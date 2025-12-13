@@ -91,6 +91,35 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  const dados = JSON.parse(localStorage.getItem("avaliacoes")) || [];
+
+  dados.forEach(registro => {
+
+    const lat = -3.7319 + (Math.random() * 0.02);
+    const lng = -38.5267 + (Math.random() * 0.02);
+
+    let cor =
+      registro.status === "adequado" ? "green" :
+      registro.status === "alerta" ? "orange" : "red";
+
+    L.circleMarker([lat, lng], {
+      radius: 8,
+      color: cor,
+      fillColor: cor,
+      fillOpacity: 0.8
+    })
+    .addTo(map)
+    .bindPopup(`
+      <strong>${registro.escola}</strong><br>
+      Status: ${registro.status}<br>
+      Data: ${registro.data}
+    `);
+  });
+
+});
+  
 function cor(status){
 if(status === "critico") return "#c62828";
 if(status === "alerta") return "#f9a825";
@@ -115,8 +144,11 @@ Data: ${e.data}
 `);
 });
 });
+
+  
 </script>
 
 </body>
 
 </html>
+
