@@ -2,23 +2,86 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Avaliação Sanitária</title>
+<title>Avaliação Sanitária Escolar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{ font-family:Arial; background:#f4f6f8; padding:20px; }
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+h2, h3{
+  margin-top:0;
+}
+
 section{
-  background:#fff; padding:20px; border-radius:8px;
-  margin-bottom:20px; box-shadow:0 2px 6px rgba(0,0,0,.1);
+  background:#ffffff;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
+
+label{
+  font-weight:bold;
+  display:block;
+  margin-top:10px;
+}
+
+input, select{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+.checklist-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+}
+
+.checklist-item:last-child{
+  border-bottom:none;
+}
+
 button{
-  width:100%; padding:15px; background:#1f3a5f;
-  color:#fff; border:none; border-radius:8px; font-size:16px;
+  width:100%;
+  padding:15px;
+  background:#1f3a5f;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
 }
-.status{ display:flex; align-items:center; gap:10px; margin-top:20px; }
-.bola{ width:16px; height:16px; border-radius:50%; }
+
+button:hover{
+  opacity:0.9;
+}
+
+.status{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:20px;
+  font-size:18px;
+}
+
+.bola{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+}
+
 .adequado .bola{ background:green; }
 .alerta .bola{ background:orange; }
 .critico .bola{ background:red; }
@@ -27,85 +90,322 @@ button{
 
 <body>
 
-<section>
-<h3>Identificação</h3>
-<label>Escola</label>
-<select id="escola" style="width:100%;padding:8px"></select>
-</section>
+<h2>Diagnóstico Sanitário de Banheiros Escolares</h2>
 
 <section>
-<h3>Checklist Sanitário</h3>
-<div><input type="checkbox" data-peso="3"> Presença de mofo</div>
-<div><input type="checkbox" data-peso="2"> Piso quebrado</div>
-<div><input type="checkbox" data-peso="2"> Vazamentos</div>
+<h3>Identificação da Avaliação</h3>
+
+<label>Escola</label>
+<select id="escola">
+  <option value="">Selecione a escola</option>
+  <option value="ABNER DE SOUSA VERAS">ABNER DE SOUSA VERAS</option>
+  <option value="ADALGISA ALVES CAVALCANTE">ADALGISA ALVES CAVALCANTE</option>
+  <option value="ADRIANO BERNARDES DA SILVA">ADRIANO BERNARDES DA SILVA</option>
+  <option value="ALBANO AMARAL">ALBANO AMARAL</option>
+  <option value="ALCEU BARBOSA">ALCEU BARBOSA</option>
+  <option value="ALEXANDRE RODRIGUES FERREIRA">ALEXANDRE RODRIGUES FERREIRA</option>
+  <option value="ALFREDO GOMES">ALFREDO GOMES</option>
+  <option value="ALMIR PINTO">ALMIR PINTO</option>
+  <option value="ALZIRA RODRIGUES">ALZIRA RODRIGUES</option>
+  <option value="ANA AMÉLIA">ANA AMÉLIA</option>
+  <option value="ANA LÚCIA">ANA LÚCIA</option>
+  <option value="ANTÔNIO CÉSAR PEREIRA PINHEIRO">ANTÔNIO CÉSAR PEREIRA PINHEIRO</option>
+  <option value="ANTÔNIO SALES">ANTÔNIO SALES</option>
+  <option value="ARMANDO RIBEIRO">ARMANDO RIBEIRO</option>
+  <option value="AURÉLIO BARBOSA">AURÉLIO BARBOSA</option>
+  <option value="BÁRBARA DE ALENCAR">BÁRBARA DE ALENCAR</option>
+  <option value="BENEDITO BENTO">BENEDITO BENTO</option>
+  <option value="BENTO GONÇALVES">BENTO GONÇALVES</option>
+  <option value="BRANCA CARNEIRO DE MENDONÇA">BRANCA CARNEIRO DE MENDONÇA</option>
+  <option value="CARLOS DRUMMOND DE ANDRADE">CARLOS DRUMMOND DE ANDRADE</option>
+  <option value="CASTELO BRANCO">CASTELO BRANCO</option>
+  <option value="CIDADE JARDIM I">CIDADE JARDIM I</option>
+  <option value="CIDADE JARDIM II">CIDADE JARDIM II</option>
+  <option value="DANIEL DE QUEIROZ">DANIEL DE QUEIROZ</option>
+  <option value="DEPUTADO PAULO SARASATE">DEPUTADO PAULO SARASATE</option>
+  <option value="DOM HELDER CÂMARA">DOM HELDER CÂMARA</option>
+  <option value="DOMINGOS OLÍMPIO">DOMINGOS OLÍMPIO</option>
+  <option value="EDSON QUEIROZ">EDSON QUEIROZ</option>
+  <option value="ELISEU MACIEL">ELISEU MACIEL</option>
+  <option value="EMÍLIO DE MENEZES">EMÍLIO DE MENEZES</option>
+  <option value="ENÉAS FERREIRA NOBRE">ENÉAS FERREIRA NOBRE</option>
+  <option value="ERASMO DE ROTERDÃ">ERASMO DE ROTERDÃ</option>
+  <option value="ESPERANÇA">ESPERANÇA</option>
+  <option value="EUGÊNIO GOMES">EUGÊNIO GOMES</option>
+  <option value="FERNANDO PESSOA">FERNANDO PESSOA</option>
+  <option value="FRANCISCO ALVES">FRANCISCO ALVES</option>
+  <option value="FRANCISCO JOSÉ DE CASTRO">FRANCISCO JOSÉ DE CASTRO</option>
+  <option value="FRANCISCO SALES">FRANCISCO SALES</option>
+  <option value="FRANCISCO SÉRGIO SILVA">FRANCISCO SÉRGIO SILVA</option>
+  <option value="GABRIELA MISTRAL">GABRIELA MISTRAL</option>
+  <option value="GERALDO MAGELA">GERALDO MAGELA</option>
+  <option value="GETÚLIO VARGAS">GETÚLIO VARGAS</option>
+  <option value="HENRIQUE JORGE">HENRIQUE JORGE</option>
+  <option value="HERBERT DE SOUSA">HERBERT DE SOUSA</option>
+  <option value="HUMBERTO DE CAMPOS">HUMBERTO DE CAMPOS</option>
+  <option value="IGARAPÉ">IGARAPÉ</option>
+  <option value="INÁCIO PARENTE">INÁCIO PARENTE</option>
+  <option value="IRACEMA">IRACEMA</option>
+  <option value="ISAÍAS GONÇALVES">ISAÍAS GONÇALVES</option>
+  <option value="IVANILDO ALVES">IVANILDO ALVES</option>
+  <option value="JARDIM GUANABARA">JARDIM GUANABARA</option>
+  <option value="JOSÉ DE ALENCAR">JOSÉ DE ALENCAR</option>
+  <option value="JOSÉ GERALDO DA SILVA">JOSÉ GERALDO DA SILVA</option>
+  <option value="JOSÉ LINS DO REGO">JOSÉ LINS DO REGO</option>
+  <option value="JOSÉ MARTINS RODRIGUES">JOSÉ MARTINS RODRIGUES</option>
+  <option value="JOSÉ NILTON MARQUES">JOSÉ NILTON MARQUES</option>
+  <option value="JOSÉ VASCONCELOS">JOSÉ VASCONCELOS</option>
+  <option value="JULIETA BARROSO">JULIETA BARROSO</option>
+  <option value="LEONARDO MOTA">LEONARDO MOTA</option>
+  <option value="LÍDIA MARIA">LÍDIA MARIA</option>
+  <option value="LUCIANO FEIJÃO">LUCIANO FEIJÃO</option>
+  <option value="LUÍS DE CAMÕES">LUÍS DE CAMÕES</option>
+  <option value="LUIZ TEIXEIRA MATOS">LUIZ TEIXEIRA MATOS</option>
+  <option value="MARCOS FREIRE">MARCOS FREIRE</option>
+  <option value="MARIA DALVA DOS SANTOS">MARIA DALVA DOS SANTOS</option>
+  <option value="MARIA DA CONCEIÇÃO HOLANDA CAVALCANTE">MARIA DA CONCEIÇÃO HOLANDA CAVALCANTE</option>
+  <option value="MARIA MIRTES BASTOS MANGUEIRA">MARIA MIRTES BASTOS MANGUEIRA</option>
+  <option value="MARIA ZILDA">MARIA ZILDA</option>
+  <option value="MÁRIO ANDRADE">MÁRIO ANDRADE</option>
+  <option value="NÁDIA LIMA">NÁDIA LIMA</option>
+  <option value="NAZARÉ">NAZARÉ</option>
+  <option value="NOSSA SENHORA APARECIDA">NOSSA SENHORA APARECIDA</option>
+  <option value="NOSSA SENHORA DAS DORES">NOSSA SENHORA DAS DORES</option>
+  <option value="NOSSA SENHORA DE FÁTIMA">NOSSA SENHORA DE FÁTIMA</option>
+  <option value="OLAVO BILAC">OLAVO BILAC</option>
+  <option value="PADRE ANCHIETA">PADRE ANCHIETA</option>
+  <option value="PADRE CÍCERO">PADRE CÍCERO</option>
+  <option value="PASTOR FLORÊNCIO NUNES NETO">PASTOR FLORÊNCIO NUNES NETO</option>
+  <option value="PAULO CÉSAR FEITOSA">PAULO CÉSAR FEITOSA</option>
+  <option value="PAULO FREIRE">PAULO FREIRE</option>
+  <option value="PEDRO II">PEDRO II</option>
+  <option value="PEQUENO PRÍNCIPE">PEQUENO PRÍNCIPE</option>
+  <option value="PRESIDENTE KENNEDY">PRESIDENTE KENNEDY</option>
+  <option value="PROFESSORA EDNA ARAÚJO">PROFESSORA EDNA ARAÚJO</option>
+  <option value="PROFESSORA MARIA MIRTES BASTOS MANGUEIRA">PROFESSORA MARIA MIRTES BASTOS MANGUEIRA</option>
+  <option value="RAIMUNDO NONATO">RAIMUNDO NONATO</option>
+  <option value="RAQUEL DE QUEIROZ">RAQUEL DE QUEIROZ</option>
+  <option value="RUI BARBOSA">RUI BARBOSA</option>
+  <option value="SANTA CECÍLIA">SANTA CECÍLIA</option>
+  <option value="SANTA RITA">SANTA RITA</option>
+  <option value="SANTO AGOSTINHO">SANTO AGOSTINHO</option>
+  <option value="SANTO ANTÔNIO">SANTO ANTÔNIO</option>
+  <option value="SÃO FRANCISCO">SÃO FRANCISCO</option>
+  <option value="SÃO JOÃO">SÃO JOÃO</option>
+  <option value="SÃO JOSÉ">SÃO JOSÉ</option>
+  <option value="SÃO LUIZ">SÃO LUIZ</option>
+  <option value="SÃO MIGUEL">SÃO MIGUEL</option>
+  <option value="SÃO PAULO">SÃO PAULO</option>
+  <option value="SEBASTIÃO ALVES">SEBASTIÃO ALVES</option>
+  <option value="SENADOR CARLOS JEREISSATI">SENADOR CARLOS JEREISSATI</option>
+  <option value="SENADOR POMPEU">SENADOR POMPEU</option>
+  <option value="SÍLVIA LIMA">SÍLVIA LIMA</option>
+  <option value="SOARES MOREIRA">SOARES MOREIRA</option>
+  <option value="TANCREDO NEVES">TANCREDO NEVES</option>
+  <option value="TEODORO SAMPAIO">TEODORO SAMPAIO</option>
+  <option value="TIRADENTES">TIRADENTES</option>
+  <option value="TRISTÃO DE ATHAYDE">TRISTÃO DE ATHAYDE</option>
+  <option value="ULISSES GUIMARÃES">ULISSES GUIMARÃES</option>
+  <option value="VALDECI BARBOSA">VALDECI BARBOSA</option>
+  <option value="VALDIR BARBOSA">VALDIR BARBOSA</option>
+  <option value="VALMIR CAMPELO">VALMIR CAMPELO</option>
+  <option value="VICENTE PINZÓN">VICENTE PINZÓN</option>
+  <option value="VILA VELHA">VILA VELHA</option>
+  <option value="VINÍCIUS DE MORAES">VINÍCIUS DE MORAES</option>
+  <option value="VITAL BRASIL">VITAL BRASIL</option>
+  <option value="WALDEMAR FALCÃO">WALDEMAR FALCÃO</option>
+  <option value="WILSON AGUIAR">WILSON AGUIAR</option>
+  <option value="XAVIER DE CASTRO">XAVIER DE CASTRO</option>
+  <option value="ZILMA ALVES">ZILMA ALVES</option>
+  <option value="ZUMBI DOS PALMARES">ZUMBI DOS PALMARES</option>
+
+
+  
+</select>
+
+<label>Responsável pela avaliação</label>
+<input type="text" id="responsavel" placeholder="Nome do gestor ou diretor">
+
+<label>Data</label>
+<input type="date" id="data">
+</section>
+<section>
+<h3>Checklist Sanitário (Engenharia Diagnóstica)</h3>
+
+<div class="checklist-item">
+  <input type="checkbox" data-peso="4">
+  <span>Presença de mofo ou bolor visível</span>
+</div>
+
+<div class="checklist-item">
+  <input type="checkbox" data-peso="3">
+  <span>Piso quebrado, solto ou escorregadio</span>
+</div>
+
+<div class="checklist-item">
+  <input type="checkbox" data-peso="3">
+  <span>Vazamentos aparentes (torneiras, descargas)</span>
+</div>
+
+<div class="checklist-item">
+  <input type="checkbox" data-peso="2">
+  <span>Sanitário ou mictório danificado/inoperante</span>
+</div>
+
+<div class="checklist-item">
+  <input type="checkbox" data-peso="2">
+  <span>Falta de ventilação adequada</span>
+</div>
+
+<div class="checklist-item">
+  <input type="checkbox" data-peso="2">
+  <span>Iluminação insuficiente</span>
+</div>
+
+<div class="checklist-item">
+  <input type="checkbox" data-peso="1">
+  <span>Ausência de sabonete, papel ou lixeira</span>
+</div>
+
 </section>
 
 <section>
 <h3>Registro Fotográfico</h3>
-<input type="file" id="fotos" multiple>
+<p style="font-size:14px;color:#555">
+Envie fotos para apoiar a análise técnica e priorização de intervenção.
+</p>
+<input type="file" id="fotos" multiple accept="image/*">
 </section>
 
 <button onclick="avaliar()">Gerar Diagnóstico</button>
+
 <div id="resultado"></div>
-
 <script>
-// carregar escolas
-fetch("mapa/escolas.json")
-.then(r=>r.json())
-.then(lista=>{
-  const sel=document.getElementById("escola");
-  sel.innerHTML='<option value="">Selecione a escola</option>';
-  lista.forEach(e=>{
-    const o=document.createElement("option");
-    o.value=e.nome;
-    o.textContent=e.nome;
-    sel.appendChild(o);
-  });
-});
+// ---------- CONFIGURAÇÕES TÉCNICAS ----------
+const LIMIAR_ALERTA = 4;
+const LIMIAR_CRITICO = 8;
 
-// avaliação
+// ---------- FUNÇÃO PRINCIPAL ----------
 function avaliar(){
-  const escola=document.getElementById("escola").value;
-  if(!escola){ alert("Selecione a escola"); return; }
 
-  let pontos=0;
-  document.querySelectorAll("input[type=checkbox]:checked")
-    .forEach(c=>pontos+=Number(c.dataset.peso));
+  const escola = document.getElementById("escola").value;
+  const responsavel = document.getElementById("responsavel").value;
+  const data = document.getElementById("data").value;
 
-  if(document.getElementById("fotos").files.length>0) pontos+=2;
+  if(!escola){
+    alert("Selecione a escola.");
+    return;
+  }
 
-  let status="adequado";
-  if(pontos>5) status="critico";
-  else if(pontos>2) status="alerta";
+  if(!responsavel){
+    alert("Informe o responsável pela avaliação.");
+    return;
+  }
 
-  document.getElementById("resultado").innerHTML=`
-    <div class="status ${status}">
-      <span class="bola"></span>
-      <strong>${status.toUpperCase()}</strong> — Pontuação: ${pontos}
+  if(!data){
+    alert("Informe a data da avaliação.");
+    return;
+  }
+
+  // ---------- CÁLCULO DA PONTUAÇÃO ----------
+  let pontos = 0;
+
+  document
+    .querySelectorAll(".checklist-item input:checked")
+    .forEach(item => {
+      pontos += Number(item.dataset.peso);
+    });
+
+  // peso adicional se houver fotos (evidência técnica)
+  const fotos = document.getElementById("fotos").files;
+  if(fotos.length > 0){
+    pontos += 2;
+  }
+
+  // ---------- CLASSIFICAÇÃO ----------
+  let status = "adequado";
+  let classe = "adequado";
+  let textoStatus = "Condição adequada";
+
+  if(pontos >= LIMIAR_CRITICO){
+    status = "critico";
+    classe = "critico";
+    textoStatus = "Condição crítica – intervenção urgente";
+  }
+  else if(pontos >= LIMIAR_ALERTA){
+    status = "alerta";
+    classe = "alerta";
+    textoStatus = "Condição de alerta – manutenção necessária";
+  }
+
+  // ---------- EXIBIÇÃO DO RESULTADO ----------
+  document.getElementById("resultado").innerHTML = `
+    <div class="status ${classe}">
+      <div class="bola"></div>
+      <div>
+        <strong>${textoStatus}</strong><br>
+        Pontuação técnica: ${pontos}
+      </div>
     </div>
-    <button onclick="gerarPDF('${escola}','${status}',${pontos})">
-      Gerar PDF
+
+    <button style="margin-top:15px" 
+      onclick="gerarPDF('${escola}','${responsavel}','${data}','${textoStatus}',${pontos})">
+      Gerar Relatório em PDF
     </button>
   `;
 
-  salvarMapa(escola,status);
+  // ---------- SALVA PARA O MAPA ----------
+  salvarAvaliacaoMapa(escola, status, pontos, data);
 }
 
-function salvarMapa(escola,status){
-  let dados=JSON.parse(localStorage.getItem("avaliacoes"))||[];
-  dados.push({escola,status,data:new Date().toLocaleDateString()});
-  localStorage.setItem("avaliacoes",JSON.stringify(dados));
+// ---------- SALVAR NO LOCALSTORAGE ----------
+function salvarAvaliacaoMapa(escola, status, pontos, data){
+
+  let registros = JSON.parse(localStorage.getItem("avaliacoes")) || [];
+
+  // remove avaliação anterior da mesma escola (evita duplicação)
+  registros = registros.filter(r => r.escola !== escola);
+
+  registros.push({
+    escola: escola,
+    status: status,
+    pontos: pontos,
+    data: data
+  });
+
+  localStorage.setItem("avaliacoes", JSON.stringify(registros));
 }
 
-function gerarPDF(escola,status,pontos){
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF();
-  pdf.text("Relatório de Avaliação Sanitária",20,20);
-  pdf.text(Escola: ${escola},20,35);
-  pdf.text(Status: ${status},20,45);
-  pdf.text(Pontuação: ${pontos},20,55);
-  pdf.text("Diagnóstico preliminar. Não substitui laudo técnico.",20,75);
-  pdf.save("avaliacao.pdf");
+// ---------- GERAR PDF ----------
+function gerarPDF(escola, responsavel, data, status, pontos){
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Relatório de Avaliação Sanitária Escolar", 20, 20);
+
+  doc.setFontSize(11);
+  doc.text(Escola: ${escola}, 20, 40);
+  doc.text(Responsável: ${responsavel}, 20, 48);
+  doc.text(Data da avaliação: ${data}, 20, 56);
+
+  doc.setFontSize(13);
+  doc.text("Diagnóstico Técnico", 20, 75);
+
+  doc.setFontSize(11);
+  doc.text(Status: ${status}, 20, 85);
+  doc.text(Pontuação técnica: ${pontos}, 20, 93);
+
+  doc.text(
+    "Este diagnóstico é preliminar, baseado em checklist técnico\n" +
+    "e evidências fotográficas. Não substitui laudo técnico\n" +
+    "emitido por profissional habilitado.",
+    20,
+    115
+  );
+
+  doc.save("avaliacao_sanitaria_escolar.pdf");
 }
 </script>
 
@@ -113,4 +413,12 @@ function gerarPDF(escola,status,pontos){
 </html>
 
 
+  
+  
 
+  
+
+
+
+
+  
