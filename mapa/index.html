@@ -1,24 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <script src="https://unpkg.com/leaflet-omnivore/leaflet-omnivore.min.js"></script>
 <meta charset="UTF-8">
 <title>Mapa da Secretaria</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="escolas.js"></script>
-  
-
-  
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <style>
-#map{ height:100vh; }
+#map { height: 100vh; }
 </style>
 </head>
 
 <body>
+
 <div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="escolas.js"></script>
+
 <script>
 const map = L.map("map").setView([-3.7319, -38.5267], 12);
 
@@ -26,48 +24,19 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-// 🔹 Lê avaliações salvas
-const avaliacoes = JSON.parse(localStorage.getItem("avaliacoes")) || [];
-
-// 🔹 Carrega o KML oficial das escolas
-omnivore.kml("escolas.kml")
-  .on("ready", function () {
-
-    this.eachLayer(layer => {
-      const nomeEscola = layer.feature.properties.name;
-
-      // procura avaliação correspondente
-      const registro = avaliacoes.find(a =>
-        a.escola.toLowerCase() === nomeEscola.toLowerCase()
-      );
-
-      let cor = "gray";
-      let statusTxt = "Sem avaliação";
-
-      if (registro) {
-        cor = registro.status === "adequado" ? "green" :
-              registro.status === "alerta" ? "orange" : "red";
-        statusTxt = registro.status;
-      }
-
-      layer.setStyle({
-        color: cor,
-        fillColor: cor,
-        fillOpacity: 0.8
-      });
-
-      layer.bindPopup(`
-        <strong>${nomeEscola}</strong><br>
-        Status: ${statusTxt}
-      `);
-    });
-
-  })
-  .addTo(map);
+document.addEventListener("escolasCarregadas", () => {
+  escolas.forEach(e => {
+    L.circleMarker([e.lat, e.lon], {
+      radius: 8,
+      color: "#777",
+      fillColor: "#777",
+      fillOpacity: 0.8
+    })
+    .bindPopup(<strong>${e.nome}</strong><br>Status: sem avaliação)
+    .addTo(map);
+  });
+});
 </script>
 
 </body>
 </html>
-
-
-
