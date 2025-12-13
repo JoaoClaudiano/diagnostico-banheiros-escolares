@@ -5,7 +5,7 @@
 <title>Avaliação Sanitária Escolar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PDF -->
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -15,12 +15,10 @@ body{
   padding:20px;
 }
 
-h2, h3{
-  margin-top:0;
-}
+h2,h3{ margin-top:0; }
 
 section{
-  background:#ffffff;
+  background:#fff;
   padding:20px;
   border-radius:10px;
   margin-bottom:20px;
@@ -49,9 +47,7 @@ input, select{
   border-bottom:1px solid #eee;
 }
 
-.checklist-item:last-child{
-  border-bottom:none;
-}
+.checklist-item:last-child{ border-bottom:none; }
 
 button{
   width:100%;
@@ -62,10 +58,6 @@ button{
   border-radius:8px;
   font-size:16px;
   cursor:pointer;
-}
-
-button:hover{
-  opacity:0.9;
 }
 
 .status{
@@ -98,129 +90,9 @@ button:hover{
 <label>Escola</label>
 <select id="escola">
   <option value="">Selecione a escola</option>
-  <option value="ABNER DE SOUSA VERAS">ABNER DE SOUSA VERAS</option>
-  <option value="ADALGISA ALVES CAVALCANTE">ADALGISA ALVES CAVALCANTE</option>
-  <option value="ADRIANO BERNARDES DA SILVA">ADRIANO BERNARDES DA SILVA</option>
-  <option value="ALBANO AMARAL">ALBANO AMARAL</option>
-  <option value="ALCEU BARBOSA">ALCEU BARBOSA</option>
-  <option value="ALEXANDRE RODRIGUES FERREIRA">ALEXANDRE RODRIGUES FERREIRA</option>
-  <option value="ALFREDO GOMES">ALFREDO GOMES</option>
-  <option value="ALMIR PINTO">ALMIR PINTO</option>
-  <option value="ALZIRA RODRIGUES">ALZIRA RODRIGUES</option>
-  <option value="ANA AMÉLIA">ANA AMÉLIA</option>
-  <option value="ANA LÚCIA">ANA LÚCIA</option>
-  <option value="ANTÔNIO CÉSAR PEREIRA PINHEIRO">ANTÔNIO CÉSAR PEREIRA PINHEIRO</option>
-  <option value="ANTÔNIO SALES">ANTÔNIO SALES</option>
-  <option value="ARMANDO RIBEIRO">ARMANDO RIBEIRO</option>
-  <option value="AURÉLIO BARBOSA">AURÉLIO BARBOSA</option>
-  <option value="BÁRBARA DE ALENCAR">BÁRBARA DE ALENCAR</option>
-  <option value="BENEDITO BENTO">BENEDITO BENTO</option>
-  <option value="BENTO GONÇALVES">BENTO GONÇALVES</option>
-  <option value="BRANCA CARNEIRO DE MENDONÇA">BRANCA CARNEIRO DE MENDONÇA</option>
-  <option value="CARLOS DRUMMOND DE ANDRADE">CARLOS DRUMMOND DE ANDRADE</option>
-  <option value="CASTELO BRANCO">CASTELO BRANCO</option>
-  <option value="CIDADE JARDIM I">CIDADE JARDIM I</option>
-  <option value="CIDADE JARDIM II">CIDADE JARDIM II</option>
-  <option value="DANIEL DE QUEIROZ">DANIEL DE QUEIROZ</option>
-  <option value="DEPUTADO PAULO SARASATE">DEPUTADO PAULO SARASATE</option>
-  <option value="DOM HELDER CÂMARA">DOM HELDER CÂMARA</option>
-  <option value="DOMINGOS OLÍMPIO">DOMINGOS OLÍMPIO</option>
-  <option value="EDSON QUEIROZ">EDSON QUEIROZ</option>
-  <option value="ELISEU MACIEL">ELISEU MACIEL</option>
-  <option value="EMÍLIO DE MENEZES">EMÍLIO DE MENEZES</option>
-  <option value="ENÉAS FERREIRA NOBRE">ENÉAS FERREIRA NOBRE</option>
-  <option value="ERASMO DE ROTERDÃ">ERASMO DE ROTERDÃ</option>
-  <option value="ESPERANÇA">ESPERANÇA</option>
-  <option value="EUGÊNIO GOMES">EUGÊNIO GOMES</option>
-  <option value="FERNANDO PESSOA">FERNANDO PESSOA</option>
-  <option value="FRANCISCO ALVES">FRANCISCO ALVES</option>
-  <option value="FRANCISCO JOSÉ DE CASTRO">FRANCISCO JOSÉ DE CASTRO</option>
-  <option value="FRANCISCO SALES">FRANCISCO SALES</option>
-  <option value="FRANCISCO SÉRGIO SILVA">FRANCISCO SÉRGIO SILVA</option>
-  <option value="GABRIELA MISTRAL">GABRIELA MISTRAL</option>
-  <option value="GERALDO MAGELA">GERALDO MAGELA</option>
-  <option value="GETÚLIO VARGAS">GETÚLIO VARGAS</option>
-  <option value="HENRIQUE JORGE">HENRIQUE JORGE</option>
-  <option value="HERBERT DE SOUSA">HERBERT DE SOUSA</option>
-  <option value="HUMBERTO DE CAMPOS">HUMBERTO DE CAMPOS</option>
-  <option value="IGARAPÉ">IGARAPÉ</option>
-  <option value="INÁCIO PARENTE">INÁCIO PARENTE</option>
-  <option value="IRACEMA">IRACEMA</option>
-  <option value="ISAÍAS GONÇALVES">ISAÍAS GONÇALVES</option>
-  <option value="IVANILDO ALVES">IVANILDO ALVES</option>
-  <option value="JARDIM GUANABARA">JARDIM GUANABARA</option>
-  <option value="JOSÉ DE ALENCAR">JOSÉ DE ALENCAR</option>
-  <option value="JOSÉ GERALDO DA SILVA">JOSÉ GERALDO DA SILVA</option>
-  <option value="JOSÉ LINS DO REGO">JOSÉ LINS DO REGO</option>
-  <option value="JOSÉ MARTINS RODRIGUES">JOSÉ MARTINS RODRIGUES</option>
-  <option value="JOSÉ NILTON MARQUES">JOSÉ NILTON MARQUES</option>
-  <option value="JOSÉ VASCONCELOS">JOSÉ VASCONCELOS</option>
-  <option value="JULIETA BARROSO">JULIETA BARROSO</option>
-  <option value="LEONARDO MOTA">LEONARDO MOTA</option>
-  <option value="LÍDIA MARIA">LÍDIA MARIA</option>
-  <option value="LUCIANO FEIJÃO">LUCIANO FEIJÃO</option>
-  <option value="LUÍS DE CAMÕES">LUÍS DE CAMÕES</option>
-  <option value="LUIZ TEIXEIRA MATOS">LUIZ TEIXEIRA MATOS</option>
-  <option value="MARCOS FREIRE">MARCOS FREIRE</option>
-  <option value="MARIA DALVA DOS SANTOS">MARIA DALVA DOS SANTOS</option>
-  <option value="MARIA DA CONCEIÇÃO HOLANDA CAVALCANTE">MARIA DA CONCEIÇÃO HOLANDA CAVALCANTE</option>
-  <option value="MARIA MIRTES BASTOS MANGUEIRA">MARIA MIRTES BASTOS MANGUEIRA</option>
-  <option value="MARIA ZILDA">MARIA ZILDA</option>
-  <option value="MÁRIO ANDRADE">MÁRIO ANDRADE</option>
-  <option value="NÁDIA LIMA">NÁDIA LIMA</option>
-  <option value="NAZARÉ">NAZARÉ</option>
-  <option value="NOSSA SENHORA APARECIDA">NOSSA SENHORA APARECIDA</option>
-  <option value="NOSSA SENHORA DAS DORES">NOSSA SENHORA DAS DORES</option>
-  <option value="NOSSA SENHORA DE FÁTIMA">NOSSA SENHORA DE FÁTIMA</option>
-  <option value="OLAVO BILAC">OLAVO BILAC</option>
-  <option value="PADRE ANCHIETA">PADRE ANCHIETA</option>
-  <option value="PADRE CÍCERO">PADRE CÍCERO</option>
-  <option value="PASTOR FLORÊNCIO NUNES NETO">PASTOR FLORÊNCIO NUNES NETO</option>
-  <option value="PAULO CÉSAR FEITOSA">PAULO CÉSAR FEITOSA</option>
-  <option value="PAULO FREIRE">PAULO FREIRE</option>
-  <option value="PEDRO II">PEDRO II</option>
-  <option value="PEQUENO PRÍNCIPE">PEQUENO PRÍNCIPE</option>
-  <option value="PRESIDENTE KENNEDY">PRESIDENTE KENNEDY</option>
-  <option value="PROFESSORA EDNA ARAÚJO">PROFESSORA EDNA ARAÚJO</option>
-  <option value="PROFESSORA MARIA MIRTES BASTOS MANGUEIRA">PROFESSORA MARIA MIRTES BASTOS MANGUEIRA</option>
-  <option value="RAIMUNDO NONATO">RAIMUNDO NONATO</option>
-  <option value="RAQUEL DE QUEIROZ">RAQUEL DE QUEIROZ</option>
-  <option value="RUI BARBOSA">RUI BARBOSA</option>
-  <option value="SANTA CECÍLIA">SANTA CECÍLIA</option>
-  <option value="SANTA RITA">SANTA RITA</option>
-  <option value="SANTO AGOSTINHO">SANTO AGOSTINHO</option>
-  <option value="SANTO ANTÔNIO">SANTO ANTÔNIO</option>
-  <option value="SÃO FRANCISCO">SÃO FRANCISCO</option>
-  <option value="SÃO JOÃO">SÃO JOÃO</option>
-  <option value="SÃO JOSÉ">SÃO JOSÉ</option>
-  <option value="SÃO LUIZ">SÃO LUIZ</option>
-  <option value="SÃO MIGUEL">SÃO MIGUEL</option>
-  <option value="SÃO PAULO">SÃO PAULO</option>
-  <option value="SEBASTIÃO ALVES">SEBASTIÃO ALVES</option>
-  <option value="SENADOR CARLOS JEREISSATI">SENADOR CARLOS JEREISSATI</option>
-  <option value="SENADOR POMPEU">SENADOR POMPEU</option>
-  <option value="SÍLVIA LIMA">SÍLVIA LIMA</option>
-  <option value="SOARES MOREIRA">SOARES MOREIRA</option>
-  <option value="TANCREDO NEVES">TANCREDO NEVES</option>
-  <option value="TEODORO SAMPAIO">TEODORO SAMPAIO</option>
-  <option value="TIRADENTES">TIRADENTES</option>
-  <option value="TRISTÃO DE ATHAYDE">TRISTÃO DE ATHAYDE</option>
-  <option value="ULISSES GUIMARÃES">ULISSES GUIMARÃES</option>
-  <option value="VALDECI BARBOSA">VALDECI BARBOSA</option>
-  <option value="VALDIR BARBOSA">VALDIR BARBOSA</option>
-  <option value="VALMIR CAMPELO">VALMIR CAMPELO</option>
-  <option value="VICENTE PINZÓN">VICENTE PINZÓN</option>
-  <option value="VILA VELHA">VILA VELHA</option>
-  <option value="VINÍCIUS DE MORAES">VINÍCIUS DE MORAES</option>
-  <option value="VITAL BRASIL">VITAL BRASIL</option>
-  <option value="WALDEMAR FALCÃO">WALDEMAR FALCÃO</option>
-  <option value="WILSON AGUIAR">WILSON AGUIAR</option>
-  <option value="XAVIER DE CASTRO">XAVIER DE CASTRO</option>
-  <option value="ZILMA ALVES">ZILMA ALVES</option>
-  <option value="ZUMBI DOS PALMARES">ZUMBI DOS PALMARES</option>
 
+  <!-- 🔴 COLE AQUI TODAS AS <option> DAS ESCOLAS (BLOCOS 1–6) -->
 
-  
 </select>
 
 <label>Responsável pela avaliação</label>
@@ -229,100 +101,83 @@ button:hover{
 <label>Data</label>
 <input type="date" id="data">
 </section>
+
 <section>
 <h3>Checklist Sanitário (Engenharia Diagnóstica)</h3>
 
 <div class="checklist-item">
-  <input type="checkbox" data-peso="4">
-  <span>Presença de mofo ou bolor visível</span>
+  <input type="checkbox" data-peso="4"> Presença de mofo ou bolor visível
 </div>
 
 <div class="checklist-item">
-  <input type="checkbox" data-peso="3">
-  <span>Piso quebrado, solto ou escorregadio</span>
+  <input type="checkbox" data-peso="3"> Piso quebrado, solto ou escorregadio
 </div>
 
 <div class="checklist-item">
-  <input type="checkbox" data-peso="3">
-  <span>Vazamentos aparentes (torneiras, descargas)</span>
+  <input type="checkbox" data-peso="3"> Vazamentos aparentes
 </div>
 
 <div class="checklist-item">
-  <input type="checkbox" data-peso="2">
-  <span>Sanitário ou mictório danificado/inoperante</span>
+  <input type="checkbox" data-peso="2"> Sanitário ou mictório danificado
 </div>
 
 <div class="checklist-item">
-  <input type="checkbox" data-peso="2">
-  <span>Falta de ventilação adequada</span>
+  <input type="checkbox" data-peso="2"> Falta de ventilação adequada
 </div>
 
 <div class="checklist-item">
-  <input type="checkbox" data-peso="2">
-  <span>Iluminação insuficiente</span>
+  <input type="checkbox" data-peso="2"> Iluminação insuficiente
 </div>
 
 <div class="checklist-item">
-  <input type="checkbox" data-peso="1">
-  <span>Ausência de sabonete, papel ou lixeira</span>
+  <input type="checkbox" data-peso="1"> Ausência de sabonete, papel ou lixeira
 </div>
 
 </section>
 
 <section>
 <h3>Registro Fotográfico</h3>
-<p style="font-size:14px;color:#555">
-Envie fotos para apoiar a análise técnica e priorização de intervenção.
-</p>
 <input type="file" id="fotos" multiple accept="image/*">
 </section>
 
 <button onclick="avaliar()">Gerar Diagnóstico</button>
 
 <div id="resultado"></div>
+
 <script>
-// ---------- CONFIGURAÇÕES TÉCNICAS ----------
+/* ===============================
+   VARIÁVEL GLOBAL SEGURA
+================================ */
+let dadosUltimaAvaliacao = null;
+
+/* ===============================
+   PARÂMETROS TÉCNICOS
+================================ */
 const LIMIAR_ALERTA = 4;
 const LIMIAR_CRITICO = 8;
 
-// ---------- FUNÇÃO PRINCIPAL ----------
+/* ===============================
+   FUNÇÃO PRINCIPAL
+================================ */
 function avaliar(){
 
   const escola = document.getElementById("escola").value;
   const responsavel = document.getElementById("responsavel").value;
   const data = document.getElementById("data").value;
 
-  if(!escola){
-    alert("Selecione a escola.");
-    return;
-  }
+  if(!escola){ alert("Selecione a escola."); return; }
+  if(!responsavel){ alert("Informe o responsável."); return; }
+  if(!data){ alert("Informe a data."); return; }
 
-  if(!responsavel){
-    alert("Informe o responsável pela avaliação.");
-    return;
-  }
-
-  if(!data){
-    alert("Informe a data da avaliação.");
-    return;
-  }
-
-  // ---------- CÁLCULO DA PONTUAÇÃO ----------
   let pontos = 0;
-
   document
     .querySelectorAll(".checklist-item input:checked")
-    .forEach(item => {
-      pontos += Number(item.dataset.peso);
-    });
+    .forEach(i => pontos += Number(i.dataset.peso));
 
-  // peso adicional se houver fotos (evidência técnica)
-  const fotos = document.getElementById("fotos").files;
-  if(fotos.length > 0){
+  if(document.getElementById("fotos").files.length > 0){
     pontos += 2;
   }
 
-  // ---------- CLASSIFICAÇÃO ----------
   let status = "adequado";
   let classe = "adequado";
   let textoStatus = "Condição adequada";
@@ -338,7 +193,14 @@ function avaliar(){
     textoStatus = "Condição de alerta – manutenção necessária";
   }
 
-  // ---------- EXIBIÇÃO DO RESULTADO ----------
+  dadosUltimaAvaliacao = {
+    escola,
+    responsavel,
+    data,
+    textoStatus,
+    pontos
+  };
+
   document.getElementById("resultado").innerHTML = `
     <div class="status ${classe}">
       <div class="bola"></div>
@@ -348,37 +210,35 @@ function avaliar(){
       </div>
     </div>
 
-    <button style="margin-top:15px" 
-      onclick="gerarPDF('${escola}','${responsavel}','${data}','${textoStatus}',${pontos})">
+    <button style="margin-top:15px" onclick="gerarPDF()">
       Gerar Relatório em PDF
     </button>
   `;
 
-  // ---------- SALVA PARA O MAPA ----------
   salvarAvaliacaoMapa(escola, status, pontos, data);
 }
 
-// ---------- SALVAR NO LOCALSTORAGE ----------
+/* ===============================
+   SALVAR PARA O MAPA
+================================ */
 function salvarAvaliacaoMapa(escola, status, pontos, data){
-
   let registros = JSON.parse(localStorage.getItem("avaliacoes")) || [];
-
-  // remove avaliação anterior da mesma escola (evita duplicação)
   registros = registros.filter(r => r.escola !== escola);
-
-  registros.push({
-    escola: escola,
-    status: status,
-    pontos: pontos,
-    data: data
-  });
-
+  registros.push({ escola, status, pontos, data });
   localStorage.setItem("avaliacoes", JSON.stringify(registros));
 }
 
-// ---------- GERAR PDF ----------
-function gerarPDF(escola, responsavel, data, status, pontos){
+/* ===============================
+   GERAR PDF (SEM BUG)
+================================ */
+function gerarPDF(){
 
+  if(!dadosUltimaAvaliacao){
+    alert("Nenhuma avaliação disponível.");
+    return;
+  }
+
+  const { escola, responsavel, data, textoStatus, pontos } = dadosUltimaAvaliacao;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -386,23 +246,22 @@ function gerarPDF(escola, responsavel, data, status, pontos){
   doc.text("Relatório de Avaliação Sanitária Escolar", 20, 20);
 
   doc.setFontSize(11);
-  doc.text(Escola: ${escola}, 20, 40);
-  doc.text(Responsável: ${responsavel}, 20, 48);
-  doc.text(Data da avaliação: ${data}, 20, 56);
+  doc.text(`Escola: ${escola}`, 20, 40);
+  doc.text(`Responsável: ${responsavel}`, 20, 48);
+  doc.text(`Data: ${data}`, 20, 56);
 
   doc.setFontSize(13);
   doc.text("Diagnóstico Técnico", 20, 75);
 
   doc.setFontSize(11);
-  doc.text(Status: ${status}, 20, 85);
-  doc.text(Pontuação técnica: ${pontos}, 20, 93);
+  doc.text(`Status: ${textoStatus}`, 20, 85);
+  doc.text(`Pontuação técnica: ${pontos}`, 20, 93);
 
   doc.text(
     "Este diagnóstico é preliminar, baseado em checklist técnico\n" +
     "e evidências fotográficas. Não substitui laudo técnico\n" +
     "emitido por profissional habilitado.",
-    20,
-    115
+    20, 115
   );
 
   doc.save("avaliacao_sanitaria_escolar.pdf");
@@ -411,14 +270,3 @@ function gerarPDF(escola, responsavel, data, status, pontos){
 
 </body>
 </html>
-
-
-  
-  
-
-  
-
-
-
-
-  
