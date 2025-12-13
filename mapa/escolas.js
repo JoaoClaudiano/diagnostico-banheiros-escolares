@@ -14,15 +14,18 @@ fetch("escolas.kml")
       if (!nameTag || !coordTag) continue;
 
       const nome = nameTag.textContent.trim();
-
       const coords = coordTag.textContent.trim().split(",");
-      const lon = parseFloat(coords[0]);
-      const lat = parseFloat(coords[1]);
 
       escolas.push({
         nome,
-        lat,
-        lon
+        lon: parseFloat(coords[0]),
+        lat: parseFloat(coords[1])
+      });
+    }
+
+    document.dispatchEvent(new Event("escolasCarregadas"));
+  })
+  .catch(err => console.error("Erro ao carregar KML:", err));
       });
     }
 
