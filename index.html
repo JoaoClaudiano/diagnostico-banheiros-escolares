@@ -4,110 +4,45 @@
 <meta charset="UTF-8">
 <title>Diagnóstico Sanitário Escolar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 body{
-margin:0;
-font-family: Arial, sans-serif;
-background:#f4f6f8;
-color:#333;
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
-
-header{
-background:#1f3a5f;
-color:#fff;
-padding:20px;
-text-align:center;
+.container{
+  background:#fff;
+  padding:30px;
+  border-radius:10px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
 }
-
-header h1{
-margin:0;
-font-size:20px;
+button{
+  width:100%;
+  padding:15px;
+  margin-top:15px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
-
-header p{
-margin-top:8px;
-font-size:14px;
-opacity:0.9;
-}
-
-main{
-padding:20px;
-max-width:500px;
-margin:auto;
-}
-
-.card{
-background:#fff;
-border-radius:8px;
-padding:20px;
-margin-bottom:16px;
-box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
-
-.card h2{
-margin-top:0;
-font-size:18px;
-color:#1f3a5f;
-}
-
-.card p{
-font-size:14px;
-margin-bottom:16px;
-}
-
-.card a{
-display:block;
-text-align:center;
-padding:12px;
-background:#1f3a5f;
-color:#fff;
-text-decoration:none;
-border-radius:6px;
-font-size:16px;
-}
-
-footer{
-text-align:center;
-font-size:12px;
-color:#666;
-padding:16px;
-}
+.avaliar{ background:#1f3a5f; color:#fff; }
+.mapa{ background:#4caf50; color:#fff; }
 </style>
 </head>
 
 <body>
-
-<header>
-<h1>Diagnóstico Sanitário Escolar</h1>
-<p>Ferramenta de apoio à gestão da infraestrutura pública</p>
-</header>
-
-<main>
-
-<div class="card">
-<h2>Avaliação da Escola</h2>
-<p>
-Preencha o checklist e registre fotos do banheiro escolar
-para gerar um diagnóstico técnico preliminar.
-</p>
-<a href="avaliacao.html">Iniciar Avaliação</a>
+<div class="container">
+  <h2>Diagnóstico Sanitário Escolar</h2>
+  <button class="avaliar" onclick="location.href='avaliacao.html'">
+    Fazer Avaliação
+  </button>
+  <button class="mapa" onclick="location.href='mapa/'">
+    Mapa da Secretaria
+  </button>
 </div>
-
-<div class="card">
-<h2>Mapa da Secretaria</h2>
-<p>
-Visualize no mapa a situação sanitária das escolas,
-com classificação por nível de criticidade.
-</p>
-<a href="mapa/index.html">Acessar Mapa</a>
-</div>
-
-</main>
-
-<footer>
-MVP • Engenharia Diagnóstica • Uso institucional
-</footer>
-
 </body>
 </html>
