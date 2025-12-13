@@ -1,305 +1,122 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>Avaliação Sanitária Escolar</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
-
-h2,h3{ margin-top:0; }
-
-section{
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  margin-bottom:20px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-
-label{
-  font-weight:bold;
-  display:block;
-  margin-top:10px;
-}
-
-input, select{
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-
-.checklist-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 0;
-  border-bottom:1px solid #eee;
-}
-
-.checklist-item:last-child{ border-bottom:none; }
-
-button{
-  width:100%;
-  padding:15px;
-  background:#1f3a5f;
-  color:white;
-  border:none;
-  border-radius:8px;
-  font-size:16px;
-  cursor:pointer;
-}
-
-.status{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-top:20px;
-  font-size:18px;
-}
-
-.bola{
-  width:18px;
-  height:18px;
-  border-radius:50%;
-}
-
-.adequado .bola{ background:green; }
-.alerta .bola{ background:orange; }
-.critico .bola{ background:red; }
+body { font-family: Arial; padding: 20px; }
+label { display: block; margin-top: 15px; }
+button { margin-top: 20px; padding: 10px 15px; }
+.status { margin-top: 20px; padding: 15px; border-radius: 6px; display: flex; align-items: center; }
+.verde { background: #e0f7e9; }
+.amarelo { background: #fff7cc; }
+.vermelho { background: #ffe0e0; }
+.bola { width: 15px; height: 15px; border-radius: 50%; margin-right: 10px; }
+.verde .bola { background: green; }
+.amarelo .bola { background: orange; }
+.vermelho .bola { background: red; }
 </style>
 </head>
 
 <body>
 
-<h2>Diagnóstico Sanitário de Banheiros Escolares</h2>
+<h2>Avaliação Sanitária de Banheiros Escolares</h2>
 
-<section>
-<h3>Identificação da Avaliação</h3>
-
-<label>Escola</label>
+<label>Escola:</label>
 <select id="escola">
   <option value="">Selecione a escola</option>
-  
-    
 </select>
 
-<label>Responsável pela avaliação</label>
-<input type="text" id="responsavel" placeholder="Nome do gestor ou diretor">
+<label>Responsável pela avaliação:</label>
+<input id="responsavel" type="text">
 
-<label>Data</label>
-<input type="date" id="data">
-</section>
+<label><input type="checkbox" id="piso"> Piso quebrado</label>
+<label><input type="checkbox" id="mofo"> Mofo ou infiltração</label>
+<label><input type="checkbox" id="sanitario"> Sanitário ou torneira quebrados</label>
 
-<section>
-<h3>Checklist Sanitário (Engenharia Diagnóstica)</h3>
-
-<div class="checklist-item">
-  <input type="checkbox" data-peso="4"> Presença de mofo ou bolor visível
-</div>
-
-<div class="checklist-item">
-  <input type="checkbox" data-peso="3"> Piso quebrado, solto ou escorregadio
-</div>
-
-<div class="checklist-item">
-  <input type="checkbox" data-peso="3"> Vazamentos aparentes
-</div>
-
-<div class="checklist-item">
-  <input type="checkbox" data-peso="2"> Sanitário ou mictório danificado
-</div>
-
-<div class="checklist-item">
-  <input type="checkbox" data-peso="2"> Falta de ventilação adequada
-</div>
-
-<div class="checklist-item">
-  <input type="checkbox" data-peso="2"> Iluminação insuficiente
-</div>
-
-<div class="checklist-item">
-  <input type="checkbox" data-peso="1"> Ausência de sabonete, papel ou lixeira
-</div>
-
-</section>
-
-<section>
-<h3>Registro Fotográfico</h3>
-<input type="file" id="fotos" multiple accept="image/*">
-</section>
-
-<button onclick="avaliar()">Gerar Diagnóstico</button>
+<button onclick="avaliar()">Gerar diagnóstico</button>
 
 <div id="resultado"></div>
-<script src="https://unpkg.com/leaflet-omnivore/leaflet-omnivore.min.js"></script>
+
+<!-- 🔹 CARREGA ESCOLAS DO KML -->
+<script src="mapa/escolas.js"></script>
+
+<!-- 🔹 SCRIPT PRINCIPAL -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-fetch("mapa/escolas.kml")
-  .then(res => res.text())
-  .then(kmlText => {
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(kmlText, "text/xml");
-    const placemarks = xml.getElementsByTagName("Placemark");
-
-    const select = document.getElementById("escola");
-    const nomes = new Set();
-
-    for (let p of placemarks) {
-      const desc = p.getElementsByTagName("description")[0];
-      if (!desc) continue;
-
-      const html = desc.textContent;
-      const match = html.match(/Nome<\/span>.*?atr-value">([^<]+)</);
-
-      if (match) {
-        nomes.add(match[1].trim());
-      }
-    }
-
-    [...nomes].sort().forEach(nome => {
-      const opt = document.createElement("option");
-      opt.value = nome;
-      opt.textContent = nome;
-      select.appendChild(opt);
-    });
-  });
-</script>
-  
-<script>
-/* ===============================
-   VARIÁVEL GLOBAL SEGURA
-================================ */
 let dadosUltimaAvaliacao = null;
 
-/* ===============================
-   PARÂMETROS TÉCNICOS
-================================ */
-const LIMIAR_ALERTA = 4;
-const LIMIAR_CRITICO = 8;
+document.addEventListener("escolasCarregadas", () => {
+  const select = document.getElementById("escola");
+  escolas.forEach(e => {
+    const opt = document.createElement("option");
+    opt.value = e.nome;
+    opt.textContent = e.nome;
+    select.appendChild(opt);
+  });
+});
 
-/* ===============================
-   FUNÇÃO PRINCIPAL
-================================ */
 function avaliar(){
-
   const escola = document.getElementById("escola").value;
   const responsavel = document.getElementById("responsavel").value;
-  const data = document.getElementById("data").value;
-
-  if(!escola){ alert("Selecione a escola."); return; }
-  if(!responsavel){ alert("Informe o responsável."); return; }
-  if(!data){ alert("Informe a data."); return; }
+  const data = new Date().toLocaleDateString();
 
   let pontos = 0;
-  document
-    .querySelectorAll(".checklist-item input:checked")
-    .forEach(i => pontos += Number(i.dataset.peso));
+  if(document.getElementById("piso").checked) pontos += 2;
+  if(document.getElementById("mofo").checked) pontos += 3;
+  if(document.getElementById("sanitario").checked) pontos += 2;
 
-  if(document.getElementById("fotos").files.length > 0){
-    pontos += 2;
-  }
+  let status, classe;
+  if(pontos >= 5){ status = "Crítico"; classe = "vermelho"; }
+  else if(pontos >= 2){ status = "Alerta"; classe = "amarelo"; }
+  else { status = "Adequado"; classe = "verde"; }
 
-  let status = "adequado";
-  let classe = "adequado";
-  let textoStatus = "Condição adequada";
-
-  if(pontos >= LIMIAR_CRITICO){
-    status = "critico";
-    classe = "critico";
-    textoStatus = "Condição crítica – intervenção urgente";
-  }
-  else if(pontos >= LIMIAR_ALERTA){
-    status = "alerta";
-    classe = "alerta";
-    textoStatus = "Condição de alerta – manutenção necessária";
-  }
-
-  dadosUltimaAvaliacao = {
-    escola,
-    responsavel,
-    data,
-    textoStatus,
-    pontos
-  };
+  dadosUltimaAvaliacao = { escola, responsavel, data, pontos, status };
 
   document.getElementById("resultado").innerHTML = `
     <div class="status ${classe}">
       <div class="bola"></div>
       <div>
-        <strong>${textoStatus}</strong><br>
+        <strong>Status: ${status}</strong><br>
         Pontuação técnica: ${pontos}
       </div>
     </div>
-
-    <button style="margin-top:15px" onclick="gerarPDF()">
-      Gerar Relatório em PDF
-    </button>
+    <button onclick="gerarPDF()">Gerar PDF</button>
   `;
 
-  salvarAvaliacaoMapa(escola, status, pontos, data);
+  salvarAvaliacaoSheets(escola, status, pontos, data);
 }
 
-/* ===============================
-   SALVAR PARA O MAPA
-================================ */
-function salvarAvaliacaoMapa(escola, status, pontos, data){
-  let registros = JSON.parse(localStorage.getItem("avaliacoes")) || [];
-  registros = registros.filter(r => r.escola !== escola);
-  registros.push({ escola, status, pontos, data });
-  localStorage.setItem("avaliacoes", JSON.stringify(registros));
-}
-
-/* ===============================
-   GERAR PDF (SEM BUG)
-================================ */
 function gerarPDF(){
-
-  if(!dadosUltimaAvaliacao){
-    alert("Nenhuma avaliação disponível.");
-    return;
-  }
-
-  const { escola, responsavel, data, textoStatus, pontos } = dadosUltimaAvaliacao;
   const { jsPDF } = window.jspdf;
+  const d = dadosUltimaAvaliacao;
   const doc = new jsPDF();
 
-  doc.setFontSize(16);
   doc.text("Relatório de Avaliação Sanitária Escolar", 20, 20);
+  doc.text(Escola: ${d.escola}, 20, 40);
+  doc.text(Responsável: ${d.responsavel}, 20, 50);
+  doc.text(Data: ${d.data}, 20, 60);
+  doc.text(Status: ${d.status}, 20, 80);
+  doc.text(Pontuação: ${d.pontos}, 20, 90);
 
-  doc.setFontSize(11);
-  doc.text(`Escola: ${escola}`, 20, 40);
-  doc.text(`Responsável: ${responsavel}`, 20, 48);
-  doc.text(`Data: ${data}`, 20, 56);
+  doc.save("avaliacao_sanitaria.pdf");
+}
 
-  doc.setFontSize(13);
-  doc.text("Diagnóstico Técnico", 20, 75);
-
-  doc.setFontSize(11);
-  doc.text(`Status: ${textoStatus}`, 20, 85);
-  doc.text(`Pontuação técnica: ${pontos}`, 20, 93);
-
-  doc.text(
-    "Este diagnóstico é preliminar, baseado em checklist técnico\n" +
-    "e evidências fotográficas. Não substitui laudo técnico\n" +
-    "emitido por profissional habilitado.",
-    20, 115
-  );
-
-  doc.save("avaliacao_sanitaria_escolar.pdf");
+function salvarAvaliacaoSheets(escola, status, pontos, data){
+  fetch("COLE_AQUI_A_URL_DO_APPS_SCRIPT", {
+    method: "POST",
+    body: JSON.stringify({
+      escola,
+      status,
+      pontos,
+      data,
+      responsavel: document.getElementById("responsavel").value
+    })
+  });
 }
 </script>
 
 </body>
 </html>
-
-
