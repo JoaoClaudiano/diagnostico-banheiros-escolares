@@ -1,0 +1,93 @@
+!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Mapa – Diagnóstico Sanitário Escolar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+body{ margin:0; font-family:Arial, sans-serif; }
+header{
+background:#1f3a5f;
+color:white;
+padding:12px;
+}
+#map{ height: calc(100vh - 70px); }
+
+.legend{
+position:absolute;
+bottom:20px;
+left:20px;
+background:white;
+padding:10px;
+border-radius:6px;
+font-size:14px;
+box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.dot{
+width:12px;
+height:12px;
+border-radius:50%;
+display:inline-block;
+margin-right:6px;
+}
+.vermelho{background:#c62828;}
+.amarelo{background:#f9a825;}
+.verde{background:#2e7d32;}
+</style>
+</head>
+
+<body>
+
+<header>
+<strong>Mapa de Diagnóstico Sanitário – Fortaleza</strong>
+</header>
+
+<div id="map"></div>
+
+<div class="legend">
+<div><span class="dot vermelho"></span> Crítico</div>
+<div><span class="dot amarelo"></span> Alerta</div>
+<div><span class="dot verde"></span> Adequado</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const map = L.map('map').setView([-3.7319, -38.5267], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+function cor(status){
+if(status === "critico") return "#c62828";
+if(status === "alerta") return "#f9a825";
+return "#2e7d32";
+}
+
+fetch("avaliacoes.json")
+.then(r => r.json())
+.then(dados => {
+dados.forEach(e => {
+L.circleMarker([e.lat, e.lng], {
+radius:8,
+color:"#333",
+fillColor:cor(e.status),
+fillOpacity:0.9
+}).addTo(map)
+.bindPopup(`
+<strong>${e.nome}</strong><br>
+Status: <b>${e.status}</b><br>
+ITDS: ${e.itds}<br>
+Data: ${e.data}
+`);
+});
+});
+</script>
+
+</body>
+</html>

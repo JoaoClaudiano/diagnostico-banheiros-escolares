@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Avaliação Sanitária Escolar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+font-family: Arial, sans-serif;
+padding:16px;
+background:#f5f5f5;
+}
+h2{
+color:#1f3a5f;
+}
+fieldset{
+background:#fff;
+padding:12px;
+border-radius:6px;
+margin-bottom:16px;
+border:1px solid #ddd;
+}
+button{
+padding:12px 18px;
+font-size:16px;
+background:#1f3a5f;
+color:white;
+border:none;
+border-radius:6px;
+}
+pre{
+background:#fff;
+padding:12px;
+border-radius:6px;
+font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Avaliação Sanitária – Banheiros Escolares</h2>
+
+<fieldset>
+<legend><strong>Checklist</strong></legend>
+
+<label><input type="checkbox" id="piso"> Piso quebrado ou escorregadio</label><br>
+<label><input type="checkbox" id="mofo"> Mofo, infiltração ou manchas de umidade</label><br>
+<label><input type="checkbox" id="sanitario"> Sanitário quebrado ou entupido</label><br>
+<label><input type="checkbox" id="torneira"> Torneira danificada ou vazando</label><br>
+<label><input type="checkbox" id="odor"> Odor forte persistente</label>
+</fieldset>
+
+<button onclick="finalizar()">Finalizar Avaliação</button>
+
+<h3>Registro Gerado</h3>
+<pre id="saida">Aguardando avaliação...</pre>
+
+<script>
+function finalizar(){
+
+let pontuacao = 5;
+
+if(document.getElementById("piso").checked) pontuacao -= 1;
+if(document.getElementById("sanitario").checked) pontuacao -= 1;
+if(document.getElementById("torneira").checked) pontuacao -= 1;
+if(document.getElementById("odor").checked) pontuacao -= 1;
+
+// Mofo com peso maior (alerta técnico)
+if(document.getElementById("mofo").checked) pontuacao -= 2;
+
+if(pontuacao < 0) pontuacao = 0;
+
+let status = "adequado";
+if(pontuacao < 3) status = "critico";
+else if(pontuacao < 4) status = "alerta";
+
+const registro = {
+id: "ESC_001",
+nome: "EMEF Exemplo",
+lat: -3.7319,
+lng: -38.5267,
+itds: pontuacao,
+status: status,
+data: new Date().toISOString().split("T")[0],
+relatorio: "#"
+};
+
+document.getElementById("saida").textContent =
+JSON.stringify(registro, null, 2);
+}
+</script>
+
+</body>
+</html>
