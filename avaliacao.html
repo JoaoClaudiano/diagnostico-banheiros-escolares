@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Avaliação Sanitária Escolar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 body{
 margin:0;
@@ -118,6 +118,7 @@ padding:12px;
 
 <header>
 <h1>Avaliação Sanitária Escolar</h1>
+  
 </header>
 
 <main>
@@ -226,15 +227,25 @@ function avaliar(){
     statusFinal = "alerta";
   }
 
-  /* ========= EXIBIÇÃO ========= */
+/* ========= EXIBIÇÃO ========= */
   const resultado = document.getElementById("resultado");
+
+  let textoStatus =
+    statusFinal === "adequado" ? "Condição adequada" :
+    statusFinal === "alerta" ? "Situação de alerta" :
+    "Condição crítica";
+
   resultado.innerHTML = `
     <div class="status ${statusFinal}">
       <span class="bola"></span>
-      ${statusFinal === "adequado" ? "Condição adequada" :
-        statusFinal === "alerta" ? "Situação de alerta" :
-        "Condição crítica"}
+      <div>
+        <strong>${textoStatus}</strong><br>
+        Pontuação final: ${pontuacaoGestor + pontuacaoIA}
+      </div>
     </div>
+    <button onclick="gerarPDF('${textoStatus}', ${pontuacaoGestor + pontuacaoIA})">
+      Gerar PDF do Relatório
+    </button>
   `;
 
   /* ========= REGISTRO PARA O MAPA ========= */
@@ -255,8 +266,33 @@ function salvarRegistro(registro){
   dados.push(registro);
   localStorage.setItem("avaliacoes", JSON.stringify(dados));
 }
+function gerarPDF(statusTexto, pontuacao){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const escola = document.getElementById("escola").value || "Não informado";
+  const data = new Date().toLocaleDateString();
+
+  doc.setFontSize(14);
+  doc.text("Relatório de Avaliação Sanitária Escolar", 20, 20);
+
+  doc.setFontSize(11);
+  doc.text(Escola: ${escola}, 20, 35);
+  doc.text(Data: ${data}, 20, 45);
+  doc.text(Status: ${statusTexto}, 20, 55);
+  doc.text(Pontuação: ${pontuacao}, 20, 65);
+
+  doc.text(
+    "Este relatório é um diagnóstico preliminar de apoio à gestão.\nNão substitui laudo técnico.",
+    20, 85
+  );
+
+  doc.save(avaliacao_${escola.replaceAll(" ","_")}.pdf);
+  }
+  
 </script>
 
 </body>
 
 </html>
+
