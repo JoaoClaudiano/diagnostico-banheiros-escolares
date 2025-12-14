@@ -5,56 +5,47 @@
 <title>Mapa Sanitário – Escolas Municipais</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Leaflet -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
+body { margin:0; font-family: Arial, sans-serif; }
 
 header {
-  padding: 12px;
-  background: #1f4fd8;
-  color: white;
-  text-align: center;
-  font-weight: bold;
+  background:#1f4fd8;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
 }
 
-#map {
-  height: calc(100vh - 50px);
+#map { height: calc(100vh - 120px); }
+
+.painel {
+  padding:10px;
+  background:#f4f6f8;
+  display:flex;
+  gap:15px;
+  justify-content:center;
+  font-size:14px;
 }
 
-.legenda {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  background: white;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 14px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.2);
-}
-
-.legenda div {
-  margin-bottom: 5px;
+.painel label {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
 }
 
 .bola {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 6px;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  display:inline-block;
 }
-.verde { background: green; }
-.laranja { background: orange; }
-.vermelho { background: red; }
+.verde { background:green; }
+.laranja { background:orange; }
+.vermelho { background:red; }
 </style>
 </head>
 
@@ -64,40 +55,58 @@ header {
 Mapa Sanitário das Escolas – Secretaria de Educação
 </header>
 
-<div id="map"></div>
+<div class="painel">
+  <label><input type="checkbox" id="filtroAdequado" checked>
+    <span class="bola verde"></span> Adequado
+  </label>
 
-<div class="legenda">
-  <div><span class="bola verde"></span> Condição adequada</div>
-  <div><span class="bola laranja"></span> Situação de alerta</div>
-  <div><span class="bola vermelho"></span> Condição crítica</div>
+  <label><input type="checkbox" id="filtroAlerta" checked>
+    <span class="bola laranja"></span> Alerta
+  </label>
+
+  <label><input type="checkbox" id="filtroCritico" checked>
+    <span class="bola vermelho"></span> Crítico
+  </label>
 </div>
 
+<div id="map"></div>
+
 <script>
-// 👉 COLE A MESMA URL /exec DO APPS SCRIPT
 const API_URL = "https://script.google.com/macros/s/AKfycbzJrWBtziBLKneO3MvQKeFLS7XsMccKKJKzbuY26GxatQxRf_60BoyxAvIFe0JwjxWn/exec";
 
-// Mapa centrado em Fortaleza
+// Mapa
 const map = L.map("map").setView([-3.7319, -38.5267], 12);
 
-// OpenStreetMap
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-// Cores por status
+// Camadas por status
+const camadaAdequado = L.layerGroup().addTo(map);
+const camadaAlerta = L.layerGroup().addTo(map);
+const camadaCritico = L.layerGroup().addTo(map);
+
+// Função status → camada
+function camadaPorStatus(status) {
+  if (status.includes("crítica")) return camadaCritico;
+  if (status.includes("alerta")) return camadaAlerta;
+  return camadaAdequado;
+}
+
 function corPorStatus(status) {
   if (status.includes("crítica")) return "red";
   if (status.includes("alerta")) return "orange";
   return "green";
 }
 
-// Carregar dados do banco
+// Carregar dados
 fetch(API_URL)
   .then(res => res.json())
   .then(dados => {
     dados.forEach(e => {
       if (!e.lat || !e.lng) return;
 
+      const layer = camadaPorStatus(e.status);
       const cor = corPorStatus(e.status);
 
       L.circleMarker([e.lat, e.lng], {
@@ -106,18 +115,27 @@ fetch(API_URL)
         fillColor: cor,
         fillOpacity: 0.8
       })
-      .addTo(map)
       .bindPopup(`
         <strong>${e.escola}</strong><br>
         Status: ${e.status}<br>
         Pontuação: ${e.pontuacao}
-      `);
+      `)
+      .addTo(layer);
     });
-  })
-  .catch(err => {
-    alert("Erro ao carregar dados do mapa");
-    console.error(err);
   });
+
+// Filtros
+document.getElementById("filtroAdequado").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaAdequado) : map.removeLayer(camadaAdequado);
+});
+
+document.getElementById("filtroAlerta").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaAlerta) : map.removeLayer(camadaAlerta);
+});
+
+document.getElementById("filtroCritico").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaCritico) : map.removeLayer(camadaCritico);
+});
 </script>
 
 </body>
