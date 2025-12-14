@@ -2,104 +2,141 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Diagnóstico Sanitário – Escolas Públicas</title>
+  <title>CheckInfra – Diagnóstico Sanitário Escolar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
+      margin: 0;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: #1f4fd8;
+      color: #fff;
+      padding: 14px 20px;
+    }
+
+    .header-container {
+      max-width: 1100px;
+      margin: auto;
       display: flex;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: space-between;
     }
 
-    .card {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
-      max-width: 400px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    h1 {
+    .logo img {
+      height: 36px;
+      width: auto;
+    }
+
+    .logo span {
       font-size: 20px;
-      margin-bottom: 20px;
-    }
-
-    a {
-      display: block;
-      margin-top: 15px;
-      padding: 14px;
-      background: #1f4fd8;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
       font-weight: bold;
     }
 
-    a.secondary {
-      background: #6c757d;
+    .nav {
+      display: flex;
+      gap: 18px;
     }
-<style>
-.actions {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-top: 30px;
-  flex-wrap: wrap;
-}
 
-.actions a {
-  text-decoration: none;
-  padding: 14px 22px;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 15px;
-  transition: 0.2s;
-  min-width: 220px;
-  text-align: center;
-}
+    .nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+    }
 
-.btn-primary {
-  background: #1f4fd8;
-  color: #fff;
-}
+    @media (max-width: 700px) {
+      .nav { display: none; }
+    }
 
-.btn-primary:hover {
-  background: #163ca6;
-}
+    /* ===== CONTEÚDO ===== */
+    .container {
+      display: flex;
+      justify-content: center;
+      margin-top: 60px;
+    }
 
-.btn-secondary {
-  background: #f0f2f5;
-  color: #333;
-  border: 1px solid #ddd;
-}
+    .actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
 
-.btn-secondary:hover {
-  background: #e2e6ea;
-}
-</style>
-    
+    .actions a {
+      text-decoration: none;
+      padding: 14px 22px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 15px;
+      transition: 0.2s;
+      min-width: 220px;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: #1f4fd8;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #163ca6;
+    }
+
+    .btn-secondary {
+      background: #f0f2f5;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e6ea;
+    }
   </style>
 </head>
 
 <body>
 
-<div class="actions">
-  <a href="./avaliacao.html" class="btn-primary">
-    📝 Realizar Avaliação
-  </a>
+<header class="header">
+  <div class="header-container">
+    <div class="logo">
+      <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
+      <span>CheckInfra</span>
+    </div>
 
-  <a href="./painel/" class="btn-secondary">
-    📈 Visualizar Gráficos
-  </a>
+    <nav class="nav">
+      <a href="./">Início</a>
+      <a href="./avaliacao.html">Avaliação</a>
+      <a href="./mapa/">Mapa</a>
+      <a href="./painel/">Painel</a>
+    </nav>
+  </div>
+</header>
 
-  <a href="./mapa/" class="btn-secondary">
-    🗺️ Mapa da Secretaria
-  </a>
+<div class="container">
+  <div class="actions">
+    <a href="./avaliacao.html" class="btn-primary">
+      📝 Realizar Avaliação
+    </a>
+
+    <a href="./painel/" class="btn-secondary">
+      📈 Visualizar Gráficos
+    </a>
+
+    <a href="./mapa/" class="btn-secondary">
+      🗺️ Mapa da Secretaria
+    </a>
+  </div>
 </div>
 
 </body>
