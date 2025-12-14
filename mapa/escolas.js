@@ -179,9 +179,6 @@ window.escolas = [
   { nome: "SÃO TOMÉ", lat: -3.798441118, lng: -38.58677118 },
   { nome: "PARQUE BELA FLOR", lat: -3.833118447, lng: -38.50622988 },
   { nome: "SANTA CRUZ", lat: -3.787771992, lng: -38.55511877 }
-
-
-
 ];
 
 // Evento global para avisar que as escolas carregaram
