@@ -23,7 +23,6 @@
       margin: auto;
       display: flex;
       align-items: center;
-      justify-content: space-between;
     }
 
     .logo {
@@ -72,6 +71,7 @@
     .checklist label {
       font-weight: normal;
       margin-bottom: 10px;
+      display: block;
     }
 
     button {
@@ -142,22 +142,26 @@
   <div id="resultado" class="resultado"></div>
 </div>
 
-<!-- 🔹 CARREGA PRIMEIRO A BASE DE ESCOLAS -->
+<!-- 🔹 CARREGA A BASE DE ESCOLAS PRIMEIRO -->
 <script src="./mapa/escolas.js"></script>
 
 <script>
-document.addEventListener("escolasCarregadas", () => {
-  const select = document.getElementById("escola");
-  select.innerHTML = '<option value="">Selecione a escola</option>';
+/* ===== PREENCHE A LISTA DE ESCOLAS ===== */
+const select = document.getElementById("escola");
+select.innerHTML = '<option value="">Selecione a escola</option>';
 
+if (window.escolas && Array.isArray(escolas)) {
   escolas.forEach(e => {
     const opt = document.createElement("option");
     opt.value = e.nome;
     opt.textContent = e.nome;
     select.appendChild(opt);
   });
-});
+} else {
+  select.innerHTML = '<option value="">Erro ao carregar escolas</option>';
+}
 
+/* ===== DIAGNÓSTICO ===== */
 function gerarDiagnostico() {
   const escola = document.getElementById("escola").value;
   const avaliador = document.getElementById("avaliador").value;
@@ -168,12 +172,10 @@ function gerarDiagnostico() {
   }
 
   let score = 0;
-  let problemas = [];
 
   document.querySelectorAll("input[type=checkbox]").forEach(cb => {
     if (cb.checked) {
       score += Number(cb.dataset.peso || 0);
-      problemas.push(cb.parentElement.textContent.trim());
     }
   });
 
@@ -199,7 +201,6 @@ function gerarDiagnostico() {
     Avaliação registrada. Redirecionando para a página inicial…
   `;
 
-  // redireciona após 3s
   setTimeout(() => {
     window.location.href = "./index.html";
   }, 3000);
