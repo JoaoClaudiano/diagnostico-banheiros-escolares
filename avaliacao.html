@@ -2,83 +2,123 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Avaliação Sanitária Escolar</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Avaliação Sanitária – Banheiros Escolares</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f6f8;
+      background: #f5f7fa;
+      margin: 0;
       padding: 20px;
     }
+
     h1 {
       text-align: center;
+      margin-bottom: 20px;
     }
+
     .card {
       background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
-      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+
     label {
+      font-weight: bold;
       display: block;
       margin-top: 15px;
-      font-weight: bold;
     }
-    select, input, button {
+
+    input, select {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
+      margin-top: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
+
     .checklist label {
       font-weight: normal;
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
     }
+
+    .checklist input {
+      width: auto;
+      margin-right: 10px;
+    }
+
     button {
-      margin-top: 20px;
-      background: #007bff;
-      color: white;
+      margin-top: 25px;
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
+      background: #1f4fd8;
+      color: #fff;
+      cursor: pointer;
     }
+
+    button:hover {
+      background: #163da6;
+    }
+
+    .resultado {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+    }
+
+    .ok { background: #d4edda; color: #155724; }
+    .alerta { background: #fff3cd; color: #856404; }
+    .critico { background: #f8d7da; color: #721c24; }
   </style>
 </head>
 
 <body>
 
-  <h1>Avaliação Sanitária</h1>
+  <h1>Avaliação Sanitária dos Banheiros</h1>
 
   <div class="card">
-    <label>Nome da escola</label>
-    <select id="escola">
-      <option value="">Carregando escolas...</option>
+
+    <label for="escola">Escola avaliada</label>
+    <select id="escola" required>
+      <option value="">Selecione a escola</option>
     </select>
 
-    <label>Responsável pela avaliação</label>
-    <input id="responsavel" placeholder="Nome do gestor ou diretor" />
+    <label for="avaliador">Responsável pela avaliação</label>
+    <input type="text" id="avaliador" placeholder="Nome do gestor ou diretor" />
 
-    <label>Checklist</label>
     <div class="checklist">
-      <label><input type="checkbox" /> Piso quebrado</label>
-      <label><input type="checkbox" /> Mofo / infiltração</label>
-      <label><input type="checkbox" /> Sanitário quebrado</label>
-      <label><input type="checkbox" /> Torneira com vazamento</label>
+      <label><input type="checkbox" id="piso" /> Piso quebrado ou escorregadio</label>
+      <label><input type="checkbox" id="mofo" /> Presença de mofo ou umidade</label>
+      <label><input type="checkbox" id="sanitario" /> Sanitário ou torneira quebrada</label>
+      <label><input type="checkbox" id="vazamento" /> Vazamentos visíveis</label>
+      <label><input type="checkbox" id="cheiro" /> Mau cheiro persistente</label>
     </div>
 
     <button onclick="gerarDiagnostico()">Gerar diagnóstico</button>
 
-    <p id="resultado"></p>
+    <div id="resultado" class="resultado"></div>
+
   </div>
 
-  <!-- SCRIPT DE ESCOLAS -->
+  <!-- Base de escolas -->
   <script src="mapa/escolas.js"></script>
 
   <script>
-    function preencherSelect() {
+    // Popular select com TODAS as escolas
+    document.addEventListener("escolasCarregadas", () => {
       const select = document.getElementById("escola");
-      select.innerHTML = "<option value=''>Selecione a escola</option>";
 
       window.escolas.forEach(e => {
         const opt = document.createElement("option");
@@ -86,23 +126,44 @@
         opt.textContent = e.nome;
         select.appendChild(opt);
       });
-    }
-
-    if (window.escolasCarregadas) {
-      preencherSelect();
-    } else {
-      window.addEventListener("load", preencherSelect);
-    }
+    });
 
     function gerarDiagnostico() {
       const escola = document.getElementById("escola").value;
       if (!escola) {
-        alert("Selecione uma escola");
+        alert("Selecione a escola avaliada.");
         return;
       }
 
-      document.getElementById("resultado").innerHTML =
-        "Diagnóstico gerado para <b>" + escola + "</b>";
+      let pontuacao = 0;
+      if (piso.checked) pontuacao++;
+      if (mofo.checked) pontuacao++;
+      if (sanitario.checked) pontuacao++;
+      if (vazamento.checked) pontuacao++;
+      if (cheiro.checked) pontuacao++;
+
+      let status = "";
+      let classe = "";
+
+      if (pontuacao <= 1) {
+        status = "Condição adequada";
+        classe = "ok";
+      } else if (pontuacao <= 3) {
+        status = "Situação de alerta";
+        classe = "alerta";
+      } else {
+        status = "Condição crítica";
+        classe = "critico";
+      }
+
+      const resultado = document.getElementById("resultado");
+      resultado.className = `resultado ${classe}`;
+      resultado.innerHTML = `
+        Escola: ${escola}<br>
+        Pontuação: ${pontuacao}<br>
+        Status: ${status}
+      `;
+      resultado.style.display = "block";
     }
   </script>
 
