@@ -1,65 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>CheckInfra – Avaliação Sanitária</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+}
+.header{
+  background:#1f4fd8;
+  color:#fff;
+  padding:16px;
+  text-align:center;
+}
+.container{
+  max-width:900px;
+  margin:30px auto;
+  padding:0 16px;
+}
+h1{text-align:center;margin-bottom:24px;}
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+label{font-weight:bold;margin-bottom:6px;display:block;}
+select,input[type="text"]{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin-bottom:14px;
+}
+.categoria{margin-bottom:26px;}
+.categoria h3{color:#1f4fd8;margin-bottom:12px;}
+.checklist{display:flex;flex-direction:column;gap:12px;}
+.check-card{
+  border:2px solid #e0e0e0;
+  border-radius:12px;
+  padding:16px;
+  cursor:pointer;
+  transition:.2s;
+  background:#fafafa;
+  font-weight:500;
+}
+.check-card input{display:none;}
+.check-card:hover{border-color:#1f4fd8;background:#f0f5ff;}
+.check-card:has(input:checked){
+  border-color:#1f4fd8;
+  background:#eaf0ff;
+  font-weight:bold;
+}
+button{
+  width:100%;
+  padding:16px;
+  background:#1f4fd8;
+  color:#fff;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+}
+button:hover{background:#163ca6;}
+.resultado{
+  margin-top:20px;
+  padding:20px;
+  border-radius:12px;
+  display:none;
+  font-weight:bold;
+}
+.ok{background:#e8f7ee;color:#1e7e34;}
+.alerta{background:#fff3cd;color:#856404;}
+.critico{background:#f8d7da;color:#721c24;}
+</style>
+</head>
+
+<body>
+
+<div class="header"><strong>CheckInfra – Avaliação Sanitária</strong></div>
+
+<div class="container">
+<h1>Avaliação Sanitária Escolar</h1>
+
+<div class="card">
+<label>Escola</label>
+<select id="escola"><option>Carregando escolas…</option></select>
+<label>Avaliador</label>
+<input type="text" id="avaliador" placeholder="Nome do avaliador">
+</div>
+
+<div class="card">
+
+<div class="categoria">
+<h3>🏗️ Estrutura</h3>
+<div class="checklist">
+<label class="check-card"><input type="checkbox" data-peso="3">Mofo ou umidade excessiva</label>
+<label class="check-card"><input type="checkbox" data-peso="2">Piso quebrado ou escorregadio</label>
+<label class="check-card"><input type="checkbox" data-peso="2">Infiltrações visíveis</label>
+</div>
+</div>
+
+<div class="categoria">
+<h3>🧹 Higiene</h3>
+<div class="checklist">
+<label class="check-card"><input type="checkbox" data-peso="2">Limpeza inadequada</label>
+<label class="check-card"><input type="checkbox" data-peso="2">Mau cheiro persistente</label>
+</div>
+</div>
+
+<div class="categoria">
+<h3>💡 Conforto</h3>
+<div class="checklist">
+<label class="check-card"><input type="checkbox" data-peso="1">Iluminação insuficiente</label>
+<label class="check-card"><input type="checkbox" data-peso="1">Ventilação inadequada</label>
+</div>
+</div>
+
+</div>
+
+<button onclick="gerarDiagnostico()">Gerar Diagnóstico</button>
+<div id="resultado" class="resultado"></div>
+</div>
+
+<script src="./mapa/escolas.js"></script>
+
 <script>
-function gerarDiagnostico() {
-  const escola = document.getElementById("escola").value;
-  const avaliador = document.getElementById("avaliador").value;
+const SCRIPT_URL = "COLE_AQUI_SEU_URL_EXEC";
 
-  if (!escola || !avaliador) {
-    alert("Preencha a escola e o avaliador");
-    return;
-  }
+/* carregar escolas */
+document.addEventListener("DOMContentLoaded",()=>{
+  if(!window.escolas)return;
+  const s=document.getElementById("escola");
+  s.innerHTML='<option value="">Selecione a escola</option>';
+  escolas.forEach(e=>{
+    const o=document.createElement("option");
+    o.value=e.nome;o.textContent=e.nome;s.appendChild(o);
+  });
+});
 
-  let score = 0;
-  let problemas = [];
+/* gerar pdf */
+function gerarPDF(escola,avaliador,score,status,problemas){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  let y=20;
 
-  document.querySelectorAll("input[type=checkbox]").forEach(cb => {
-    if (cb.checked) {
-      score += parseInt(cb.dataset.peso);
+  pdf.setFontSize(16);
+  pdf.text("CheckInfra – Avaliação Sanitária",10,y);
+  y+=10;
+
+  pdf.setFontSize(12);
+  pdf.text(`Escola: ${escola}`,10,y); y+=8;
+  pdf.text(`Avaliador: ${avaliador}`,10,y); y+=8;
+  pdf.text(`Pontuação: ${score}`,10,y); y+=8;
+  pdf.text(`Status: ${status}`,10,y); y+=10;
+
+  pdf.text("Itens avaliados:",10,y); y+=8;
+  problemas.forEach(p=>{
+    pdf.text(`- ${p}`,12,y);
+    y+=7;
+  });
+
+  pdf.save(`avaliacao_${escola.replaceAll(" ","_")}.pdf`);
+}
+
+/* diagnóstico */
+function gerarDiagnostico(){
+  const escola=document.getElementById("escola").value;
+  const avaliador=document.getElementById("avaliador").value;
+  if(!escola||!avaliador){alert("Preencha todos os campos");return;}
+
+  let score=0,problemas=[];
+  document.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+    if(cb.checked){
+      score+=Number(cb.dataset.peso);
       problemas.push(cb.parentElement.textContent.trim());
     }
   });
 
-  let status = "Condição adequada";
-  let classe = "ok";
+  let status="Condição adequada",classe="ok";
+  if(score>=9){status="Condição crítica";classe="critico";}
+  else if(score>=4){status="Situação de alerta";classe="alerta";}
 
-  if (score >= 9) {
-    status = "Condição crítica";
-    classe = "critico";
-  } else if (score >= 4) {
-    status = "Situação de alerta";
-    classe = "alerta";
-  }
+  const r=document.getElementById("resultado");
+  r.className="resultado "+classe;
+  r.style.display="block";
+  r.innerHTML=`Avaliação registrada.<br>Status: ${status}<br>Redirecionando…`;
 
-  const r = document.getElementById("resultado");
-  r.className = "resultado " + classe;
-  r.innerHTML = `
-    Escola: ${escola}<br>
-    Avaliador: ${avaliador}<br>
-    Pontuação técnica: ${score}<br>
-    Status: ${status}<br><br>
-    <strong>Avaliação registrada. Redirecionando para a página inicial…</strong>
-  `;
+  gerarPDF(escola,avaliador,score,status,problemas);
 
-  const escolaObj = escolas.find(e => e.nome === escola);
-
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      escola,
-      avaliador,
-      pontuacao: score,
-      status,
-      problemas: problemas.join("; "),
-      lat: escolaObj ? escolaObj.lat : null,
-      lng: escolaObj ? escolaObj.lng : null
+  const escolaObj=escolas.find(e=>e.nome===escola);
+  fetch(SCRIPT_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      escola,avaliador,pontuacao:score,status,
+      problemas:problemas.join("; "),
+      lat:escolaObj?.lat,lng:escolaObj?.lng
     })
   });
 
-  gerarPDF(escola, score, status);
-
-  // ⏱️ redireciona após 3 segundos
-  setTimeout(() => {
-    window.location.href = "./index.html";
-  }, 3000);
+  setTimeout(()=>window.location.href="./index.html",3000);
 }
 </script>
+
+</body>
+</html>
