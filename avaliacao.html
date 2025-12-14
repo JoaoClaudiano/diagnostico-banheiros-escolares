@@ -6,88 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="./mapa/escolas.js"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
-
-.card {
-  background:#fff;
-  max-width:800px;
-  margin:auto;
-  padding:25px;
-  border-radius:8px;
-}
-
-h2 {
-  margin-bottom:10px;
-}
-
-.section {
-  margin-top:25px;
-}
-
-label {
-  font-weight:bold;
-  display:block;
-  margin-top:10px;
-}
-
-input[type="text"] {
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-}
-
-.group {
-  margin-top:15px;
-  padding:15px;
-  border:1px solid #ddd;
-  border-radius:6px;
-}
-
-.group-title {
-  font-weight:bold;
-  margin-bottom:10px;
-}
-
-.check {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-top:8px;
-}
-
-.check input {
-  transform: scale(1.2);
-}
-
-button {
-  margin-top:30px;
-  width:100%;
-  padding:15px;
-  font-size:16px;
-  background:#1f4fd8;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-}
-
-.resultado {
-  margin-top:25px;
-  padding:15px;
-  border-radius:6px;
-  display:none;
-  font-weight:bold;
-  text-align:center;
-}
-
-.ok { background:#d4edda; color:#155724; }
-.alerta { background:#fff3cd; color:#856404; }
-.critico { background:#f8d7da; color:#721c24; }
+body { font-family: Arial; background:#f4f6f8; padding:20px; }
+.card { background:#fff; max-width:800px; margin:auto; padding:25px; border-radius:8px; }
+.group { margin-top:15px; padding:15px; border:1px solid #ddd; border-radius:6px; }
+.check { display:flex; gap:10px; margin-top:8px; }
+button { margin-top:30px; width:100%; padding:15px; font-size:16px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; }
+.resultado { margin-top:20px; padding:15px; border-radius:6px; font-weight:bold; }
+.ok { background:#d4edda; }
+.alerta { background:#fff3cd; }
+.critico { background:#f8d7da; }
 </style>
 </head>
 
@@ -96,99 +26,77 @@ button {
 <div class="card">
 <h2>Avaliação Sanitária dos Banheiros</h2>
 
-<div class="section">
-  <label>Escola</label>
-  <input type="text" id="escola" list="listaEscolas" placeholder="Digite ou selecione a escola">
-  <datalist id="listaEscolas"></datalist>
+<label>Escola</label>
+<input id="escola" list="listaEscolas" placeholder="Digite ou selecione">
+<datalist id="listaEscolas"></datalist>
+
+<label>Avaliador</label>
+<input id="avaliador">
+
+<div class="group">
+  <div class="check"><input type="checkbox" data-peso="4"> Mofo / bolor</div>
+  <div class="check"><input type="checkbox" data-peso="3"> Infiltração</div>
+  <div class="check"><input type="checkbox" data-peso="2"> Vazamentos</div>
+  <div class="check"><input type="checkbox" data-peso="2"> Mau cheiro</div>
+  <div class="check"><input type="checkbox" data-peso="1"> Iluminação ruim</div>
 </div>
 
-<div class="section">
-  <label>Responsável pela avaliação</label>
-  <input type="text" id="avaliador">
-</div>
-
-<div class="section">
-  <div class="group">
-    <div class="group-title">🧱 Estrutura</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Piso danificado</div>
-    <div class="check"><input type="checkbox" data-peso="1"> Revestimento solto</div>
-    <div class="check"><input type="checkbox" data-peso="3"> Infiltração visível</div>
-  </div>
-
-  <div class="group">
-    <div class="group-title">💧 Hidrossanitário</div>
-    <div class="check"><input type="checkbox" data-peso="3"> Sanitário ou torneira quebrada</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Vazamentos</div>
-  </div>
-
-  <div class="group">
-    <div class="group-title">🌫️ Ambiente</div>
-    <div class="check"><input type="checkbox" data-peso="4"> Mofo / bolor</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Mau cheiro</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Ventilação inadequada</div>
-    <div class="check"><input type="checkbox" data-peso="1"> Iluminação deficiente</div>
-  </div>
-
-  <div class="group">
-    <div class="group-title">♿ Uso e segurança</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Falta de acessibilidade</div>
-    <div class="check"><input type="checkbox" data-peso="1"> Porta sem tranca</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Drenagem inadequada</div>
-  </div>
-</div>
-
-<button onclick="gerarDiagnostico()">Gerar diagnóstico e PDF</button>
-
+<button onclick="gerarDiagnostico()">Gerar diagnóstico</button>
 <div id="resultado" class="resultado"></div>
 </div>
 
-<script src="./mapa/escolas.js"></script>
-
 <script>
-/* Preencher lista de escolas */
-const lista = document.getElementById("listaEscolas");
-if (window.escolas) {
-  window.escolas.forEach(e => {
-    const opt = document.createElement("option");
-    opt.value = e.nome;
-    lista.appendChild(opt);
-  });
-}
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJrWBtziBLKneO3MvQKeFLS7XsMccKKJKzbuY26GxatQxRf_60BoyxAvIFe0JwjxWn/exec";
 
-/* Diagnóstico técnico */
+const lista = document.getElementById("listaEscolas");
+escolas.forEach(e => {
+  const opt = document.createElement("option");
+  opt.value = e.nome;
+  opt.dataset.lat = e.lat;
+  opt.dataset.lng = e.lng;
+  lista.appendChild(opt);
+});
+
 function gerarDiagnostico() {
-  const escola = document.getElementById("escola").value;
-  if (!escola) {
-    alert("Informe a escola");
+  const escolaNome = escola.value;
+  const avaliador = document.getElementById("avaliador").value;
+
+  const escolaObj = escolas.find(e => e.nome === escolaNome);
+  if (!escolaObj) {
+    alert("Selecione uma escola válida da lista");
     return;
   }
 
   let score = 0;
   document.querySelectorAll("input[type=checkbox]:checked")
-    .forEach(cb => score += parseInt(cb.dataset.peso));
+    .forEach(cb => score += Number(cb.dataset.peso));
 
   let status = "Condição adequada", classe = "ok";
-  if (score >= 9) { status = "Condição crítica"; classe = "critico"; }
+  if (score >= 8) { status = "Condição crítica"; classe = "critico"; }
   else if (score >= 4) { status = "Situação de alerta"; classe = "alerta"; }
 
-  const r = document.getElementById("resultado");
-  r.className = "resultado " + classe;
-  r.style.display = "block";
-  r.innerHTML = `Escola: ${escola}<br>Pontuação técnica: ${score}<br>Status: ${status}`;
+  resultado.className = "resultado " + classe;
+  resultado.innerHTML = `Pontuação: ${score}<br>Status: ${status}`;
 
-  gerarPDF(escola, score, status);
-}
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      escola: escolaNome,
+      avaliador,
+      pontuacao: score,
+      status,
+      lat: escolaObj.lat,
+      lng: escolaObj.lng
+    })
+  });
 
-/* PDF */
-function gerarPDF(escola, score, status) {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("Relatório de Avaliação Sanitária", 20, 20);
-  doc.text(`Escola: ${escola}`, 20, 40);
-  doc.text(`Pontuação técnica: ${score}`, 20, 50);
-  doc.text(`Status: ${status}`, 20, 60);
-  doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 70);
-  doc.save(`avaliacao_${escola}.pdf`);
+  const pdf = new jsPDF();
+  pdf.text("Relatório Sanitário", 20, 20);
+  pdf.text(`Escola: ${escolaNome}`, 20, 40);
+  pdf.text(`Pontuação: ${score}`, 20, 50);
+  pdf.text(`Status: ${status}`, 20, 60);
+  pdf.save(`avaliacao_${escolaNome}.pdf`);
 }
 </script>
 
