@@ -1,167 +1,123 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Painel Técnico – Banheiros Escolares</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<title>Painel da Secretaria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
-
-h1 {
-  text-align:center;
-}
-
-.cards {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap:15px;
-  margin-bottom:30px;
-}
-
-.card {
-  background:#fff;
-  padding:20px;
-  border-radius:8px;
-  text-align:center;
-  font-weight:bold;
-}
-
-.graficos {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap:30px;
-}
-
-.box {
-  background:#fff;
-  padding:20px;
-  border-radius:8px;
-}
+body { font-family: Arial; background:#f4f6f8; padding:20px; }
+.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:8px; }
+.grid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+h2 { margin:0 0 10px; }
+small { color:#666; }
 </style>
 </head>
 
 <body>
 
-<h1>Painel Técnico – Avaliação Sanitária</h1>
-
-<div class="cards">
-  <div class="card">🟢 Adequadas<br><span id="ok">0</span></div>
-  <div class="card">🟠 Alerta<br><span id="alerta">0</span></div>
-  <div class="card">🔴 Críticas<br><span id="critico">0</span></div>
+<div class="card">
+  <h2>Painel da Secretaria</h2>
+  <small>Dados consolidados das avaliações</small>
 </div>
 
-<div class="graficos">
-  <div class="box">
-    <h3>Status das Escolas</h3>
+<div class="card grid">
+  <div>
+    <h3>Status das Avaliações</h3>
     <canvas id="graficoStatus"></canvas>
   </div>
-  
-  <div class="box">
-  <h3>Tempo em Situação Crítica (dias)</h3>
-  <canvas id="graficoTempoCritico"></canvas>
-</div>
-
-  <div class="box">
+  <div>
     <h3>Principais Problemas</h3>
     <canvas id="graficoProblemas"></canvas>
   </div>
 </div>
 
+<div class="card">
+  <h3>Dias em Situação Crítica</h3>
+  <canvas id="graficoTempo"></canvas>
+</div>
+
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID/exec";
 
 fetch(SCRIPT_URL)
   .then(r => r.json())
   .then(dados => {
-
-    let contagemStatus = { ok:0, alerta:0, critico:0 };
-    let problemas = {
-      "Mofo / bolor":0,
-      "Piso danificado":0,
-      "Vazamentos":0,
-      "Ventilação inadequada":0,
-      "Outros":0
-    };
-    const escolasCriticas = dados.filter(d => d.diasCritico > 0);
-
-new Chart(document.getElementById("graficoTempoCritico"), {
-  type: "bar",
-  data: {
-    labels: escolasCriticas.map(e => e.escola),
-    datasets: [{
-      label: "Dias em condição crítica",
-      data: escolasCriticas.map(e => e.diasCritico),
-      backgroundColor: "#dc3545"
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    scales: {
-      x: { beginAtZero: true }
-    }
-  }
-});
-
-    dados.forEach(d => {
-      if (d.status.includes("adequada")) contagemStatus.ok++;
-      else if (d.status.includes("alerta")) contagemStatus.alerta++;
-      else if (d.status.includes("crítica")) contagemStatus.critico++;
-
-      // Se no futuro você salvar problemas detalhados, aqui já está preparado
-      if (d.problema) {
-        problemas[d.problema] = (problemas[d.problema] || 0) + 1;
-      } else {
-        problemas["Outros"]++;
-      }
-    });
-
-    document.getElementById("ok").innerText = contagemStatus.ok;
-    document.getElementById("alerta").innerText = contagemStatus.alerta;
-    document.getElementById("critico").innerText = contagemStatus.critico;
-
-    // Gráfico de barras – Status
-    new Chart(document.getElementById("graficoStatus"), {
-      type: "bar",
-      data: {
-        labels: ["Adequadas", "Alerta", "Críticas"],
-        datasets: [{
-          data: [
-            contagemStatus.ok,
-            contagemStatus.alerta,
-            contagemStatus.critico
-          ],
-          backgroundColor: ["#28a745", "#ffc107", "#dc3545"]
-        }]
-      }
-    });
-
-    // Gráfico de pizza – Problemas
-    new Chart(document.getElementById("graficoProblemas"), {
-      type: "pie",
-      data: {
-        labels: Object.keys(problemas),
-        datasets: [{
-          data: Object.values(problemas),
-          backgroundColor: [
-            "#6f42c1",
-            "#fd7e14",
-            "#20c997",
-            "#17a2b8",
-            "#adb5bd"
-          ]
-        }]
-      }
-    });
-
+    montarGraficos(dados);
   })
   .catch(() => alert("Erro ao carregar dados do painel"));
+
+function montarGraficos(dados) {
+  /* ---------- STATUS ---------- */
+  const statusCount = { adequada:0, alerta:0, critica:0 };
+
+  dados.forEach(d => {
+    const s = (d.status || "").toLowerCase();
+    if (s.includes("crítica")) statusCount.critica++;
+    else if (s.includes("alerta")) statusCount.alerta++;
+    else statusCount.adequada++;
+  });
+
+  new Chart(document.getElementById("graficoStatus"), {
+    type: "pie",
+    data: {
+      labels: ["Adequada", "Alerta", "Crítica"],
+      datasets: [{
+        data: [statusCount.adequada, statusCount.alerta, statusCount.critica],
+        backgroundColor: ["#4caf50","#ff9800","#f44336"]
+      }]
+    }
+  });
+
+  /* ---------- PROBLEMAS ---------- */
+  const problemasCount = {};
+
+  dados.forEach(d => {
+    if (!d.problemas) return;
+    d.problemas.split(";").forEach(p => {
+      const key = p.trim();
+      if (!key) return;
+      problemasCount[key] = (problemasCount[key] || 0) + 1;
+    });
+  });
+
+  new Chart(document.getElementById("graficoProblemas"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(problemasCount),
+      datasets: [{
+        label: "Ocorrências",
+        data: Object.values(problemasCount),
+        backgroundColor: "#1f4fd8"
+      }]
+    },
+    options: { indexAxis: 'y' }
+  });
+
+  /* ---------- TEMPO (CRÍTICO POR DIA) ---------- */
+  const porDia = {};
+  dados.forEach(d => {
+    if (!d.timestamp || !d.status) return;
+    if (!d.status.toLowerCase().includes("crítica")) return;
+    const dia = d.timestamp.split("T")[0];
+    porDia[dia] = (porDia[dia] || 0) + 1;
+  });
+
+  new Chart(document.getElementById("graficoTempo"), {
+    type: "line",
+    data: {
+      labels: Object.keys(porDia),
+      datasets: [{
+        label: "Registros críticos",
+        data: Object.values(porDia),
+        borderColor: "#f44336",
+        fill: false
+      }]
+    }
+  });
+}
 </script>
 
 </body>
