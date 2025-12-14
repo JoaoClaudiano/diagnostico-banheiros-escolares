@@ -175,19 +175,19 @@ function gerarDiagnostico(){
   const escolaObj = escolas.find(x => x.nome === escola);
 
   /* ✅ ENVIO CORRETO PARA APPS SCRIPT */
-  const formData = new FormData();
-  formData.append("escola", escola);
-  formData.append("avaliador", avaliador);
-  formData.append("pontuacao", score);
-  formData.append("status", status);
-  formData.append("problemas", problemas.join("; "));
-  formData.append("lat", escolaObj ? escolaObj.lat : "");
-  formData.append("lng", escolaObj ? escolaObj.lng : "");
+  const body = new URLSearchParams({
+    escola: escola,
+    avaliador: avaliador,
+    pontuacao: score,
+    status: status,
+    problemas: problemas.join("; "),
+    lat: escolaObj ? escolaObj.lat : "",
+    lng: escolaObj ? escolaObj.lng : ""
+  });
 
   fetch(SCRIPT_URL, {
     method: "POST",
-    mode: "no-cors",
-    body: formData
+    body: body
   });
 
   setTimeout(()=>location.href="./index.html",3000);
