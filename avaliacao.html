@@ -42,9 +42,7 @@ button:hover{background:#163ca6;}
 
 <div class="card">
 <label>Escola</label>
-<select id="escola">
-  <option>Carregando escolas…</option>
-</select>
+<select id="escola"><option>Carregando escolas…</option></select>
 
 <label>Avaliador</label>
 <input type="text" id="avaliador" placeholder="Nome do avaliador">
@@ -140,7 +138,6 @@ function gerarPDF(escola,avaliador,score,status,problemas){
   pdf.text("Itens avaliados:",10,y);y+=8;
 
   problemas.forEach(p=>{pdf.text("- "+p,12,y);y+=7;});
-
   imagensBase64.forEach(img=>{
     if(y>230){pdf.addPage();y=20;}
     pdf.addImage(img,"JPEG",10,y,60,45);
@@ -175,25 +172,23 @@ function gerarDiagnostico(){
 
   gerarPDF(escola,avaliador,score,status,problemas);
 
-  /* ✅ CORREÇÃO CRÍTICA AQUI */
   const escolaObj = escolas.find(x => x.nome === escola);
+
+  /* ✅ ENVIO CORRETO PARA APPS SCRIPT */
+  const formData = new FormData();
+  formData.append("escola", escola);
+  formData.append("avaliador", avaliador);
+  formData.append("pontuacao", score);
+  formData.append("status", status);
+  formData.append("problemas", problemas.join("; "));
+  formData.append("lat", escolaObj ? escolaObj.lat : "");
+  formData.append("lng", escolaObj ? escolaObj.lng : "");
 
   fetch(SCRIPT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      escola: escola,
-      avaliador: avaliador,
-      pontuacao: score,
-      status: status,
-      problemas: problemas.join("; "),
-      lat: escolaObj ? escolaObj.lat : "",
-      lng: escolaObj ? escolaObj.lng : ""
-    })
-  })
-  .then(r=>r.json())
-  .then(resp=>console.log("Sheets:",resp))
-  .catch(err=>console.error("Erro POST:",err));
+    mode: "no-cors",
+    body: formData
+  });
 
   setTimeout(()=>location.href="./index.html",3000);
 }
