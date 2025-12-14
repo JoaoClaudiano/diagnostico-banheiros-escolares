@@ -32,6 +32,7 @@ button:hover{background:#163ca6;}
 .critico{background:#f8d7da;color:#721c24;}
 </style>
 </head>
+
 <body>
 
 <div class="header"><strong>CheckInfra – Avaliação Sanitária</strong></div>
@@ -41,7 +42,10 @@ button:hover{background:#163ca6;}
 
 <div class="card">
 <label>Escola</label>
-<select id="escola"><option>Carregando escolas…</option></select>
+<select id="escola">
+  <option>Carregando escolas…</option>
+</select>
+
 <label>Avaliador</label>
 <input type="text" id="avaliador" placeholder="Nome do avaliador">
 </div>
@@ -75,7 +79,6 @@ button:hover{background:#163ca6;}
 
 </div>
 
-<!-- 📷 FOTOS -->
 <div class="card">
 <h3>📷 Registro Fotográfico</h3>
 <input type="file" id="fotos" accept="image/*" multiple>
@@ -98,11 +101,12 @@ document.addEventListener("DOMContentLoaded",()=>{
   s.innerHTML='<option value="">Selecione a escola</option>';
   escolas.forEach(e=>{
     const o=document.createElement("option");
-    o.value=e.nome;o.textContent=e.nome;s.appendChild(o);
+    o.value=e.nome;
+    o.textContent=e.nome;
+    s.appendChild(o);
   });
 });
 
-  
 /* fotos */
 document.getElementById("fotos").addEventListener("change",e=>{
   imagensBase64=[];
@@ -154,7 +158,10 @@ function gerarDiagnostico(){
 
   let score=0,problemas=[];
   document.querySelectorAll("input[type=checkbox]").forEach(cb=>{
-    if(cb.checked){score+=Number(cb.dataset.peso);problemas.push(cb.parentElement.textContent.trim());}
+    if(cb.checked){
+      score+=Number(cb.dataset.peso);
+      problemas.push(cb.parentElement.textContent.trim());
+    }
   });
 
   let status="Condição adequada",classe="ok";
@@ -168,9 +175,12 @@ function gerarDiagnostico(){
 
   gerarPDF(escola,avaliador,score,status,problemas);
 
-  const e=escolas.find(x=>x.nome===escola);
+  /* ✅ CORREÇÃO CRÍTICA AQUI */
+  const escolaObj = escolas.find(x => x.nome === escola);
+
   fetch(SCRIPT_URL, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       escola: escola,
       avaliador: avaliador,
@@ -180,7 +190,10 @@ function gerarDiagnostico(){
       lat: escolaObj ? escolaObj.lat : "",
       lng: escolaObj ? escolaObj.lng : ""
     })
-  });
+  })
+  .then(r=>r.json())
+  .then(resp=>console.log("Sheets:",resp))
+  .catch(err=>console.error("Erro POST:",err));
 
   setTimeout(()=>location.href="./index.html",3000);
 }
