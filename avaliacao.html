@@ -1,186 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>CheckInfra – Avaliação Sanitária</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<!-- Lista de escolas -->
-<script src="./mapa/escolas.js"></script>
-
-<style>
-/* ===== GERAL ===== */
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-}
-
-/* ===== LOGO ===== */
-.logo-area {
-  text-align:center;
-  margin:40px 0 10px;
-}
-
-.logo-area img {
-  height:90px;
-}
-
-/* ===== CARD PRINCIPAL ===== */
-.card {
-  background:#fff;
-  max-width:900px;
-  margin:20px auto 40px;
-  padding:30px;
-  border-radius:10px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
-}
-
-h2 {
-  text-align:center;
-  margin-bottom:25px;
-}
-
-/* ===== CAMPOS ===== */
-label {
-  display:block;
-  margin-top:18px;
-  font-weight:bold;
-}
-
-input[type="text"],
-input[type="file"] {
-  width:100%;
-  margin-top:6px;
-  padding:10px;
-}
-
-/* ===== GRID DE CARDS ===== */
-.cards {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap:18px;
-  margin-top:25px;
-}
-
-.card-check {
-  border:1px solid #ddd;
-  border-radius:8px;
-  padding:16px;
-}
-
-.card-check h4 {
-  margin:0 0 10px;
-  font-size:16px;
-}
-
-/* ===== CHECKS ===== */
-.check {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-top:8px;
-}
-
-.check input {
-  transform: scale(1.2);
-}
-
-/* ===== BOTÃO ===== */
-button {
-  margin-top:35px;
-  width:100%;
-  padding:16px;
-  font-size:17px;
-  background:#1f4fd8;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* ===== RESULTADO ===== */
-.resultado {
-  margin-top:25px;
-  padding:18px;
-  border-radius:8px;
-  font-weight:bold;
-}
-
-.ok { background:#d4edda; }
-.alerta { background:#fff3cd; }
-.critico { background:#f8d7da; }
-</style>
-</head>
-
-<body>
-
-<!-- LOGO CENTRAL -->
-<div class="logo-area">
-  <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
-</div>
-
-<!-- CARD PRINCIPAL -->
-<div class="card">
-<h2>Avaliação Sanitária dos Banheiros</h2>
-
-<label>Escola</label>
-<input id="escola" list="listaEscolas" placeholder="Digite ou selecione">
-<datalist id="listaEscolas"></datalist>
-
-<label>Avaliador responsável</label>
-<input id="avaliador" type="text">
-
-<label>Fotos do banheiro (opcional)</label>
-<input id="fotos" type="file" accept="image/*" multiple>
-
-<!-- CHECKLIST EM CARDS -->
-<div class="cards">
-
-  <div class="card-check">
-    <h4>🌫️ Ambiente</h4>
-    <div class="check"><input type="checkbox" data-peso="4"> Mofo / bolor</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Mau cheiro</div>
-    <div class="check"><input type="checkbox" data-peso="1"> Iluminação ruim</div>
-  </div>
-
-  <div class="card-check">
-    <h4>🧱 Estrutura</h4>
-    <div class="check"><input type="checkbox" data-peso="3"> Infiltração</div>
-    <div class="check"><input type="checkbox" data-peso="2"> Piso danificado</div>
-  </div>
-
-  <div class="card-check">
-    <h4>💧 Hidrossanitário</h4>
-    <div class="check"><input type="checkbox" data-peso="2"> Vazamentos</div>
-    <div class="check"><input type="checkbox" data-peso="3"> Sanitário ou torneira quebrados</div>
-  </div>
-
-</div>
-
-<button onclick="gerarDiagnostico()">Gerar diagnóstico e PDF</button>
-
-<div id="resultado" class="resultado"></div>
-</div>
-
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
-
-/* Lista de escolas */
-const lista = document.getElementById("listaEscolas");
-escolas.forEach(e => {
-  const opt = document.createElement("option");
-  opt.value = e.nome;
-  lista.appendChild(opt);
-});
-
 function gerarDiagnostico() {
   const escola = document.getElementById("escola").value;
   const avaliador = document.getElementById("avaliador").value;
-  const arquivos = document.getElementById("fotos").files;
 
   if (!escola || !avaliador) {
     alert("Preencha a escola e o avaliador");
@@ -200,8 +21,13 @@ function gerarDiagnostico() {
   let status = "Condição adequada";
   let classe = "ok";
 
-  if (score >= 9) { status = "Condição crítica"; classe = "critico"; }
-  else if (score >= 4) { status = "Situação de alerta"; classe = "alerta"; }
+  if (score >= 9) {
+    status = "Condição crítica";
+    classe = "critico";
+  } else if (score >= 4) {
+    status = "Situação de alerta";
+    classe = "alerta";
+  }
 
   const r = document.getElementById("resultado");
   r.className = "resultado " + classe;
@@ -209,49 +35,31 @@ function gerarDiagnostico() {
     Escola: ${escola}<br>
     Avaliador: ${avaliador}<br>
     Pontuação técnica: ${score}<br>
-    Status: ${status}
+    Status: ${status}<br><br>
+    <strong>Avaliação registrada. Redirecionando para a página inicial…</strong>
   `;
 
+  const escolaObj = escolas.find(e => e.nome === escola);
+
   fetch(SCRIPT_URL, {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      escola, avaliador, pontuacao:score, status, problemas:problemas.join("; ")
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      escola,
+      avaliador,
+      pontuacao: score,
+      status,
+      problemas: problemas.join("; "),
+      lat: escolaObj ? escolaObj.lat : null,
+      lng: escolaObj ? escolaObj.lng : null
     })
   });
 
-  gerarPDF(escola, avaliador, score, status, arquivos);
-}
+  gerarPDF(escola, score, status);
 
-function gerarPDF(escola, avaliador, score, status, arquivos) {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
-  let y = 20;
-
-  pdf.text("Relatório Sanitário – CheckInfra", 20, y); y+=15;
-  pdf.text(`Escola: ${escola}`, 20, y); y+=10;
-  pdf.text(`Avaliador: ${avaliador}`, 20, y); y+=10;
-  pdf.text(`Pontuação: ${score}`, 20, y); y+=10;
-  pdf.text(`Status: ${status}`, 20, y); y+=15;
-
-  if (arquivos.length === 0) {
-    pdf.save(`avaliacao_${escola}.pdf`);
-    return;
-  }
-
-  Array.from(arquivos).forEach((file, i) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      pdf.addImage(e.target.result, "JPEG", 20, y, 160, 90);
-      y += 100;
-      if (i === arquivos.length - 1) {
-        pdf.save(`avaliacao_${escola}.pdf`);
-      }
-    };
-    reader.readAsDataURL(file);
-  });
+  // ⏱️ redireciona após 3 segundos
+  setTimeout(() => {
+    window.location.href = "./index.html";
+  }, 3000);
 }
 </script>
-
-</body>
-</html>
