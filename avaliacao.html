@@ -1,240 +1,186 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>CheckInfra – Avaliação Sanitária</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>CheckInfra – Avaliação Sanitária</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background:#f4f6f8;
-      margin: 0;
-    }
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    .header {
-      background: #1f4fd8;
-      color: #fff;
-      padding: 14px 20px;
-    }
+<!-- Lista de escolas -->
+<script src="./mapa/escolas.js"></script>
 
-    .header-container {
-      max-width: 1100px;
-      margin: auto;
-      display: flex;
-      justify-content: center;
-    }
+<style>
+/* ===== GERAL ===== */
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+}
 
-    .logo img { height: 44px; }
+/* ===== LOGO ===== */
+.logo-area {
+  text-align:center;
+  margin:40px 0 10px;
+}
 
-    .container {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
+.logo-area img {
+  height:90px;
+}
 
-    h1 { text-align: center; margin-bottom: 30px; }
+/* ===== CARD PRINCIPAL ===== */
+.card {
+  background:#fff;
+  max-width:900px;
+  margin:20px auto 40px;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
 
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
+h2 {
+  text-align:center;
+  margin-bottom:25px;
+}
 
-    label { font-weight: bold; display: block; margin-bottom: 6px; }
+/* ===== CAMPOS ===== */
+label {
+  display:block;
+  margin-top:18px;
+  font-weight:bold;
+}
 
-    select, input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      margin-bottom: 12px;
-    }
+input[type="text"],
+input[type="file"] {
+  width:100%;
+  margin-top:6px;
+  padding:10px;
+}
 
-    .categoria { margin-bottom: 25px; }
-    .categoria h3 { color:#1f4fd8; }
+/* ===== GRID DE CARDS ===== */
+.cards {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap:18px;
+  margin-top:25px;
+}
 
-    .checklist-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 14px;
-    }
+.card-check {
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:16px;
+}
 
-    .check-card {
-      padding: 16px;
-      border-radius: 10px;
-      border: 2px solid #e0e0e0;
-      background: #fafafa;
-      cursor: pointer;
-      transition: 0.2s;
-      font-weight: 500;
-    }
+.card-check h4 {
+  margin:0 0 10px;
+  font-size:16px;
+}
 
-    .check-card input { display: none; }
+/* ===== CHECKS ===== */
+.check {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
+}
 
-    .check-card:hover {
-      border-color:#1f4fd8;
-      background:#f0f5ff;
-    }
+.check input {
+  transform: scale(1.2);
+}
 
-    .check-card:has(input:checked) {
-      border-color:#1f4fd8;
-      background:#eaf0ff;
-      font-weight:bold;
-    }
+/* ===== BOTÃO ===== */
+button {
+  margin-top:35px;
+  width:100%;
+  padding:16px;
+  font-size:17px;
+  background:#1f4fd8;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
 
-    .preview {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
+/* ===== RESULTADO ===== */
+.resultado {
+  margin-top:25px;
+  padding:18px;
+  border-radius:8px;
+  font-weight:bold;
+}
 
-    .preview img {
-      width: 120px;
-      height: 90px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width:100%;
-      padding:16px;
-      background:#1f4fd8;
-      color:#fff;
-      font-size:16px;
-      font-weight:bold;
-      border:none;
-      border-radius:10px;
-      cursor:pointer;
-    }
-
-    button:hover { background:#163ca6; }
-
-    .resultado {
-      margin-top:24px;
-      padding:20px;
-      border-radius:10px;
-      display:none;
-      font-weight:bold;
-    }
-
-    .ok { background:#e8f7ee; color:#1e7e34; }
-    .alerta { background:#fff3cd; color:#856404; }
-    .critico { background:#f8d7da; color:#721c24; }
-  </style>
+.ok { background:#d4edda; }
+.alerta { background:#fff3cd; }
+.critico { background:#f8d7da; }
+</style>
 </head>
 
 <body>
 
-<header class="header">
-  <div class="header-container">
-    <div class="logo">
-      <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
-    </div>
-  </div>
-</header>
-
-<div class="container">
-  <h1>Avaliação Sanitária Escolar</h1>
-
-  <div class="card">
-    <label>Escola</label>
-    <select id="escola">
-      <option>Carregando escolas…</option>
-    </select>
-
-    <label>Avaliador</label>
-    <input type="text" id="avaliador" placeholder="Nome do avaliador">
-  </div>
-
-  <div class="card">
-    <div class="categoria">
-      <h3>🏗️ Estrutura</h3>
-      <div class="checklist-cards">
-        <label class="check-card"><input type="checkbox" data-peso="3"> Mofo ou umidade excessiva</label>
-        <label class="check-card"><input type="checkbox" data-peso="2"> Piso quebrado ou escorregadio</label>
-        <label class="check-card"><input type="checkbox" data-peso="2"> Infiltrações visíveis</label>
-      </div>
-    </div>
-
-    <div class="categoria">
-      <h3>🧹 Higiene</h3>
-      <div class="checklist-cards">
-        <label class="check-card"><input type="checkbox" data-peso="2"> Limpeza inadequada</label>
-        <label class="check-card"><input type="checkbox" data-peso="2"> Mau cheiro persistente</label>
-      </div>
-    </div>
-
-    <div class="categoria">
-      <h3>💡 Conforto</h3>
-      <div class="checklist-cards">
-        <label class="check-card"><input type="checkbox" data-peso="1"> Iluminação insuficiente</label>
-        <label class="check-card"><input type="checkbox" data-peso="1"> Ventilação inadequada</label>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>📷 Registro Fotográfico</h3>
-    <input type="file" id="fotos" accept="image/*" multiple>
-    <div class="preview" id="preview"></div>
-  </div>
-
-  <button onclick="gerarDiagnostico()">Gerar Diagnóstico</button>
-  <div id="resultado" class="resultado"></div>
+<!-- LOGO CENTRAL -->
+<div class="logo-area">
+  <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
 </div>
 
-<!-- BASE DE ESCOLAS -->
-<script src="./mapa/escolas.js"></script>
+<!-- CARD PRINCIPAL -->
+<div class="card">
+<h2>Avaliação Sanitária dos Banheiros</h2>
+
+<label>Escola</label>
+<input id="escola" list="listaEscolas" placeholder="Digite ou selecione">
+<datalist id="listaEscolas"></datalist>
+
+<label>Avaliador responsável</label>
+<input id="avaliador" type="text">
+
+<label>Fotos do banheiro (opcional)</label>
+<input id="fotos" type="file" accept="image/*" multiple>
+
+<!-- CHECKLIST EM CARDS -->
+<div class="cards">
+
+  <div class="card-check">
+    <h4>🌫️ Ambiente</h4>
+    <div class="check"><input type="checkbox" data-peso="4"> Mofo / bolor</div>
+    <div class="check"><input type="checkbox" data-peso="2"> Mau cheiro</div>
+    <div class="check"><input type="checkbox" data-peso="1"> Iluminação ruim</div>
+  </div>
+
+  <div class="card-check">
+    <h4>🧱 Estrutura</h4>
+    <div class="check"><input type="checkbox" data-peso="3"> Infiltração</div>
+    <div class="check"><input type="checkbox" data-peso="2"> Piso danificado</div>
+  </div>
+
+  <div class="card-check">
+    <h4>💧 Hidrossanitário</h4>
+    <div class="check"><input type="checkbox" data-peso="2"> Vazamentos</div>
+    <div class="check"><input type="checkbox" data-peso="3"> Sanitário ou torneira quebrados</div>
+  </div>
+
+</div>
+
+<button onclick="gerarDiagnostico()">Gerar diagnóstico e PDF</button>
+
+<div id="resultado" class="resultado"></div>
+</div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
 
-/* ✅ CORREÇÃO DO CARREGAMENTO */
-document.addEventListener("DOMContentLoaded", () => {
-  const select = document.getElementById("escola");
-
-  if (window.escolas && Array.isArray(window.escolas)) {
-    select.innerHTML = '<option value="">Selecione a escola</option>';
-    escolas.forEach(e => {
-      const opt = document.createElement("option");
-      opt.value = e.nome;
-      opt.textContent = e.nome;
-      select.appendChild(opt);
-    });
-  } else {
-    select.innerHTML = '<option>Erro ao carregar escolas</option>';
-  }
+/* Lista de escolas */
+const lista = document.getElementById("listaEscolas");
+escolas.forEach(e => {
+  const opt = document.createElement("option");
+  opt.value = e.nome;
+  lista.appendChild(opt);
 });
 
-/* IMAGENS */
-let imagensBase64 = [];
-
-document.getElementById("fotos").addEventListener("change", e => {
-  imagensBase64 = [];
-  const preview = document.getElementById("preview");
-  preview.innerHTML = "";
-
-  [...e.target.files].forEach(file => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      imagensBase64.push(ev.target.result);
-      const img = document.createElement("img");
-      img.src = ev.target.result;
-      preview.appendChild(img);
-    };
-    reader.readAsDataURL(file);
-  });
-});
-
-/* DIAGNÓSTICO */
 function gerarDiagnostico() {
   const escola = document.getElementById("escola").value;
   const avaliador = document.getElementById("avaliador").value;
+  const arquivos = document.getElementById("fotos").files;
 
   if (!escola || !avaliador) {
     alert("Preencha a escola e o avaliador");
@@ -246,7 +192,7 @@ function gerarDiagnostico() {
 
   document.querySelectorAll("input[type=checkbox]").forEach(cb => {
     if (cb.checked) {
-      score += Number(cb.dataset.peso);
+      score += parseInt(cb.dataset.peso);
       problemas.push(cb.parentElement.textContent.trim());
     }
   });
@@ -254,45 +200,56 @@ function gerarDiagnostico() {
   let status = "Condição adequada";
   let classe = "ok";
 
-  if (score >= 9) {
-    status = "Condição crítica";
-    classe = "critico";
-  } else if (score >= 4) {
-    status = "Situação de alerta";
-    classe = "alerta";
-  }
+  if (score >= 9) { status = "Condição crítica"; classe = "critico"; }
+  else if (score >= 4) { status = "Situação de alerta"; classe = "alerta"; }
 
   const r = document.getElementById("resultado");
   r.className = "resultado " + classe;
-  r.style.display = "block";
   r.innerHTML = `
     Escola: ${escola}<br>
     Avaliador: ${avaliador}<br>
     Pontuação técnica: ${score}<br>
-    Status: ${status}<br><br>
-    Avaliação registrada. Redirecionando…
+    Status: ${status}
   `;
 
-  const escolaObj = escolas.find(e => e.nome === escola);
-
   fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      escola,
-      avaliador,
-      pontuacao: score,
-      status,
-      problemas: problemas.join("; "),
-      lat: escolaObj?.lat || null,
-      lng: escolaObj?.lng || null,
-      fotos: imagensBase64.length
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      escola, avaliador, pontuacao:score, status, problemas:problemas.join("; ")
     })
   });
 
-  setTimeout(() => {
-    window.location.href = "./index.html";
-  }, 3000);
+  gerarPDF(escola, avaliador, score, status, arquivos);
+}
+
+function gerarPDF(escola, avaliador, score, status, arquivos) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  let y = 20;
+
+  pdf.text("Relatório Sanitário – CheckInfra", 20, y); y+=15;
+  pdf.text(`Escola: ${escola}`, 20, y); y+=10;
+  pdf.text(`Avaliador: ${avaliador}`, 20, y); y+=10;
+  pdf.text(`Pontuação: ${score}`, 20, y); y+=10;
+  pdf.text(`Status: ${status}`, 20, y); y+=15;
+
+  if (arquivos.length === 0) {
+    pdf.save(`avaliacao_${escola}.pdf`);
+    return;
+  }
+
+  Array.from(arquivos).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      pdf.addImage(e.target.result, "JPEG", 20, y, 160, 90);
+      y += 100;
+      if (i === arquivos.length - 1) {
+        pdf.save(`avaliacao_${escola}.pdf`);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 }
 </script>
 

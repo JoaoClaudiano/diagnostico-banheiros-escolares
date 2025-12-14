@@ -1,131 +1,130 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>CheckInfra – Painel</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<title>Painel da Secretaria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-    }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    header {
-      background: #1f4fd8;
-      color: #fff;
-      padding: 14px 20px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 18px;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      border-left: 8px solid #ccc;
-    }
-
-    .ok { border-color: #28a745; }
-    .alerta { border-color: #ffc107; }
-    .critico { border-color: #dc3545; }
-
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 16px;
-    }
-
-    .card p {
-      margin: 6px 0;
-      font-size: 14px;
-    }
-
-    .status {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .status.ok { color:#28a745; }
-    .status.alerta { color:#856404; }
-    .status.critico { color:#721c24; }
-
-    .loading {
-      text-align: center;
-      font-weight: bold;
-      color: #666;
-    }
-  </style>
+<style>
+body { font-family: Arial; background:#f4f6f8; padding:20px; }
+.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:8px; }
+.grid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+h2 { margin:0 0 10px; }
+small { color:#666; }
+.grafico {
+  max-width: 500px;
+  margin: 30px auto;
+}
+</style>
 </head>
 
 <body>
 
-<header>
-  Painel de Avaliações – CheckInfra
-</header>
+<div class="card">
+  <h2>Painel da Secretaria</h2>
+  <small>Dados consolidados das avaliações</small>
+</div>
 
-<div class="container">
-  <h2>Últimas Avaliações Registradas</h2>
-  <div id="cards" class="cards">
-    <div class="loading">Carregando avaliações…</div>
+<div class="card grid">
+  <div>
+    <h3>Status das Avaliações</h3>
+    <div class="grafico">
+      <canvas id="graficoStatus"></canvas>
+    </div>
+      
+  </div>
+  <div>
+    <h3>Principais Problemas</h3>
+    <canvas id="graficoProblemas"></canvas>
   </div>
 </div>
 
+<div class="card">
+  <h3>Dias em Situação Crítica</h3>
+  <canvas id="graficoTempo"></canvas>
+</div>
+
 <script>
-/* 🔗 MESMO URL EXEC */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
 
-/* 📥 BUSCA DADOS DO SHEETS */
 fetch(SCRIPT_URL)
-  .then(res => res.json())
+  .then(r => r.json())
   .then(dados => {
-    const container = document.getElementById("cards");
-    container.innerHTML = "";
-
-    if (!dados.length) {
-      container.innerHTML = "<p>Nenhuma avaliação registrada.</p>";
-      return;
-    }
-
-    dados.reverse().forEach(item => {
-      const card = document.createElement("div");
-      card.className = `card ${item.statusClass}`;
-
-      card.innerHTML = `
-        <h3>${item.escola}</h3>
-        <p><strong>Avaliador:</strong> ${item.avaliador}</p>
-        <p><strong>Pontuação:</strong> ${item.pontuacao}</p>
-        <p><strong>Problemas:</strong> ${item.problemas || "Nenhum"}</p>
-        <div class="status ${item.statusClass}">
-          ${item.status}
-        </div>
-      `;
-
-      container.appendChild(card);
-    });
+    montarGraficos(dados);
   })
-  .catch(() => {
-    document.getElementById("cards").innerHTML =
-      "<p>Erro ao carregar dados do painel.</p>";
+  .catch(() => alert("Erro ao carregar dados do painel"));
+
+function montarGraficos(dados) {
+  /* ---------- STATUS ---------- */
+  const statusCount = { adequada:0, alerta:0, critica:0 };
+
+  dados.forEach(d => {
+    const s = (d.status || "").toLowerCase();
+    if (s.includes("crítica")) statusCount.critica++;
+    else if (s.includes("alerta")) statusCount.alerta++;
+    else statusCount.adequada++;
   });
+
+  new Chart(document.getElementById("graficoStatus"), {
+    type: "pie",
+    data: {
+      labels: ["Adequada", "Alerta", "Crítica"],
+      datasets: [{
+        data: [statusCount.adequada, statusCount.alerta, statusCount.critica],
+        backgroundColor: ["#4caf50","#ff9800","#f44336"]
+      }]
+    }
+  });
+
+  /* ---------- PROBLEMAS ---------- */
+  const problemasCount = {};
+
+  dados.forEach(d => {
+    if (!d.problemas) return;
+    d.problemas.split(";").forEach(p => {
+      const key = p.trim();
+      if (!key) return;
+      problemasCount[key] = (problemasCount[key] || 0) + 1;
+    });
+  });
+
+  new Chart(document.getElementById("graficoProblemas"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(problemasCount),
+      datasets: [{
+        label: "Ocorrências",
+        data: Object.values(problemasCount),
+        backgroundColor: "#1f4fd8"
+      }]
+    },
+    options: { indexAxis: 'y' }
+  });
+
+  /* ---------- TEMPO (CRÍTICO POR DIA) ---------- */
+  const porDia = {};
+  dados.forEach(d => {
+    if (!d.timestamp || !d.status) return;
+    if (!d.status.toLowerCase().includes("crítica")) return;
+    const dia = d.timestamp.split("T")[0];
+    porDia[dia] = (porDia[dia] || 0) + 1;
+  });
+
+  new Chart(document.getElementById("graficoTempo"), {
+    type: "line",
+    data: {
+      labels: Object.keys(porDia),
+      datasets: [{
+        label: "Registros críticos",
+        data: Object.values(porDia),
+        borderColor: "#f44336",
+        fill: false
+      }]
+    }
+  });
+}
 </script>
 
 </body>

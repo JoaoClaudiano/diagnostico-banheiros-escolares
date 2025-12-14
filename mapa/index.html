@@ -1,125 +1,141 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>CheckInfra – Mapa Sanitário</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Mapa Sanitário – Escolas Municipais</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- LEAFLET -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
+<style>
+body { margin:0; font-family: Arial, sans-serif; }
 
-    header {
-      background: #1f4fd8;
-      color: #fff;
-      padding: 14px 20px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 18px;
-    }
+header {
+  background:#1f4fd8;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
+}
 
-    #map {
-      height: calc(100vh - 56px);
-      width: 100%;
-    }
+#map { height: calc(100vh - 120px); }
 
-    .popup h3 {
-      margin: 0 0 6px;
-      font-size: 15px;
-    }
+.painel {
+  padding:10px;
+  background:#f4f6f8;
+  display:flex;
+  gap:15px;
+  justify-content:center;
+  font-size:14px;
+}
 
-    .popup p {
-      margin: 4px 0;
-      font-size: 13px;
-    }
+.painel label {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
 
-    .ok { color:#28a745; font-weight:bold; }
-    .alerta { color:#856404; font-weight:bold; }
-    .critico { color:#721c24; font-weight:bold; }
-  </style>
+.bola {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  display:inline-block;
+}
+.verde { background:green; }
+.laranja { background:orange; }
+.vermelho { background:red; }
+</style>
 </head>
 
 <body>
 
 <header>
-  Mapa Sanitário das Escolas – CheckInfra
+Mapa Sanitário das Escolas – Secretaria de Educação
 </header>
+
+<div class="painel">
+  <label><input type="checkbox" id="filtroAdequado" checked>
+    <span class="bola verde"></span> Adequado
+  </label>
+
+  <label><input type="checkbox" id="filtroAlerta" checked>
+    <span class="bola laranja"></span> Alerta
+  </label>
+
+  <label><input type="checkbox" id="filtroCritico" checked>
+    <span class="bola vermelho"></span> Crítico
+  </label>
+</div>
 
 <div id="map"></div>
 
-<!-- LEAFLET JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-/* 🔗 MESMO URL EXEC */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
+const API_URL ="https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
 
-/* 📍 MAPA BASE (FORTALEZA) */
-const map = L.map("map").setView([-3.7319, -38.5267], 11);
+// Mapa
+const map = L.map("map").setView([-3.7319, -38.5267], 12);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-/* 🎯 ÍCONES POR STATUS */
-function criarIcone(cor) {
-  return new L.Icon({
-    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${cor}.png`,
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
+// Camadas por status
+const camadaAdequado = L.layerGroup().addTo(map);
+const camadaAlerta = L.layerGroup().addTo(map);
+const camadaCritico = L.layerGroup().addTo(map);
+
+// Função status → camada
+function camadaPorStatus(status) {
+  if (status.includes("crítica")) return camadaCritico;
+  if (status.includes("alerta")) return camadaAlerta;
+  return camadaAdequado;
 }
 
-const icones = {
-  ok: criarIcone("green"),
-  alerta: criarIcone("yellow"),
-  critico: criarIcone("red")
-};
+function corPorStatus(status) {
+  if (status.includes("crítica")) return "red";
+  if (status.includes("alerta")) return "orange";
+  return "green";
+}
 
-/* 📥 BUSCA AVALIAÇÕES DO SHEETS */
-fetch(SCRIPT_URL)
+// Carregar dados
+fetch(API_URL)
   .then(res => res.json())
   .then(dados => {
-    dados.forEach(item => {
+    dados.forEach(e => {
+      if (!e.lat || !e.lng) return;
 
-      if (!item.lat || !item.lng) return;
+      const layer = camadaPorStatus(e.status);
+      const cor = corPorStatus(e.status);
 
-      const marker = L.marker(
-        [item.lat, item.lng],
-        { icon: icones[item.statusClass] || icones.ok }
-      ).addTo(map);
-
-      marker.bindPopup(`
-        <div class="popup">
-          <h3>${item.escola}</h3>
-          <p><strong>Avaliador:</strong> ${item.avaliador}</p>
-          <p><strong>Pontuação:</strong> ${item.pontuacao}</p>
-          <p><strong>Status:</strong>
-            <span class="${item.statusClass}">
-              ${item.status}
-            </span>
-          </p>
-          <p><strong>Problemas:</strong><br>
-            ${item.problemas || "Nenhum"}
-          </p>
-        </div>
-      `);
+      L.circleMarker([e.lat, e.lng], {
+        radius: 8,
+        color: cor,
+        fillColor: cor,
+        fillOpacity: 0.8
+      })
+      .bindPopup(`
+        <strong>${e.escola}</strong><br>
+        Status: ${e.status}<br>
+        Pontuação: ${e.pontuacao}
+      `)
+      .addTo(layer);
     });
-  })
-  .catch(() => {
-    alert("Erro ao carregar dados do mapa.");
   });
+
+// Filtros
+document.getElementById("filtroAdequado").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaAdequado) : map.removeLayer(camadaAdequado);
+});
+
+document.getElementById("filtroAlerta").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaAlerta) : map.removeLayer(camadaAlerta);
+});
+
+document.getElementById("filtroCritico").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaCritico) : map.removeLayer(camadaCritico);
+});
 </script>
 
 </body>
