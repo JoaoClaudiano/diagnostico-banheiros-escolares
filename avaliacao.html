@@ -2,19 +2,113 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Avaliação Sanitária – Banheiros Escolares</title>
+<title>CheckInfra – Avaliação Sanitária</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Lista de escolas -->
 <script src="./mapa/escolas.js"></script>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; padding:20px; }
-.card { background:#fff; max-width:800px; margin:auto; padding:25px; border-radius:8px; }
-.group { margin-top:15px; padding:15px; border:1px solid #ddd; border-radius:6px; }
-.check { display:flex; gap:10px; margin-top:8px; }
-button { margin-top:30px; width:100%; padding:15px; font-size:16px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; }
-.resultado { margin-top:20px; padding:15px; border-radius:6px; font-weight:bold; }
+/* ===== GERAL ===== */
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: #1f4fd8;
+  color: #fff;
+  padding: 14px 20px;
+}
+
+.header-container {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  height: 36px;
+}
+
+.logo span {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.nav {
+  display: flex;
+  gap: 18px;
+}
+
+.nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .nav { display: none; }
+}
+
+/* ===== CARD ===== */
+.card {
+  background:#fff;
+  max-width:800px;
+  margin: 30px auto;
+  padding:25px;
+  border-radius:8px;
+}
+
+/* ===== FORM ===== */
+.group {
+  margin-top:15px;
+  padding:15px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+.check {
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
+
+button {
+  margin-top:30px;
+  width:100%;
+  padding:15px;
+  font-size:16px;
+  background:#1f4fd8;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor: pointer;
+}
+
+/* ===== RESULTADO ===== */
+.resultado {
+  margin-top:20px;
+  padding:15px;
+  border-radius:6px;
+  font-weight:bold;
+}
+
 .ok { background:#d4edda; }
 .alerta { background:#fff3cd; }
 .critico { background:#f8d7da; }
@@ -23,6 +117,25 @@ button { margin-top:30px; width:100%; padding:15px; font-size:16px; background:#
 
 <body>
 
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="header-container">
+    <div class="logo">
+      <!-- se ainda não tiver a logo, pode remover a img -->
+      <!-- <img src="./assets/logo-checkinfra.png" alt="CheckInfra"> -->
+      <span>CheckInfra</span>
+    </div>
+
+    <nav class="nav">
+      <a href="./">Início</a>
+      <a href="./avaliacao.html">Avaliação</a>
+      <a href="./mapa/">Mapa</a>
+      <a href="./painel/">Painel</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== CONTEÚDO ===== -->
 <div class="card">
 <h2>Avaliação Sanitária dos Banheiros</h2>
 
@@ -48,7 +161,7 @@ button { margin-top:30px; width:100%; padding:15px; font-size:16px; background:#
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIqrAdgd7pLsW0kYAnrrHQ-WrCsnbR4Eh9BpkamYbrKwCOFP5fH6N52HFw2nOz2t2G/exec";
 
-/* Preenche lista de escolas */
+/* Lista de escolas */
 const lista = document.getElementById("listaEscolas");
 escolas.forEach(e => {
   const opt = document.createElement("option");
@@ -89,7 +202,6 @@ function gerarDiagnostico() {
 
   const r = document.getElementById("resultado");
   r.className = "resultado " + classe;
-  r.style.display = "block";
   r.innerHTML = `
     Escola: ${escola}<br>
     Avaliador: ${avaliador}<br>
@@ -121,7 +233,7 @@ function gerarPDF(escola, score, status) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
 
-  pdf.text("Relatório Sanitário – Banheiros Escolares", 20, 20);
+  pdf.text("Relatório Sanitário – CheckInfra", 20, 20);
   pdf.text(`Escola: ${escola}`, 20, 40);
   pdf.text(`Pontuação técnica: ${score}`, 20, 50);
   pdf.text(`Status: ${status}`, 20, 60);
