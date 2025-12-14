@@ -134,7 +134,7 @@
 <header class="header">
   <div class="header-container">
     <div class="logo">
-      <img src="./assets/logo-checkinfra.png">
+      <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
     </div>
   </div>
 </header>
@@ -159,25 +159,25 @@
     <div class="categoria">
       <h3>🏗️ Estrutura</h3>
       <div class="checklist-cards">
-        <label class="check-card"><input type="checkbox" data-peso="3">Mofo ou umidade excessiva</label>
-        <label class="check-card"><input type="checkbox" data-peso="2">Piso quebrado ou escorregadio</label>
-        <label class="check-card"><input type="checkbox" data-peso="2">Infiltrações visíveis</label>
+        <label class="check-card"><input type="checkbox" data-peso="3"> Mofo ou umidade excessiva</label>
+        <label class="check-card"><input type="checkbox" data-peso="2"> Piso quebrado ou escorregadio</label>
+        <label class="check-card"><input type="checkbox" data-peso="2"> Infiltrações visíveis</label>
       </div>
     </div>
 
     <div class="categoria">
       <h3>🧹 Higiene</h3>
       <div class="checklist-cards">
-        <label class="check-card"><input type="checkbox" data-peso="2">Limpeza inadequada</label>
-        <label class="check-card"><input type="checkbox" data-peso="2">Mau cheiro persistente</label>
+        <label class="check-card"><input type="checkbox" data-peso="2"> Limpeza inadequada</label>
+        <label class="check-card"><input type="checkbox" data-peso="2"> Mau cheiro persistente</label>
       </div>
     </div>
 
     <div class="categoria">
       <h3>💡 Conforto</h3>
       <div class="checklist-cards">
-        <label class="check-card"><input type="checkbox" data-peso="1">Iluminação insuficiente</label>
-        <label class="check-card"><input type="checkbox" data-peso="1">Ventilação inadequada</label>
+        <label class="check-card"><input type="checkbox" data-peso="1"> Iluminação insuficiente</label>
+        <label class="check-card"><input type="checkbox" data-peso="1"> Ventilação inadequada</label>
       </div>
     </div>
 
@@ -194,14 +194,18 @@
   <div id="resultado" class="resultado"></div>
 </div>
 
+<!-- BASE DE ESCOLAS -->
 <script src="./mapa/escolas.js"></script>
 
 <script>
-let imagensBase64 = [];
+/* 🔗 URL DO APPS SCRIPT */
+const SCRIPT_URL = "COLE_AQUI_O_SEU_URL_EXEC";
 
+/* ===== ESCOLAS ===== */
 document.addEventListener("escolasCarregadas", () => {
   const select = document.getElementById("escola");
   select.innerHTML = '<option value="">Selecione a escola</option>';
+
   escolas.forEach(e => {
     const opt = document.createElement("option");
     opt.value = e.nome;
@@ -209,6 +213,9 @@ document.addEventListener("escolasCarregadas", () => {
     select.appendChild(opt);
   });
 });
+
+/* ===== IMAGENS ===== */
+let imagensBase64 = [];
 
 document.getElementById("fotos").addEventListener("change", e => {
   imagensBase64 = [];
@@ -227,28 +234,70 @@ document.getElementById("fotos").addEventListener("change", e => {
   });
 });
 
+/* ===== DIAGNÓSTICO ===== */
 function gerarDiagnostico() {
-  const escola = escola.value;
-  const avaliador = avaliador.value;
-  if (!escola || !avaliador) return alert("Preencha os campos");
+  const escola = document.getElementById("escola").value;
+  const avaliador = document.getElementById("avaliador").value;
+
+  if (!escola || !avaliador) {
+    alert("Preencha a escola e o avaliador");
+    return;
+  }
 
   let score = 0;
-  document.querySelectorAll("input[type=checkbox]").forEach(cb=>{
-    if(cb.checked) score+=Number(cb.dataset.peso);
+  let problemas = [];
+
+  document.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    if (cb.checked) {
+      score += Number(cb.dataset.peso);
+      problemas.push(cb.parentElement.textContent.trim());
+    }
   });
 
-  let status="Condição adequada", classe="ok";
-  if(score>=9){status="Condição crítica";classe="critico";}
-  else if(score>=4){status="Situação de alerta";classe="alerta";}
+  let status = "Condição adequada";
+  let classe = "ok";
 
-  const r=document.getElementById("resultado");
-  r.className="resultado "+classe;
-  r.style.display="block";
-  r.innerHTML=`${escola}<br>${avaliador}<br>Pontuação: ${score}<br>${status}<br><br>Redirecionando…`;
+  if (score >= 9) {
+    status = "Condição crítica";
+    classe = "critico";
+  } else if (score >= 4) {
+    status = "Situação de alerta";
+    classe = "alerta";
+  }
 
-  // 👉 imagensBase64 já prontas para entrar no PDF depois
+  const r = document.getElementById("resultado");
+  r.className = "resultado " + classe;
+  r.style.display = "block";
+  r.innerHTML = `
+    Escola: ${escola}<br>
+    Avaliador: ${avaliador}<br>
+    Pontuação técnica: ${score}<br>
+    Status: ${status}<br><br>
+    Avaliação registrada. Redirecionando para a página inicial…
+  `;
 
-  setTimeout(()=>window.location.href="./index.html",3000);
+  /* 📤 ENVIA PARA O SHEETS */
+  const escolaObj = escolas.find(e => e.nome === escola);
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      escola,
+      avaliador,
+      pontuacao: score,
+      status,
+      problemas: problemas.join("; "),
+      lat: escolaObj ? escolaObj.lat : null,
+      lng: escolaObj ? escolaObj.lng : null,
+      fotos: imagensBase64.length // por enquanto só registra a quantidade
+    })
+  });
+
+  /* ⏱️ REDIRECIONA */
+  setTimeout(() => {
+    window.location.href = "./index.html";
+  }, 3000);
 }
 </script>
 
