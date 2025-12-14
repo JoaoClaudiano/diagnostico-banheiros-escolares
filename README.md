@@ -36,3 +36,9 @@ Projeto em desenvolvimento — protótipo funcional em evolução contínua.
 
 Sugestões, melhorias e adaptações são bem-vindas, especialmente para uso em
 contextos educacionais e de gestão pública.
+
+## 💼 Uso comercial
+
+Este projeto utiliza a Licença MIT, o que permite seu uso comercial,
+inclusive em soluções pagas, serviços, consultorias e aplicações
+institucionais.
