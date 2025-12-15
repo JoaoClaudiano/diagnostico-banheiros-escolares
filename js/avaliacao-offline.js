@@ -44,7 +44,10 @@ document.getElementById("form-avaliacao").addEventListener("submit", async (e) =
   if (navigator.onLine) {
     console.log("Online: pode sincronizar depois");
     // aqui entraremos com sync real no próximo passo
-  } else {
-    console.log("Offline: avaliação salva localmente");
-  }
+} else {
+  const r = document.getElementById("resultado");
+  r.className = "resultado alerta";
+  r.style.display = "block";
+  r.innerHTML = "📴 Offline: avaliação salva no dispositivo. Será sincronizada automaticamente quando houver internet.";
+}
 });
