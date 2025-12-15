@@ -1,7 +1,6 @@
 document.getElementById("form-avaliacao").addEventListener("submit", async (e) => {
-  e.preventDefault(); // impede reload
+  e.preventDefault();
 
-  // coleta dados básicos
   const escola = document.getElementById("escola").value;
   const avaliador = document.getElementById("avaliador").value;
 
@@ -13,7 +12,6 @@ document.getElementById("form-avaliacao").addEventListener("submit", async (e) =
   // coleta checklist
   let score = 0;
   let problemas = [];
-
   document.querySelectorAll("input[type=checkbox]").forEach(cb => {
     if (cb.checked) {
       score += Number(cb.dataset.peso);
@@ -34,20 +32,24 @@ document.getElementById("form-avaliacao").addEventListener("submit", async (e) =
     timestamp: new Date().toISOString()
   };
 
-  // salva SEMPRE offline
+  // salva offline sempre
   await salvarAvaliacaoOffline(dados);
 
-  // chama seu diagnóstico visual + PDF
-  gerarDiagnostico();
-
-  // só tenta enviar se estiver online
-  if (navigator.onLine) {
-    console.log("Online: pode sincronizar depois");
-    // aqui entraremos com sync real no próximo passo
-} else {
   const r = document.getElementById("resultado");
-  r.className = "resultado alerta";
-  r.style.display = "block";
-  r.innerHTML = "📴 Offline: avaliação salva no dispositivo. Será sincronizada automaticamente quando houver internet.";
-}
+
+  if (!navigator.onLine) {
+    // 1️⃣ mensagem imediata offline
+    r.className = "resultado alerta";
+    r.style.display = "block";
+    r.innerHTML = "📴 Offline: avaliação salva no dispositivo.";
+
+    // 2️⃣ após 3s, gera diagnóstico + PDF
+    setTimeout(() => {
+      gerarDiagnostico();
+    }, 3000);
+
+  } else {
+    // online → fluxo normal
+    gerarDiagnostico();
+  }
 });
