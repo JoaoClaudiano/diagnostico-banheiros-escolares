@@ -156,11 +156,27 @@ let pulsoAtivo = true;
 let dadosHeatmap = [];
 
 const camadaHeatmap = L.heatLayer(dadosHeatmap, {
-  radius: 30,
-  blur: 20,
-  maxZoom: 17
+  radius: 35,
+  blur: 25,
+  maxZoom: 18,
+  minOpacity: 0.35
 });
+function atualizarHeatmapPorZoom() {
+  const zoom = map.getZoom();
 
+  let raio = 35;
+
+  if (zoom <= 11) raio = 60;
+  else if (zoom <= 13) raio = 45;
+  else if (zoom <= 15) raio = 30;
+  else raio = 20;
+
+  camadaHeatmap.setOptions({ radius: raio });
+}
+
+// Atualiza sempre que o zoom muda
+map.on("zoomend", atualizarHeatmapPorZoom);
+  
 function camadaPorStatus(status) {
   if (status.includes("crítica")) return camadaCritico;
   if (status.includes("alerta")) return camadaAlerta;
