@@ -6,10 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#1f4fd8">
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- SheetJS (XLSX export) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -18,28 +15,52 @@ body {
   background:#f4f6f8;
   padding:20px;
 }
+
 .card {
   background:#fff;
   max-width:1100px;
   margin:20px auto;
   padding:20px;
-  border-radius:8px;
+  border-radius:10px;
 }
+
 .grid {
   display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:20px;
+  grid-template-columns: repeat(3,1fr);
+  gap:16px;
 }
-table {
-  width:100%;
-  border-collapse: collapse;
+
+.kpi {
+  background:#f9fafb;
+  border-radius:10px;
+  padding:16px;
+}
+
+.kpi h4 {
+  margin:0;
   font-size:14px;
+  color:#555;
 }
-th, td {
-  padding:8px;
-  border-bottom:1px solid #eee;
+
+.kpi strong {
+  font-size:30px;
+  display:block;
+  margin-top:6px;
 }
-th { background:#f4f6f8; text-align:left; }
+
+.info {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#1f4fd8;
+  color:#fff;
+  font-size:12px;
+  cursor:pointer;
+  margin-left:6px;
+}
 
 .badge {
   padding:4px 8px;
@@ -52,27 +73,77 @@ th { background:#f4f6f8; text-align:left; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
 
+table {
+  width:100%;
+  border-collapse: collapse;
+  font-size:14px;
+}
+th, td {
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
+th { background:#f4f6f8; text-align:left; }
+
 button {
+  padding:10px 14px;
   background:#1f4fd8;
   color:#fff;
   border:none;
-  padding:10px 14px;
   border-radius:6px;
   cursor:pointer;
-  font-size:14px;
-}
-button:hover { background:#163aa9; }
-
-footer {
-  max-width:1100px;
-  margin:40px auto 10px;
-  font-size:12px;
-  color:#555;
-  line-height:1.5;
 }
 
-@media(max-width:800px){
+/* ===== MODAL ===== */
+.modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  align-items:center;
+  justify-content:center;
+}
+.modal-content {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  max-width:500px;
+}
+
+/* ===== MOBILE ADAPTAÇÃO (NÃO AFETA DESKTOP) ===== */
+@media (max-width: 600px){
   .grid { grid-template-columns:1fr; }
+
+  .kpi strong { font-size:34px; }
+
+  table thead { display:none; }
+
+  table tr {
+    display:block;
+    margin-bottom:12px;
+    border:1px solid #eee;
+    border-radius:8px;
+    padding:10px;
+  }
+
+  table td {
+    display:block;
+    border:none;
+    padding:4px 0;
+  }
+
+  table td::before {
+    font-weight:bold;
+    color:#666;
+    display:inline-block;
+    width:90px;
+  }
+
+  table td:nth-child(1)::before { content:"#"; }
+  table td:nth-child(2)::before { content:"Escola"; }
+  table td:nth-child(3)::before { content:"Status"; }
+  table td:nth-child(4)::before { content:"IPT"; }
+
+  .modal-content { width:90%; }
 }
 </style>
 </head>
@@ -81,32 +152,26 @@ footer {
 
 <div class="card">
   <h2>Painel Gerencial – CheckInfra</h2>
-  <small>Síntese executiva, indicadores técnicos e priorização de intervenções</small>
+  <small>Síntese executiva e priorização técnica</small>
 </div>
 
-<div class="card">
-  <strong>📌 Leitura rápida</strong>
-  <div id="textoExecutivo">Carregando...</div>
-</div>
+<div class="card grid">
+  <div class="kpi">
+    <h4>Unidades Críticas</h4>
+    <strong id="kpiCritica">–</strong>
+  </div>
 
-<div class="card">
-  <h3>📘 Como ler este Dashboard</h3>
-  <p>
-    🟢 Adequada &nbsp; 🟡 Alerta &nbsp; 🟠 Atenção Elevada &nbsp; 🔴 Crítica
-  </p>
-  <p>
-    O <strong>Índice de Prioridade Técnica (IPT)</strong> é um indicador composto
-    que combina:
-  </p>
-  <ul>
-    <li>Gravidade do status observado</li>
-    <li>Pontuação técnica dos problemas identificados</li>
-    <li>Persistência temporal da condição crítica</li>
-  </ul>
-  <p>
-    O objetivo é <strong>hierarquizar intervenções</strong> de forma objetiva,
-    transparente e comparável, sem substituir inspeções técnicas presenciais.
-  </p>
+  <div class="kpi">
+    <h4>Unidades em Atenção</h4>
+    <strong id="kpiAtencao">–</strong>
+  </div>
+
+  <div class="kpi">
+    <h4>IPT Médio
+      <span class="info" onclick="abrirModal()">i</span>
+    </h4>
+    <strong id="kpiMedio">–</strong>
+  </div>
 </div>
 
 <div class="card grid">
@@ -114,7 +179,6 @@ footer {
     <h3>Status das Unidades</h3>
     <canvas id="graficoStatus"></canvas>
   </div>
-
   <div>
     <h3>Top Prioridades (IPT)</h3>
     <canvas id="graficoIndice"></canvas>
@@ -123,136 +187,127 @@ footer {
 
 <div class="card">
   <h3>🏆 Ranking Geral de Prioridade Técnica</h3>
-  <button onclick="exportarXLSX()">⬇️ Baixar ranking completo (XLSX)</button>
+  <button onclick="exportarXLSX()">⬇️ Baixar XLSX</button>
   <br><br>
   <table>
     <thead>
       <tr>
-        <th>#</th>
-        <th>Escola</th>
-        <th>Status</th>
-        <th>IPT</th>
+        <th>#</th><th>Escola</th><th>Status</th><th>IPT</th>
       </tr>
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
 </div>
 
-<footer id="rodapeExplicativo"></footer>
+<div class="card">
+  <h3>📘 Metodologia – Índice de Prioridade Técnica (IPT)</h3>
+  <p>
+    O IPT é um índice autoral do CheckInfra, inspirado em práticas de
+    priorização técnica de engenharia diagnóstica, avaliação multicritério
+    (MCDA) e gestão de ativos públicos.
+  </p>
+  <p>
+    Ele combina três dimensões:
+    <br>• Gravidade do status (peso 40%)
+    <br>• Pontuação técnica observada (peso 40%)
+    <br>• Persistência temporal do problema (peso 20%)
+  </p>
+  <p>
+    O IPT médio representa o <strong>nível médio de criticidade da rede</strong>.
+    Valores altos indicam pressão sistêmica por investimento e manutenção.
+  </p>
+</div>
+
+<div class="modal" id="modalIPT" onclick="fecharModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3>O que é o IPT médio?</h3>
+    <p>
+      O IPT médio expressa o grau médio de urgência técnica da rede escolar.
+      Ele não aponta uma escola específica, mas indica o <strong>estado geral
+      da infraestrutura</strong>.
+    </p>
+    <button onclick="fecharModal()">Fechar</button>
+  </div>
+</div>
 
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbyt4wD8LQ67NOD-Zz7EEvfc7RuYEhKDYE50gkK7rp-47idg6STKUGqk5pYVDclamentdQ/exec";
 let rankingGlobal = [];
 
-fetch(URL)
-.then(r=>r.json())
-.then(dados => montarDashboard(dados));
+fetch(URL).then(r=>r.json()).then(dados => montar(dados));
 
-function montarDashboard(dados) {
+function montar(dados){
+  let critica=0, atencao=0, somaIPT=0;
+  const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
 
-  const statusCount = { adequada:0, alerta:0, atencao:0, critica:0 };
-  rankingGlobal = [];
+  dados.forEach(d=>{
+    let peso=1, classe="adequada";
+    const s=(d.status||"").toLowerCase();
 
-  let somaIPT = 0;
+    if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++}
+    else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++}
+    else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++}
+    else statusCount.adequada++;
 
-  dados.forEach(d => {
-    const s = (d.status || "").toLowerCase();
-    let pesoStatus = 1;
-    let classe = "adequada";
-    let statusLabel = "Adequada";
+    const pont=Number(d.pontuacao||0);
+    const dias=Math.min(Number(d.dias_criticos||0),30);
+    const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
 
-    if (s.includes("crít")) {
-      pesoStatus=4; classe="critica"; statusLabel="Crítica"; statusCount.critica++;
-    } else if (s.includes("aten")) {
-      pesoStatus=3; classe="atencao"; statusLabel="Atenção Elevada"; statusCount.atencao++;
-    } else if (s.includes("alerta")) {
-      pesoStatus=2; classe="alerta"; statusLabel="Alerta"; statusCount.alerta++;
-    } else {
-      statusCount.adequada++;
-    }
-
-    const pont = Number(d.pontuacao || 0);
-    const dias = Math.min(Number(d.dias_criticos || 0), 30);
-
-    const IPT = (pesoStatus*0.4)+(pont*0.4)+(dias*0.2);
-    somaIPT += IPT;
+    somaIPT+=IPT;
 
     rankingGlobal.push({
-      escola: d.escola || "Sem nome",
-      status: statusLabel,
+      escola:d.escola||"Sem nome",
       classe,
-      IPT: IPT
+      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+      IPT
     });
   });
 
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
-  const IPTmedio = (somaIPT / rankingGlobal.length).toFixed(2);
-
-  document.getElementById("textoExecutivo").innerHTML = `
-    ${statusCount.critica} unidades em condição <strong>crítica</strong> e
-    ${statusCount.atencao} em <strong>atenção elevada</strong>.
-    <br>
-    <strong>IPT médio da rede:</strong> ${IPTmedio}
-  `;
+  kpiCritica.innerText=critica;
+  kpiAtencao.innerText=atencao;
+  kpiMedio.innerText=(somaIPT/dados.length).toFixed(2);
 
   new Chart(graficoStatus,{
     type:"pie",
     data:{
-      labels:["Adequada","Alerta","Atenção Elevada","Crítica"],
-      datasets:[{
-        data:Object.values(statusCount),
-        backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"]
-      }]
+      labels:["Adequada","Alerta","Atenção","Crítica"],
+      datasets:[{data:Object.values(statusCount),
+      backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"]}]
     }
   });
 
+  const topN=window.innerWidth<600?5:10;
   new Chart(graficoIndice,{
     type:"bar",
     data:{
-      labels: rankingGlobal.slice(0,10).map(r=>r.escola),
-      datasets:[{
-        data: rankingGlobal.slice(0,10).map(r=>r.IPT.toFixed(2)),
-        backgroundColor:"#1f4fd8"
-      }]
+      labels:rankingGlobal.slice(0,topN).map(r=>r.escola),
+      datasets:[{data:rankingGlobal.slice(0,topN).map(r=>r.IPT.toFixed(2)),backgroundColor:"#1f4fd8"}]
     },
-    options:{ indexAxis:'y', plugins:{legend:{display:false}} }
+    options:{indexAxis:"y",plugins:{legend:{display:false}}}
   });
 
-  const tbody = document.getElementById("tabelaRanking");
   rankingGlobal.forEach((r,i)=>{
-    tbody.innerHTML += `
+    tabelaRanking.innerHTML+=`
       <tr>
         <td>${i+1}</td>
         <td>${r.escola}</td>
-        <td><span class="badge ${r.classe}">${r.status}</span></td>
+        <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
         <td>${r.IPT.toFixed(2)}</td>
       </tr>`;
   });
-
-  document.getElementById("rodapeExplicativo").innerHTML = `
-    <strong>Nota metodológica:</strong><br>
-    O Índice de Prioridade Técnica (IPT) é um indicador composto desenvolvido no âmbito
-    do projeto CheckInfra para apoiar a priorização de intervenções em infraestrutura
-    sanitária escolar. O <strong>IPT médio</strong> representa o nível médio de urgência
-    técnica da rede avaliada, permitindo análises comparativas ao longo do tempo.
-    Este painel não substitui inspeções técnicas formais.
-  `;
 }
 
-function exportarXLSX() {
-  const dados = rankingGlobal.map((r,i)=>({
-    Ranking: i+1,
-    Escola: r.escola,
-    Status: r.status,
-    IPT: r.IPT.toFixed(2)
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(dados);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
-  XLSX.writeFile(wb, "checkinfra_ranking_ipt.xlsx");
+function exportarXLSX(){
+  const ws=XLSX.utils.json_to_sheet(rankingGlobal);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Ranking IPT");
+  XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
 }
+
+function abrirModal(){ modalIPT.style.display="flex"; }
+function fecharModal(){ modalIPT.style.display="none"; }
 </script>
 
 </body>
