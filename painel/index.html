@@ -6,7 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#1f4fd8">
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- SheetJS (XLSX export) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
 body {
@@ -48,44 +52,27 @@ th { background:#f4f6f8; text-align:left; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
 
-/* KPIs */
-.kpi-grid {
-  display:grid;
-  grid-template-columns: repeat(4,1fr);
-  gap:16px;
-}
-.kpi {
-  background:#f9fafb;
-  padding:16px;
-  border-radius:8px;
-  text-align:center;
-}
-.kpi strong {
-  display:block;
-  font-size:26px;
-}
-.kpi span {
-  font-size:13px;
-  color:#555;
-}
-.kpi-critica strong { color:#f44336; }
-.kpi-atencao strong { color:#ff7043; }
-.kpi-ipt strong { color:#1f4fd8; }
-.kpi-total strong { color:#333; }
-
-button.download {
+button {
   background:#1f4fd8;
   color:#fff;
   border:none;
-  padding:8px 12px;
+  padding:10px 14px;
   border-radius:6px;
   cursor:pointer;
   font-size:14px;
 }
+button:hover { background:#163aa9; }
+
+footer {
+  max-width:1100px;
+  margin:40px auto 10px;
+  font-size:12px;
+  color:#555;
+  line-height:1.5;
+}
 
 @media(max-width:800px){
   .grid { grid-template-columns:1fr; }
-  .kpi-grid { grid-template-columns:1fr 1fr; }
 }
 </style>
 </head>
@@ -94,27 +81,7 @@ button.download {
 
 <div class="card">
   <h2>Painel Gerencial – CheckInfra</h2>
-  <small>Síntese executiva e priorização técnica</small>
-</div>
-
-<!-- KPIs -->
-<div class="card kpi-grid">
-  <div class="kpi kpi-critica">
-    <strong id="kpiCritica">0</strong>
-    <span>Unidades Críticas</span>
-  </div>
-  <div class="kpi kpi-atencao">
-    <strong id="kpiAtencao">0</strong>
-    <span>Atenção Elevada</span>
-  </div>
-  <div class="kpi kpi-ipt">
-    <strong id="kpiIPT">0</strong>
-    <span>IPT médio</span>
-  </div>
-  <div class="kpi kpi-total">
-    <strong id="kpiTotal">0</strong>
-    <span>Unidades avaliadas</span>
-  </div>
+  <small>Síntese executiva, indicadores técnicos e priorização de intervenções</small>
 </div>
 
 <div class="card">
@@ -124,11 +91,21 @@ button.download {
 
 <div class="card">
   <h3>📘 Como ler este Dashboard</h3>
-  <p>🟢 Adequada &nbsp; 🟡 Alerta &nbsp; 🟠 Atenção Elevada &nbsp; 🔴 Crítica</p>
   <p>
-    O <strong>Índice de Prioridade Técnica (IPT)</strong> combina gravidade do status,
-    pontuação técnica e persistência temporal, permitindo hierarquizar
-    intervenções de forma objetiva e transparente.
+    🟢 Adequada &nbsp; 🟡 Alerta &nbsp; 🟠 Atenção Elevada &nbsp; 🔴 Crítica
+  </p>
+  <p>
+    O <strong>Índice de Prioridade Técnica (IPT)</strong> é um indicador composto
+    que combina:
+  </p>
+  <ul>
+    <li>Gravidade do status observado</li>
+    <li>Pontuação técnica dos problemas identificados</li>
+    <li>Persistência temporal da condição crítica</li>
+  </ul>
+  <p>
+    O objetivo é <strong>hierarquizar intervenções</strong> de forma objetiva,
+    transparente e comparável, sem substituir inspeções técnicas presenciais.
   </p>
 </div>
 
@@ -137,6 +114,7 @@ button.download {
     <h3>Status das Unidades</h3>
     <canvas id="graficoStatus"></canvas>
   </div>
+
   <div>
     <h3>Top Prioridades (IPT)</h3>
     <canvas id="graficoIndice"></canvas>
@@ -144,8 +122,8 @@ button.download {
 </div>
 
 <div class="card">
-  <h3>🏆 Ranking Geral de Prioridade Técnica (Top 20)</h3>
-  <button class="download" onclick="baixarCSV()">⬇️ Baixar ranking completo</button>
+  <h3>🏆 Ranking Geral de Prioridade Técnica</h3>
+  <button onclick="exportarXLSX()">⬇️ Baixar ranking completo (XLSX)</button>
   <br><br>
   <table>
     <thead>
@@ -160,6 +138,8 @@ button.download {
   </table>
 </div>
 
+<footer id="rodapeExplicativo"></footer>
+
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbyt4wD8LQ67NOD-Zz7EEvfc7RuYEhKDYE50gkK7rp-47idg6STKUGqk5pYVDclamentdQ/exec";
 let rankingGlobal = [];
@@ -171,18 +151,25 @@ fetch(URL)
 function montarDashboard(dados) {
 
   const statusCount = { adequada:0, alerta:0, atencao:0, critica:0 };
-  const ranking = [];
+  rankingGlobal = [];
+
   let somaIPT = 0;
 
   dados.forEach(d => {
     const s = (d.status || "").toLowerCase();
     let pesoStatus = 1;
     let classe = "adequada";
+    let statusLabel = "Adequada";
 
-    if (s.includes("crít")) { pesoStatus=4; classe="critica"; statusCount.critica++; }
-    else if (s.includes("aten")) { pesoStatus=3; classe="atencao"; statusCount.atencao++; }
-    else if (s.includes("alerta")) { pesoStatus=2; classe="alerta"; statusCount.alerta++; }
-    else statusCount.adequada++;
+    if (s.includes("crít")) {
+      pesoStatus=4; classe="critica"; statusLabel="Crítica"; statusCount.critica++;
+    } else if (s.includes("aten")) {
+      pesoStatus=3; classe="atencao"; statusLabel="Atenção Elevada"; statusCount.atencao++;
+    } else if (s.includes("alerta")) {
+      pesoStatus=2; classe="alerta"; statusLabel="Alerta"; statusCount.alerta++;
+    } else {
+      statusCount.adequada++;
+    }
 
     const pont = Number(d.pontuacao || 0);
     const dias = Math.min(Number(d.dias_criticos || 0), 30);
@@ -190,28 +177,24 @@ function montarDashboard(dados) {
     const IPT = (pesoStatus*0.4)+(pont*0.4)+(dias*0.2);
     somaIPT += IPT;
 
-    ranking.push({
+    rankingGlobal.push({
       escola: d.escola || "Sem nome",
+      status: statusLabel,
       classe,
-      statusLabel:
-        classe==="critica"?"Crítica":
-        classe==="atencao"?"Atenção Elevada":
-        classe==="alerta"?"Alerta":"Adequada",
-      IPT
+      IPT: IPT
     });
   });
 
-  ranking.sort((a,b)=>b.IPT-a.IPT);
-  rankingGlobal = ranking;
+  rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
-  document.getElementById("kpiCritica").innerText = statusCount.critica;
-  document.getElementById("kpiAtencao").innerText = statusCount.atencao;
-  document.getElementById("kpiTotal").innerText = dados.length;
-  document.getElementById("kpiIPT").innerText = (somaIPT/dados.length).toFixed(2);
+  const IPTmedio = (somaIPT / rankingGlobal.length).toFixed(2);
 
-  document.getElementById("textoExecutivo").innerHTML =
-    `${statusCount.critica} unidades críticas e ${statusCount.atencao} em atenção elevada.
-     O ranking prioriza gravidade, recorrência e impacto técnico.`;
+  document.getElementById("textoExecutivo").innerHTML = `
+    ${statusCount.critica} unidades em condição <strong>crítica</strong> e
+    ${statusCount.atencao} em <strong>atenção elevada</strong>.
+    <br>
+    <strong>IPT médio da rede:</strong> ${IPTmedio}
+  `;
 
   new Chart(graficoStatus,{
     type:"pie",
@@ -227,9 +210,9 @@ function montarDashboard(dados) {
   new Chart(graficoIndice,{
     type:"bar",
     data:{
-      labels: ranking.slice(0,10).map(r=>r.escola),
+      labels: rankingGlobal.slice(0,10).map(r=>r.escola),
       datasets:[{
-        data: ranking.slice(0,10).map(r=>r.IPT.toFixed(2)),
+        data: rankingGlobal.slice(0,10).map(r=>r.IPT.toFixed(2)),
         backgroundColor:"#1f4fd8"
       }]
     },
@@ -237,28 +220,38 @@ function montarDashboard(dados) {
   });
 
   const tbody = document.getElementById("tabelaRanking");
-  ranking.slice(0,20).forEach((r,i)=>{
+  rankingGlobal.forEach((r,i)=>{
     tbody.innerHTML += `
       <tr>
         <td>${i+1}</td>
         <td>${r.escola}</td>
-        <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
+        <td><span class="badge ${r.classe}">${r.status}</span></td>
         <td>${r.IPT.toFixed(2)}</td>
       </tr>`;
   });
+
+  document.getElementById("rodapeExplicativo").innerHTML = `
+    <strong>Nota metodológica:</strong><br>
+    O Índice de Prioridade Técnica (IPT) é um indicador composto desenvolvido no âmbito
+    do projeto CheckInfra para apoiar a priorização de intervenções em infraestrutura
+    sanitária escolar. O <strong>IPT médio</strong> representa o nível médio de urgência
+    técnica da rede avaliada, permitindo análises comparativas ao longo do tempo.
+    Este painel não substitui inspeções técnicas formais.
+  `;
 }
 
-function baixarCSV(){
-  let csv = "Posição;Escola;Status;IPT\n";
-  rankingGlobal.forEach((r,i)=>{
-    csv += `${i+1};${r.escola};${r.statusLabel};${r.IPT.toFixed(2)}\n`;
-  });
+function exportarXLSX() {
+  const dados = rankingGlobal.map((r,i)=>({
+    Ranking: i+1,
+    Escola: r.escola,
+    Status: r.status,
+    IPT: r.IPT.toFixed(2)
+  }));
 
-  const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "ranking_IPT_CheckInfra.csv";
-  link.click();
+  const ws = XLSX.utils.json_to_sheet(dados);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
+  XLSX.writeFile(wb, "checkinfra_ranking_ipt.xlsx");
 }
 </script>
 
