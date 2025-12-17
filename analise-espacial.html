@@ -3,23 +3,12 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- Google tag -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DD4SQ88NVT');
-</script>
-
 <title>Análise Espacial – CheckInfra</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1f4fd8">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- 🔥 PLUGIN HEATMAP -->
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
 <style>
@@ -33,57 +22,24 @@ header {
   font-weight:bold;
 }
 
-#map { height: calc(100vh - 190px); }
+#map { height: calc(100vh - 210px); }
 
 .painel {
   padding:10px;
   background:#f4f6f8;
   display:flex;
-  gap:15px;
+  gap:12px;
   justify-content:center;
   font-size:14px;
   flex-wrap:wrap;
 }
 
-.painel label {
+.painel select, .painel label {
   display:flex;
   align-items:center;
   gap:6px;
-  cursor:pointer;
 }
 
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  display:inline-block;
-}
-.verde { background:green; }
-.laranja { background:orange; }
-.vermelho { background:red; }
-
-/* ===== PULSO ===== */
-.pulse-critico { animation: pulse-red 2.4s ease-out infinite; }
-.pulse-alerta  { animation: pulse-orange 2.4s ease-out infinite; }
-.pulse-adequado{ animation: pulse-green 2.4s ease-out infinite; }
-
-@keyframes pulse-red {
-  0% { r:8; opacity:.9; }
-  70% { r:18; opacity:0; }
-  100% { opacity:0; }
-}
-@keyframes pulse-orange {
-  0% { r:8; opacity:.8; }
-  70% { r:16; opacity:0; }
-  100% { opacity:0; }
-}
-@keyframes pulse-green {
-  0% { r:8; opacity:.7; }
-  70% { r:14; opacity:0; }
-  100% { opacity:0; }
-}
-
-/* ===== LEGENDA ===== */
 .legenda {
   background:#fff;
   padding:10px;
@@ -91,48 +47,34 @@ header {
   border-radius:6px;
   box-shadow:0 1px 5px rgba(0,0,0,.3);
 }
-.legenda h4 {
-  margin:0 0 6px;
-  font-size:14px;
-}
-.legenda div {
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin-bottom:4px;
-}
 </style>
 </head>
 
 <body>
 
 <header>
-  Análise Espacial – Leitura Territorial Exploratória
+  🧭 Análise Espacial – Leitura Territorial Exploratória
   <div style="font-size:12px;font-weight:normal;opacity:.9;">
-    Identificação de padrões espaciais relativos às condições sanitárias das escolas
+    Indicadores espaciais relativos às condições sanitárias das escolas
   </div>
 </header>
 
 <div style="padding:10px;font-size:13px;background:#f8f9fa;border-bottom:1px solid #ddd;text-align:center;">
-  Esta visualização apresenta <strong>padrões espaciais relativos</strong>.
-  As análises são exploratórias e não indicam causalidade,
-  nem substituem vistorias técnicas presenciais.
+  Visualizações exploratórias. Não indicam causalidade nem substituem vistorias técnicas presenciais.
 </div>
 
 <div class="painel">
   <label>
-    <input type="checkbox" id="toggleHeatmap" checked>
-    🔥 Heatmap (concentração territorial)
+    Indicador:
+    <select id="seletorIndicador">
+      <option value="1">Indicador 1 — Densidade Crítica</option>
+      <option value="2">Indicador 2 — Concentração Relativa</option>
+    </select>
   </label>
 
   <label>
-    <input type="checkbox" id="togglePontos">
-    ⬤ Escolas (pontos)
-  </label>
-
-  <label>
-    <input type="checkbox" id="togglePulso" checked>
-    🌐 Mapa vivo
+    <input type="checkbox" id="toggleZonas" checked>
+    🟥 Zonas prioritárias
   </label>
 </div>
 
@@ -147,12 +89,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-// Camadas
-const camadaAdequado = L.layerGroup();
-const camadaAlerta = L.layerGroup();
-const camadaCritico = L.layerGroup();
-
-let pulsoAtivo = true;
+let modoIndicador = 1;
 let dadosHeatmap = [];
 
 const camadaHeatmap = L.heatLayer(dadosHeatmap, {
@@ -160,10 +97,13 @@ const camadaHeatmap = L.heatLayer(dadosHeatmap, {
   blur: 25,
   maxZoom: 18,
   minOpacity: 0.35
-});
+}).addTo(map);
+
+const camadaZonas = L.layerGroup().addTo(map);
+
+// 🔄 Adaptação ao zoom
 function atualizarHeatmapPorZoom() {
   const zoom = map.getZoom();
-
   let raio = 35;
 
   if (zoom <= 11) raio = 60;
@@ -173,73 +113,60 @@ function atualizarHeatmapPorZoom() {
 
   camadaHeatmap.setOptions({ radius: raio });
 }
-
-// Atualiza sempre que o zoom muda
 map.on("zoomend", atualizarHeatmapPorZoom);
-  
-function camadaPorStatus(status) {
-  if (status.includes("crítica")) return camadaCritico;
-  if (status.includes("alerta")) return camadaAlerta;
-  return camadaAdequado;
-}
-function corPorStatus(status) {
-  if (status.includes("crítica")) return "red";
-  if (status.includes("alerta")) return "orange";
-  return "green";
-}
-function classePulso(status) {
-  if (!pulsoAtivo) return "";
-  if (status.includes("crítica")) return "pulse-critico";
-  if (status.includes("alerta")) return "pulse-alerta";
-  return "pulse-adequado";
+
+// 🔁 Recalcular tudo
+function recalcularMapa(dados) {
+  dadosHeatmap.length = 0;
+  camadaZonas.clearLayers();
+
+  dados.forEach(e => {
+    if (!e.lat || !e.lng) return;
+
+    let peso = 0.3;
+
+    if (modoIndicador === 1) {
+      if (e.status.includes("crítica")) peso = 1.5;
+      else if (e.status.includes("alerta")) peso = 1.0;
+    }
+
+    if (modoIndicador === 2) {
+      if (e.status.includes("crítica")) peso = 1.2;
+      else if (e.status.includes("alerta")) peso = 0.8;
+    }
+
+    dadosHeatmap.push([e.lat, e.lng, peso]);
+
+    // Zona prioritária simples
+    if (peso >= 1.2) {
+      L.circle([e.lat, e.lng], {
+        radius: 500,
+        color: "red",
+        fillColor: "red",
+        fillOpacity: 0.08,
+        weight: 1
+      }).addTo(camadaZonas);
+    }
+  });
+
+  camadaHeatmap.setLatLngs(dadosHeatmap);
 }
 
+// 🔄 Carregar dados
 fetch(API_URL)
   .then(res => res.json())
   .then(dados => {
-    dados.forEach(e => {
-      if (!e.lat || !e.lng) return;
+    recalcularMapa(dados);
 
-      dadosHeatmap.push([e.lat, e.lng, 1]);
-
-      L.circleMarker([e.lat, e.lng], {
-        radius:8,
-        color: corPorStatus(e.status),
-        fillColor: corPorStatus(e.status),
-        fillOpacity:.8,
-        className: classePulso(e.status)
-      })
-      .bindPopup(`
-        <strong>${e.escola}</strong><br>
-        Status: ${e.status}<br>
-        Pontuação: ${e.pontuacao}
-      `)
-      .addTo(camadaPorStatus(e.status));
+    document.getElementById("seletorIndicador").addEventListener("change", e => {
+      modoIndicador = Number(e.target.value);
+      recalcularMapa(dados);
     });
-
-    camadaHeatmap.addTo(map);
   });
 
-// Controles
-document.getElementById("toggleHeatmap").addEventListener("change", e => {
-  e.target.checked ? map.addLayer(camadaHeatmap) : map.removeLayer(camadaHeatmap);
-});
-
-document.getElementById("togglePontos").addEventListener("change", e => {
-  if (e.target.checked) {
-    map.addLayer(camadaAdequado);
-    map.addLayer(camadaAlerta);
-    map.addLayer(camadaCritico);
-  } else {
-    map.removeLayer(camadaAdequado);
-    map.removeLayer(camadaAlerta);
-    map.removeLayer(camadaCritico);
-  }
-});
-
-document.getElementById("togglePulso").addEventListener("change", e => {
-  pulsoAtivo = e.target.checked;
-  location.reload();
+// Toggle zonas
+document.getElementById("toggleZonas").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaZonas) : map.removeLayer(camadaZonas);
 });
 
 // Legenda
@@ -247,15 +174,10 @@ const legenda = L.control({ position: "bottomright" });
 legenda.onAdd = function () {
   const div = L.DomUtil.create("div", "legenda");
   div.innerHTML = `
-    <h4>Leitura do mapa</h4>
-    <div><span class="bola verde"></span> Situação adequada</div>
-    <div><span class="bola laranja"></span> Requer atenção</div>
-    <div><span class="bola vermelho"></span> Prioridade de intervenção</div>
-    <hr>
-    <small>
-      Heatmap indica concentração territorial relativa.
-      Não substitui inspeção técnica presencial.
-    </small>
+    <strong>Indicadores</strong><br>
+    🔥 Intensidade = concentração territorial<br>
+    🟥 Zonas = áreas prioritárias<br><br>
+    <small>Leitura exploratória.</small>
   `;
   return div;
 };
