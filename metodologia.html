@@ -7,35 +7,36 @@
 
   <style>
     .nav-global {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  display: flex;
-  gap: 8px;
-  z-index: 9999;
-}
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 9999;
+    }
 
-.nav-global button,
-.nav-global a {
-  background: rgba(31,79,216,0.95);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-}
+    .nav-global button,
+    .nav-global a {
+      background: rgba(31,79,216,0.95);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
 
-.nav-global button:hover,
-.nav-global a:hover {
-  background: #163aa9;
-}
+    .nav-global button:hover,
+    .nav-global a:hover {
+      background: #163aa9;
+    }
+
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
@@ -81,7 +82,6 @@
       font-weight: bold;
     }
 
-    /* ===== CLASSIFICAÇÃO ===== */
     .classificacao li {
       list-style: none;
       padding: 10px;
@@ -94,7 +94,6 @@
     .laranja { background: #ffe5d0; }
     .vermelho { background: #f8d7da; }
 
-    /* ===== CICLO ===== */
     .ciclo-checkinfra {
       display: flex;
       align-items: stretch;
@@ -136,18 +135,15 @@
 </head>
 
 <body>
-<div class="nav-global">
-  <button onclick="history.back()" title="Voltar">
-    ⬅️
-  </button>
 
-  <a href="./index.html" title="Início">
-    🏠
-  </a>
+<div class="nav-global">
+  <button onclick="history.back()" title="Voltar">⬅️</button>
+  <a href="./index.html" title="Início">🏠</a>
 </div>
+
 <header>
   <h1>Metodologia Técnica — CheckInfra</h1>
-  <p>Diagnóstico Sanitário de Banheiros Escolares</p>
+  <p>Diagnóstico Sanitário e Priorização de Intervenções em Escolas Públicas</p>
 </header>
 
 <main>
@@ -156,74 +152,67 @@
   <div class="card">
     <h2>Objetivo da Metodologia</h2>
     <p>
-      A metodologia do CheckInfra foi desenvolvida por estudantes de Engenharia Civil
-      no contexto da disciplina de Empreendedorismo, com o objetivo de estruturar
-      um <strong>diagnóstico técnico, simples e replicável</strong> das condições sanitárias
-      de banheiros escolares.
+      A metodologia do CheckInfra foi desenvolvida no contexto acadêmico da Engenharia Civil
+      com o objetivo de estruturar um <strong>instrumento técnico, simples e replicável</strong>
+      para avaliação das condições sanitárias de banheiros escolares.
     </p>
     <p>
-      O sistema não substitui inspeções prediais formais, mas atua como uma
-      <strong>ferramenta de apoio à decisão</strong>, permitindo identificar riscos,
-      priorizar intervenções e orientar a gestão pública com base em evidências.
+      O sistema atua como <strong>ferramenta de apoio à decisão</strong>,
+      permitindo identificar riscos, comparar unidades e orientar a priorização de
+      intervenções no âmbito da gestão pública.
+    </p>
+    <p>
+      Ressalta-se que o CheckInfra <strong>não substitui inspeções prediais formais</strong>,
+      funcionando como etapa preliminar de triagem e leitura territorial.
     </p>
   </div>
 
-  <!-- CATEGORIA 1 -->
+  <!-- CATEGORIAS -->
   <div class="card">
-    <h2>Categoria 1 — Estrutura Física</h2>
+    <h2>Estrutura de Avaliação Técnica</h2>
+    <p>A avaliação é organizada em quatro categorias principais:</p>
+  </div>
+
+  <div class="card">
+    <h3>Categoria 1 — Estrutura Física</h3>
     <ul>
       <li>Mofo ou umidade excessiva <span class="badge">(peso 3)</span></li>
       <li>Piso quebrado ou escorregadio <span class="badge">(peso 2)</span></li>
       <li>Infiltrações visíveis <span class="badge">(peso 2)</span></li>
     </ul>
-    <p>
-      Avalia condições que impactam a durabilidade da edificação e a segurança dos usuários.
-      Inspirada em boas práticas de manutenção predial e salubridade.
-    </p>
+    <p>Relaciona-se à segurança, durabilidade e salubridade da edificação.</p>
   </div>
 
-  <!-- CATEGORIA 2 -->
   <div class="card">
-    <h2>Categoria 2 — Higiene e Salubridade</h2>
+    <h3>Categoria 2 — Higiene e Salubridade</h3>
     <ul>
       <li>Limpeza inadequada <span class="badge">(peso 2)</span></li>
       <li>Mau cheiro persistente <span class="badge">(peso 2)</span></li>
     </ul>
-    <p>
-      Relacionada à saúde pública e ao uso adequado dos ambientes sanitários,
-      alinhada a princípios da vigilância sanitária.
-    </p>
+    <p>Associada à saúde pública e condições mínimas de uso dos sanitários.</p>
   </div>
 
-  <!-- CATEGORIA 3 -->
   <div class="card">
-    <h2>Categoria 3 — Instalações Hidrossanitárias</h2>
+    <h3>Categoria 3 — Instalações Hidrossanitárias</h3>
     <ul>
       <li>Vazamentos aparentes <span class="badge">(peso 3)</span></li>
       <li>Descarga ou torneiras defeituosas <span class="badge">(peso 2)</span></li>
     </ul>
-    <p>
-      Foca no funcionamento básico dos sistemas prediais,
-      prevenindo desperdício de água e falhas operacionais.
-    </p>
+    <p>Foca no funcionamento dos sistemas prediais e prevenção de falhas operacionais.</p>
   </div>
 
-  <!-- CATEGORIA 4 -->
   <div class="card">
-    <h2>Categoria 4 — Conforto Ambiental</h2>
+    <h3>Categoria 4 — Conforto Ambiental</h3>
     <ul>
       <li>Iluminação insuficiente <span class="badge">(peso 1)</span></li>
       <li>Ventilação inadequada <span class="badge">(peso 1)</span></li>
     </ul>
-    <p>
-      Considera aspectos de conforto e bem-estar que influenciam o uso adequado
-      dos sanitários, mesmo não sendo estruturalmente críticos.
-    </p>
+    <p>Aspectos que influenciam o uso adequado e o bem-estar dos usuários.</p>
   </div>
 
   <!-- CLASSIFICAÇÃO -->
   <div class="card">
-    <h2>Classificação Final</h2>
+    <h2>Classificação Sanitária</h2>
     <ul class="classificacao">
       <li class="verde">🟢 <strong>0 a 3 pontos</strong> — Condição adequada</li>
       <li class="amarelo">🟡 <strong>4 a 6 pontos</strong> — Situação de alerta</li>
@@ -232,47 +221,63 @@
     </ul>
   </div>
 
+  <!-- IPT -->
+  <div class="card">
+    <h2>Índice de Prioridade Técnica (IPT)</h2>
+    <p>
+      O Índice de Prioridade Técnica (IPT) é um <strong>indicador composto</strong>
+      desenvolvido pelo CheckInfra para ordenar as unidades escolares
+      segundo a urgência técnica de intervenção.
+    </p>
+
+    <h3>Componentes do IPT</h3>
+    <ul>
+      <li><strong>Gravidade Sanitária (GS)</strong> — classificação final da unidade</li>
+      <li><strong>Intensidade Técnica (IT)</strong> — pontuação obtida na avaliação</li>
+      <li><strong>Recorrência Temporal (RT)</strong> — persistência de situações críticas</li>
+    </ul>
+
+    <h3>Fórmula</h3>
+    <p>
+      <strong>IPT = (GS × 0,5) + (IT × 0,3) + (RT × 0,2)</strong>
+    </p>
+
+    <p>
+      Quanto maior o IPT, maior a prioridade técnica da unidade no ranking gerencial.
+      O índice permite diferenciar problemas pontuais de situações crônicas.
+    </p>
+
+    <p style="font-size:13px;color:#555;">
+      Metodologia inspirada em abordagens de análise multicritério, gestão de riscos
+      e priorização de ativos em engenharia e políticas públicas.
+    </p>
+  </div>
+
   <!-- CICLO -->
   <div class="card">
     <h2>Ciclo Metodológico do CheckInfra</h2>
 
     <div class="ciclo-checkinfra">
-      <div class="etapa">
-        <span class="icone">📝</span>
-        Avaliação
-      </div>
+      <div class="etapa"><span class="icone">📝</span>Avaliação</div>
       <div class="seta">➡️</div>
-      <div class="etapa">
-        <span class="icone">🎯</span>
-        Classificação
-      </div>
+      <div class="etapa"><span class="icone">🎯</span>Classificação</div>
       <div class="seta">➡️</div>
-      <div class="etapa">
-        <span class="icone">📊</span>
-        Priorização
-      </div>
+      <div class="etapa"><span class="icone">📊</span>Priorização</div>
       <div class="seta">➡️</div>
-      <div class="etapa">
-        <span class="icone">🛠️</span>
-        Intervenção
-      </div>
+      <div class="etapa"><span class="icone">🛠️</span>Intervenção</div>
       <div class="seta">➡️</div>
-      <div class="etapa">
-        <span class="icone">🔄</span>
-        Reavaliação
-      </div>
+      <div class="etapa"><span class="icone">🔄</span>Reavaliação</div>
     </div>
 
     <p>
-      O CheckInfra opera como um ciclo contínuo, permitindo acompanhar a evolução
-      das condições sanitárias ao longo do tempo.
+      O ciclo permite acompanhamento contínuo e avaliação da efetividade das intervenções.
     </p>
   </div>
 
 </main>
 
 <footer>
-  © 2025 CheckInfra — Metodologia desenvolvida para fins acadêmicos e de apoio à gestão pública
+  © 2025 CheckInfra — Metodologia desenvolvida para fins acadêmicos e apoio à gestão pública
 </footer>
 
 </body>
