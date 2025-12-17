@@ -476,9 +476,238 @@
   </p>
 </div>
 
+<!-- ================= ANÁLISE ESPACIAL — PARETO ================= -->
+<div class="card">
+  <h2>Análise Espacial com Princípio de Pareto</h2>
+
+  <p>
+    A análise espacial do CheckInfra utiliza o <strong>Princípio de Pareto</strong>
+    integrado a indicadores territoriais para identificar
+    <strong>zonas prioritárias de intervenção</strong>.
+    O objetivo é orientar decisões públicas quando os recursos são limitados,
+    maximizando o impacto técnico e social das ações.
+  </p>
+
+  <p>
+    A unidade territorial adotada é o <strong>bairro oficial</strong>,
+    conforme delimitação administrativa do município,
+    garantindo compatibilidade com planejamento urbano e gestão orçamentária.
+  </p>
+
+  <!-- ACCORDION 1 -->
+  <div class="accordion-item">
+    <button class="accordion-header">
+      1. Princípio de Pareto aplicado à análise territorial
+      <span>›</span>
+    </button>
+    <div class="accordion-content">
+      <p>
+        O Princípio de Pareto estabelece que, em muitos sistemas,
+        uma pequena parcela das causas é responsável pela maior parte dos efeitos.
+        Tradicionalmente, essa relação é representada como <strong>80/20</strong>,
+        embora os percentuais possam variar conforme o contexto.
+      </p>
+
+      <p>
+        No CheckInfra, o Pareto é aplicado para identificar
+        <strong>quais escolas concentram a maior parte da criticidade sanitária</strong>,
+        a partir de indicadores como o IPT ou a pontuação do checklist.
+      </p>
+
+      <p class="info">
+        ℹ️ Referências:
+        Pareto (1896); Juran (1999); Montgomery (2013)
+      </p>
+    </div>
+  </div>
+
+  <!-- ACCORDION 2 -->
+  <div class="accordion-item">
+    <button class="accordion-header">
+      2. Construção do conjunto Pareto de escolas
+      <span>›</span>
+    </button>
+    <div class="accordion-content">
+      <p>
+        As escolas são ordenadas de forma decrescente segundo
+        um indicador de criticidade (IPT ou pontuação técnica).
+        Em seguida, calcula-se o impacto acumulado.
+      </p>
+
+      <div class="equacao">
+        Impacto acumulado (%) =
+        (Σ IPTᵢ ordenado / Σ IPT total) × 100
+      </div>
+
+      <p>
+        As escolas incluídas até determinado percentual acumulado
+        (70%, 75% ou 80%) compõem o <strong>conjunto Pareto</strong>.
+      </p>
+
+      <p class="info">
+        ℹ️ Referências:
+        Juran (Quality Control Handbook); ISO 9001
+      </p>
+    </div>
+  </div>
+
+  <!-- ACCORDION 3 -->
+  <div class="accordion-item">
+    <button class="accordion-header">
+      3. Critérios de corte (70%, 75% e 80%) e justificativa técnica
+      <span>›</span>
+    </button>
+    <div class="accordion-content">
+      <p>
+        O CheckInfra adota múltiplos critérios de corte,
+        permitindo flexibilidade conforme a estratégia de gestão pública.
+      </p>
+
+      <ul>
+        <li><strong>70%</strong> — resposta rápida e emergencial</li>
+        <li><strong>75%</strong> — equilíbrio entre impacto e viabilidade</li>
+        <li><strong>80%</strong> — referência clássica do Pareto</li>
+      </ul>
+
+      <p>
+        A utilização de faixas, em vez de um único valor fixo,
+        é recomendada na literatura de gestão da qualidade
+        e planejamento público, pois permite adaptação
+        às restrições orçamentárias e operacionais.
+      </p>
+
+      <p class="info">
+        ℹ️ Referências:
+        Juran (1999); Montgomery (2013); OECD (Public Investment Framework)
+      </p>
+    </div>
+  </div>
+
+  <!-- ACCORDION 4 -->
+  <div class="accordion-item">
+    <button class="accordion-header">
+      4. Densidade crítica por bairro
+      <span>›</span>
+    </button>
+    <div class="accordion-content">
+      <p>
+        A densidade crítica mede a intensidade dos problemas
+        dentro de um território, considerando sua área física.
+      </p>
+
+      <div class="equacao">
+        DC<sub>b</sub> = U<sub>crit,b</sub> / A<sub>b</sub>
+      </div>
+
+      <ul>
+        <li><strong>U<sub>crit,b</sub></strong>: escolas Pareto ou críticas no bairro</li>
+        <li><strong>A<sub>b</sub></strong>: área do bairro (km²)</li>
+      </ul>
+
+      <p>
+        Esse indicador permite comparar bairros de tamanhos diferentes
+        de forma justa e tecnicamente consistente.
+      </p>
+
+      <p class="info">
+        ℹ️ Referências:
+        Anselin (Spatial Econometrics); WHO (Urban Health Indicators)
+      </p>
+    </div>
+  </div>
+
+  <!-- ACCORDION 5 -->
+  <div class="accordion-item">
+    <button class="accordion-header">
+      5. Concentração relativa e desigualdade territorial
+      <span>›</span>
+    </button>
+    <div class="accordion-content">
+      <p>
+        A concentração relativa compara a proporção de escolas críticas
+        de um bairro com a média municipal.
+      </p>
+
+      <div class="equacao">
+        CR<sub>b</sub> =
+        (U<sub>crit,b</sub> / U<sub>b</sub>) ÷
+        (U<sub>crit,tot</sub> / U<sub>tot</sub>)
+      </div>
+
+      <p>
+        Valores acima de 1 indicam concentração superior à média,
+        sugerindo desigualdade territorial na infraestrutura sanitária.
+      </p>
+
+      <p class="info">
+        ℹ️ Referências:
+        UN-Habitat (Spatial Inequality); OECD (Territorial Indicators)
+      </p>
+    </div>
+  </div>
+
+  <!-- ACCORDION 6 -->
+  <div class="accordion-item">
+    <button class="accordion-header">
+      6. Modelo integrado de zonas prioritárias
+      <span>›</span>
+    </button>
+    <div class="accordion-content">
+      <p>
+        Um bairro é classificado como <strong>zona prioritária</strong>
+        quando apresenta simultaneamente:
+      </p>
+
+      <ul>
+        <li>presença de escolas no conjunto Pareto</li>
+        <li>densidade crítica elevada</li>
+        <li>concentração relativa acima da média municipal</li>
+      </ul>
+
+      <div class="equacao">
+        ZP<sub>b</sub> = f(Pareto<sub>b</sub>, DC<sub>b</sub>, CR<sub>b</sub>)
+      </div>
+
+      <p>
+        Esse modelo permite integrar criticidade técnica,
+        intensidade espacial e desigualdade territorial
+        em uma única leitura sintética para apoio à decisão.
+      </p>
+
+      <p class="info">
+        ℹ️ Referências:
+        ISO 31000; Saaty (AHP); UN-Habitat
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPT ACCORDION -->
+<script>
+  const headers = document.querySelectorAll(".accordion-header");
+
+  headers.forEach(header => {
+    header.addEventListener("click", () => {
+      const content = header.nextElementSibling;
+      const isOpen = header.classList.contains("active");
+
+      headers.forEach(h => {
+        h.classList.remove("active");
+        h.nextElementSibling.style.maxHeight = null;
+      });
+
+      if (!isOpen) {
+        header.classList.add("active");
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    });
+  });
+</script>
+
   <!-- 9 REFERENCIAS -->
   <div class="card">
-    <h2>10. Referências Técnicas</h2>
+    <h2>11. Referências Técnicas</h2>
     <ul>
       <li>ABNT NBR 15575 — Desempenho de edificações</li>
       <li>ABNT NBR 5674 — Manutenção de edificações</li>
