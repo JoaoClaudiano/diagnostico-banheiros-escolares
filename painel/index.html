@@ -2,16 +2,6 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8" />
-
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DD4SQ88NVT');
-</script>
-
 <title>Painel Gerencial – CheckInfra</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#1f4fd8">
@@ -19,31 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* ===== NAVEGAÇÃO ===== */
-.nav-global {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  display: flex;
-  gap: 8px;
-  z-index: 9999;
-}
-.nav-global button, .nav-global a {
-  background: rgba(31,79,216,0.95);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  cursor: pointer;
-  font-size: 18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
-}
-
-/* ===== LAYOUT ===== */
 body {
   font-family: Arial, sans-serif;
   background:#f4f6f8;
@@ -72,26 +37,16 @@ th, td {
 }
 th { background:#f4f6f8; text-align:left; }
 
-/* ===== BADGES ===== */
 .badge {
-  padding:4px 10px;
-  border-radius:14px;
+  padding:4px 8px;
+  border-radius:12px;
   color:#fff;
   font-size:12px;
-  text-transform: capitalize;
 }
-.alta { background:#f44336; }
-.media { background:#ff9800; }
-.baixa { background:#4caf50; }
-
-button.export {
-  background:#1f4fd8;
-  color:#fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
+.adequada { background:#4caf50; }
+.alerta { background:#ff9800; }
+.atencao { background:#ff7043; }
+.critica { background:#f44336; }
 
 @media(max-width:800px){
   .grid { grid-template-columns:1fr; }
@@ -101,50 +56,36 @@ button.export {
 
 <body>
 
-<!-- Navegação -->
-<div class="nav-global">
-  <button onclick="history.back()">⬅️</button>
-  <a href="./index.html">🏠</a>
-</div>
-
-<!-- Cabeçalho -->
 <div class="card">
   <h2>Painel Gerencial – CheckInfra</h2>
-  <small>
-    Dashboard executivo para apoio à decisão e priorização de intervenções em infraestrutura escolar.
-  </small>
+  <small>Síntese executiva e priorização técnica</small>
 </div>
 
-<!-- Leitura executiva -->
 <div class="card">
   <strong>📌 Leitura rápida</strong>
   <div id="textoExecutivo">Carregando...</div>
 </div>
 
-<!-- Gráficos -->
 <div class="card grid">
   <div>
-    <h3>Status das Avaliações</h3>
+    <h3>Status das Unidades</h3>
     <canvas id="graficoStatus"></canvas>
   </div>
 
   <div>
-    <h3>Distribuição do Índice de Prioridade (IPT)</h3>
+    <h3>Top Prioridades (IPT)</h3>
     <canvas id="graficoIndice"></canvas>
   </div>
 </div>
 
-<!-- Ranking -->
 <div class="card">
-  <h3>🏆 Ranking Geral de Prioridades</h3>
-  <button class="export" onclick="exportarCSV()">⬇️ Exportar ranking completo (CSV)</button>
-
+  <h3>🏆 Ranking Geral de Prioridade Técnica</h3>
   <table>
     <thead>
       <tr>
         <th>#</th>
         <th>Escola</th>
-        <th>Prioridade</th>
+        <th>Status</th>
         <th>IPT</th>
       </tr>
     </thead>
@@ -152,23 +93,8 @@ button.export {
   </table>
 </div>
 
-<!-- Metodologia -->
-<div class="card">
-  <small>
-    <strong>Metodologia do Índice de Prioridade Técnica (IPT)</strong><br>
-    O IPT é um indicador sintético utilizado para apoio à priorização de intervenções.
-    Ele combina: (i) gravidade do status sanitário (50%),
-    (ii) pontuação técnica da avaliação (30%) e
-    (iii) recorrência temporal de criticidade (20%).
-    O índice não substitui inspeções técnicas presenciais.
-    <br><br>
-    <a href="./metodologia.html">📄 Ver metodologia completa</a>
-  </small>
-</div>
-
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbyt4wD8LQ67NOD-Zz7EEvfc7RuYEhKDYE50gkK7rp-47idg6STKUGqk5pYVDclamentdQ/exec";
-let rankingGlobal = [];
 
 fetch(URL)
 .then(r=>r.json())
@@ -176,88 +102,101 @@ fetch(URL)
 
 function montarDashboard(dados) {
 
-  const statusCount = { adequada:0, alerta:0, critica:0 };
-  const faixas = { baixa:0, media:0, alta:0 };
+  const statusCount = {
+    adequada: 0,
+    alerta: 0,
+    atencao: 0,
+    critica: 0
+  };
+
+  const ranking = [];
 
   dados.forEach(d => {
-    const s = (d.status||"").toLowerCase();
+    const s = (d.status || "").toLowerCase();
     let pesoStatus = 1;
+    let classe = "adequada";
 
-    if (s.includes("crít")) { statusCount.critica++; pesoStatus = 3; }
-    else if (s.includes("alerta")) { statusCount.alerta++; pesoStatus = 2; }
-    else statusCount.adequada++;
+    if (s.includes("crít")) {
+      statusCount.critica++;
+      pesoStatus = 4;
+      classe = "critica";
+    }
+    else if (s.includes("aten")) {
+      statusCount.atencao++;
+      pesoStatus = 3;
+      classe = "atencao";
+    }
+    else if (s.includes("alerta")) {
+      statusCount.alerta++;
+      pesoStatus = 2;
+      classe = "alerta";
+    }
+    else {
+      statusCount.adequada++;
+    }
 
-    const pont = Number(d.pontuacao||0);
-    const dias = Number(d.dias_criticos||0);
+    const pont = Number(d.pontuacao || 0);
+    const dias = Number(d.dias_criticos || 0);
 
-    const IPT = (pesoStatus*0.5)+(pont*0.3)+(dias*0.2);
+    // Índice de Prioridade Técnica (IPT)
+    const IPT = (pesoStatus * 0.4) + (pont * 0.4) + (dias * 0.2);
 
-    let prioridade = "baixa";
-    if (IPT >= 5) prioridade = "alta";
-    else if (IPT >= 3) prioridade = "media";
-
-    faixas[prioridade]++;
-
-    rankingGlobal.push({
+    ranking.push({
       escola: d.escola || "Sem nome",
-      prioridade,
-      indice: IPT.toFixed(2)
+      classe,
+      IPT: IPT
     });
   });
 
-  rankingGlobal.sort((a,b)=>b.indice-a.indice);
+  ranking.sort((a,b)=>b.IPT - a.IPT);
 
-  document.getElementById("textoExecutivo").innerHTML =
-    `${Math.round((statusCount.critica/dados.length)*100)}% das unidades estão em situação crítica.
-     Foram identificadas <strong>${faixas.alta}</strong> escolas com prioridade elevada de intervenção.`;
+  document.getElementById("textoExecutivo").innerHTML = `
+    ${statusCount.critica} unidades em condição <strong>crítica</strong> e 
+    ${statusCount.atencao} em <strong>atenção elevada</strong>.  
+    O ranking considera gravidade, pontuação técnica e histórico.
+  `;
 
   new Chart(graficoStatus,{
     type:"pie",
     data:{
-      labels:["Adequada","Alerta","Crítica"],
+      labels:["Adequada","Alerta","Atenção elevada","Crítica"],
       datasets:[{
-        data:Object.values(statusCount),
-        backgroundColor:["#4caf50","#ff9800","#f44336"]
+        data:[
+          statusCount.adequada,
+          statusCount.alerta,
+          statusCount.atencao,
+          statusCount.critica
+        ],
+        backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"]
       }]
     }
   });
 
   new Chart(graficoIndice,{
-    type:"doughnut",
+    type:"bar",
     data:{
-      labels:["Baixa","Média","Alta"],
+      labels: ranking.slice(0,10).map(r=>r.escola),
       datasets:[{
-        data:[faixas.baixa, faixas.media, faixas.alta],
-        backgroundColor:["#4caf50","#ff9800","#f44336"]
+        data: ranking.slice(0,10).map(r=>r.IPT.toFixed(2)),
+        backgroundColor:"#1f4fd8"
       }]
     },
-    options:{ plugins:{ legend:{ position:"bottom" } } }
+    options:{
+      plugins:{ legend:{ display:false } },
+      indexAxis: 'y'
+    }
   });
 
   const tbody = document.getElementById("tabelaRanking");
-  rankingGlobal.forEach((r,i)=>{
+  ranking.forEach((r,i)=>{
     tbody.innerHTML += `
       <tr>
         <td>${i+1}</td>
         <td>${r.escola}</td>
-        <td><span class="badge ${r.prioridade}">${r.prioridade}</span></td>
-        <td>${r.indice}</td>
+        <td><span class="badge ${r.classe}">${r.classe}</span></td>
+        <td>${r.IPT.toFixed(2)}</td>
       </tr>`;
   });
-}
-
-function exportarCSV(){
-  let csv = "Posição;Escola;Prioridade;IPT\n";
-  rankingGlobal.forEach((r,i)=>{
-    csv += `${i+1};${r.escola};${r.prioridade};${r.indice}\n`;
-  });
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "ranking_checkinfra.csv";
-  a.click();
 }
 </script>
 
