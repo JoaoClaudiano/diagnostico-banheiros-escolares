@@ -12,14 +12,15 @@
   gtag('config', 'G-DD4SQ88NVT');
 </script>
 
-<title>Mapa Sanitário – Escolas Municipais</title>
+<title>Análise Espacial – CheckInfra</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#1f4fd8">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- 🔥 PLUGIN HEATMAP -->
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
 <style>
 body { margin:0; font-family: Arial, sans-serif; }
@@ -32,7 +33,7 @@ header {
   font-weight:bold;
 }
 
-#map { height: calc(100vh - 170px); }
+#map { height: calc(100vh - 190px); }
 
 .painel {
   padding:10px;
@@ -61,8 +62,7 @@ header {
 .laranja { background:orange; }
 .vermelho { background:red; }
 
-/* ===== PULSO CARTOGRÁFICO ===== */
-
+/* ===== PULSO ===== */
 .pulse-critico { animation: pulse-red 2.4s ease-out infinite; }
 .pulse-alerta  { animation: pulse-orange 2.4s ease-out infinite; }
 .pulse-adequado{ animation: pulse-green 2.4s ease-out infinite; }
@@ -72,13 +72,11 @@ header {
   70% { r:18; opacity:0; }
   100% { opacity:0; }
 }
-
 @keyframes pulse-orange {
   0% { r:8; opacity:.8; }
   70% { r:16; opacity:0; }
   100% { opacity:0; }
 }
-
 @keyframes pulse-green {
   0% { r:8; opacity:.7; }
   70% { r:14; opacity:0; }
@@ -86,7 +84,6 @@ header {
 }
 
 /* ===== LEGENDA ===== */
-
 .legenda {
   background:#fff;
   padding:10px;
@@ -110,20 +107,27 @@ header {
 <body>
 
 <header>
-  Mapa Sanitário das Escolas – Secretaria de Educação
+  Análise Espacial – Leitura Territorial Exploratória
+  <div style="font-size:12px;font-weight:normal;opacity:.9;">
+    Identificação de padrões espaciais relativos às condições sanitárias das escolas
+  </div>
 </header>
 
+<div style="padding:10px;font-size:13px;background:#f8f9fa;border-bottom:1px solid #ddd;text-align:center;">
+  Esta visualização apresenta <strong>padrões espaciais relativos</strong>.
+  As análises são exploratórias e não indicam causalidade,
+  nem substituem vistorias técnicas presenciais.
+</div>
+
 <div class="painel">
-  <label><input type="checkbox" id="filtroAdequado" checked>
-    <span class="bola verde"></span> Adequado
+  <label>
+    <input type="checkbox" id="toggleHeatmap" checked>
+    🔥 Heatmap (concentração territorial)
   </label>
 
-  <label><input type="checkbox" id="filtroAlerta" checked>
-    <span class="bola laranja"></span> Alerta
-  </label>
-
-  <label><input type="checkbox" id="filtroCritico" checked>
-    <span class="bola vermelho"></span> Crítico
+  <label>
+    <input type="checkbox" id="togglePontos">
+    ⬤ Escolas (pontos)
   </label>
 
   <label>
@@ -143,24 +147,30 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-const camadaAdequado = L.layerGroup().addTo(map);
-const camadaAlerta = L.layerGroup().addTo(map);
-const camadaCritico = L.layerGroup().addTo(map);
+// Camadas
+const camadaAdequado = L.layerGroup();
+const camadaAlerta = L.layerGroup();
+const camadaCritico = L.layerGroup();
 
 let pulsoAtivo = true;
+let dadosHeatmap = [];
+
+const camadaHeatmap = L.heatLayer(dadosHeatmap, {
+  radius: 30,
+  blur: 20,
+  maxZoom: 17
+});
 
 function camadaPorStatus(status) {
   if (status.includes("crítica")) return camadaCritico;
   if (status.includes("alerta")) return camadaAlerta;
   return camadaAdequado;
 }
-
 function corPorStatus(status) {
   if (status.includes("crítica")) return "red";
   if (status.includes("alerta")) return "orange";
   return "green";
 }
-
 function classePulso(status) {
   if (!pulsoAtivo) return "";
   if (status.includes("crítica")) return "pulse-critico";
@@ -174,13 +184,12 @@ fetch(API_URL)
     dados.forEach(e => {
       if (!e.lat || !e.lng) return;
 
-      const layer = camadaPorStatus(e.status);
-      const cor = corPorStatus(e.status);
+      dadosHeatmap.push([e.lat, e.lng, 1]);
 
       L.circleMarker([e.lat, e.lng], {
         radius:8,
-        color:cor,
-        fillColor:cor,
+        color: corPorStatus(e.status),
+        fillColor: corPorStatus(e.status),
         fillOpacity:.8,
         className: classePulso(e.status)
       })
@@ -189,16 +198,35 @@ fetch(API_URL)
         Status: ${e.status}<br>
         Pontuação: ${e.pontuacao}
       `)
-      .addTo(layer);
+      .addTo(camadaPorStatus(e.status));
     });
+
+    camadaHeatmap.addTo(map);
   });
+
+// Controles
+document.getElementById("toggleHeatmap").addEventListener("change", e => {
+  e.target.checked ? map.addLayer(camadaHeatmap) : map.removeLayer(camadaHeatmap);
+});
+
+document.getElementById("togglePontos").addEventListener("change", e => {
+  if (e.target.checked) {
+    map.addLayer(camadaAdequado);
+    map.addLayer(camadaAlerta);
+    map.addLayer(camadaCritico);
+  } else {
+    map.removeLayer(camadaAdequado);
+    map.removeLayer(camadaAlerta);
+    map.removeLayer(camadaCritico);
+  }
+});
 
 document.getElementById("togglePulso").addEventListener("change", e => {
   pulsoAtivo = e.target.checked;
   location.reload();
 });
 
-/* LEGENDA */
+// Legenda
 const legenda = L.control({ position: "bottomright" });
 legenda.onAdd = function () {
   const div = L.DomUtil.create("div", "legenda");
@@ -209,7 +237,7 @@ legenda.onAdd = function () {
     <div><span class="bola vermelho"></span> Prioridade de intervenção</div>
     <hr>
     <small>
-      O pulso indica intensidade relativa de atenção territorial.
+      Heatmap indica concentração territorial relativa.
       Não substitui inspeção técnica presencial.
     </small>
   `;
