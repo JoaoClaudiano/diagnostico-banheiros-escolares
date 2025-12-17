@@ -10,7 +10,244 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>CheckInfra — Análise Espacial Prioritária</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  color: #333;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+h1, h2 {
+  color: #1f4fd8;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 26px;
+  margin-bottom: 26px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.accordion-item {
+  border-top: 1px solid #e0e0e0;
+  margin-top: 12px;
+}
+
+.accordion-header {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1f4fd8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+}
+
+.accordion-header span {
+  font-size: 20px;
+  transition: transform 0.3s ease;
+}
+
+.accordion-header.active span {
+  transform: rotate(90deg);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.accordion-content p,
+.accordion-content ul {
+  margin: 10px 0;
+}
+
+.info {
+  font-size: 13px;
+  color: #555;
+}
+
+@media (max-width: 600px) {
+  .accordion-header {
+    font-size: 15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<div class="card">
+<h1>Análise Espacial Prioritária — CheckInfra</h1>
+<p>
+Esta seção apresenta como o <strong>Princípio de Pareto</strong> é aplicado
+à análise espacial, em conjunto com <strong>densidade crítica</strong> e
+<strong>concentração relativa</strong>, para definição de zonas prioritárias
+de intervenção.
+</p>
+
+<!-- ABA 1 -->
+<div class="accordion-item">
+<button class="accordion-header">
+1. Princípio de Pareto aplicado ao território
+<span>›</span>
+</button>
+<div class="accordion-content">
+<p>
+O Princípio de Pareto indica que uma pequena parcela das causas
+costuma concentrar a maior parte dos efeitos.
+</p>
+<p>
+No contexto territorial, isso significa que <strong>poucos territórios
+concentram a maior parte da criticidade sanitária da rede</strong>.
+</p>
+<p>
+No CheckInfra, o Pareto é aplicado sobre indicadores técnicos
+(IPT, pontuação crítica ou número de unidades críticas),
+ordenando os territórios do maior para o menor impacto.
+</p>
+<p class="info">
+ℹ️ Referências: Juran (1992), Montgomery (2019)
+</p>
+</div>
+</div>
+
+<!-- ABA 2 -->
+<div class="accordion-item">
+<button class="accordion-header">
+2. Critérios de corte (70%, 75% e 80%)
+<span>›</span>
+</button>
+<div class="accordion-content">
+<p>
+Para evitar arbitrariedade, o CheckInfra utiliza
+<strong>faixas de corte progressivas</strong> do Pareto:
+</p>
+<ul>
+<li><strong>70%</strong> — núcleo crítico (prioridade imediata)</li>
+<li><strong>75%</strong> — prioridade estratégica</li>
+<li><strong>80%</strong> — prioridade ampliada (Pareto clássico)</li>
+</ul>
+<p>
+Esses cortes permitem adaptar decisões à disponibilidade
+orçamentária e ao horizonte temporal da política pública.
+</p>
+</div>
+</div>
+
+<!-- ABA 3 -->
+<div class="accordion-item">
+<button class="accordion-header">
+3. Densidade crítica
+<span>›</span>
+</button>
+<div class="accordion-content">
+<p>
+A densidade crítica mede a <strong>intensidade espacial</strong> dos problemas,
+indicando quantas unidades críticas existem em uma determinada área.
+</p>
+<p>
+Ela permite identificar <strong>bolsões territoriais de fragilidade</strong>,
+onde intervenções integradas tendem a ser mais eficientes.
+</p>
+<p class="info">
+ℹ️ Base conceitual: análise espacial, saúde pública, planejamento urbano
+</p>
+</div>
+</div>
+
+<!-- ABA 4 -->
+<div class="accordion-item">
+<button class="accordion-header">
+4. Concentração relativa
+<span>›</span>
+</button>
+<div class="accordion-content">
+<p>
+A concentração relativa compara a proporção de unidades críticas
+de um território com a média da cidade.
+</p>
+<p>
+Valores acima de 1 indicam que o território está
+<strong>desproporcionalmente mais afetado</strong>,
+evidenciando desigualdade territorial.
+</p>
+</div>
+</div>
+
+<!-- ABA 5 -->
+<div class="accordion-item">
+<button class="accordion-header">
+5. Zonas prioritárias integradas
+<span>›</span>
+</button>
+<div class="accordion-content">
+<p>
+Um território é classificado como <strong>Zona Prioritária</strong> quando:
+</p>
+<ul>
+<li>está dentro do corte de Pareto</li>
+<li>apresenta alta densidade crítica</li>
+<li>possui concentração relativa acima da média</li>
+</ul>
+<p>
+Essa integração evita decisões baseadas em um único indicador
+e fortalece a justiça técnica da priorização.
+</p>
+</div>
+</div>
+
+</div>
+
+</main>
+
+<script>
+const headers = document.querySelectorAll(".accordion-header");
+
+headers.forEach(header => {
+  header.addEventListener("click", () => {
+    const content = header.nextElementSibling;
+    const isOpen = header.classList.contains("active");
+
+    headers.forEach(h => {
+      h.classList.remove("active");
+      h.nextElementSibling.style.maxHeight = null;
+    });
+
+    if (!isOpen) {
+      header.classList.add("active");
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  });
+});
+</script>
+
+</body>
+</html>
 <style>
 body { margin:0; font-family: Arial, sans-serif; }
 .nav-global {
