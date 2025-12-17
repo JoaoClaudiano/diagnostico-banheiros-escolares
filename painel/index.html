@@ -65,50 +65,19 @@ th { background:#f4f6f8; text-align:left; }
   <strong>📌 Leitura rápida</strong>
   <div id="textoExecutivo">Carregando...</div>
 </div>
+
 <div class="card">
   <h3>📘 Como ler este Dashboard</h3>
   <p>
-  <strong>Legenda de Status:</strong><br>
-  🟢 Adequada &nbsp;
-  🟡 Alerta &nbsp;
-  🟠 Atenção Elevada &nbsp;
-  🔴 Crítica
-</p>
-  <p>
-    Este painel apresenta uma <strong>síntese executiva</strong> das avaliações
-    realizadas pelo CheckInfra, com foco em <strong>priorização técnica</strong>
-    e apoio à tomada de decisão.
+    🟢 Adequada &nbsp; 🟡 Alerta &nbsp; 🟠 Atenção Elevada &nbsp; 🔴 Crítica
   </p>
-
-  <ul>
-    <li>
-      <strong>Status</strong> (Adequada, Alerta, Atenção Elevada, Crítica) indicam
-      a <em>condição atual</em> observada no momento da avaliação.
-    </li>
-
-    <li>
-      O <strong>Índice de Prioridade Técnica (IPT)</strong> é um indicador composto
-      que combina:
-      <ul>
-        <li>Gravidade do status</li>
-        <li>Pontuação técnica dos problemas</li>
-        <li>Persistência temporal da condição</li>
-      </ul>
-    </li>
-
-    <li>
-      Por isso, <strong>nem toda unidade crítica aparece no topo do ranking</strong>:
-      escolas com problemas recorrentes ou histórico prolongado podem demandar
-      intervenção prioritária.
-    </li>
-  </ul>
-
   <p>
-    O painel <strong>não substitui inspeções técnicas formais</strong>, mas orienta
-    a alocação de recursos, vistorias presenciais e planejamento de intervenções
-    de forma objetiva e transparente.
+    O Índice de Prioridade Técnica (IPT) combina gravidade do status,
+    pontuação técnica e persistência temporal, permitindo hierarquizar
+    intervenções de forma objetiva.
   </p>
 </div>
+
 <div class="card grid">
   <div>
     <h3>Status das Unidades</h3>
@@ -122,7 +91,7 @@ th { background:#f4f6f8; text-align:left; }
 </div>
 
 <div class="card">
-  <h3>🏆 Ranking Geral de Prioridade Técnica</h3>
+  <h3>🏆 Ranking Geral de Prioridade Técnica (Top 20)</h3>
   <table>
     <thead>
       <tr>
@@ -145,13 +114,7 @@ fetch(URL)
 
 function montarDashboard(dados) {
 
-  const statusCount = {
-    adequada: 0,
-    alerta: 0,
-    atencao: 0,
-    critica: 0
-  };
-
+  const statusCount = { adequada:0, alerta:0, atencao:0, critica:0 };
   const ranking = [];
 
   dados.forEach(d => {
@@ -159,57 +122,39 @@ function montarDashboard(dados) {
     let pesoStatus = 1;
     let classe = "adequada";
 
-    if (s.includes("crít")) {
-      statusCount.critica++;
-      pesoStatus = 4;
-      classe = "critica";
-    }
-    else if (s.includes("aten")) {
-      statusCount.atencao++;
-      pesoStatus = 3;
-      classe = "atencao";
-    }
-    else if (s.includes("alerta")) {
-      statusCount.alerta++;
-      pesoStatus = 2;
-      classe = "alerta";
-    }
-    else {
-      statusCount.adequada++;
-    }
+    if (s.includes("crít")) { pesoStatus=4; classe="critica"; statusCount.critica++; }
+    else if (s.includes("aten")) { pesoStatus=3; classe="atencao"; statusCount.atencao++; }
+    else if (s.includes("alerta")) { pesoStatus=2; classe="alerta"; statusCount.alerta++; }
+    else statusCount.adequada++;
 
     const pont = Number(d.pontuacao || 0);
-    const dias = Number(d.dias_criticos || 0);
+    const dias = Math.min(Number(d.dias_criticos || 0), 30);
 
-    // Índice de Prioridade Técnica (IPT)
-    const IPT = (pesoStatus * 0.4) + (pont * 0.4) + (dias * 0.2);
+    const IPT = (pesoStatus*0.4)+(pont*0.4)+(dias*0.2);
 
     ranking.push({
       escola: d.escola || "Sem nome",
       classe,
-      IPT: IPT
+      statusLabel:
+        classe==="critica"?"Crítica":
+        classe==="atencao"?"Atenção Elevada":
+        classe==="alerta"?"Alerta":"Adequada",
+      IPT
     });
   });
 
-  ranking.sort((a,b)=>b.IPT - a.IPT);
+  ranking.sort((a,b)=>b.IPT-a.IPT);
 
-  document.getElementById("textoExecutivo").innerHTML = `
-    ${statusCount.critica} unidades em condição <strong>crítica</strong> e 
-    ${statusCount.atencao} em <strong>atenção elevada</strong>.  
-    O ranking considera gravidade, pontuação técnica e histórico.
-  `;
+  document.getElementById("textoExecutivo").innerHTML =
+    `${statusCount.critica} unidades críticas e ${statusCount.atencao} em atenção elevada.
+     O ranking prioriza gravidade, recorrência e impacto técnico.`;
 
   new Chart(graficoStatus,{
     type:"pie",
     data:{
-      labels:["Adequada","Alerta","Atenção elevada","Crítica"],
+      labels:["Adequada","Alerta","Atenção Elevada","Crítica"],
       datasets:[{
-        data:[
-          statusCount.adequada,
-          statusCount.alerta,
-          statusCount.atencao,
-          statusCount.critica
-        ],
+        data:Object.values(statusCount),
         backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"]
       }]
     }
@@ -224,19 +169,16 @@ function montarDashboard(dados) {
         backgroundColor:"#1f4fd8"
       }]
     },
-    options:{
-      plugins:{ legend:{ display:false } },
-      indexAxis: 'y'
-    }
+    options:{ indexAxis:'y', plugins:{legend:{display:false}} }
   });
 
   const tbody = document.getElementById("tabelaRanking");
-  ranking.forEach((r,i)=>{
+  ranking.slice(0,20).forEach((r,i)=>{
     tbody.innerHTML += `
       <tr>
         <td>${i+1}</td>
         <td>${r.escola}</td>
-        <td><span class="badge ${r.classe}">${r.classe}</span></td>
+        <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
         <td>${r.IPT.toFixed(2)}</td>
       </tr>`;
   });
