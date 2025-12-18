@@ -7,7 +7,6 @@ function gerarIdCheckInfra() {
   const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `CI-${ano}-${mes}-${dia}-${rand}`;
 }
-
 // ===================== PDF =====================
 function gerarPDF(d) {
   const { jsPDF } = window.jspdf;
