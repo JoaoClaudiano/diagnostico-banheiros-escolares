@@ -22,41 +22,39 @@
 
 <style>
 body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; }
-.header { background: #1f4fd8; color: #fff; text-align: center; padding: 18px; font-size: 18px; font-weight: bold; }
+.header { background: #1f4fd8; color: #fff; text-align: center; padding: 20px; font-size: 18px; font-weight: bold; }
 .container { max-width: 900px; margin: 20px auto; padding: 0 16px; }
-h1 { text-align: center; margin: 16px 0; font-size: 1.6rem; }
+h1 { text-align: center; margin: 20px 0; }
 
-.card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,.08); transition: all .2s ease; }
-.card-grande h3 { margin-bottom: 10px; color: #1f4fd8; font-size: 1.2rem; }
+.card { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.08); transition: all .2s ease; }
+.card-grande h3 { margin-bottom: 12px; color: #1f4fd8; }
 
-.checklist { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-.check-card { padding: 10px; border-radius: 12px; background: #fafafa; border: 2px solid #e0e0e0; cursor: pointer; transition: all .2s ease; text-align: center; font-weight: normal; font-size: 0.95rem; }
+.checklist { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.check-card { padding: 12px; border-radius: 12px; background: #fafafa; border: 2px solid #e0e0e0; cursor: pointer; transition: all .2s ease; text-align: center; font-weight: normal; }
 .check-card:hover { transform: translateY(-2px); box-shadow: 0 3px 6px rgba(0,0,0,.1); }
 .check-card.selected { border-color: #1f4fd8; background: #eaf0ff; font-weight: bold; }
 
-label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem; }
-select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 12px; font-size: 0.95rem; }
+label { font-weight: bold; display: block; margin-bottom: 6px; }
+select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 14px; }
 
-.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 18px; text-align: center; background: #fcfcfc; margin-bottom: 20px; }
+.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; cursor: pointer; }
 .upload-box input { display: none; }
-.upload-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.upload-preview img { width: 80px; height: auto; border-radius: 8px; border: 1px solid #ccc; }
+.upload-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.upload-preview img { width: 100px; height: auto; border-radius: 8px; border: 1px solid #ccc; }
 
-button { width: 100%; padding: 14px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 button:hover { background: #163ca6; }
 
-.resultado { padding: 18px; border-radius: 14px; font-weight: bold; margin-top: 50px; display: none; color: #000; font-size: 0.95rem; }
+.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 40px; display: none; color: #000; }
 .resultado-ok { background: #d4edda; color: #155724; }
 .resultado-alerta { background: #fff3cd; color: #856404; }
 .resultado-critico { background: #f8d7da; color: #721c24; }
 
 .selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
 
+/* Media query para subir card de resultado em celular */
 @media (max-width: 600px) {
-  .resultado { margin-top: 90px; } /* sobe o card para não ser coberto */
-  .check-card { font-size: 0.9rem; padding: 8px; }
-  button { padding: 12px; font-size: 15px; }
-  .upload-preview img { width: 70px; }
+  .resultado { margin-top: 20px; }
 }
 </style>
 </head>
@@ -108,16 +106,15 @@ button:hover { background: #163ca6; }
   </div>
 
   <!-- CARD 3 — UPLOAD DE FOTOS -->
-  <div class="card upload-box">
+  <div class="card upload-box" id="upload-box">
     <h3>📷 Registro Fotográfico</h3>
     <input type="file" id="fotos" accept="image/*" multiple>
     <div id="preview" class="upload-preview"></div>
   </div>
 
-  <button type="submit">Gerar Diagnóstico e PDF</button>
+  <button type="submit">Gerar Diagnóstico</button>
 </form>
 
-<!-- CARD DE DIAGNÓSTICO -->
 <div id="resultado" class="resultado"></div>
 
 </div>
@@ -153,9 +150,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Preview de fotos
+  // Upload box clicável
+  const uploadBox = document.getElementById("upload-box");
   const fotosInput = document.getElementById("fotos");
   const preview = document.getElementById("preview");
+
+  uploadBox.addEventListener("click", () => fotosInput.click());
+
   fotosInput.addEventListener("change", () => {
     preview.innerHTML = "";
     Array.from(fotosInput.files).forEach(file => {
@@ -179,7 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
       pontuacao += parseInt(card.dataset.peso || 0);
     });
 
-    // Status
     let status = "ok";
     if (pontuacao >= 6 && pontuacao < 10) status = "alerta";
     else if (pontuacao >= 10) status = "critico";
@@ -187,9 +187,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const avaliador = document.getElementById("avaliador").value;
     const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
 
+    // Atualiza card de resultado
     const resultado = document.getElementById("resultado");
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
+    resultado.scrollIntoView({behavior: "smooth", block: "center"});
     resultado.innerHTML = `
       <div class="selo">
         ${status === "ok" ? "🟢 Condição adequada" :
