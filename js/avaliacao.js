@@ -99,55 +99,56 @@ document.addEventListener("DOMContentLoaded",()=>{
     fotosBase64=[];
 
     [...fotosInput.files].forEach(file=>{
-      const reader=new FileReader();
-      reader.onload=e=>{
+      const reader = new FileReader();
+      reader.onload = e => {
         fotosBase64.push(e.target.result);
-        const img=document.createElement("img");
-        img.src=e.target.result;
+        const img = document.createElement("img");
+        img.src = e.target.result;
         preview.appendChild(img);
       };
       reader.readAsDataURL(file);
     });
   });
 
-  document.getElementById("form-avaliacao").addEventListener("submit",async e=>{
+  document.getElementById("form-avaliacao").addEventListener("submit", async e => {
     e.preventDefault();
 
-    let pontuacao=0,problemas=[];
+    let pontuacao = 0;
+    let problemas = [];
     document.querySelectorAll(".check-card.selected").forEach(c=>{
-      pontuacao+=Number(c.dataset.peso);
+      pontuacao += Number(c.dataset.peso);
       problemas.push(c.innerText.trim());
     });
 
-    let status="Adequada",classe="ok";
-    if(pontuacao>=8){status="Crítica";classe="critico";}
-    else if(pontuacao>=4){status="Alerta";classe="alerta";}
+    let status = "Adequada", classe="ok";
+    if(pontuacao>=8){ status="Crítica"; classe="critico"; }
+    else if(pontuacao>=4){ status="Alerta"; classe="alerta"; }
 
-    // =================== NOVO ===================
-    const id = gerarIdCheckInfra();
-    window.idcheckinfra = id; // <- define o ID global
-    // ============================================
-
-    const dados={
-      id,
-      escola:document.getElementById("escola").value,
-      avaliador:document.getElementById("avaliador").value,
+    const dados = {
+      id: gerarIdCheckInfra(),
+      escola: document.getElementById("escola").value,
+      avaliador: document.getElementById("avaliador").value,
       pontuacao,
       status,
       classe,
       problemas,
-      fotos:fotosBase64
+      fotos: fotosBase64
     };
+
+    // **Define global ID para o HTML**
+    window.idcheckinfra = dados.id;
 
     try{
       if(navigator.onLine){
         await setDoc(doc(db,"avaliacoes",dados.id),{...dados,createdAt:serverTimestamp()});
-      }else salvarOffline(dados);
-    }catch{
+      } else salvarOffline(dados);
+    } catch {
       salvarOffline(dados);
     }
 
-    gerarPDF(dados);
+    // PDF ainda pode ser gerado se quiser
+    // gerarPDF(dados);
+
     e.target.reset();
     preview.innerHTML="";
     fotosBase64=[];
