@@ -17,9 +17,6 @@
   gtag('config', 'G-DD4SQ88NVT');
 </script>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
 body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; }
 .header { background: #1f4fd8; color: #fff; text-align: center; padding: 20px; font-size: 18px; font-weight: bold; }
@@ -45,12 +42,17 @@ select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px soli
 button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 button:hover { background: #163ca6; }
 
-.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 20px; display: none; color: #000; }
+.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 40px; display: none; color: #000; }
 .resultado-ok { background: #d4edda; color: #155724; }
 .resultado-alerta { background: #fff3cd; color: #856404; }
 .resultado-critico { background: #f8d7da; color: #721c24; }
 
 .selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+
+/* Media Query para dispositivos móveis */
+@media (max-width: 600px){
+  .resultado { margin-top: 80px; }
+}
 </style>
 </head>
 
@@ -107,7 +109,7 @@ button:hover { background: #163ca6; }
     <div id="preview" class="upload-preview"></div>
   </div>
 
-  <button type="submit">Gerar Diagnóstico e PDF</button>
+  <button type="submit">Gerar Diagnóstico</button>
 </form>
 
 <div id="resultado" class="resultado"></div>
@@ -161,16 +163,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Submit: mostra resultado com ID real do avaliacao.js
+  // Submit
   const form = document.getElementById("form-avaliacao");
   form.addEventListener("submit", e => {
     e.preventDefault();
 
+    // Pontuação baseada nos check-cards selecionados
     let pontuacao = 0;
     document.querySelectorAll(".check-card.selected").forEach(card => {
       pontuacao += parseInt(card.dataset.peso || 0);
     });
 
+    // Status
     let status = "ok";
     if (pontuacao >= 6 && pontuacao < 10) status = "alerta";
     else if (pontuacao >= 10) status = "critico";
@@ -178,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const avaliador = document.getElementById("avaliador").value;
     const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
 
+    // Atualiza card de resultado
     const resultado = document.getElementById("resultado");
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
@@ -187,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
           status === "alerta" ? "🟡 Situação de alerta" :
           "🔴 Condição crítica"}
       </div>
-      <strong>IDCHECKINFRA:</strong> ${idCheckInfra}<br>
+      <strong>ID:</strong> ${idCheckInfra}<br>
       <strong>Pontuação:</strong> ${pontuacao}<br>
       <strong>Avaliador:</strong> ${avaliador}<br>
       ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
