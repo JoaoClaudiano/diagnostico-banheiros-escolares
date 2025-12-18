@@ -2,6 +2,11 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<title>CheckInfra – Avaliação Sanitária</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1f4fd8">
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
@@ -12,24 +17,18 @@
   gtag('config', 'G-DD4SQ88NVT');
 </script>
 
-<title>CheckInfra – Avaliação Sanitária</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#1f4fd8">
-
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; }
-.header { background: #1f4fd8; height: 80px; }
-.logo-box { display: flex; justify-content: center; margin-top: -40px; }
-.logo-box img { height: 90px; }
+.header { background: #1f4fd8; color: #fff; text-align: center; padding: 20px; font-size: 18px; font-weight: bold; }
 .container { max-width: 900px; margin: 20px auto; padding: 0 16px; }
 h1 { text-align: center; margin: 20px 0; }
 
-.card { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+.card { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.08); cursor: pointer; transition: all .2s ease; }
+.card.selected { border-color: #1f4fd8; background: #eaf0ff; font-weight: bold; }
+
 label { font-weight: bold; display: block; margin-bottom: 6px; }
 select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 14px; }
 
@@ -37,9 +36,6 @@ select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px soli
 .categoria h3 { color: #1f4fd8; margin-bottom: 12px; }
 
 .checklist { display: flex; flex-direction: column; gap: 12px; }
-.check-card { border: 2px solid #e0e0e0; border-radius: 12px; padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; background: #fafafa; transition: all .2s ease; }
-.check-card span.icon { font-size: 22px; }
-.check-card:has(input:checked) { border-color: #1f4fd8; background: #eaf0ff; font-weight: bold; }
 
 .upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; }
 .upload-box input { display: none; }
@@ -49,37 +45,20 @@ select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px soli
 button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 button:hover { background: #163ca6; }
 
-.resultado { display: none; padding: 20px; border-radius: 12px; font-weight: bold; }
-.resultado.ok { background: #e8f7ee; color: #1e7e34; }
-.resultado.alerta { background: #fff3cd; color: #856404; }
-.resultado.critico { background: #f8d7da; color: #721c24; }
-
+.resultado { padding: 20px; border-radius: 12px; font-weight: bold; margin-top: 20px; display: none; }
 .selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
 .selo-ok { background: #d4edda; color: #155724; }
 .selo-alerta { background: #fff3cd; color: #856404; }
 .selo-critico { background: #f8d7da; color: #721c24; }
-
-#offlineCard { background: #fff8e1; color: #856404; border-left: 6px solid #f0ad4e; padding: 12px; margin-bottom: 16px; }
 </style>
 </head>
 
 <body>
 
-<div class="header"></div>
-
-<div class="logo-box">
-  <img src="./logo.png" alt="CheckInfra">
-</div>
+<div class="header">CheckInfra – Avaliação Sanitária</div>
 
 <div class="container">
-
 <h1>Avaliação Sanitária Escolar</h1>
-
-<!-- AVISO OFFLINE -->
-<div id="offlineCard" class="card" style="display:none">
-📴 <strong>Modo offline ativo</strong><br>
-Os dados serão sincronizados automaticamente quando a conexão voltar.
-</div>
 
 <form id="form-avaliacao">
 
@@ -87,7 +66,7 @@ Os dados serão sincronizados automaticamente quando a conexão voltar.
   <div class="card">
     <label>Escola</label>
     <select id="escola" required>
-      <option value="">Selecione</option>
+      <option value="">Selecione a escola</option>
     </select>
 
     <label>Avaliador</label>
@@ -95,78 +74,53 @@ Os dados serão sincronizados automaticamente quando a conexão voltar.
   </div>
 
   <!-- CARD 2 — CHECKLIST -->
-  <div class="card">
-
+  <div class="card checklist">
     <div class="categoria">
       <h3>🏗️ Estrutura</h3>
-      <div class="checklist">
-        <label class="check-card">
-          <span class="icon">🦠</span>
-          <input type="checkbox" data-peso="3"> Mofo ou umidade
-        </label>
-        <label class="check-card">
-          <span class="icon">🧱</span>
-          <input type="checkbox" data-peso="2"> Piso danificado
-        </label>
-        <label class="check-card">
-          <span class="icon">💧</span>
-          <input type="checkbox" data-peso="2"> Infiltrações
-        </label>
-      </div>
+      <div class="check-card" data-peso="3">Mofo ou umidade excessiva</div>
+      <div class="check-card" data-peso="2">Piso quebrado ou escorregadio</div>
+      <div class="check-card" data-peso="2">Infiltrações visíveis</div>
     </div>
 
     <div class="categoria">
       <h3>🧹 Higiene</h3>
-      <div class="checklist">
-        <label class="check-card">
-          <span class="icon">🧹</span>
-          <input type="checkbox" data-peso="2"> Limpeza inadequada
-        </label>
-        <label class="check-card">
-          <span class="icon">🦨</span>
-          <input type="checkbox" data-peso="2"> Mau cheiro persistente
-        </label>
-      </div>
+      <div class="check-card" data-peso="2">Limpeza inadequada</div>
+      <div class="check-card" data-peso="2">Mau cheiro persistente</div>
     </div>
 
     <div class="categoria">
       <h3>💡 Conforto</h3>
-      <div class="checklist">
-        <label class="check-card">
-          <span class="icon">💡</span>
-          <input type="checkbox" data-peso="1"> Iluminação insuficiente
-        </label>
-        <label class="check-card">
-          <span class="icon">🌬️</span>
-          <input type="checkbox" data-peso="1"> Ventilação inadequada
-        </label>
-      </div>
+      <div class="check-card" data-peso="1">Iluminação insuficiente</div>
+      <div class="check-card" data-peso="1">Ventilação inadequada</div>
     </div>
-
   </div>
 
   <!-- CARD 3 — UPLOAD DE FOTOS -->
   <div class="card upload-box">
-    <label for="fotos">
-      📷 <strong>Anexar fotos do ambiente</strong><br>
-      <small>(opcional — não substitui vistoria técnica)</small>
-    </label>
+    <h3>📷 Registro Fotográfico</h3>
     <input type="file" id="fotos" accept="image/*" multiple>
     <div id="preview" class="upload-preview"></div>
   </div>
 
-  <!-- BOTÃO -->
-  <button type="submit">Gerar Diagnóstico</button>
+  <button type="submit">Gerar Diagnóstico e PDF</button>
 </form>
 
-<!-- RESULTADO -->
 <div id="resultado" class="resultado"></div>
+
 </div>
 
-<!-- ESCOLAS -->
 <script src="./mapa/escolas.js"></script>
+<script type="module" src="./js/avaliacao.js"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Aviso offline inicial
+  if (!navigator.onLine) {
+    if (!confirm("⚠️ Você está OFFLINE. O sistema irá sincronizar automaticamente quando a conexão voltar. Deseja continuar?")) {
+      return;
+    }
+  }
+
   const select = document.getElementById("escola");
   if (window.escolas) {
     window.escolas.forEach(e => {
@@ -176,13 +130,100 @@ document.addEventListener("DOMContentLoaded", () => {
       select.appendChild(opt);
     });
   }
+
+  // Seleção por card
+  document.querySelectorAll(".check-card").forEach(card => {
+    card.addEventListener("click", () => {
+      card.classList.toggle("selected");
+    });
+  });
+
+  // Preview de fotos
+  const fotosInput = document.getElementById("fotos");
+  const preview = document.getElementById("preview");
+  fotosInput.addEventListener("change", () => {
+    preview.innerHTML = "";
+    Array.from(fotosInput.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Submit e geração de PDF
+  const form = document.getElementById("form-avaliacao");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    let pontuacao = 0;
+    document.querySelectorAll(".check-card.selected").forEach(card => {
+      pontuacao += parseInt(card.dataset.peso || 0);
+    });
+
+    let status = "ok";
+    if (pontuacao >= 6 && pontuacao < 10) status = "alerta";
+    else if (pontuacao >= 10) status = "critico";
+
+    const dados = { id: window.idcheckinfra || Math.floor(Math.random()*9000+1000) };
+    const avaliador = document.getElementById("avaliador").value;
+
+    // Atualiza card resultado
+    const resultado = document.getElementById("resultado");
+    resultado.className = "resultado";
+    resultado.style.display = "block";
+    resultado.innerHTML = `
+      <div class="selo selo-${status}">
+        ${status === "ok" ? "🟢 Condição adequada" :
+          status === "alerta" ? "🟡 Situação de alerta" :
+          "🔴 Condição crítica"}
+      </div>
+      <strong>Código:</strong> ${dados.id}<br>
+      <strong>Pontuação:</strong> ${pontuacao}<br>
+      <strong>Avaliador:</strong> ${avaliador}<br>
+      ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
+    `;
+
+    // Gerar PDF com jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("CheckInfra – Avaliação Sanitária Escolar", 20, 20);
+    doc.setFontSize(14);
+    doc.text(`Código: ${dados.id}`, 20, 40);
+    doc.text(`Status: ${status}`, 20, 50);
+    doc.text(`Pontuação: ${pontuacao}`, 20, 60);
+    doc.text(`Avaliador: ${avaliador}`, 20, 70);
+    doc.text(navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado", 20, 80);
+
+    // Incluir fotos
+    let yPos = 100;
+    const files = Array.from(fotosInput.files);
+    for (let i = 0; i < files.length; i++) {
+      const reader = new FileReader();
+      await new Promise(resolve => {
+        reader.onload = function(e) {
+          const imgData = e.target.result;
+          doc.addImage(imgData, 'JPEG', 20, yPos, 50, 50);
+          yPos += 55;
+          if (yPos > 250 && i < files.length -1) {
+            doc.addPage();
+            yPos = 20;
+          }
+          resolve();
+        };
+        reader.readAsDataURL(files[i]);
+      });
+    }
+
+    doc.save(`diagnostico_${dados.id}.pdf`);
+  });
 });
 </script>
 
-<!-- SCRIPT PRINCIPAL (avaliacao.js) -->
-<script type="module" src="./js/avaliacao.js"></script>
-
-<!-- SERVICE WORKER -->
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register("./service-worker.js");
