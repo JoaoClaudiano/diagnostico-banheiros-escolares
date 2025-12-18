@@ -14,9 +14,9 @@ body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
 
 .card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
 
-.grid { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
+.grid { display:grid; grid-template-columns: repeat(4,1fr); gap:16px; }
 
-.kpi { background:#f9fafb; border-radius:10px; padding:16px; }
+.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
 
@@ -38,7 +38,7 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
-/* ===== MOBILE ADAPTAÇÃO (NÃO AFETA DESKTOP) ===== */
+/* ===== MOBILE ADAPTAÇÃO ===== */
 @media (max-width: 600px){
   .grid { grid-template-columns:1fr; }
   .kpi strong { font-size:34px; }
@@ -62,25 +62,27 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
   <small>Síntese executiva e priorização técnica</small>
 </div>
 
+<!-- KPIs -->
 <div class="card grid">
   <div class="kpi">
     <h4>Unidades Críticas</h4>
     <strong id="kpiCritica">–</strong>
   </div>
-
   <div class="kpi">
     <h4>Unidades em Atenção</h4>
     <strong id="kpiAtencao">–</strong>
   </div>
-
   <div class="kpi">
-    <h4>IPT Médio
-      <span class="info" onclick="abrirModal()">i</span>
-    </h4>
+    <h4>Unidades em Alerta</h4>
+    <strong id="kpiAlerta">–</strong>
+  </div>
+  <div class="kpi">
+    <h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4>
     <strong id="kpiMedio">–</strong>
   </div>
 </div>
 
+<!-- Gráficos -->
 <div class="card grid">
   <div>
     <h3>Status das Unidades</h3>
@@ -92,6 +94,7 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
   </div>
 </div>
 
+<!-- Ranking Geral -->
 <div class="card">
   <h3>🏆 Ranking Geral de Prioridade Técnica</h3>
   <button onclick="exportarXLSX()">⬇️ Baixar XLSX</button>
@@ -106,25 +109,7 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
   </table>
 </div>
 
-<div class="card">
-  <h3>📘 Metodologia – Índice de Prioridade Técnica (IPT)</h3>
-  <p>
-    O IPT é um índice autoral do CheckInfra, inspirado em práticas de
-    priorização técnica de engenharia diagnóstica, avaliação multicritério
-    (MCDA) e gestão de ativos públicos.
-  </p>
-  <p>
-    Ele combina três dimensões:
-    <br>• Gravidade do status (peso 40%)
-    <br>• Pontuação técnica observada (peso 40%)
-    <br>• Persistência temporal do problema (peso 20%)
-  </p>
-  <p>
-    O IPT médio representa o <strong>nível médio de criticidade da rede</strong>.
-    Valores altos indicam pressão sistêmica por investimento e manutenção.
-  </p>
-</div>
-
+<!-- Modal explicativo -->
 <div class="modal" id="modalIPT" onclick="fecharModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3>O que é o IPT médio?</h3>
@@ -154,8 +139,10 @@ let rankingGlobal = [];
 const tabelaRanking = document.getElementById("tabelaRanking");
 const kpiCritica = document.getElementById("kpiCritica");
 const kpiAtencao = document.getElementById("kpiAtencao");
+const kpiAlerta = document.getElementById("kpiAlerta");
 const kpiMedio = document.getElementById("kpiMedio");
 
+// Carrega avaliações do Firebase
 async function carregarAvaliacoes(){
   const snapshot = await getDocs(collection(db,"avaliacoes"));
   const dados = [];
@@ -163,41 +150,43 @@ async function carregarAvaliacoes(){
     const d = doc.data();
     if(d.status) dados.push(d);
   });
-  montar(dados);
+  montarPainel(dados);
 }
 
-function montar(dados){
+// Monta KPIs, gráficos e ranking
+function montarPainel(dados){
   rankingGlobal = [];
   tabelaRanking.innerHTML = "";
 
-  let critica=0, atencao=0, somaIPT=0;
+  let critica=0, atencao=0, alerta=0, somaIPT=0;
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
 
   dados.forEach(d=>{
     let peso=1, classe="adequada";
-    const s=(d.status||"").toLowerCase();
+    const s = (d.status||"").toLowerCase();
 
-    if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++}
-    else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++}
-    else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++}
+    if(s.includes("crít")){peso=4; classe="critica"; critica++; statusCount.critica++}
+    else if(s.includes("aten")){peso=3; classe="atencao"; atencao++; statusCount.atencao++}
+    else if(s.includes("alerta")){peso=2; classe="alerta"; alerta++; statusCount.alerta++}
     else statusCount.adequada++;
 
-    const pont=Number(d.pontuacao||0);
-    const dias=Math.min(Number(d.dias_criticos||0),30);
-    const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
-    somaIPT+=IPT;
+    const pont = Number(d.pontuacao||0);
+    const dias = Math.min(Number(d.dias_criticos||0),30);
+    const IPT = (peso*0.4)+(pont*0.4)+(dias*0.2);
+    somaIPT += IPT;
 
     rankingGlobal.push({
-      escola:d.escola||"Sem nome",
+      escola: d.escola || "Sem nome",
       classe,
-      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+      statusLabel: classe==="critica"?"Crítica":classe==="atencao"?"Atenção":classe==="alerta"?"Alerta":"Adequada",
       IPT
     });
   });
 
+  // Ordena ranking
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
-  // Tabela
+  // Preenche tabela
   rankingGlobal.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
@@ -208,9 +197,10 @@ function montar(dados){
       </tr>`;
   });
 
-  // KPIs
+  // Atualiza KPIs
   kpiCritica.innerText = critica;
   kpiAtencao.innerText = atencao;
+  kpiAlerta.innerText = alerta;
   kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
 
   // Gráfico status
@@ -218,10 +208,8 @@ function montar(dados){
     type:"pie",
     data:{
       labels:["Adequada","Alerta","Atenção","Crítica"],
-      datasets:[{
-        data:Object.values(statusCount),
-        backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"]
-      }]
+      datasets:[{ data:Object.values(statusCount),
+        backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"] }]
     }
   });
 
@@ -237,20 +225,30 @@ function montar(dados){
   });
 }
 
+// Exporta ranking para XLSX
 function exportarXLSX(){
   if(rankingGlobal.length===0){
     alert("Nenhum dado disponível para exportação.");
     return;
   }
-  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
+
+  const exportData = rankingGlobal.map(r=>({
+    Escola: r.escola,
+    Status: r.statusLabel,
+    IPT: r.IPT.toFixed(2)
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
   XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
 }
 
-function abrirModal(){ modalIPT.style.display="flex"; }
-function fecharModal(){ modalIPT.style.display="none"; }
+// Modal IPT
+function abrirModal(){ document.getElementById("modalIPT").style.display="flex"; }
+function fecharModal(){ document.getElementById("modalIPT").style.display="none"; }
 
+// Inicializa painel
 carregarAvaliacoes();
 </script>
 
