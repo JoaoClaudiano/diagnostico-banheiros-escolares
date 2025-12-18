@@ -45,42 +45,81 @@ async function sincronizarOffline(){
 // ================= PDF =================
 async function gerarPDF(d) {
   const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  pdf.setFontSize(14);
-  pdf.text("CHECKINFRA – AVALIAÇÃO SANITÁRIA",105,15,{align:"center"});
-  pdf.setFontSize(11);
-  pdf.text(`Escola: ${d.escola}`,20,30);
-  pdf.text(`Avaliador: ${d.avaliador}`,20,38);
-  pdf.text(`Código: ${d.id}`,20,46);
-  pdf.text(`Pontuação: ${d.pontuacao}`,20,54);
-  pdf.text(`Status: ${d.status}`,20,62);
+  const margin = 20;
+  let y = margin;
 
-  let y = 75;
-  pdf.text("Problemas:",20,y); y+=8;
-  d.problemas.forEach(p=>{
-    pdf.text(`- ${p}`,25,y);
-    y+=7;
+  // Logo
+  const logo = new Image();
+  logo.src = 'assets/logo-checkinfra.png';
+  await new Promise(resolve => { logo.onload = resolve; });
+  pdf.addImage(logo, 'PNG', 105 - 20, y - 10, 40, 20); // centraliza
+  y += 25;
+
+  // Cabeçalho
+  pdf.setFontSize(16);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("CHECKINFRA – AVALIAÇÃO SANITÁRIA ESCOLAR", 105, y, { align: "center" });
+  y += 12;
+
+  pdf.setFontSize(12);
+  pdf.setFont("helvetica", "normal");
+  pdf.text(`ID do diagnóstico: ${d.id}`, margin, y);
+  y += 7;
+  pdf.text(`Escola: ${d.escola}`, margin, y);
+  y += 7;
+  pdf.text(`Avaliador: ${d.avaliador}`, margin, y);
+  y += 7;
+  pdf.text(`Pontuação: ${d.pontuacao}`, margin, y);
+  y += 7;
+  pdf.text(`Status: ${d.status}`, margin, y);
+  y += 12;
+
+  // Problemas
+  pdf.setFont("helvetica", "bold");
+  pdf.text("Problemas identificados:", margin, y);
+  y += 7;
+  pdf.setFont("helvetica", "normal");
+  d.problemas.forEach(p => {
+    pdf.text(`- ${p}`, margin + 5, y);
+    y += 7;
   });
 
-  if(d.fotos.length){
+  // Registro fotográfico
+  if (d.fotos.length) {
     pdf.addPage();
-    pdf.text("Registro fotográfico",105,15,{align:"center"});
-    let x=20,yImg=25;
-    d.fotos.forEach(img=>{
-      pdf.addImage(img,"JPEG",x,yImg,80,60);
-      x+=90;
-      if(x>120){x=20;yImg+=70;}
+    y = margin;
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Registro Fotográfico", 105, y, { align: "center" });
+    y += 10;
+
+    let x = margin;
+    let rowHeight = 60;
+    d.fotos.forEach((img, index) => {
+      pdf.addImage(img, "JPEG", x, y, 80, 60);
+      x += 90;
+      if (x + 80 > 210 - margin) { // nova linha
+        x = margin;
+        y += rowHeight + 10;
+      }
+      if (y + rowHeight > 297 - margin) { // nova página
+        pdf.addPage();
+        y = margin;
+        x = margin;
+      }
     });
   }
 
-  pdf.addPage();
-  pdf.setFontSize(10);
-  pdf.text(
-    "Este relatório é um diagnóstico preliminar e não substitui vistoria técnica presencial "
-    +"ou laudo de engenharia.",
-    20,30,{maxWidth:170}
-  );
+  // Rodapé
+  const footerText = `Este relatório é um diagnóstico preliminar e não substitui vistoria técnica presencial ou laudo de engenharia. Impressão em: ${new Date().toLocaleDateString()}`;
+  pdf.setFontSize(9);
+  pdf.setTextColor(100);
+  const pageCount = pdf.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    pdf.setPage(i);
+    pdf.text(footerText, 105, 287, { align: "center" });
+  }
 
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
