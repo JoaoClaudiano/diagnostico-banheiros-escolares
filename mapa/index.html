@@ -2,7 +2,6 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-
 <title>Mapa Sanitário – Escolas Municipais</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -12,64 +11,21 @@
 
 <style>
 body { margin:0; font-family: Arial, sans-serif; }
-.nav-global {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  display: flex;
-  gap: 8px;
-  z-index: 9999;
-}
-.nav-global button,
-.nav-global a {
-  background: rgba(31,79,216,0.95);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
+.nav-global { position: fixed; top: 12px; left: 12px; display: flex; gap: 8px; z-index: 9999; }
+.nav-global button, .nav-global a {
+  background: rgba(31,79,216,0.95); color: #fff; border: none; border-radius: 50%;
+  width: 38px; height: 38px; cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center; text-decoration: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
-.nav-global button:hover,
-.nav-global a:hover { background: #163aa9; }
-
-header {
-  background:#1f4fd8;
-  color:#fff;
-  padding:12px;
-  text-align:center;
-  font-weight:bold;
-}
+.nav-global button:hover, .nav-global a:hover { background: #163aa9; }
+header { background:#1f4fd8; color:#fff; padding:12px; text-align:center; font-weight:bold; }
 
 #map { height: calc(100vh - 170px); }
 
-.painel {
-  padding:10px;
-  background:#f4f6f8;
-  display:flex;
-  gap:15px;
-  justify-content:center;
-  font-size:14px;
-  flex-wrap:wrap;
-}
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:6px;
-  cursor:pointer;
-}
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  display:inline-block;
-}
+.painel { padding:10px; background:#f4f6f8; display:flex; gap:15px; justify-content:center; font-size:14px; flex-wrap:wrap; }
+.painel label { display:flex; align-items:center; gap:6px; cursor:pointer; }
+.bola { width:12px; height:12px; border-radius:50%; display:inline-block; }
 .verde { background:green; }
 .laranja { background:orange; }
 .vermelho { background:red; }
@@ -82,29 +38,14 @@ header {
 @keyframes pulse-orange { 0% { r:8; opacity:.8; } 70% { r:16; opacity:0; } 100% { opacity:0; } }
 @keyframes pulse-green { 0% { r:8; opacity:.7; } 70% { r:14; opacity:0; } 100% { opacity:0; } }
 
-/* Legenda */
-.legenda {
-  background:#fff;
-  padding:10px;
-  font-size:13px;
-  border-radius:6px;
-  box-shadow:0 1px 5px rgba(0,0,0,.3);
-}
+.legenda { background:#fff; padding:10px; font-size:13px; border-radius:6px; box-shadow:0 1px 5px rgba(0,0,0,.3); }
 .legenda h4 { margin:0 0 6px; font-size:14px; }
 .legenda div { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+
 .zoom-todos {
-  position: fixed;
-  bottom: 90px;
-  right: 12px;
-  z-index: 9999;
-  background: #1f4fd8;
-  color: #fff;
-  border:none;
-  padding:10px 14px;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  position: fixed; bottom: 90px; right: 12px; z-index: 9999;
+  background: #1f4fd8; color: #fff; border:none; padding:10px 14px; border-radius:6px;
+  cursor:pointer; font-weight:bold; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 .zoom-todos:hover { background:#163aa9; }
 </style>
@@ -148,19 +89,25 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution:
 
 let pulsoAtivo = true;
 
-// Criando clusters por status
-const clusters = {
-  adequado: L.markerClusterGroup(),
-  alerta: L.markerClusterGroup(),
-  critico: L.markerClusterGroup()
-};
+// Criar grupos de clusters
+const clusters = L.markerClusterGroup({ chunkedLoading:true, iconCreateFunction: cluster => {
+  const markers = cluster.getAllChildMarkers();
+  let statusPredominante = 'adequado';
+  const countCritico = markers.filter(m => m.options.status === 'crítica').length;
+  const countAlerta = markers.filter(m => m.options.status === 'alerta').length;
+  const countAdequado = markers.filter(m => m.options.status === 'adequada').length;
+  if (countCritico >= countAlerta && countCritico >= countAdequado) statusPredominante='crítica';
+  else if (countAlerta >= countAdequado) statusPredominante='alerta';
+
+  const cor = statusPredominante==='crítica'?'red': statusPredominante==='alerta'?'orange':'green';
+  return L.divIcon({ html:`<div style="background:${cor};border-radius:50%;padding:5px;color:#fff;">${cluster.getChildCount()}</div>`, className:'cluster-icon', iconSize:null });
+}});
 
 function corPorStatus(status) {
   if (status.toLowerCase().includes("crítica")) return "red";
   if (status.toLowerCase().includes("alerta")) return "orange";
   return "green";
 }
-
 function classePulso(status) {
   if (!pulsoAtivo) return "";
   if (status.toLowerCase().includes("crítica")) return "pulse-critico";
@@ -168,55 +115,41 @@ function classePulso(status) {
   return "pulse-adequado";
 }
 
+let todosMarkers = [];
+
 // Carregar escolas do Firebase
 async function carregarEscolas() {
-  const querySnapshot = await getDocs(collection(db, "avaliacoes"));
-  const allMarkers = [];
-  querySnapshot.forEach(docSnap => {
+  const snapshot = await getDocs(collection(db,"avaliacoes"));
+  snapshot.forEach(docSnap => {
     const e = docSnap.data();
     if (!e.lat || !e.lng) return;
 
-    const cor = corPorStatus(e.status);
-    const marker = L.circleMarker([e.lat, e.lng], {
-      radius: window.innerWidth < 600 ? 10 : 8,
-      color: cor,
-      fillColor: cor,
-      fillOpacity: 0.8,
-      className: classePulso(e.status)
-    }).bindPopup(`
-      <strong>${e.escola}</strong><br>
-      Status: ${e.status}<br>
-      Pontuação: ${e.pontuacao}
-    `);
+    const marker = L.circleMarker([e.lat,e.lng],{
+      radius: window.innerWidth<600?10:8,
+      color: corPorStatus(e.status),
+      fillColor: corPorStatus(e.status),
+      fillOpacity:0.8,
+      className: classePulso(e.status),
+      status: e.status.toLowerCase()
+    }).bindPopup(`<strong>${e.escola}</strong><br>Status: ${e.status}<br>Pontuação: ${e.pontuacao}`);
 
-    // Adiciona ao cluster correto
-    if (e.status.toLowerCase().includes("crítica")) clusters.critico.addLayer(marker);
-    else if (e.status.toLowerCase().includes("alerta")) clusters.alerta.addLayer(marker);
-    else clusters.adequado.addLayer(marker);
-
-    allMarkers.push(marker);
+    clusters.addLayer(marker);
+    todosMarkers.push(marker);
   });
 
-  // Adiciona clusters visíveis
-  map.addLayer(clusters.adequado);
-  map.addLayer(clusters.alerta);
-  map.addLayer(clusters.critico);
-
-  return allMarkers;
+  map.addLayer(clusters);
 }
-
-let todosMarkers = [];
-carregarEscolas().then(markers => todosMarkers = markers);
+carregarEscolas();
 
 // Filtros
 document.getElementById("filtroAdequado").addEventListener("change", e => {
-  e.target.checked ? map.addLayer(clusters.adequado) : map.removeLayer(clusters.adequado);
+  clusters.eachLayer(m => m.options.status==='adequada' ? (e.target.checked?clusters.addLayer(m):clusters.removeLayer(m)) : null);
 });
 document.getElementById("filtroAlerta").addEventListener("change", e => {
-  e.target.checked ? map.addLayer(clusters.alerta) : map.removeLayer(clusters.alerta);
+  clusters.eachLayer(m => m.options.status==='alerta' ? (e.target.checked?clusters.addLayer(m):clusters.removeLayer(m)) : null);
 });
 document.getElementById("filtroCritico").addEventListener("change", e => {
-  e.target.checked ? map.addLayer(clusters.critico) : map.removeLayer(clusters.critico);
+  clusters.eachLayer(m => m.options.status==='crítica' ? (e.target.checked?clusters.addLayer(m):clusters.removeLayer(m)) : null);
 });
 
 // Toggle pulso
@@ -232,21 +165,19 @@ document.getElementById("zoomTodos").addEventListener("click", () => {
 });
 
 // Legenda
-const legenda = L.control({ position: "bottomright" });
-legenda.onAdd = function () {
-  const div = L.DomUtil.create("div", "legenda");
-  div.innerHTML = `
-    <h4>Leitura do mapa</h4>
+const legenda = L.control({ position:"bottomright" });
+legenda.onAdd = function(){ 
+  const div=L.DomUtil.create("div","legenda");
+  div.innerHTML=`<h4>Leitura do mapa</h4>
     <div><span class="bola verde"></span> Situação adequada</div>
     <div><span class="bola laranja"></span> Requer atenção</div>
     <div><span class="bola vermelho"></span> Prioridade de intervenção</div>
     <hr>
-    <small>O pulso indica intensidade relativa de atenção territorial. Não substitui inspeção técnica presencial.</small>
-  `;
+    <small>O pulso indica intensidade relativa de atenção territorial. Não substitui inspeção técnica presencial.</small>`;
   return div;
 };
 legenda.addTo(map);
-</script>
 
+</script>
 </body>
 </html>
