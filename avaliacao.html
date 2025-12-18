@@ -62,7 +62,7 @@ Os dados serão sincronizados automaticamente quando houver conexão.
 
 <div class="card">
 <label>Escola</label>
-<select id="escola">
+<select id="escola" required>
 <option value="">Selecione</option>
 </select>
 
@@ -90,7 +90,7 @@ Os dados serão sincronizados automaticamente quando houver conexão.
 document.addEventListener("DOMContentLoaded",()=>{
   const select=document.getElementById("escola");
   if(window.escolas){
-    escolas.forEach(e=>{
+    window.escolas.forEach(e=>{
       const o=document.createElement("option");
       o.value=e.nome;
       o.textContent=e.nome;
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 <!-- =================== FIREBASE =================== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
@@ -114,10 +114,10 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 window.salvarAvaliacao = async dados => {
-  await addDoc(collection(db,"avaliacoes"), {
-    ...dados,
-    createdAt: serverTimestamp()
-  });
+  await setDoc(
+    doc(db,"avaliacoes",dados.id),
+    {...dados, createdAt: serverTimestamp()}
+  );
 };
 </script>
 
@@ -127,18 +127,18 @@ const STORAGE_KEY="checkinfra_pendentes";
 
 function gerarId(){
   const d=new Date();
-  return `CI-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).substr(2,5).toUpperCase()}`;
+  return `CI-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
 }
 
 function gerarPDF(d){
   const { jsPDF } = window.jspdf;
   const pdf=new jsPDF();
-  pdf.text(`CHECKINFRA`,10,10);
-  pdf.text(`Código: ${d.id}`,10,20);
-  pdf.text(`Escola: ${d.escola}`,10,30);
-  pdf.text(`Avaliador: ${d.avaliador}`,10,40);
-  pdf.text(`Status: ${d.status}`,10,50);
-  pdf.text(`Pontuação: ${d.score}`,10,60);
+  pdf.text("CHECKINFRA – Avaliação Sanitária",10,15);
+  pdf.text(`Código: ${d.id}`,10,30);
+  pdf.text(`Escola: ${d.escola}`,10,40);
+  pdf.text(`Avaliador: ${d.avaliador}`,10,50);
+  pdf.text(`Status: ${d.status}`,10,60);
+  pdf.text(`Pontuação: ${d.score}`,10,70);
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
 
@@ -170,7 +170,7 @@ const id=gerarId();
 let score=0,problemas=[];
 document.querySelectorAll("input[type=checkbox]:checked").forEach(c=>{
 score+=Number(c.dataset.peso);
-problemas.push(c.parentElement.innerText);
+problemas.push(c.parentElement.innerText.trim());
 });
 
 let status="Condição adequada";
@@ -196,6 +196,8 @@ const r=document.getElementById("resultado");
 r.className="resultado "+classe;
 r.style.display="block";
 r.innerHTML=`Código: ${id}<br>Status: ${status}<br>Pontuação: ${score}`;
+
+e.target.reset();
 });
 </script>
 
