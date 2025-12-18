@@ -743,9 +743,15 @@
     });
   });
 </script>
-<footer>
-  © 2025 CheckInfra — Metodologia técnica para apoio à gestão pública
-</footer>
+    <!-- Footer -->
+<div id="footer-container"></div>
+<script>
+fetch('pages/footer.html')
+  .then(response => response.text())
+  .then(html => {
+    document.getElementById('footer-container').innerHTML = html;
+  });
+</script>
 
 </body>
 </html>
