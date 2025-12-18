@@ -119,6 +119,7 @@ button:hover { background: #163ca6; }
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
   // Aviso offline inicial
   if (!navigator.onLine) {
     if (!confirm("⚠️ Você está OFFLINE. O sistema irá sincronizar automaticamente quando a conexão voltar. Deseja continuar?")) {
@@ -126,6 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Preencher select de escolas
   const select = document.getElementById("escola");
   if (window.escolas) {
     window.escolas.forEach(e => {
@@ -136,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Seleção por check-card
+  // Seleção por card
   document.querySelectorAll(".check-card").forEach(card => {
     card.addEventListener("click", () => {
       card.classList.toggle("selected");
@@ -159,24 +161,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Submit e geração de PDF
+  // Submit: apenas exibe resultado (ID real vem do avaliacao.js)
   const form = document.getElementById("form-avaliacao");
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", e => {
     e.preventDefault();
 
+    // Pontuação baseada nos check-cards selecionados
     let pontuacao = 0;
+    let problemas = [];
     document.querySelectorAll(".check-card.selected").forEach(card => {
       pontuacao += parseInt(card.dataset.peso || 0);
+      problemas.push(card.innerText.trim());
     });
 
+    // Status
     let status = "ok";
     if (pontuacao >= 6 && pontuacao < 10) status = "alerta";
     else if (pontuacao >= 10) status = "critico";
 
-    const dados = { id: window.idcheckinfra || Math.floor(Math.random()*9000+1000) };
+    // ID real do avaliacao.js
     const avaliador = document.getElementById("avaliador").value;
+    const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
 
-    // Atualiza card resultado com fundo colorido
+    // Atualiza card de resultado
     const resultado = document.getElementById("resultado");
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
@@ -186,45 +193,11 @@ document.addEventListener("DOMContentLoaded", () => {
           status === "alerta" ? "🟡 Situação de alerta" :
           "🔴 Condição crítica"}
       </div>
-      <strong>IDCHECKINFRA:</strong> ${dados.id}<br>
+      <strong>IDCHECKINFRA:</strong> ${idCheckInfra}<br>
       <strong>Pontuação:</strong> ${pontuacao}<br>
       <strong>Avaliador:</strong> ${avaliador}<br>
       ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
     `;
-
-    // Gerar PDF com jsPDF
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("CheckInfra – Avaliação Sanitária Escolar", 20, 20);
-    doc.setFontSize(14);
-    doc.text(`IDCHECKINFRA: ${dados.id}`, 20, 40);
-    doc.text(`Status: ${status}`, 20, 50);
-    doc.text(`Pontuação: ${pontuacao}`, 20, 60);
-    doc.text(`Avaliador: ${avaliador}`, 20, 70);
-    doc.text(navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado", 20, 80);
-
-    // Incluir fotos
-    let yPos = 100;
-    const files = Array.from(fotosInput.files);
-    for (let i = 0; i < files.length; i++) {
-      const reader = new FileReader();
-      await new Promise(resolve => {
-        reader.onload = function(e) {
-          const imgData = e.target.result;
-          doc.addImage(imgData, 'JPEG', 20, yPos, 50, 50);
-          yPos += 55;
-          if (yPos > 250 && i < files.length -1) {
-            doc.addPage();
-            yPos = 20;
-          }
-          resolve();
-        };
-        reader.readAsDataURL(files[i]);
-      });
-    }
-
-    doc.save(`diagnostico_${dados.id}.pdf`);
   });
 });
 </script>
