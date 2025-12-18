@@ -1,16 +1,6 @@
-// ===================== ID CHECKINFRA =====================
-function gerarIdCheckInfra() {
-  const agora = new Date();
-  const ano = agora.getFullYear();
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  const dia = String(agora.getDate()).padStart(2, "0");
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `CI-${ano}-${mes}-${dia}-${random}`;
-}
+const STORAGE_KEY = "checkinfra_pendentes";
 
-// ===================== STORAGE OFFLINE =====================
-const STORAGE_KEY = "checkinfra_avaliacoes_pendentes";
-
+// ===== OFFLINE STORAGE =====
 function salvarOffline(dados) {
   const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   lista.push(dados);
@@ -25,56 +15,44 @@ function limparOffline() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// ===================== SINCRONIZAÇÃO =====================
-async function sincronizarAvaliacoes() {
+// ===== SINCRONIZAÇÃO =====
+async function sincronizar() {
   if (!navigator.onLine || !window.salvarAvaliacao) return;
 
   const pendentes = carregarOffline();
-  if (pendentes.length === 0) return;
+  if (!pendentes.length) return;
 
-  console.log("🔄 Sincronizando avaliações offline:", pendentes.length);
-
-  for (const avaliacao of pendentes) {
-    try {
-      await window.salvarAvaliacao(avaliacao);
-    } catch (e) {
-      console.error("Erro ao sincronizar", avaliacao.id);
-      return; // para tudo se falhar
-    }
+  for (const a of pendentes) {
+    await window.salvarAvaliacao(a);
   }
 
   limparOffline();
-  console.log("✅ Sincronização concluída");
 }
 
-// ===================== UI OFFLINE =====================
-function atualizarStatusOffline() {
+// ===== UI =====
+function atualizarOfflineUI() {
   const card = document.getElementById("offlineCard");
   if (!card) return;
-
   card.style.display = navigator.onLine ? "none" : "block";
 }
 
-// ===================== EVENTOS =====================
+// ===== EVENTOS =====
 window.addEventListener("online", () => {
-  atualizarStatusOffline();
-  sincronizarAvaliacoes();
+  atualizarOfflineUI();
+  sincronizar();
 });
 
-window.addEventListener("offline", atualizarStatusOffline);
+window.addEventListener("offline", atualizarOfflineUI);
 
-// ===================== FORM =====================
+// ===== FORM =====
 document.addEventListener("DOMContentLoaded", () => {
-
-  atualizarStatusOffline();
-  sincronizarAvaliacoes();
+  atualizarOfflineUI();
+  sincronizar();
 
   const form = document.getElementById("form-avaliacao");
   const resultado = document.getElementById("resultado");
 
-  if (!form || !resultado) return;
-
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
 
     const escola = document.getElementById("escola").value;
@@ -85,43 +63,40 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const avaliacaoId = gerarIdCheckInfra();
-
-    let score = 0;
+    let pontuacao = 0;
     let problemas = [];
 
     document.querySelectorAll(".check-card input:checked").forEach(cb => {
-      score += Number(cb.dataset.peso || 0);
+      pontuacao += Number(cb.dataset.peso);
       problemas.push(cb.parentElement.innerText.trim());
     });
 
-    let status = "Condição adequada";
+    let status = "Adequada";
     let classe = "ok";
 
-    if (score >= 8) {
-      status = "Condição crítica";
+    if (pontuacao >= 8) {
+      status = "Crítica";
       classe = "critico";
-    } else if (score >= 4) {
-      status = "Situação de alerta";
+    } else if (pontuacao >= 4) {
+      status = "Alerta";
       classe = "alerta";
     }
 
     const dados = {
-      id: avaliacaoId,
+      id: gerarIdCheckInfra(),
       escola,
       avaliador,
-      pontuacao: score,
+      pontuacao,
       status,
-      problemas,
-      createdAt: new Date().toISOString()
+      problemas
     };
 
     resultado.className = "resultado " + classe;
     resultado.style.display = "block";
     resultado.innerHTML = `
-      <strong>Código:</strong> ${avaliacaoId}<br>
+      <strong>Código:</strong> ${dados.id}<br>
       <strong>Status:</strong> ${status}<br>
-      <strong>Pontuação:</strong> ${score}<br>
+      <strong>Pontuação:</strong> ${pontuacao}<br>
       ${navigator.onLine ? "☁️ Enviado" : "📴 Salvo offline"}
     `;
 
@@ -135,47 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       salvarOffline(dados);
     }
 
-    gerarPDF({
-      id: avaliacaoId,
-      escola,
-      avaliador,
-      score,
-      status,
-      problemas
-    });
-
+    gerarPDF(dados);
     form.reset();
   });
-
 });
-
-// ===================== PDF =====================
-function gerarPDF(dados) {
-  if (!window.jspdf) {
-    alert("jsPDF não carregado");
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
-
-  pdf.setFontSize(14);
-  pdf.text("CheckInfra – Avaliação Sanitária", 20, 20);
-
-  pdf.setFontSize(11);
-  pdf.text(`Código: ${dados.id}`, 20, 35);
-  pdf.text(`Escola: ${dados.escola}`, 20, 45);
-  pdf.text(`Avaliador: ${dados.avaliador}`, 20, 55);
-  pdf.text(`Pontuação: ${dados.score}`, 20, 65);
-  pdf.text(`Status: ${dados.status}`, 20, 75);
-  pdf.text(`Data: ${new Date().toLocaleString()}`, 20, 85);
-
-  if (dados.problemas?.length) {
-    pdf.text("Problemas identificados:", 20, 100);
-    dados.problemas.forEach((p, i) => {
-      pdf.text(`- ${p}`, 24, 110 + i * 8);
-    });
-  }
-
-  pdf.save(`CheckInfra_${dados.id}.pdf`);
-}
