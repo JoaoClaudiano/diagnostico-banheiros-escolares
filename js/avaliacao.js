@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       fotos:fotosBase64
     };
 
-    // **Define ID global para HTML**
+    // **Define global ID para HTML e PDF**
     window.idcheckinfra = dados.id;
 
     try{
@@ -145,9 +145,26 @@ document.addEventListener("DOMContentLoaded",()=>{
       salvarOffline(dados);
     }
 
-    // PDF
+    // Atualiza card de diagnóstico no HTML imediatamente
+    const resultado = document.getElementById("resultado");
+    resultado.style.display = "block";
+    resultado.className = "resultado resultado-" + (classe==="ok" ? "ok" : classe==="alerta" ? "alerta" : "critico");
+    resultado.innerHTML = `
+      <div class="selo">
+        ${classe==="ok" ? "🟢 Condição adequada" :
+          classe==="alerta" ? "🟡 Situação de alerta" :
+          "🔴 Condição crítica"}
+      </div>
+      <strong>IDCHECKINFRA:</strong> ${dados.id}<br>
+      <strong>Pontuação:</strong> ${pontuacao}<br>
+      <strong>Avaliador:</strong> ${dados.avaliador}<br>
+      ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
+    `;
+
+    // Gera o PDF
     gerarPDF(dados);
 
+    // Limpa form
     e.target.reset();
     preview.innerHTML="";
     fotosBase64=[];
