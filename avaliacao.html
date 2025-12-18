@@ -161,29 +161,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Submit: apenas exibe resultado (ID real vem do avaliacao.js)
+  // Submit: mostra resultado com ID real do avaliacao.js
   const form = document.getElementById("form-avaliacao");
   form.addEventListener("submit", e => {
     e.preventDefault();
 
-    // Pontuação baseada nos check-cards selecionados
     let pontuacao = 0;
-    let problemas = [];
     document.querySelectorAll(".check-card.selected").forEach(card => {
       pontuacao += parseInt(card.dataset.peso || 0);
-      problemas.push(card.innerText.trim());
     });
 
-    // Status
     let status = "ok";
     if (pontuacao >= 6 && pontuacao < 10) status = "alerta";
     else if (pontuacao >= 10) status = "critico";
 
-    // ID real do avaliacao.js
     const avaliador = document.getElementById("avaliador").value;
     const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
 
-    // Atualiza card de resultado
     const resultado = document.getElementById("resultado");
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
