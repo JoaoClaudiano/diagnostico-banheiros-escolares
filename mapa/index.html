@@ -25,17 +25,18 @@ header { background:#1f4fd8; color:#fff; padding:50px 12px 12px; text-align:cent
 .painel label { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px;}
 .bola { width:12px; height:12px; border-radius:50%; display:inline-block; }
 .verde { background:green; }
-.laranja { background:orange; }
-.amarela { background:orangered; }
+.laranja { background:yellow; } /* ALERTA em amarelo */
+.amarela { background:yellow; } /* Atenção também amarelo, se desejar */
 .vermelho { background:red; }
 
 /* Pulso animado */
 .pulse-critico { animation: pulse-red 2.4s ease-out infinite; }
-.pulse-alerta  { animation: pulse-orange 2.4s ease-out infinite; }
-.pulse-atencao { animation: pulse-orange 2.4s ease-out infinite; }
+.pulse-alerta  { animation: pulse-yellow 2.4s ease-out infinite; } /* ALERTA amarelo */
+.pulse-atencao { animation: pulse-yellow 2.4s ease-out infinite; }
 .pulse-adequado{ animation: pulse-green 2.4s ease-out infinite; }
+
 @keyframes pulse-red { 0% { r:8; opacity:.9; } 70% { r:18; opacity:0; } 100% { opacity:0; } }
-@keyframes pulse-orange { 0% { r:8; opacity:.8; } 70% { r:16; opacity:0; } 100% { opacity:0; } }
+@keyframes pulse-yellow { 0% { r:8; opacity:.8; } 70% { r:16; opacity:0; } 100% { opacity:0; } }
 @keyframes pulse-green { 0% { r:8; opacity:.7; } 70% { r:14; opacity:0; } 100% { opacity:0; } }
 
 /* Legenda */
@@ -94,8 +95,8 @@ const camadaCritico = L.layerGroup().addTo(map);
 function corPorStatus(status){
   status = status.toLowerCase();
   if(status.includes("crítica")) return "red";
-  if(status.includes("atenção")) return "orangered";
-  if(status.includes("alerta")) return "orange";
+  if(status.includes("atenção")) return "yellow";
+  if(status.includes("alerta")) return "yellow"; // ALTERADO: ALERTA em amarelo
   return "green";
 }
 
@@ -104,7 +105,7 @@ function classePulso(status){
   status = status.toLowerCase();
   if(status.includes("crítica")) return "pulse-critico";
   if(status.includes("atenção")) return "pulse-atencao";
-  if(status.includes("alerta")) return "pulse-alerta";
+  if(status.includes("alerta")) return "pulse-alerta"; // ALTERADO: pulso amarelo
   return "pulse-adequado";
 }
 
