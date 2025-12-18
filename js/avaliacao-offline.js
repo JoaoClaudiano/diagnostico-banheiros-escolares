@@ -148,3 +148,34 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
+// ===================== PDF =====================
+function gerarPDF(dados) {
+  if (!window.jspdf) {
+    alert("jsPDF não carregado");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  pdf.setFontSize(14);
+  pdf.text("CheckInfra – Avaliação Sanitária", 20, 20);
+
+  pdf.setFontSize(11);
+  pdf.text(`Código: ${dados.id}`, 20, 35);
+  pdf.text(`Escola: ${dados.escola}`, 20, 45);
+  pdf.text(`Avaliador: ${dados.avaliador}`, 20, 55);
+  pdf.text(`Pontuação: ${dados.score}`, 20, 65);
+  pdf.text(`Status: ${dados.status}`, 20, 75);
+  pdf.text(`Data: ${new Date().toLocaleString()}`, 20, 85);
+
+  if (dados.problemas?.length) {
+    pdf.text("Problemas identificados:", 20, 100);
+    dados.problemas.forEach((p, i) => {
+      pdf.text(`- ${p}`, 24, 110 + i * 8);
+    });
+  }
+
+  pdf.save(`CheckInfra_${dados.id}.pdf`);
+}
