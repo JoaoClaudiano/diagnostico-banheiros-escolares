@@ -28,138 +28,181 @@ body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0}
 .logo-box img{height:90px}
 .container{max-width:900px;margin:20px auto;padding:0 16px}
 h1{text-align:center;margin:20px 0}
-.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08)
+}
+
 label{font-weight:bold;display:block;margin-bottom:6px}
-select,input{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-bottom:14px}
-.check-card{border:2px solid #e0e0e0;border-radius:12px;padding:16px;cursor:pointer;background:#fafafa;margin-bottom:10px}
+select,input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin-bottom:14px
+}
+
+.check-card{
+  border:2px solid #e0e0e0;
+  border-radius:12px;
+  padding:16px;
+  cursor:pointer;
+  background:#fafafa;
+  margin-bottom:10px
+}
 .check-card input{display:none}
-.check-card:has(input:checked){border-color:#1f4fd8;background:#eaf0ff;font-weight:bold}
-button{width:100%;padding:16px;background:#1f4fd8;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:bold}
-.resultado{display:none;padding:20px;border-radius:12px;font-weight:bold}
+.check-card:has(input:checked){
+  border-color:#1f4fd8;
+  background:#eaf0ff;
+  font-weight:bold
+}
+
+button{
+  width:100%;
+  padding:16px;
+  background:#1f4fd8;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer
+}
+
+.resultado{
+  display:none;
+  padding:20px;
+  border-radius:12px;
+  font-weight:bold
+}
 .ok{background:#e8f7ee;color:#1e7e34}
 .alerta{background:#fff3cd;color:#856404}
 .critico{background:#f8d7da;color:#721c24}
-#offlineCard{background:#fff8e1;color:#856404;border-left:6px solid #f0ad4e}
+
+#offlineCard{
+  background:#fff8e1;
+  color:#856404;
+  border-left:6px solid #f0ad4e
+}
 </style>
 </head>
 
 <body>
 
 <div class="header"></div>
+
 <div class="logo-box">
   <img src="./logo.png" alt="CheckInfra">
 </div>
 
 <div class="container">
+
 <h1>Avaliação Sanitária Escolar</h1>
 
 <div id="offlineCard" class="card" style="display:none">
 📴 <strong>Modo offline ativo</strong><br>
-Os dados serão sincronizados quando a conexão voltar.
+Os dados estão sendo salvos localmente.
 </div>
 
 <form id="form-avaliacao">
 
 <div class="card">
-<label>Escola</label>
-<select id="escola" required>
-<option value="">Selecione</option>
-</select>
+  <label>Escola</label>
+  <select id="escola" required>
+    <option value="">Selecione</option>
+  </select>
 
-<label>Avaliador</label>
-<input type="text" id="avaliador" required>
+  <label>Avaliador</label>
+  <input type="text" id="avaliador" required>
 </div>
 
 <div class="card">
-<label class="check-card"><input type="checkbox" data-peso="3"> Mofo ou umidade</label>
-<label class="check-card"><input type="checkbox" data-peso="2"> Piso danificado</label>
-<label class="check-card"><input type="checkbox" data-peso="2"> Infiltrações</label>
-<label class="check-card"><input type="checkbox" data-peso="2"> Limpeza inadequada</label>
-<label class="check-card"><input type="checkbox" data-peso="1"> Iluminação ruim</label>
+  <label class="check-card"><input type="checkbox" data-peso="3"> Mofo ou umidade</label>
+  <label class="check-card"><input type="checkbox" data-peso="2"> Piso danificado</label>
+  <label class="check-card"><input type="checkbox" data-peso="2"> Infiltrações</label>
+  <label class="check-card"><input type="checkbox" data-peso="2"> Limpeza inadequada</label>
+  <label class="check-card"><input type="checkbox" data-peso="1"> Iluminação ruim</label>
 </div>
 
 <button type="submit">Gerar Diagnóstico</button>
 </form>
 
 <div id="resultado" class="resultado"></div>
+
 </div>
 
-<!-- LISTA DE ESCOLAS -->
+<!-- ESCOLAS -->
 <script src="./mapa/escolas.js"></script>
 
-<!-- SCRIPT ÚNICO DA AVALIAÇÃO -->
-<script src="./js/avaliacao-core.js"></script>
-<!-- 🔥 LÓGICA COMPLETA -->
-  
 <script>
-/* ===== ID ===== */
-function gerarIdCheckInfra(){
-  const d=new Date();
-  return `CI-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
-}
-
-/* ===== PDF ===== */
-function gerarPDF(d){
-  const { jsPDF } = window.jspdf;
-  const pdf=new jsPDF();
-  pdf.text("CheckInfra – Avaliação Sanitária",20,20);
-  pdf.text(`Código: ${d.id}`,20,35);
-  pdf.text(`Escola: ${d.escola}`,20,45);
-  pdf.text(`Avaliador: ${d.avaliador}`,20,55);
-  pdf.text(`Pontuação: ${d.score}`,20,65);
-  pdf.text(`Status: ${d.status}`,20,75);
-  pdf.save(`${d.id}.pdf`);
-}
-
-/* ===== UI ===== */
+/* ========= OFFLINE ========= */
 function atualizarOffline(){
-  document.getElementById("offlineCard").style.display =
-    navigator.onLine ? "none" : "block";
+  const card = document.getElementById("offlineCard");
+  card.style.display = navigator.onLine ? "none" : "block";
 }
 window.addEventListener("online", atualizarOffline);
 window.addEventListener("offline", atualizarOffline);
-atualizarOffline();
 
-/* ===== FORM ===== */
-document.addEventListener("DOMContentLoaded",()=>{
-  const select=document.getElementById("escola");
-  if(window.escolas){
-    escolas.forEach(e=>{
-      const o=document.createElement("option");
-      o.value=e.nome;
-      o.textContent=e.nome;
+/* ========= ID ========= */
+function gerarIdCheckInfra(){
+  const d = new Date();
+  return `CI-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
+}
+
+/* ========= PDF ========= */
+function gerarPDF(d){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  pdf.text("CheckInfra – Avaliação Sanitária", 20, 20);
+  pdf.text(`Código: ${d.id}`, 20, 35);
+  pdf.text(`Escola: ${d.escola}`, 20, 45);
+  pdf.text(`Avaliador: ${d.avaliador}`, 20, 55);
+  pdf.text(`Pontuação: ${d.score}`, 20, 65);
+  pdf.text(`Status: ${d.status}`, 20, 75);
+  pdf.save(`${d.id}.pdf`);
+}
+
+/* ========= INIT ========= */
+document.addEventListener("DOMContentLoaded", () => {
+  atualizarOffline();
+
+  const select = document.getElementById("escola");
+  if (window.escolas) {
+    escolas.forEach(e => {
+      const o = document.createElement("option");
+      o.value = e.nome;
+      o.textContent = e.nome;
       select.appendChild(o);
     });
   }
 
-  document.getElementById("form-avaliacao").addEventListener("submit",e=>{
+  document.getElementById("form-avaliacao").addEventListener("submit", e => {
     e.preventDefault();
 
-    const id=gerarIdCheckInfra();
-    let score=0, problemas=[];
+    const escola = document.getElementById("escola").value;
+    const avaliador = document.getElementById("avaliador").value;
 
+    const id = gerarIdCheckInfra();
+
+    let score = 0;
     document.querySelectorAll("input[type=checkbox]:checked").forEach(c=>{
-      score+=Number(c.dataset.peso);
-      problemas.push(c.parentElement.innerText);
+      score += Number(c.dataset.peso);
     });
 
     let status="Adequada", classe="ok";
     if(score>=8){status="Crítica";classe="critico";}
     else if(score>=4){status="Alerta";classe="alerta";}
 
-    gerarPDF({
-      id,
-      escola:escola.value,
-      avaliador:avaliador.value,
-      score,
-      status,
-      problemas
-    });
+    gerarPDF({ id, escola, avaliador, score, status });
 
     const r=document.getElementById("resultado");
     r.className="resultado "+classe;
     r.style.display="block";
-    r.innerHTML=`Código: ${id}<br>Status: ${status}<br>Pontuação: ${score}`;
+    r.innerHTML=`<strong>Código:</strong> ${id}<br><strong>Status:</strong> ${status}<br><strong>Pontuação:</strong> ${score}`;
   });
 });
 </script>
