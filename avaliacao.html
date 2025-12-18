@@ -37,24 +37,23 @@ h1 { text-align: center; margin: 20px 0; }
 label { font-weight: bold; display: block; margin-bottom: 6px; }
 select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 14px; }
 
-.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; }
-.upload-box input { display: none; cursor: pointer; }
+.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; cursor:pointer; }
+.upload-box input { display: none; }
 .upload-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 .upload-preview img { width: 100px; height: auto; border-radius: 8px; border: 1px solid #ccc; }
 
 button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 button:hover { background: #163ca6; }
 
-.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 10px; display: none; color: #000; }
+.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 20px; display: none; color: #000; }
 .resultado-ok { background: #d4edda; color: #155724; }
 .resultado-alerta { background: #fff3cd; color: #856404; }
 .resultado-critico { background: #f8d7da; color: #721c24; }
 
-.selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+.selo { display: block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
 
-@media screen and (max-width: 600px) {
-  .checklist { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-  .upload-preview img { width: 80px; }
+@media(max-width:600px){
+  .resultado { font-size: 14px; }
 }
 </style>
 </head>
@@ -106,18 +105,16 @@ button:hover { background: #163ca6; }
   </div>
 
   <!-- CARD 3 — UPLOAD DE FOTOS -->
-  <div class="card upload-box" id="upload-box">
+  <div class="card upload-box" onclick="document.getElementById('fotos').click();">
     <h3>📷 Registro Fotográfico</h3>
     <input type="file" id="fotos" accept="image/*" multiple>
     <div id="preview" class="upload-preview"></div>
   </div>
 
   <button type="submit">Gerar Diagnóstico e PDF</button>
-
-  <!-- CARD DIAGNÓSTICO -->
-  <div id="resultado" class="resultado"></div>
-
 </form>
+
+<div id="resultado" class="resultado"></div>
 
 </div>
 
@@ -126,6 +123,7 @@ button:hover { background: #163ca6; }
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
   // Preencher select de escolas
   const select = document.getElementById("escola");
   if (window.escolas) {
@@ -144,10 +142,69 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Upload box clicável
-  const uploadBox = document.getElementById("upload-box");
-  uploadBox.addEventListener("click", () => {
-    document.getElementById("fotos").click();
+  // Preview de fotos
+  const fotosInput = document.getElementById("fotos");
+  const preview = document.getElementById("preview");
+  fotosInput.addEventListener("change", () => {
+    preview.innerHTML = "";
+    Array.from(fotosInput.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  const form = document.getElementById("form-avaliacao");
+  const resultado = document.getElementById("resultado");
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+
+    // Pontuação e problemas
+    let pontuacao = 0;
+    let problemas = [];
+    document.querySelectorAll(".check-card.selected").forEach(c => {
+      pontuacao += parseInt(c.dataset.peso || 0);
+      problemas.push(c.innerText.trim());
+    });
+
+    // Status
+    let status = "ok", classe = "ok";
+    if(pontuacao>=6 && pontuacao<10){status="Alerta";classe="alerta";}
+    else if(pontuacao>=10){status="Crítica";classe="critico";}
+
+    const dados = {
+      id: window.idcheckinfra, // mesmo id do avalicao.js
+      escola: document.getElementById("escola").value,
+      avaliador: document.getElementById("avaliador").value,
+      pontuacao,
+      status,
+      classe,
+      problemas,
+      fotos: []
+    };
+
+    // Atualiza card de diagnóstico
+    resultado.style.display = "block";
+    resultado.className = "resultado resultado-" + classe;
+    resultado.innerHTML = `
+      <div class="selo">
+        ${classe === "ok" ? "🟢 Condição adequada" :
+          classe === "alerta" ? "🟡 Situação de alerta" :
+          "🔴 Condição crítica"}
+      </div>
+      <div style="margin-top:6px;"><strong>IDCHECKINFRA:</strong> ${dados.id}</div>
+      <div><strong>Pontuação:</strong> ${pontuacao}</div>
+      <div><strong>Avaliador:</strong> ${dados.avaliador}</div>
+      <div style="margin-top:4px;">${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}</div>
+    `;
+
+    // Redireciona após 5 segundos
+    setTimeout(() => { window.location.href = "./index.html"; }, 5000);
   });
 });
 </script>
