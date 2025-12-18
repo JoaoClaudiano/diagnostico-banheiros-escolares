@@ -6,184 +6,45 @@
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DD4SQ88NVT');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-DD4SQ88NVT');
 </script>
 
 <title>CheckInfra – Avaliação Sanitária</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <meta name="theme-color" content="#1f4fd8">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{
-  font-family:Arial,sans-serif;
-  background:#f4f6f8;
-  margin:0;
-}
-
-.nav-global{
-  position:fixed;
-  top:12px;
-  left:12px;
-  display:flex;
-  gap:8px;
-  z-index:9999;
-}
-.nav-global button,
-.nav-global a{
-  background:#1f4fd8;
-  color:#fff;
-  border:none;
-  border-radius:50%;
-  width:38px;
-  height:38px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-}
-
-.header{
-  background:#1f4fd8;
-  height:80px;
-}
-
-.logo-box{
-  display:flex;
-  justify-content:center;
-  margin-top:-40px;
-}
-.logo-box img{
-  height:90px;
-}
-
-.container{
-  max-width:900px;
-  margin:20px auto;
-  padding:0 16px;
-}
-
-h1{
-  text-align:center;
-  margin:20px 0;
-}
-
-.card{
-  background:#fff;
-  border-radius:14px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-
-label{
-  font-weight:bold;
-  display:block;
-  margin-bottom:6px;
-}
-
-select,input[type="text"],input[type="file"]{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  margin-bottom:14px;
-}
-
-.categoria{
-  margin-bottom:26px;
-}
-.categoria h3{
-  color:#1f4fd8;
-  margin-bottom:12px;
-}
-
-.checklist{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.check-card{
-  border:2px solid #e0e0e0;
-  border-radius:12px;
-  padding:16px;
-  cursor:pointer;
-  background:#fafafa;
-  transition:.2s;
-}
-.check-card input{display:none;}
-.check-card:hover{
-  border-color:#1f4fd8;
-  background:#f0f5ff;
-}
-.check-card:has(input:checked){
-  border-color:#1f4fd8;
-  background:#eaf0ff;
-  font-weight:bold;
-}
-
-.preview{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.preview img{
-  width:120px;
-  height:90px;
-  object-fit:cover;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-button{
-  width:100%;
-  padding:16px;
-  background:#1f4fd8;
-  color:#fff;
-  font-size:16px;
-  font-weight:bold;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-}
-button:hover{background:#163ca6;}
-
-.resultado{
-  margin-top:20px;
-  padding:20px;
-  border-radius:12px;
-  display:none;
-  font-weight:bold;
-}
-.ok{background:#e8f7ee;color:#1e7e34;}
-.alerta{background:#fff3cd;color:#856404;}
-.critico{background:#f8d7da;color:#721c24;}
-  
-#offlineCard {
-  background:#fff8e1;
-  color:#856404;
-}
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0}
+.header{background:#1f4fd8;height:80px}
+.logo-box{display:flex;justify-content:center;margin-top:-40px}
+.logo-box img{height:90px}
+.container{max-width:900px;margin:20px auto;padding:0 16px}
+h1{text-align:center;margin:20px 0}
+.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+label{font-weight:bold;display:block;margin-bottom:6px}
+select,input{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-bottom:14px}
+.check-card{border:2px solid #e0e0e0;border-radius:12px;padding:16px;cursor:pointer;background:#fafafa}
+.check-card input{display:none}
+.check-card:has(input:checked){border-color:#1f4fd8;background:#eaf0ff;font-weight:bold}
+button{width:100%;padding:16px;background:#1f4fd8;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:bold}
+.resultado{display:none;padding:20px;border-radius:12px;font-weight:bold}
+.ok{background:#e8f7ee;color:#1e7e34}
+.alerta{background:#fff3cd;color:#856404}
+.critico{background:#f8d7da;color:#721c24}
+#offlineCard{background:#fff8e1;color:#856404;border-left:6px solid #f0ad4e}
 </style>
 </head>
 
 <body>
 
-<div class="nav-global">
-  <button onclick="history.back()">⬅️</button>
-  <a href="./index.html">🏠</a>
-</div>
-
 <div class="header"></div>
-
 <div class="logo-box">
   <img src="./logo.png" alt="CheckInfra">
 </div>
@@ -191,88 +52,45 @@ button:hover{background:#163ca6;}
 <div class="container">
 
 <h1>Avaliação Sanitária Escolar</h1>
-  <div id="offlineCard" class="card" style="display:none; border-left:6px solid #f0ad4e;">
-  <strong>📴 Modo offline ativo</strong><br>
-  Os dados estão sendo salvos no dispositivo e serão sincronizados automaticamente
-  quando a conexão com a internet for restabelecida.
+
+<div id="offlineCard" class="card" style="display:none">
+📴 <strong>Modo offline ativo.</strong><br>
+Os dados serão sincronizados automaticamente quando houver conexão.
 </div>
-  
+
 <form id="form-avaliacao">
 
 <div class="card">
-  <label>Escola</label>
-  <select id="escola">
-    <option value="">Selecione a escola</option>
-  </select>
+<label>Escola</label>
+<select id="escola">
+<option value="">Selecione</option>
+</select>
 
-  <label>Avaliador</label>
-  <input type="text" id="avaliador" placeholder="Nome do avaliador">
-</div>
-
-<div class="card">
-
-<div class="categoria">
-<h3>🏗️ Estrutura</h3>
-<div class="checklist">
-<label class="check-card">
-<input type="checkbox" data-peso="3"> Mofo ou umidade excessiva
-</label>
-<label class="check-card">
-<input type="checkbox" data-peso="2"> Piso quebrado ou escorregadio
-</label>
-<label class="check-card">
-<input type="checkbox" data-peso="2"> Infiltrações visíveis
-</label>
-</div>
-</div>
-
-<div class="categoria">
-<h3>🧹 Higiene</h3>
-<div class="checklist">
-<label class="check-card">
-<input type="checkbox" data-peso="2"> Limpeza inadequada
-</label>
-<label class="check-card">
-<input type="checkbox" data-peso="2"> Mau cheiro persistente
-</label>
-</div>
-</div>
-
-<div class="categoria">
-<h3>💡 Conforto</h3>
-<div class="checklist">
-<label class="check-card">
-<input type="checkbox" data-peso="1"> Iluminação insuficiente
-</label>
-<label class="check-card">
-<input type="checkbox" data-peso="1"> Ventilação inadequada
-</label>
-</div>
-</div>
-
+<label>Avaliador</label>
+<input type="text" id="avaliador" required>
 </div>
 
 <div class="card">
-<h3>📷 Registro Fotográfico</h3>
-<input type="file" id="fotos" accept="image/*" multiple>
-<div class="preview" id="preview"></div>
+<label class="check-card"><input type="checkbox" data-peso="3"> Mofo ou umidade</label>
+<label class="check-card"><input type="checkbox" data-peso="2"> Piso danificado</label>
+<label class="check-card"><input type="checkbox" data-peso="2"> Infiltrações</label>
+<label class="check-card"><input type="checkbox" data-peso="2"> Limpeza inadequada</label>
+<label class="check-card"><input type="checkbox" data-peso="1"> Iluminação ruim</label>
 </div>
 
 <button type="submit">Gerar Diagnóstico</button>
-
 </form>
 
 <div id="resultado" class="resultado"></div>
 </div>
 
+<!-- =================== ESCOLAS =================== -->
 <script src="./mapa/escolas.js"></script>
-<script src="./js/avaliacao-offline.js"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
   const select=document.getElementById("escola");
   if(window.escolas){
-    window.escolas.forEach(e=>{
+    escolas.forEach(e=>{
       const o=document.createElement("option");
       o.value=e.nome;
       o.textContent=e.nome;
@@ -282,62 +100,103 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 </script>
 
-<script>
-document.getElementById("form-avaliacao").addEventListener("submit",async e=>{
-  e.preventDefault();
-
-  const escola=escola.value;
-  const avaliador=avaliador.value;
-
-  let score=0, problemas=[];
-  document.querySelectorAll("input[type=checkbox]:checked").forEach(c=>{
-    score+=parseInt(c.dataset.peso);
-    problemas.push(c.parentElement.innerText.trim());
-  });
-
-  let status="ok";
-  if(score>=6) status="critico";
-  else if(score>=3) status="alerta";
-
-  if(window.salvarAvaliacao){
-    await salvarAvaliacao({escola,avaliador,score,status,problemas});
-  }
-
-  const r=document.getElementById("resultado");
-  r.className="resultado "+status;
-  r.style.display="block";
-  r.innerHTML=`Status: ${status.toUpperCase()}<br>Pontuação: ${score}`;
-});
-</script>
-
+<!-- =================== FIREBASE =================== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig={
-  apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain:"checkinfra-adf3c.firebaseapp.com",
-  projectId:"checkinfra-adf3c",
-  storageBucket:"checkinfra-adf3c.appspot.com",
-  messagingSenderId:"206434271838",
-  appId:"1:206434271838:web:347d68e6956fe26ee1eacf"
-};
+const app = initializeApp({
+  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain: "checkinfra-adf3c.firebaseapp.com",
+  projectId: "checkinfra-adf3c"
+});
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
+const db = getFirestore(app);
 
-window.salvarAvaliacao=async dados=>{
-  await addDoc(collection(db,"avaliacoes"),{
+window.salvarAvaliacao = async dados => {
+  await addDoc(collection(db,"avaliacoes"), {
     ...dados,
-    createdAt:serverTimestamp()
+    createdAt: serverTimestamp()
   });
 };
 </script>
 
+<!-- =================== LÓGICA PRINCIPAL =================== -->
 <script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./service-worker.js");
+const STORAGE_KEY="checkinfra_pendentes";
+
+function gerarId(){
+  const d=new Date();
+  return `CI-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).substr(2,5).toUpperCase()}`;
 }
+
+function gerarPDF(d){
+  const { jsPDF } = window.jspdf;
+  const pdf=new jsPDF();
+  pdf.text(`CHECKINFRA`,10,10);
+  pdf.text(`Código: ${d.id}`,10,20);
+  pdf.text(`Escola: ${d.escola}`,10,30);
+  pdf.text(`Avaliador: ${d.avaliador}`,10,40);
+  pdf.text(`Status: ${d.status}`,10,50);
+  pdf.text(`Pontuação: ${d.score}`,10,60);
+  pdf.save(`CheckInfra-${d.id}.pdf`);
+}
+
+function salvarOffline(d){
+  const l=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+  l.push(d);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(l));
+}
+
+async function sincronizar(){
+  if(!navigator.onLine||!window.salvarAvaliacao)return;
+  const l=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+  for(const d of l){ await salvarAvaliacao(d); }
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+function atualizarOffline(){
+  document.getElementById("offlineCard").style.display=
+    navigator.onLine?"none":"block";
+}
+
+window.addEventListener("online",()=>{atualizarOffline();sincronizar();});
+window.addEventListener("offline",atualizarOffline);
+
+document.getElementById("form-avaliacao").addEventListener("submit",async e=>{
+e.preventDefault();
+
+const id=gerarId();
+let score=0,problemas=[];
+document.querySelectorAll("input[type=checkbox]:checked").forEach(c=>{
+score+=Number(c.dataset.peso);
+problemas.push(c.parentElement.innerText);
+});
+
+let status="Condição adequada";
+let classe="ok";
+if(score>=8){status="Crítica";classe="critico";}
+else if(score>=4){status="Alerta";classe="alerta";}
+
+const dados={
+id,
+escola:escola.value,
+avaliador:avaliador.value,
+score,status,problemas
+};
+
+if(navigator.onLine){
+try{await salvarAvaliacao(dados);}
+catch{salvarOffline(dados);}
+}else salvarOffline(dados);
+
+gerarPDF(dados);
+
+const r=document.getElementById("resultado");
+r.className="resultado "+classe;
+r.style.display="block";
+r.innerHTML=`Código: ${id}<br>Status: ${status}<br>Pontuação: ${score}`;
+});
 </script>
 
 </body>
