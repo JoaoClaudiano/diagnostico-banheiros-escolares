@@ -2,16 +2,6 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-
-<!-- Google tag -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DD4SQ88NVT');
-</script>
-
 <title>Mapa Sanitário – Escolas Municipais</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -31,7 +21,6 @@ body { margin:0; font-family: Arial, sans-serif; }
   gap: 8px;
   z-index: 9999;
 }
-
 .nav-global button,
 .nav-global a {
   background: rgba(31,79,216,0.95);
@@ -48,7 +37,6 @@ body { margin:0; font-family: Arial, sans-serif; }
   text-decoration: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
-
 .nav-global button:hover,
 .nav-global a:hover {
   background: #163aa9;
@@ -60,7 +48,6 @@ header {
   text-align:center;
   font-weight:bold;
 }
-
 #map { height: calc(100vh - 170px); }
 
 .painel {
@@ -72,14 +59,12 @@ header {
   font-size:14px;
   flex-wrap:wrap;
 }
-
 .painel label {
   display:flex;
   align-items:center;
   gap:6px;
   cursor:pointer;
 }
-
 .bola {
   width:12px;
   height:12px;
@@ -91,7 +76,6 @@ header {
 .vermelho { background:red; }
 
 /* ===== PULSO CARTOGRÁFICO ===== */
-
 .pulse-critico { animation: pulse-red 2.4s ease-out infinite; }
 .pulse-alerta  { animation: pulse-orange 2.4s ease-out infinite; }
 .pulse-adequado{ animation: pulse-green 2.4s ease-out infinite; }
@@ -101,13 +85,11 @@ header {
   70% { r:18; opacity:0; }
   100% { opacity:0; }
 }
-
 @keyframes pulse-orange {
   0% { r:8; opacity:.8; }
   70% { r:16; opacity:0; }
   100% { opacity:0; }
 }
-
 @keyframes pulse-green {
   0% { r:8; opacity:.7; }
   70% { r:14; opacity:0; }
@@ -115,7 +97,6 @@ header {
 }
 
 /* ===== LEGENDA ===== */
-
 .legenda {
   background:#fff;
   padding:10px;
@@ -138,14 +119,10 @@ header {
 
 <body>
 <div class="nav-global">
-  <button onclick="history.back()" title="Voltar">
-    ⬅️
-  </button>
-
-  <a href="./index.html" title="Início">
-    🏠
-  </a>
+  <button onclick="history.back()" title="Voltar">⬅️</button>
+  <a href="./index.html" title="Início">🏠</a>
 </div>
+
 <header>
   Mapa Sanitário das Escolas – Secretaria de Educação
 </header>
@@ -154,88 +131,111 @@ header {
   <label><input type="checkbox" id="filtroAdequado" checked>
     <span class="bola verde"></span> Adequado
   </label>
-
   <label><input type="checkbox" id="filtroAlerta" checked>
     <span class="bola laranja"></span> Alerta
   </label>
-
   <label><input type="checkbox" id="filtroCritico" checked>
     <span class="bola vermelho"></span> Crítico
   </label>
-
-  <label>
-    <input type="checkbox" id="togglePulso" checked>
-    🌐 Mapa vivo
-  </label>
+  <label><input type="checkbox" id="togglePulso" checked> 🌐 Mapa vivo</label>
 </div>
 
 <div id="map"></div>
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyt4wD8LQ67NOD-Zz7EEvfc7RuYEhKDYE50gkK7rp-47idg6STKUGqk5pYVDclamentdQ/exec";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// Config Firebase
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "checkinfra-adf3c"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Inicializa mapa
 const map = L.map("map").setView([-3.7319, -38.5267], 12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "©️ OpenStreetMap" }).addTo(map);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
-
+// Camadas
 const camadaAdequado = L.layerGroup().addTo(map);
 const camadaAlerta = L.layerGroup().addTo(map);
 const camadaCritico = L.layerGroup().addTo(map);
-
 let pulsoAtivo = true;
 
-function camadaPorStatus(status) {
-  if (status.includes("crítica")) return camadaCritico;
-  if (status.includes("alerta")) return camadaAlerta;
+// Funções utilitárias
+function camadaPorStatus(status){
+  if(status.toLowerCase().includes("crítica")) return camadaCritico;
+  if(status.toLowerCase().includes("alerta")) return camadaAlerta;
   return camadaAdequado;
 }
-
-function corPorStatus(status) {
-  if (status.includes("crítica")) return "red";
-  if (status.includes("alerta")) return "orange";
+function corPorStatus(status){
+  if(status.toLowerCase().includes("crítica")) return "red";
+  if(status.toLowerCase().includes("alerta")) return "orange";
   return "green";
 }
-
-function classePulso(status) {
-  if (!pulsoAtivo) return "";
-  if (status.includes("crítica")) return "pulse-critico";
-  if (status.includes("alerta")) return "pulse-alerta";
+function classePulso(status){
+  if(!pulsoAtivo) return "";
+  if(status.toLowerCase().includes("crítica")) return "pulse-critico";
+  if(status.toLowerCase().includes("alerta")) return "pulse-alerta";
   return "pulse-adequado";
 }
 
-fetch(API_URL)
-  .then(res => res.json())
-  .then(dados => {
-    dados.forEach(e => {
-      if (!e.lat || !e.lng) return;
+// Função para carregar dados do Firebase
+async function carregarAvaliacoes(){
+  const snapshot = await getDocs(collection(db,"avaliacoes"));
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
 
-      const layer = camadaPorStatus(e.status);
-      const cor = corPorStatus(e.status);
+// Renderiza mapa
+async function renderMapa(){
+  const dados = await carregarAvaliacoes();
 
-      L.circleMarker([e.lat, e.lng], {
-        radius:8,
-        color:cor,
-        fillColor:cor,
-        fillOpacity:.8,
-        className: classePulso(e.status)
-      })
-      .bindPopup(`
-        <strong>${e.escola}</strong><br>
-        Status: ${e.status}<br>
-        Pontuação: ${e.pontuacao}
-      `)
-      .addTo(layer);
-    });
+  camadaAdequado.clearLayers();
+  camadaAlerta.clearLayers();
+  camadaCritico.clearLayers();
+
+  dados.forEach(e=>{
+    if(!e.lat || !e.lng) return;
+    const layer = camadaPorStatus(e.status);
+    const cor = corPorStatus(e.status);
+
+    L.circleMarker([e.lat, e.lng], {
+      radius:8,
+      color:cor,
+      fillColor:cor,
+      fillOpacity:0.8,
+      className:classePulso(e.status)
+    })
+    .bindPopup(`
+      <strong>${e.escola}</strong><br>
+      Status: ${e.status}<br>
+      Pontuação: ${e.pontuacao}<br>
+      ID: ${e.id}
+    `)
+    .addTo(layer);
   });
+}
 
-document.getElementById("togglePulso").addEventListener("change", e => {
-  pulsoAtivo = e.target.checked;
-  location.reload();
+// Inicializa mapa
+renderMapa();
+
+// Atualiza mapa em tempo real
+onSnapshot(collection(db,"avaliacoes"), snapshot => {
+  renderMapa();
 });
 
-/* LEGENDA */
+// Eventos filtros
+document.getElementById("togglePulso").addEventListener("change", e=>{
+  pulsoAtivo = e.target.checked;
+  renderMapa();
+});
+</script>
+
+<script>
+// Legenda
 const legenda = L.control({ position: "bottomright" });
 legenda.onAdd = function () {
   const div = L.DomUtil.create("div", "legenda");
@@ -245,10 +245,7 @@ legenda.onAdd = function () {
     <div><span class="bola laranja"></span> Requer atenção</div>
     <div><span class="bola vermelho"></span> Prioridade de intervenção</div>
     <hr>
-    <small>
-      O pulso indica intensidade relativa de atenção territorial.
-      Não substitui inspeção técnica presencial.
-    </small>
+    <small>O pulso indica intensidade relativa de atenção territorial.<br>Não substitui inspeção técnica presencial.</small>
   `;
   return div;
 };
