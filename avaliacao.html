@@ -37,7 +37,7 @@ h1 { text-align: center; margin: 20px 0; }
 label { font-weight: bold; display: block; margin-bottom: 6px; }
 select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 14px; }
 
-.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; cursor: pointer; }
+.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; }
 .upload-box input { display: none; }
 .upload-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 .upload-preview img { width: 100px; height: auto; border-radius: 8px; border: 1px solid #ccc; }
@@ -45,16 +45,15 @@ select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px soli
 button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 button:hover { background: #163ca6; }
 
-.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 40px; display: none; color: #000; }
+.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 10px; display: none; color: #000; }
 .resultado-ok { background: #d4edda; color: #155724; }
 .resultado-alerta { background: #fff3cd; color: #856404; }
 .resultado-critico { background: #f8d7da; color: #721c24; }
 
 .selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
 
-/* Media query para subir card de resultado em celular */
-@media (max-width: 600px) {
-  .resultado { margin-top: 20px; }
+@media (max-width: 480px){
+  .resultado { margin-bottom: 60px; } /* espaço extra para celular */
 }
 </style>
 </head>
@@ -106,13 +105,13 @@ button:hover { background: #163ca6; }
   </div>
 
   <!-- CARD 3 — UPLOAD DE FOTOS -->
-  <div class="card upload-box" id="upload-box">
+  <div class="card upload-box">
     <h3>📷 Registro Fotográfico</h3>
     <input type="file" id="fotos" accept="image/*" multiple>
     <div id="preview" class="upload-preview"></div>
   </div>
 
-  <button type="submit">Gerar Diagnóstico</button>
+  <button type="submit">Gerar Diagnóstico e PDF</button>
 </form>
 
 <div id="resultado" class="resultado"></div>
@@ -150,13 +149,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Upload box clicável
-  const uploadBox = document.getElementById("upload-box");
+  // Preview de fotos
   const fotosInput = document.getElementById("fotos");
   const preview = document.getElementById("preview");
-
-  uploadBox.addEventListener("click", () => fotosInput.click());
-
   fotosInput.addEventListener("change", () => {
     preview.innerHTML = "";
     Array.from(fotosInput.files).forEach(file => {
@@ -170,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Submit: apenas exibe resultado (ID real vem do avaliacao.js)
+  // Submit
   const form = document.getElementById("form-avaliacao");
   form.addEventListener("submit", e => {
     e.preventDefault();
@@ -187,11 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const avaliador = document.getElementById("avaliador").value;
     const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
 
-    // Atualiza card de resultado
+    // Atualiza card de resultado próximo do botão
     const resultado = document.getElementById("resultado");
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
-    resultado.scrollIntoView({behavior: "smooth", block: "center"});
     resultado.innerHTML = `
       <div class="selo">
         ${status === "ok" ? "🟢 Condição adequada" :
@@ -203,6 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
       <strong>Avaliador:</strong> ${avaliador}<br>
       ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
     `;
+    // Scroll suave para resultado
+    resultado.scrollIntoView({ behavior: "smooth", block: "center" });
   });
 });
 </script>
