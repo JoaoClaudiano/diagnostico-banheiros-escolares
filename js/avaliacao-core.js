@@ -1,11 +1,11 @@
-// ===================== ID CHECKINFRA =====================
-function gerarIdCheckInfra() {
+// ===================== ID CHECKINFRA (GLOBAL) =====================
+window.gerarIdCheckInfra = function () {
   const d = new Date();
   return `CI-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
-}
+};
 
-// ===================== PDF =====================
-function gerarPDF(d) {
+// ===================== PDF (GLOBAL) =====================
+window.gerarPDF = function (d) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
 
@@ -17,7 +17,7 @@ function gerarPDF(d) {
   pdf.text(`Status: ${d.status}`, 20, 75);
 
   pdf.save(`${d.id}.pdf`);
-}
+};
 
 // ===================== OFFLINE UI =====================
 function atualizarOffline() {
@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const escola = document.getElementById("escola").value;
     const avaliador = document.getElementById("avaliador").value;
 
-    const id = gerarIdCheckInfra();
+    const id = window.gerarIdCheckInfra();
+
     let score = 0;
     let problemas = [];
 
@@ -55,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (score >= 8) { status = "Crítica"; classe = "critico"; }
     else if (score >= 4) { status = "Alerta"; classe = "alerta"; }
 
-    gerarPDF({ id, escola, avaliador, score, status, problemas });
+    window.gerarPDF({ id, escola, avaliador, score, status, problemas });
 
     resultado.className = "resultado " + classe;
     resultado.style.display = "block";
