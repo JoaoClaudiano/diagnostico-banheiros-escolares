@@ -42,198 +42,82 @@ async function sincronizarOffline(){
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// ================= PDF PROFISSIONAL =================
+// ================= PDF =================
 async function gerarPDF(d) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  const margin = 20;
+  const margin = 15;
   let y = margin;
 
-  // ---------------- LOGO E TÍTULO ----------------
-  const logoWidth = 40;
-  const logoHeight = 40;
-  pdf.addImage("./assets/logo-checkinfra.png", "PNG", (210 - logoWidth)/2, y, logoWidth, logoHeight);
-  y += logoHeight + 3;
+  // ------------------ LOGO ------------------
+  const logoImg = new Image();
+  logoImg.src = './assets/logo-checkinfra.png';
+  logoImg.onload = () => {
+    const logoWidth = 40;
+    const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+    pdf.addImage(logoImg, 'PNG', (210 - logoWidth)/2, y, logoWidth, logoHeight);
+    y += logoHeight + 5;
 
-  pdf.setFontSize(14);
-  pdf.setFont("helvetica", "bold");
-  pdf.text("CheckInfra", 105, y, { align: "center" });
-  y += 8;
+    // Nome da empresa e título
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("CHECKINFRA", 105, y, { align: "center" });
+    y += 7;
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR", 105, y, { align: "center" });
+    y += 12;
 
-  pdf.setFontSize(12);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR", 105, y, { align: "center" });
-  y += 12;
+    // ------------------ CARD IDENTIFICAÇÃO ------------------
+    pdf.setDrawColor(200);
+    pdf.setFillColor(240);
+    pdf.rect(margin, y, 210 - 2*margin, 30, 'FD');
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Identificação", margin + 2, y + 7);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Escola: ${d.escola}`, margin + 2, y + 14);
+    pdf.text(`Avaliador: ${d.avaliador}`, margin + 2, y + 20);
+    pdf.text(`Data da Avaliação: ${new Date().toLocaleDateString()}`, margin + 2, y + 26);
+    y += 35;
 
-  // ---------------- CARD IDENTIFICAÇÃO ----------------
-  pdf.setFillColor(240, 248, 255);
-  pdf.rect(margin, y, 170, 35, "F");
-  pdf.setFontSize(12);
-  pdf.setFont("helvetica", "bold");
-  pdf.text("Identificação", margin + 3, y + 7);
-  pdf.setFont("helvetica", "normal");
-  pdf.text(`Escola: ${d.escola}`, margin + 3, y + 15);
-  pdf.text(`Avaliador: ${d.avaliador}`, margin + 3, y + 22);
-  pdf.text(`Data da avaliação: ${new Date().toLocaleDateString()}`, margin + 3, y + 29);
-  y += 40;
+    // ------------------ CARD PROBLEMAS ------------------
+    pdf.setDrawColor(200);
+    pdf.setFillColor(245);
+    const problemasCardHeight = Math.max(10 + d.problemas.length*7, 20);
+    pdf.rect(margin, y, 210 - 2*margin, problemasCardHeight, 'FD');
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Problemas Apontados", margin + 2, y + 7);
+    pdf.setFont("helvetica", "normal");
+    let py = y + 14;
+    d.problemas.forEach(p => {
+      pdf.text(`- ${p}`, margin + 4, py);
+      py += 7;
+    });
+    y += problemasCardHeight + 5;
 
-  // ---------------- CARD PROBLEMAS ----------------
-  pdf.setFillColor(240, 248, 255);
-  const problemasHeight = 10 + d.problemas.length * 7;
-  pdf.rect(margin, y, 170, problemasHeight, "F");
-  pdf.setFont("helvetica", "bold");
-  pdf.text("Problemas Apontados", margin + 3, y + 7);
-  pdf.setFont("helvetica", "normal");
-  let py = y + 14;
-  d.problemas.forEach(p => {
-    pdf.text(`- ${p}`, margin + 5, py);
-    py += 7;
-  });
-  y += problemasHeight + 5;
-
-  // ---------------- CARD REGISTRO FOTOGRÁFICO ----------------
-  pdf.setFillColor(240, 248, 255);
-  const photoCardHeight = d.fotos.length ? 70 : 20;
-  pdf.rect(margin, y, 170, photoCardHeight, "F");
-  pdf.setFont("helvetica", "bold");
-  pdf.text("Registro Fotográfico", margin + 3, y + 7);
-  if (d.fotos.length) {
-    let x = margin + 3;
-    let yImg = y + 15;
-    const imgWidth = 80;
-    const imgHeight = 60;
+    // ------------------ CARD FOTOS ------------------
+    pdf.setDrawColor(200);
+    pdf.setFillColor(250);
+    pdf.rect(margin, y, 210 - 2*margin, 60, 'FD');
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Registro Fotográfico", margin + 2, y + 7);
+    let x = margin + 2, yImg = y + 14, imgWidth = 80, imgHeight = 60;
     d.fotos.forEach((img) => {
       pdf.addImage(img, "JPEG", x, yImg, imgWidth, imgHeight);
       x += imgWidth + 10;
-      if (x + imgWidth > 210 - margin) {
-        x = margin + 3;
-        yImg += imgHeight + 10;
-      }
-      if (yImg + imgHeight > 297 - margin) {
-        pdf.addPage();
-        yImg = margin;
-        x = margin + 3;
-      }
+      if (x + imgWidth > 210 - margin) { x = margin + 2; yImg += imgHeight + 10; }
+      if (yImg + imgHeight > 297 - margin) { pdf.addPage(); yImg = margin; x = margin + 2; }
     });
-  }
-  y += photoCardHeight + 5;
+    y += 65;
 
-  // ---------------- CARD RESULTADO ----------------
-  pdf.setFillColor(240, 248, 255);
-  pdf.rect(margin, y, 170, 30, "F");
-  pdf.setFont("helvetica", "bold");
-  pdf.text("Resultado", margin + 3, y + 7);
-  pdf.setFont("helvetica", "normal");
-  pdf.text(`Pontuação: ${d.pontuacao}`, margin + 3, y + 15);
-  pdf.text(`Status: ${d.status}`, margin + 3, y + 22);
-  pdf.text(`ID do diagnóstico: ${d.id}`, margin + 3, y + 29);
-  y += 35;
-
-  // ---------------- AVISO LEGAL ----------------
-  pdf.setFontSize(10);
-  pdf.text(
-    "Este relatório é um diagnóstico preliminar e não substitui vistoria técnica presencial ou laudo de engenharia.",
-    margin, y, { maxWidth: 170 }
-  );
-
-  // ---------------- RODAPÉ ----------------
-  const footerText = `Data de impressão: ${new Date().toLocaleDateString()}`;
-  pdf.setFontSize(9);
-  pdf.setTextColor(100);
-  const pageCount = pdf.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    pdf.setPage(i);
-    pdf.text(footerText, 105, 287, { align: "center" });
-  }
-
-  pdf.save(`CheckInfra-${d.id}.pdf`);
-}
-
-// ================= MAIN =================
-document.addEventListener("DOMContentLoaded",()=>{
-  sincronizarOffline();
-
-  const fotosInput = document.getElementById("fotos");
-  const preview = document.getElementById("preview");
-  let fotosBase64 = [];
-
-  fotosInput.addEventListener("change",()=>{
-    preview.innerHTML="";
-    fotosBase64=[];
-    [...fotosInput.files].forEach(file=>{
-      const reader = new FileReader();
-      reader.onload = e=>{
-        fotosBase64.push(e.target.result);
-        const img = document.createElement("img");
-        img.src = e.target.result;
-        preview.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
-  });
-
-  const form = document.getElementById("form-avaliacao");
-  const resultado = document.getElementById("resultado");
-
-  form.addEventListener("submit", async e=>{
-    e.preventDefault();
-
-    let pontuacao = 0;
-    let problemas = [];
-    document.querySelectorAll(".check-card.selected").forEach(c=>{
-      pontuacao += Number(c.dataset.peso);
-      problemas.push(c.innerText.trim());
-    });
-
-    let status="Adequada",classe="ok";
-    if(pontuacao>=8){status="Crítica";classe="critico";}
-    else if(pontuacao>=4){status="Alerta";classe="alerta";}
-
-    const dados = {
-      id: gerarIdCheckInfra(),
-      escola: document.getElementById("escola").value,
-      avaliador: document.getElementById("avaliador").value,
-      pontuacao,
-      status,
-      classe,
-      problemas,
-      fotos: fotosBase64,
-      logoPath: "./assets/logo-checkinfra.png"
-    };
-
-    window.idcheckinfra = dados.id;
-
-    // Atualiza card de diagnóstico
-    resultado.style.display = "block";
-    resultado.className = "resultado resultado-" + classe;
-    resultado.innerHTML = `
-      <div class="selo">
-        ${classe === "ok" ? "Condição adequada" :
-          classe === "alerta" ? "Situação de alerta" :
-          "Condição crítica"}
-      </div>
-      <strong>IDCHECKINFRA:</strong><br>${dados.id}<br>
-      <strong>Pontuação:</strong> ${pontuacao}<br>
-      <strong>Avaliador:</strong> ${dados.avaliador}<br>
-      ${navigator.onLine ? "Enviado ao sistema" : "Salvo offline — será sincronizado"}
-    `;
-
-    try{
-      if(navigator.onLine){
-        await setDoc(doc(db,"avaliacoes",dados.id),{...dados,createdAt:serverTimestamp()});
-      } else salvarOffline(dados);
-    }catch{
-      salvarOffline(dados);
-    }
-
-    // Gera PDF
-    gerarPDF(dados);
-
-    // Reset e redirecionamento automático
-    form.reset();
-    preview.innerHTML="";
-    fotosBase64=[];
-    setTimeout(()=>{ window.location.href = "./index.html"; }, 5000);
-  });
-});
+    // ------------------ CARD RESULTADO ------------------
+    pdf.setDrawColor(200);
+    pdf.setFillColor(235);
+    pdf.rect(margin, y, 210 - 2*margin, 25, 'FD');
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Resultado", margin + 2, y + 7);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Pontuação: ${d.pontuacao}`, margin + 2, y + 14);
+    pdf.text(`Status: ${d.status}`, margin +
