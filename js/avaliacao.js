@@ -2,24 +2,31 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getFirestore,
-  collection,
-  addDoc,
+  doc,
+  setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
+  projectId: "checkinfra-adf3c",
+  storageBucket: "checkinfra-adf3c.appspot.com",
+  messagingSenderId: "206434271838",
+  appId: "1:206434271838:web:347d68e6956fe26ee1eacf"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ================= ID =================
+// ================= ID CHECKINFRA =================
 function gerarIdCheckInfra() {
   const d = new Date();
-  return `CI-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `CI-${ano}-${mes}-${dia}-${rand}`;
 }
 
 // ================= PDF =================
@@ -27,17 +34,30 @@ function gerarPDF(d) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
 
-  pdf.text("CHECKINFRA – Avaliação Sanitária", 10, 15);
-  pdf.text(`Código: ${d.id}`, 10, 30);
-  pdf.text(`Escola: ${d.escola}`, 10, 40);
-  pdf.text(`Avaliador: ${d.avaliador}`, 10, 50);
-  pdf.text(`Status: ${d.status}`, 10, 60);
-  pdf.text(`Pontuação: ${d.score}`, 10, 70);
+  pdf.setFontSize(14);
+  pdf.text("CheckInfra – Avaliação Sanitária", 20, 20);
 
-  pdf.save(`CheckInfra-${d.id}.pdf`);
+  pdf.setFontSize(11);
+  pdf.text(`Código: ${d.id}`, 20, 35);
+  pdf.text(`Escola: ${d.escola}`, 20, 45);
+  pdf.text(`Avaliador: ${d.avaliador}`, 20, 55);
+  pdf.text(`Pontuação: ${d.pontuacao}`, 20, 65);
+  pdf.text(`Status: ${d.status}`, 20, 75);
+
+  let y = 90;
+  pdf.text("Problemas identificados:", 20, y);
+  y += 10;
+
+  d.problemas.forEach(p => {
+    pdf.text(`- ${p}`, 25, y);
+    y += 8;
+  });
+
+  pdf.text(`Data: ${new Date().toLocaleDateString()}`, 20, y + 10);
+  pdf.save(`${d.id}.pdf`);
 }
 
-// ================= OFFLINE =================
+// ================= OFFLINE (localStorage) =================
 const STORAGE_KEY = "checkinfra_pendentes";
 
 function salvarOffline(dados) {
@@ -53,32 +73,44 @@ async function sincronizarOffline() {
   if (!pendentes.length) return;
 
   for (const dados of pendentes) {
-    await addDoc(collection(db, "avaliacoes"), {
-      ...dados,
-      createdAt: serverTimestamp()
-    });
+    await setDoc(
+      doc(db, "avaliacoes", dados.id),
+      { ...dados, createdAt: serverTimestamp() }
+    );
   }
 
   localStorage.removeItem(STORAGE_KEY);
 }
 
 // ================= UI OFFLINE =================
-function atualizarOffline() {
+function atualizarOfflineUI() {
   const card = document.getElementById("offlineCard");
-  if (!card) return;
-  card.style.display = navigator.onLine ? "none" : "block";
+  if (card) {
+    card.style.display = navigator.onLine ? "none" : "block";
+  }
 }
 
 window.addEventListener("online", () => {
-  atualizarOffline();
+  atualizarOfflineUI();
   sincronizarOffline();
 });
-window.addEventListener("offline", atualizarOffline);
+window.addEventListener("offline", atualizarOfflineUI);
 
-// ================= SUBMIT =================
+// ================= MAIN =================
 document.addEventListener("DOMContentLoaded", () => {
-  atualizarOffline();
+  atualizarOfflineUI();
   sincronizarOffline();
+
+  // popula escolas
+  const select = document.getElementById("escola");
+  if (window.escolas && select) {
+    window.escolas.forEach(e => {
+      const opt = document.createElement("option");
+      opt.value = e.nome;
+      opt.textContent = e.nome;
+      select.appendChild(opt);
+    });
+  }
 
   const form = document.getElementById("form-avaliacao");
   const resultado = document.getElementById("resultado");
@@ -89,40 +121,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const escola = document.getElementById("escola").value;
     const avaliador = document.getElementById("avaliador").value;
 
-    if (!escola || !avaliador) {
-      alert("Preencha escola e avaliador");
-      return;
-    }
-
-    const id = gerarIdCheckInfra();
-    let score = 0;
+    let pontuacao = 0;
     let problemas = [];
 
-    document.querySelectorAll(".check-card input:checked").forEach(c => {
-      score += Number(c.dataset.peso);
-      problemas.push(c.parentElement.innerText.trim());
+    document.querySelectorAll(".check-card input:checked").forEach(cb => {
+      pontuacao += Number(cb.dataset.peso);
+      problemas.push(cb.parentElement.innerText.trim());
     });
 
-    let status = "Condição adequada";
+    let status = "Adequada";
     let classe = "ok";
-    if (score >= 8) { status = "Condição crítica"; classe = "critico"; }
-    else if (score >= 4) { status = "Situação de alerta"; classe = "alerta"; }
+    if (pontuacao >= 8) { status = "Crítica"; classe = "critico"; }
+    else if (pontuacao >= 4) { status = "Alerta"; classe = "alerta"; }
 
     const dados = {
-      id,
+      id: gerarIdCheckInfra(),
       escola,
       avaliador,
-      score,
+      pontuacao,
       status,
       problemas
     };
 
     try {
       if (navigator.onLine) {
-        await addDoc(collection(db, "avaliacoes"), {
-          ...dados,
-          createdAt: serverTimestamp()
-        });
+        await setDoc(
+          doc(db, "avaliacoes", dados.id),
+          { ...dados, createdAt: serverTimestamp() }
+        );
       } else {
         salvarOffline(dados);
       }
@@ -135,9 +161,10 @@ document.addEventListener("DOMContentLoaded", () => {
     resultado.className = "resultado " + classe;
     resultado.style.display = "block";
     resultado.innerHTML = `
-      <strong>Código:</strong> ${id}<br>
+      <strong>Código:</strong> ${dados.id}<br>
       <strong>Status:</strong> ${status}<br>
-      <strong>Pontuação:</strong> ${score}
+      <strong>Pontuação:</strong> ${pontuacao}<br>
+      ${navigator.onLine ? "☁️ Enviado" : "📴 Salvo offline"}
     `;
 
     form.reset();
