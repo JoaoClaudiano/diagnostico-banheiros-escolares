@@ -171,9 +171,23 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
 
     // Status
-    let status="Adequada",classe="ok";
-    if(pontuacao>=8){status="Crítica";classe="critico";}
-    else if(pontuacao>=4){status="Alerta";classe="alerta";}
+// Determinar status e classe
+let status = "Adequada";
+let classe = "ok";
+
+if(pontuacao >= 8){
+  status = "Crítica";
+  classe = "critico";
+} else if(pontuacao >= 6){
+  status = "Atenção";
+  classe = "atencao";
+} else if(pontuacao >= 4){
+  status = "Alerta";
+  classe = "alerta";
+} else {
+  status = "Adequada";
+  classe = "ok";
+}
 
     // Escola selecionada e lat/lng da lista escolas.js
     const escolaSelecionada = document.getElementById("escola").value;
