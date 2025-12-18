@@ -2,72 +2,45 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-DD4SQ88NVT');
-</script>
-
 <title>CheckInfra – Avaliação Sanitária</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#1f4fd8">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0}
-.header{background:#1f4fd8;height:80px}
-.logo-box{display:flex;justify-content:center;margin-top:-40px}
-.logo-box img{height:90px}
-.container{max-width:900px;margin:20px auto;padding:0 16px}
-h1{text-align:center;margin:20px 0}
-.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-label{font-weight:bold;display:block;margin-bottom:6px}
-select,input{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-bottom:14px}
-.check-card{border:2px solid #e0e0e0;border-radius:12px;padding:16px;cursor:pointer;background:#fafafa}
+body{font-family:Arial;background:#f4f6f8;margin:0}
+.container{max-width:800px;margin:20px auto;padding:16px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:16px}
+.check-card{border:2px solid #ddd;border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer}
 .check-card input{display:none}
-.check-card:has(input:checked){border-color:#1f4fd8;background:#eaf0ff;font-weight:bold}
-button{width:100%;padding:16px;background:#1f4fd8;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:bold}
-.resultado{display:none;padding:20px;border-radius:12px;font-weight:bold}
-.ok{background:#e8f7ee;color:#1e7e34}
-.alerta{background:#fff3cd;color:#856404}
-.critico{background:#f8d7da;color:#721c24}
-#offlineCard{background:#fff8e1;color:#856404;border-left:6px solid #f0ad4e}
+.check-card:has(input:checked){border-color:#1f4fd8;background:#eaf0ff}
+button{width:100%;padding:14px;background:#1f4fd8;color:#fff;border:none;border-radius:10px}
+.resultado{display:none;padding:16px;border-radius:10px;font-weight:bold}
+.ok{background:#e8f7ee}
+.alerta{background:#fff3cd}
+.critico{background:#f8d7da}
+#offlineCard{background:#fff8e1;padding:12px;border-left:6px solid #f0ad4e}
 </style>
 </head>
 
 <body>
 
-<div class="header"></div>
-<div class="logo-box">
-  <img src="./logo.png" alt="CheckInfra">
-</div>
-
 <div class="container">
 
-<h1>Avaliação Sanitária Escolar</h1>
+<h2>Avaliação Sanitária Escolar</h2>
 
-<div id="offlineCard" class="card" style="display:none">
-📴 <strong>Modo offline ativo.</strong><br>
-Os dados serão sincronizados automaticamente quando houver conexão.
+<div id="offlineCard" style="display:none">
+📴 Modo offline ativo. Dados serão sincronizados.
 </div>
 
 <form id="form-avaliacao">
 
 <div class="card">
 <label>Escola</label>
-<select id="escola" required>
-<option value="">Selecione</option>
-</select>
+<input id="escola" required>
 
 <label>Avaliador</label>
-<input type="text" id="avaliador" required>
+<input id="avaliador" required>
 </div>
 
 <div class="card">
@@ -82,48 +55,24 @@ Os dados serão sincronizados automaticamente quando houver conexão.
 </form>
 
 <div id="resultado" class="resultado"></div>
+
 </div>
 
-<!-- =================== ESCOLAS =================== -->
-<script src="./mapa/escolas.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded",()=>{
-  const select=document.getElementById("escola");
-  if(window.escolas){
-    window.escolas.forEach(e=>{
-      const o=document.createElement("option");
-      o.value=e.nome;
-      o.textContent=e.nome;
-      select.appendChild(o);
-    });
-  }
-});
-</script>
-
-<!-- =================== FIREBASE =================== -->
+<!-- ================= SCRIPT ÚNICO ================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ================= FIREBASE ================= */
 const app = initializeApp({
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
   projectId: "checkinfra-adf3c"
 });
-
 const db = getFirestore(app);
 
-window.salvarAvaliacao = async dados => {
-  await setDoc(
-    doc(db,"avaliacoes",dados.id),
-    {...dados, createdAt: serverTimestamp()}
-  );
-};
-</script>
-
-<!-- =================== LÓGICA PRINCIPAL =================== -->
-<script>
-const STORAGE_KEY="checkinfra_pendentes";
+/* ================= HELPERS ================= */
+const STORAGE_KEY = "checkinfra_offline";
 
 function gerarId(){
   const d=new Date();
@@ -132,8 +81,8 @@ function gerarId(){
 
 function gerarPDF(d){
   const { jsPDF } = window.jspdf;
-  const pdf=new jsPDF();
-  pdf.text("CHECKINFRA – Avaliação Sanitária",10,15);
+  const pdf = new jsPDF();
+  pdf.text("CHECKINFRA – Avaliação",10,15);
   pdf.text(`Código: ${d.id}`,10,30);
   pdf.text(`Escola: ${d.escola}`,10,40);
   pdf.text(`Avaliador: ${d.avaliador}`,10,50);
@@ -142,62 +91,69 @@ function gerarPDF(d){
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
 
+async function salvarFirebase(dados){
+  await setDoc(doc(db,"avaliacoes",dados.id),{
+    ...dados,
+    createdAt: serverTimestamp()
+  });
+}
+
 function salvarOffline(d){
-  const l=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+  const l = JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
   l.push(d);
   localStorage.setItem(STORAGE_KEY,JSON.stringify(l));
 }
 
 async function sincronizar(){
-  if(!navigator.onLine||!window.salvarAvaliacao)return;
-  const l=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
-  for(const d of l){ await salvarAvaliacao(d); }
+  if(!navigator.onLine) return;
+  const l = JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+  for(const d of l){ await salvarFirebase(d); }
   localStorage.removeItem(STORAGE_KEY);
 }
 
+/* ================= UI ================= */
+const offlineCard = document.getElementById("offlineCard");
 function atualizarOffline(){
-  document.getElementById("offlineCard").style.display=
-    navigator.onLine?"none":"block";
+  offlineCard.style.display = navigator.onLine?"none":"block";
 }
-
 window.addEventListener("online",()=>{atualizarOffline();sincronizar();});
 window.addEventListener("offline",atualizarOffline);
+atualizarOffline();
 
+/* ================= SUBMIT ================= */
 document.getElementById("form-avaliacao").addEventListener("submit",async e=>{
 e.preventDefault();
 
-const id=gerarId();
-let score=0,problemas=[];
+let score=0, problemas=[];
 document.querySelectorAll("input[type=checkbox]:checked").forEach(c=>{
-score+=Number(c.dataset.peso);
-problemas.push(c.parentElement.innerText.trim());
+  score+=Number(c.dataset.peso);
+  problemas.push(c.parentElement.innerText);
 });
 
-let status="Condição adequada";
-let classe="ok";
+let status="Condição adequada", classe="ok";
 if(score>=8){status="Crítica";classe="critico";}
 else if(score>=4){status="Alerta";classe="alerta";}
 
 const dados={
-id,
-escola:escola.value,
-avaliador:avaliador.value,
-score,status,problemas
+  id:gerarId(),
+  escola:escola.value,
+  avaliador:avaliador.value,
+  score,status,problemas
 };
 
-if(navigator.onLine){
-try{await salvarAvaliacao(dados);}
-catch{salvarOffline(dados);}
-}else salvarOffline(dados);
+try{
+  if(navigator.onLine) await salvarFirebase(dados);
+  else salvarOffline(dados);
+}catch{
+  salvarOffline(dados);
+}
 
 gerarPDF(dados);
 
 const r=document.getElementById("resultado");
 r.className="resultado "+classe;
 r.style.display="block";
-r.innerHTML=`Código: ${id}<br>Status: ${status}<br>Pontuação: ${score}`;
-
-e.target.reset();
+r.innerHTML=`Código: ${dados.id}<br>Status: ${status}<br>Pontuação: ${score}`;
 });
 </script>
 
