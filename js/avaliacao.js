@@ -110,49 +110,47 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   });
 
-  document.getElementById("form-avaliacao").addEventListener("submit",async e=>{
+  const form = document.getElementById("form-avaliacao");
+  const resultado = document.getElementById("resultado");
+
+  form.addEventListener("submit", async e=>{
     e.preventDefault();
 
-    let pontuacao=0,problemas=[];
+    // Calcula pontuação e problemas
+    let pontuacao = 0;
+    let problemas = [];
     document.querySelectorAll(".check-card.selected").forEach(c=>{
-      pontuacao+=Number(c.dataset.peso);
+      pontuacao += Number(c.dataset.peso);
       problemas.push(c.innerText.trim());
     });
 
+    // Determina status
     let status="Adequada",classe="ok";
     if(pontuacao>=8){status="Crítica";classe="critico";}
     else if(pontuacao>=4){status="Alerta";classe="alerta";}
 
-    const dados={
-      id:gerarIdCheckInfra(),
-      escola:document.getElementById("escola").value,
-      avaliador:document.getElementById("avaliador").value,
+    // Dados avaliação
+    const dados = {
+      id: gerarIdCheckInfra(),
+      escola: document.getElementById("escola").value,
+      avaliador: document.getElementById("avaliador").value,
       pontuacao,
       status,
       classe,
       problemas,
-      fotos:fotosBase64
+      fotos: fotosBase64
     };
 
-    // **Define global ID para HTML e PDF**
+    // Define global ID para HTML
     window.idcheckinfra = dados.id;
 
-    try{
-      if(navigator.onLine){
-        await setDoc(doc(db,"avaliacoes",dados.id),{...dados,createdAt:serverTimestamp()});
-      }else salvarOffline(dados);
-    }catch{
-      salvarOffline(dados);
-    }
-
-    // Atualiza card de diagnóstico no HTML imediatamente
-    const resultado = document.getElementById("resultado");
+    // Atualiza card de diagnóstico
     resultado.style.display = "block";
-    resultado.className = "resultado resultado-" + (classe==="ok" ? "ok" : classe==="alerta" ? "alerta" : "critico");
+    resultado.className = "resultado resultado-" + classe;
     resultado.innerHTML = `
       <div class="selo">
-        ${classe==="ok" ? "🟢 Condição adequada" :
-          classe==="alerta" ? "🟡 Situação de alerta" :
+        ${classe === "ok" ? "🟢 Condição adequada" :
+          classe === "alerta" ? "🟡 Situação de alerta" :
           "🔴 Condição crítica"}
       </div>
       <strong>IDCHECKINFRA:</strong> ${dados.id}<br>
@@ -161,11 +159,19 @@ document.addEventListener("DOMContentLoaded",()=>{
       ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
     `;
 
-    // Gera o PDF
+    try{
+      if(navigator.onLine){
+        await setDoc(doc(db,"avaliacoes",dados.id),{...dados,createdAt:serverTimestamp()});
+      } else salvarOffline(dados);
+    }catch{
+      salvarOffline(dados);
+    }
+
+    // Gera PDF
     gerarPDF(dados);
 
-    // Limpa form
-    e.target.reset();
+    // Reset do formulário e preview
+    form.reset();
     preview.innerHTML="";
     fotosBase64=[];
   });
