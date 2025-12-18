@@ -44,12 +44,14 @@ select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px soli
 button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 button:hover { background: #163ca6; }
 
-.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 20px; display: none; color: #000; margin-bottom: 40px; }
+.resultado { padding: 20px; border-radius: 14px; font-weight: bold; display: none; color: #000; position: relative; transition: all .3s ease; margin-bottom: 20px;}
 .resultado-ok { background: #d4edda; color: #155724; }
 .resultado-alerta { background: #fff3cd; color: #856404; }
 .resultado-critico { background: #f8d7da; color: #721c24; }
 
-.selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
+.selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+
+#idcheckinfra { display:block; margin-top:6px; font-size:14px; font-weight: normal; }
 
 @media (max-width: 600px) {
   .card { padding: 16px; }
@@ -114,7 +116,10 @@ button:hover { background: #163ca6; }
   <button type="submit">Gerar Diagnóstico e PDF</button>
 </form>
 
-<div id="resultado" class="resultado"></div>
+<div id="resultado" class="resultado">
+  <div class="selo"></div>
+  <span id="idcheckinfra"></span>
+</div>
 
 </div>
 
@@ -123,13 +128,6 @@ button:hover { background: #163ca6; }
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
-  // Aviso offline inicial
-  if (!navigator.onLine) {
-    if (!confirm("⚠️ Você está OFFLINE. O sistema irá sincronizar automaticamente quando a conexão voltar. Deseja continuar?")) {
-      return;
-    }
-  }
 
   // Preencher select de escolas
   const select = document.getElementById("escola");
@@ -142,20 +140,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Seleção por card checklist
+  // Checklist seleção
   document.querySelectorAll(".check-card").forEach(card => {
-    card.addEventListener("click", () => {
-      card.classList.toggle("selected");
-    });
+    card.addEventListener("click", () => card.classList.toggle("selected"));
   });
 
-  // Tornar card upload clicável
+  // Upload fotos
   const uploadBox = document.getElementById("upload-box");
   const fotosInput = document.getElementById("fotos");
   const preview = document.getElementById("preview");
-
   uploadBox.addEventListener("click", () => fotosInput.click());
-
   fotosInput.addEventListener("change", () => {
     preview.innerHTML = "";
     Array.from(fotosInput.files).forEach(file => {
@@ -169,12 +163,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Submit
   const form = document.getElementById("form-avaliacao");
+  const resultado = document.getElementById("resultado");
+  const selo = resultado.querySelector(".selo");
+  const idElem = document.getElementById("idcheckinfra");
+
   form.addEventListener("submit", async e => {
     e.preventDefault();
 
-    // Pontuação
     let pontuacao = 0;
     let problemas = [];
     document.querySelectorAll(".check-card.selected").forEach(card => {
@@ -182,7 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
       problemas.push(card.innerText.trim());
     });
 
-    // Status
     let status = "ok";
     if (pontuacao >= 6 && pontuacao < 10) status = "alerta";
     else if (pontuacao >= 10) status = "critico";
@@ -192,23 +187,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // ID do avaliacao.js
     const idCheckInfra = window.idcheckinfra || `CI-${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,"0")}-${String(new Date().getDate()).padStart(2,"0")}-${Math.random().toString(36).substring(2,8).toUpperCase()}`;
 
-    // Atualiza card de resultado próximo do botão
-    const resultado = document.getElementById("resultado");
+    // Mostra resultado logo abaixo do botão
     resultado.style.display = "block";
+    selo.textContent = status === "ok" ? "🟢 Condição adequada" :
+                      status === "alerta" ? "🟡 Situação de alerta" :
+                      "🔴 Condição crítica";
+    idElem.textContent = "IDCHECKINFRA: " + idCheckInfra;
     resultado.className = "resultado resultado-" + status;
-    resultado.innerHTML = `
-      <div class="selo">
-        ${status === "ok" ? "🟢 Condição adequada" :
-          status === "alerta" ? "🟡 Situação de alerta" :
-          "🔴 Condição crítica"}
-      </div>
-      <strong>IDCHECKINFRA:</strong> ${idCheckInfra}<br>
-      <strong>Pontuação:</strong> ${pontuacao}<br>
-      <strong>Avaliador:</strong> ${avaliador}<br>
-      ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
-    `;
 
-    // Gera PDF usando função do avaliacao.js
+    // Gera PDF
     if(window.gerarPDF) {
       window.gerarPDF({
         id: idCheckInfra,
@@ -222,10 +209,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Redireciona para página inicial após 3s
+    // Mantém card fixo visível por 3 segundos antes de redirecionar
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 1000);
+    }, 500);
     setTimeout(() => {
       window.location.href = "index.html";
     }, 3000);
