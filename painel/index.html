@@ -8,8 +8,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<!-- Firebase -->
 <script type="module">
-  // ================= FIREBASE =================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -22,156 +23,50 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  let rankingGlobal = [];
-
-  async function carregarDados() {
-    rankingGlobal = [];
-    const snapshot = await getDocs(collection(db, "avaliacoes"));
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      rankingGlobal.push(d);
-    });
-    montar(rankingGlobal);
-  }
-
-  document.addEventListener("DOMContentLoaded", carregarDados);
+  window.db = db; // expõe para uso no script abaixo
 </script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
+body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
 
-/* ... Mantenha todo o CSS existente do seu painel ... */
-.card {
-  background:#fff;
-  max-width:1100px;
-  margin:20px auto;
-  padding:20px;
-  border-radius:10px;
-}
+.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
 
-.grid {
-  display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap:16px;
-}
+.grid { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
 
-.kpi {
-  background:#f9fafb;
-  border-radius:10px;
-  padding:16px;
-}
+.kpi { background:#f9fafb; border-radius:10px; padding:16px; }
+.kpi h4 { margin:0; font-size:14px; color:#555; }
+.kpi strong { font-size:30px; display:block; margin-top:6px; }
 
-.kpi h4 {
-  margin:0;
-  font-size:14px;
-  color:#555;
-}
+.info { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1f4fd8; color:#fff; font-size:12px; cursor:pointer; margin-left:6px; }
 
-.kpi strong {
-  font-size:30px;
-  display:block;
-  margin-top:6px;
-}
-
-.info {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#1f4fd8;
-  color:#fff;
-  font-size:12px;
-  cursor:pointer;
-  margin-left:6px;
-}
-
-.badge {
-  padding:4px 8px;
-  border-radius:12px;
-  color:#fff;
-  font-size:12px;
-}
+.badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
 .adequada { background:#4caf50; }
 .alerta { background:#ff9800; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
 
-table {
-  width:100%;
-  border-collapse: collapse;
-  font-size:14px;
-}
-th, td {
-  padding:8px;
-  border-bottom:1px solid #eee;
-}
+table { width:100%; border-collapse: collapse; font-size:14px; }
+th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; text-align:left; }
 
-button {
-  padding:10px 14px;
-  background:#1f4fd8;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
+button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
 /* ===== MODAL ===== */
-.modal {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  align-items:center;
-  justify-content:center;
-}
-.modal-content {
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  max-width:500px;
-}
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
+.modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
 /* ===== MOBILE ADAPTAÇÃO (NÃO AFETA DESKTOP) ===== */
 @media (max-width: 600px){
   .grid { grid-template-columns:1fr; }
-
   .kpi strong { font-size:34px; }
-
   table thead { display:none; }
-
-  table tr {
-    display:block;
-    margin-bottom:12px;
-    border:1px solid #eee;
-    border-radius:8px;
-    padding:10px;
-  }
-
-  table td {
-    display:block;
-    border:none;
-    padding:4px 0;
-  }
-
-  table td::before {
-    font-weight:bold;
-    color:#666;
-    display:inline-block;
-    width:90px;
-  }
-
+  table tr { display:block; margin-bottom:12px; border:1px solid #eee; border-radius:8px; padding:10px; }
+  table td { display:block; border:none; padding:4px 0; }
+  table td::before { font-weight:bold; color:#666; display:inline-block; width:90px; }
   table td:nth-child(1)::before { content:"#"; }
   table td:nth-child(2)::before { content:"Escola"; }
   table td:nth-child(3)::before { content:"Status"; }
   table td:nth-child(4)::before { content:"IPT"; }
-
   .modal-content { width:90%; }
 }
 </style>
@@ -189,16 +84,12 @@ button {
     <h4>Unidades Críticas</h4>
     <strong id="kpiCritica">–</strong>
   </div>
-
   <div class="kpi">
     <h4>Unidades em Atenção</h4>
     <strong id="kpiAtencao">–</strong>
   </div>
-
   <div class="kpi">
-    <h4>IPT Médio
-      <span class="info" onclick="abrirModal()">i</span>
-    </h4>
+    <h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4>
     <strong id="kpiMedio">–</strong>
   </div>
 </div>
@@ -220,9 +111,7 @@ button {
   <br><br>
   <table>
     <thead>
-      <tr>
-        <th>#</th><th>Escola</th><th>Status</th><th>IPT</th>
-      </tr>
+      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
@@ -259,81 +148,99 @@ button {
   </div>
 </div>
 
-<script>
-function montar(dados){
-  let critica=0, atencao=0, somaIPT=0;
-  const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
-  tabelaRanking.innerHTML="";
+<script type="module">
+  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  dados.forEach(d=>{
-    let peso=1, classe="adequada";
-    const s=(d.status||"").toLowerCase();
+  let rankingGlobal = [];
 
-    if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++}
-    else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++}
-    else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++}
-    else statusCount.adequada++;
-
-    const pont=Number(d.pontuacao||0);
-    const dias=Math.min(Number(d.dias_criticos||0),30);
-    const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
-
-    somaIPT+=IPT;
-
-    rankingGlobal.push({
-      escola:d.escola||"Sem nome",
-      classe,
-      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
-      IPT
+  async function carregarDados() {
+    const snapshot = await getDocs(collection(window.db, "avaliacoes"));
+    const dados = [];
+    snapshot.forEach(doc => {
+      dados.push(doc.data());
     });
-  });
+    montar(dados);
+  }
 
-  rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
+  function montar(dados){
+    let critica=0, atencao=0, somaIPT=0;
+    const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
+    tabelaRanking.innerHTML="";
+    rankingGlobal=[];
 
-  kpiCritica.innerText=critica;
-  kpiAtencao.innerText=atencao;
-  kpiMedio.innerText=(somaIPT/dados.length).toFixed(2);
+    dados.forEach(d=>{
+      let peso=1, classe="adequada";
+      const s=(d.status||"").toLowerCase();
 
-  new Chart(graficoStatus,{
-    type:"pie",
-    data:{
-      labels:["Adequada","Alerta","Atenção","Crítica"],
-      datasets:[{data:Object.values(statusCount),
-      backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"]}]
-    }
-  });
+      if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++}
+      else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++}
+      else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++}
+      else statusCount.adequada++;
 
-  const topN=window.innerWidth<600?5:10;
-  new Chart(graficoIndice,{
-    type:"bar",
-    data:{
-      labels:rankingGlobal.slice(0,topN).map(r=>r.escola),
-      datasets:[{data:rankingGlobal.slice(0,topN).map(r=>r.IPT.toFixed(2)),backgroundColor:"#1f4fd8"}]
-    },
-    options:{indexAxis:"y",plugins:{legend:{display:false}}}
-  });
+      const pont=Number(d.pontuacao||0);
+      const dias=Math.min(Number(d.dias_criticos||0),30);
+      const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
+      somaIPT+=IPT;
 
-  rankingGlobal.forEach((r,i)=>{
-    tabelaRanking.innerHTML+=`
-      <tr>
-        <td>${i+1}</td>
-        <td>${r.escola}</td>
-        <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
-        <td>${r.IPT.toFixed(2)}</td>
-      </tr>`;
-  });
-}
+      rankingGlobal.push({
+        escola:d.escola||"Sem nome",
+        classe,
+        statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+        IPT
+      });
+    });
 
-function exportarXLSX(){
-  const ws=XLSX.utils.json_to_sheet(rankingGlobal);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Ranking IPT");
-  XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
-}
+    rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
-function abrirModal(){ modalIPT.style.display="flex"; }
-function fecharModal(){ modalIPT.style.display="none"; }
+    kpiCritica.innerText=critica;
+    kpiAtencao.innerText=atencao;
+    kpiMedio.innerText=(somaIPT/dados.length).toFixed(2);
+
+    // Gráfico Status
+    new Chart(graficoStatus,{
+      type:"pie",
+      data:{
+        labels:["Adequada","Alerta","Atenção","Crítica"],
+        datasets:[{data:Object.values(statusCount),
+          backgroundColor:["#4caf50","#ff9800","#ff7043","#f44336"]}]
+      }
+    });
+
+    // Gráfico Top Prioridades
+    const topN=window.innerWidth<600?5:10;
+    new Chart(graficoIndice,{
+      type:"bar",
+      data:{
+        labels:rankingGlobal.slice(0,topN).map(r=>r.escola),
+        datasets:[{data:rankingGlobal.slice(0,topN).map(r=>r.IPT.toFixed(2)),backgroundColor:"#1f4fd8"}]
+      },
+      options:{indexAxis:"y",plugins:{legend:{display:false}}}
+    });
+
+    // Preencher tabela
+    rankingGlobal.forEach((r,i)=>{
+      tabelaRanking.innerHTML+=`
+        <tr>
+          <td>${i+1}</td>
+          <td>${r.escola}</td>
+          <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
+          <td>${r.IPT.toFixed(2)}</td>
+        </tr>`;
+    });
+  }
+
+  carregarDados();
+
+  function exportarXLSX(){
+    const ws=XLSX.utils.json_to_sheet(rankingGlobal);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Ranking IPT");
+    XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
+  }
+
+  function abrirModal(){ modalIPT.style.display="flex"; }
+  function fecharModal(){ modalIPT.style.display="none"; }
+
 </script>
-
 </body>
 </html>
