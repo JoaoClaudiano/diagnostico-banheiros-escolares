@@ -10,24 +10,64 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
-.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
+body { 
+  font-family: Arial, sans-serif; 
+  background:#f4f6f8; 
+  margin:0; 
+  display:flex; 
+  flex-direction:column; 
+  min-height:100vh; 
+}
+
+/* Cards */
+.card { 
+  background:#fff; 
+  max-width:1100px; 
+  margin:20px auto; 
+  padding:20px; 
+  border-radius:10px; 
+}
+
+/* Grid e KPI */
 .grid { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
+
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
+
 .info { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1f4fd8; color:#fff; font-size:12px; cursor:pointer; margin-left:6px; }
+
 .badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
 .adequada { background:#4caf50; }
 .alerta { background:yellow; color:#000; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
+
 table { width:100%; border-collapse: collapse; font-size:14px; }
 th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; text-align:left; }
+
 button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+
+/* Modal */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
+
+/* Footer fixo no final */
+footer {
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:16px 10px;
+  font-size:12px;
+  line-height:1.4;
+  box-sizing:border-box;
+  width:100vw;
+  position:relative;
+  left:0;
+}
+
+/* Mobile */
 @media (max-width: 600px){
   .grid { grid-template-columns:1fr; }
   .kpi strong { font-size:34px; }
@@ -39,11 +79,11 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
   table td:nth-child(2)::before { content:"Escola"; }
   table td:nth-child(3)::before { content:"Status"; }
   table td:nth-child(4)::before { content:"IPT"; }
-  table td:nth-child(5)::before { content:"Dias Críticos"; }
   .modal-content { width:90%; }
 }
+
 @media (max-width: 480px) {
-  footer div { padding: 0 8px; }
+  footer div { padding:0 8px; }
   footer p { font-size:10px; }
   footer img { width:50%; max-width:80px; }
 }
@@ -67,7 +107,9 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
     <strong id="kpiAtencao">–</strong>
   </div>
   <div class="kpi">
-    <h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4>
+    <h4>IPT Médio
+      <span class="info" onclick="abrirModal()">i</span>
+    </h4>
     <strong id="kpiMedio">–</strong>
   </div>
 </div>
@@ -83,24 +125,13 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
   </div>
 </div>
 
-<div class="card grid">
-  <div>
-    <h3>Frequência de Problemas</h3>
-    <canvas id="graficoProblemas"></canvas>
-  </div>
-  <div>
-    <h3>Dias em Status Crítico</h3>
-    <canvas id="graficoDiasCriticos"></canvas>
-  </div>
-</div>
-
 <div class="card">
   <h3>🏆 Ranking Geral de Prioridade Técnica</h3>
   <button onclick="exportarXLSX()">⬇️ Baixar XLSX</button>
   <br><br>
   <table>
     <thead>
-      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Dias Críticos</th></tr>
+      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
@@ -108,29 +139,38 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
 
 <div class="card">
   <h3>📘 Metodologia – Índice de Prioridade Técnica (IPT)</h3>
-  <p>O IPT é um índice autoral do CheckInfra, inspirado em práticas de priorização técnica de engenharia diagnóstica, avaliação multicritério (MCDA) e gestão de ativos públicos.</p>
-  <p>Ele combina três dimensões:
+  <p>
+    O IPT é um índice autoral do CheckInfra, inspirado em práticas de
+    priorização técnica de engenharia diagnóstica, avaliação multicritério
+    (MCDA) e gestão de ativos públicos.
+  </p>
+  <p>
+    Ele combina três dimensões:
     <br>• Gravidade do status (peso 40%)
     <br>• Pontuação técnica observada (peso 40%)
     <br>• Persistência temporal do problema (peso 20%)
   </p>
-  <p>O IPT médio representa o <strong>nível médio de criticidade da rede</strong>. Valores altos indicam pressão sistêmica por investimento e manutenção.</p>
+  <p>
+    O IPT médio representa o <strong>nível médio de criticidade da rede</strong>.
+    Valores altos indicam pressão sistêmica por investimento e manutenção.
+  </p>
 </div>
 
 <div class="modal" id="modalIPT" onclick="fecharModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3>O que é o IPT médio?</h3>
-    <p>O IPT médio expressa o grau médio de urgência técnica da rede escolar. Ele não aponta uma escola específica, mas indica o <strong>estado geral da infraestrutura</strong>.</p>
+    <p>
+      O IPT médio expressa o grau médio de urgência técnica da rede escolar.
+      Ele não aponta uma escola específica, mas indica o <strong>estado geral
+      da infraestrutura</strong>.
+    </p>
     <button onclick="fecharModal()">Fechar</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { Chart, registerables } from "https://cdn.jsdelivr.net/npm/chart.js";
-
-Chart.register(...registerables);
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
@@ -152,12 +192,7 @@ async function carregarAvaliacoes(){
   const dados = [];
   snapshot.forEach(doc=>{
     const d = doc.data();
-    if(d.status && d.createdAt instanceof Timestamp){
-      // converte timestamp para string de data
-      d.data_avaliacao = d.createdAt.toDate().toISOString().split("T")[0];
-      d.dias_criticos = d.dias_criticos || 0;
-      dados.push(d);
-    }
+    if(d.status) dados.push(d);
   });
   montar(dados);
 }
@@ -168,41 +203,32 @@ function montar(dados){
 
   let critica=0, atencao=0, somaIPT=0;
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
-  const problemasCount={};
 
   dados.forEach(d=>{
     let peso=1, classe="adequada";
     const s=(d.status||"").toLowerCase();
 
-    if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++;}
-    else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++;}
-    else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++;}
+    if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++}
+    else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++}
+    else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++}
     else statusCount.adequada++;
 
-    const pont = Number(d.pontuacao||0);
-    const dias = Math.min(Number(d.dias_criticos||0),30);
-    const IPT = (peso*0.4) + (pont*0.4) + (dias*0.2);
-    somaIPT += IPT;
-
-    // contar problemas
-    if(d.problemas && Array.isArray(d.problemas)){
-      d.problemas.forEach(p=>{
-        problemasCount[p] = (problemasCount[p]||0)+1;
-      });
-    }
+    const pont=Number(d.pontuacao||0);
+    const dias=Math.min(Number(d.dias_criticos||0),30);
+    const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
+    somaIPT+=IPT;
 
     rankingGlobal.push({
-      escola: d.escola||"Sem nome",
+      escola:d.escola||"Sem nome",
       classe,
-      statusLabel: classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
-      IPT,
-      diasCriticos: dias
+      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+      IPT
     });
   });
 
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
-  // tabela
+  // Tabela
   rankingGlobal.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
@@ -210,7 +236,6 @@ function montar(dados){
         <td>${r.escola}</td>
         <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
         <td>${r.IPT.toFixed(2)}</td>
-        <td>${r.diasCriticos}</td>
       </tr>`;
   });
 
@@ -219,17 +244,20 @@ function montar(dados){
   kpiAtencao.innerText = atencao;
   kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
 
-  // gráficos de status
+  // Gráfico status
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
     data:{
       labels:["Adequada","Alerta","Atenção","Crítica"],
-      datasets:[{ data:Object.values(statusCount), backgroundColor:["#4caf50","yellow","#ff7043","#f44336"] }]
+      datasets:[{
+        data:Object.values(statusCount),
+        backgroundColor:["#4caf50","yellow","#ff7043","#f44336"]
+      }]
     }
   });
 
-  // gráfico top prioridades
-  const topN = window.innerWidth<600?5:10;
+  // Gráfico top prioridades
+  const topN = window.innerWidth<600 ? 5 : 10;
   new Chart(document.getElementById("graficoIndice"),{
     type:"bar",
     data:{
@@ -238,29 +266,27 @@ function montar(dados){
     },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
-
-  // gráfico frequência de problemas
-  new Chart(document.getElementById("graficoProblemas"),{
-    type:"bar",
-    data:{ labels:Object.keys(problemasCount), datasets:[{ label:"Ocorrências", data:Object.values(problemasCount), backgroundColor:"#ff9800" }] },
-    options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
-  });
-
-  // gráfico dias críticos
-  new Chart(document.getElementById("graficoDiasCriticos"),{
-    type:"bar",
-    data:{ labels:rankingGlobal.map(r=>r.escola), datasets:[{ label:"Dias Críticos", data:rankingGlobal.map(r=>r.diasCriticos), backgroundColor:"#f44336" }] },
-    options:{ plugins:{ legend:{ display:false } }, responsive:true, scales:{ y:{ beginAtZero:true, stepSize:1 } } }
-  });
 }
 
-function exportarXLSX(){
-  if(rankingGlobal.length===0){ alert("Nenhum dado disponível para exportação."); return; }
-  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
+// Exportação XLSX corrigida
+window.exportarXLSX = function() {
+  if(rankingGlobal.length === 0){
+    alert("Nenhum dado disponível para exportação.");
+    return;
+  }
+
+  // Dados simples para exportação
+  const exportData = rankingGlobal.map(r => ({
+    Escola: r.escola,
+    Status: r.statusLabel,
+    IPT: r.IPT.toFixed(2)
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
   XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
-}
+};
 
 function abrirModal(){ modalIPT.style.display="flex"; }
 function fecharModal(){ modalIPT.style.display="none"; }
@@ -268,19 +294,25 @@ function fecharModal(){ modalIPT.style.display="none"; }
 carregarAvaliacoes();
 </script>
 
-<footer style="background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4;">
+<!-- ===== FOOTER FIXO NO FINAL DA PÁGINA ===== -->
+<footer>
   <div style="max-width:600px; margin:0 auto;">
-    <p>© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
-    <p>
-      <a href="./pages/sobre.html" style="color:#fff; text-decoration:underline;">Sobre</a> | 
+    <p style="margin:0 0 6px;">
+      © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
+    </p>
+    <p style="margin:0 0 6px;">
+            <a href="./pages/sobre.html" style="color:#fff; text-decoration:underline;">Sobre</a> | 
       <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
       <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
       <a href="./pages/termos-de-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
     </p>
-    <p>
+    <p style="margin:0 0 6px;">
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
         <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:80px; width:35%;">
       </a>
+    </p>
+    <p style="margin:0; font-size:11px;">
+      🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
 </footer>
