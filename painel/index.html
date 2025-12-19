@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#1f4fd8">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.esm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -135,7 +135,7 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { Chart, registerables } from "https://cdn.jsdelivr.net/npm/chart.js";
-import zoomPlugin from "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.esm.js";
+import zoomPlugin from "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.esm.js";
 
 Chart.register(...registerables, zoomPlugin);
 
@@ -160,12 +160,12 @@ async function carregarAvaliacoes(){
   snapshot.forEach(doc=>{
     const d = doc.data();
     if(d.status && d.createdAt){
-      // Converte timestamp para string yyyy-mm-dd
-      const dataStr = d.createdAt.toDate().toISOString().split("T")[0];
-      d.data_avaliacao = dataStr;
-      // Garantir dias_criticos existe
-      if(d.dias_criticos === undefined) d.dias_criticos = 0;
-      dados.push(d);
+      // Converter Timestamp para Date string
+      const dataAvaliacao = d.createdAt instanceof Timestamp ? d.createdAt.toDate() : new Date(d.createdAt);
+      // Calcular dias críticos
+      const hoje = new Date();
+      const diasCriticos = Math.max(Math.round((hoje - dataAvaliacao)/(1000*60*60*24)),0);
+      dados.push({...d, data_avaliacao: dataAvaliacao.toISOString().split('T')[0], dias_criticos: diasCriticos});
     }
   });
   montar(dados);
@@ -200,7 +200,6 @@ function montar(dados){
       });
     }
 
-    // Agrupar por data para linha do tempo
     const dia = d.data_avaliacao;
     if(!diasMap[dia]) diasMap[dia]={critica:[],atencao:[],alerta:[],adequada:[]};
     diasMap[dia][classe].push(d.escola);
@@ -216,7 +215,6 @@ function montar(dados){
 
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
-  // Tabela
   rankingGlobal.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
@@ -232,7 +230,6 @@ function montar(dados){
   kpiAtencao.innerText = atencao;
   kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
 
-  // Gráficos
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
     data:{ labels:["Adequada","Alerta","Atenção","Crítica"], datasets:[{ data:Object.values(statusCount), backgroundColor:["#4caf50","yellow","#ff7043","#f44336"] }] }
