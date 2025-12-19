@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Metodologia — CheckInfra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f4fd8">
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:20px;
+}
+.card{
+  background:#fff;
+  max-width:1000px;
+  margin:20px auto;
+  padding:24px;
+  border-radius:10px;
+}
+h2,h3{
+  color:#1f4fd8;
+}
+p,li{
+  line-height:1.6;
+  font-size:14px;
+}
+ul{
+  padding-left:20px;
+}
+.badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:12px;
+  font-size:12px;
+  color:#fff;
+}
+.critica{background:#f44336}
+.atencao{background:#ff7043}
+.alerta{background:#fbc02d;color:#000}
+.adequada{background:#4caf50}
+.footer{
+  text-align:center;
+  font-size:12px;
+  color:#fff;
+  background:#1f4fd8;
+  padding:16px;
+  margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>📘 Metodologia — Índice de Prioridade Técnica (IPT)</h2>
+  <p>
+    O <strong>CheckInfra</strong> é uma ferramenta de diagnóstico preliminar e
+    priorização técnica da infraestrutura sanitária escolar, voltada ao apoio
+    à gestão pública, planejamento e tomada de decisão baseada em evidências.
+  </p>
+</div>
+
+<div class="card">
+  <h3>1. Unidade de Análise</h3>
+  <p>
+    A unidade principal de análise do sistema é a <strong>escola</strong>.
+    Embora múltiplas avaliações possam existir ao longo do tempo, o painel
+    gerencial considera, para fins de ranking e indicadores consolidados,
+    <strong>apenas a avaliação mais recente de cada escola</strong>.
+  </p>
+  <p>
+    Todas as avaliações anteriores permanecem armazenadas e acessíveis
+    para fins de auditoria, análise histórica e transparência institucional.
+  </p>
+</div>
+
+<div class="card">
+  <h3>2. Estrutura do Índice IPT</h3>
+  <p>
+    O Índice de Prioridade Técnica (IPT) é um índice autoral do CheckInfra,
+    inspirado em práticas de engenharia diagnóstica, avaliação multicritério
+    (MCDA) e gestão de ativos públicos.
+  </p>
+
+  <p><strong>Fórmula geral:</strong></p>
+  <p style="font-size:16px;"><strong>
+    IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)
+  </strong></p>
+
+  <ul>
+    <li><strong>GS</strong> — Gravidade Sanitária</li>
+    <li><strong>IT</strong> — Intensidade Técnica</li>
+    <li><strong>RT</strong> — Recorrência Temporal (persistência)</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>3. Gravidade Sanitária (GS)</h3>
+  <p>
+    A Gravidade Sanitária é derivada do status final da avaliação,
+    conforme os critérios do checklist técnico.
+  </p>
+
+  <ul>
+    <li><span class="badge adequada">Adequada</span> → GS = 1</li>
+    <li><span class="badge alerta">Alerta</span> → GS = 2</li>
+    <li><span class="badge atencao">Atenção</span> → GS = 3</li>
+    <li><span class="badge critica">Crítica</span> → GS = 4</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>4. Intensidade Técnica (IT)</h3>
+  <p>
+    A Intensidade Técnica corresponde à pontuação total obtida na avaliação,
+    calculada a partir da soma ponderada dos problemas identificados no checklist.
+  </p>
+  <p>
+    Esse componente reflete a <strong>complexidade, extensão e severidade técnica</strong>
+    das não conformidades observadas.
+  </p>
+</div>
+
+<div class="card">
+  <h3>5. Recorrência Temporal (RT)</h3>
+  <p>
+    O componente RT representa a <strong>persistência recorrente</strong>
+    dos problemas ao longo do tempo.
+  </p>
+  <p>
+    No modelo atual do CheckInfra, o RT é definido como:
+  </p>
+  <ul>
+    <li>Quantidade de avaliações já registradas para a mesma escola</li>
+    <li>Utilizada como proxy de reincidência estrutural</li>
+    <li>Limitada por teto técnico para evitar distorções</li>
+  </ul>
+  <p>
+    Esse fator permite identificar problemas crônicos, independentemente
+    de variações pontuais entre avaliadores.
+  </p>
+</div>
+
+<div class="card">
+  <h3>6. Consolidação e Ranking</h3>
+  <p>
+    Para fins de leitura executiva, o painel:
+  </p>
+  <ul>
+    <li>Exibe apenas <strong>uma linha por escola</strong></li>
+    <li>Considera sempre a <strong>avaliação mais recente</strong></li>
+    <li>Recalcula o IPT dinamicamente</li>
+    <li>Preserva todo o histórico para consulta</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>7. Aviso Técnico</h3>
+  <p>
+    O CheckInfra não substitui inspeções presenciais, laudos técnicos ou
+    projetos de engenharia. Trata-se de uma ferramenta de apoio à gestão,
+    priorização e planejamento.
+  </p>
+</div>
+
+<div class="footer">
+  © 2025 CheckInfra — Metodologia pública, transparente e auditável
+</div>
+
+</body>
+</html>
