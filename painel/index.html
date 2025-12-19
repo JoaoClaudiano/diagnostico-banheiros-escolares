@@ -79,6 +79,7 @@ footer {
   table td:nth-child(2)::before { content:"Escola"; }
   table td:nth-child(3)::before { content:"Status"; }
   table td:nth-child(4)::before { content:"IPT"; }
+  table td:nth-child(5)::before { content:"Dias Críticos"; }
   .modal-content { width:90%; }
 }
 
@@ -131,7 +132,7 @@ footer {
     <canvas id="graficoProblemas"></canvas>
   </div>
   <div>
-    <h3>Dias em Status Crítico</h3>
+    <h3>Dias em Status Crítico (Agrupado)</h3>
     <canvas id="graficoDiasCriticos"></canvas>
   </div>
 </div>
@@ -142,7 +143,7 @@ footer {
   <br><br>
   <table>
     <thead>
-      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
+      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Dias Críticos</th></tr>
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
@@ -216,6 +217,10 @@ function montar(dados){
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
   const problemasCount={}; // frequência de problemas
 
+  // Faixas de dias críticos (em dias)
+  const faixas = [0,30,60,90,180,365];
+  const diasCriticosFaixas = Array(faixas.length-1).fill(0);
+
   dados.forEach(d=>{
     let peso=1, classe="adequada";
     const s=(d.status||"").toLowerCase();
@@ -226,7 +231,7 @@ function montar(dados){
     else statusCount.adequada++;
 
     const pont=Number(d.pontuacao||0);
-    const dias=Math.min(Number(d.dias_criticos||0),30);
+    const dias=Math.min(Number(d.dias_criticos||0),365);
     const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
     somaIPT+=IPT;
 
@@ -236,6 +241,14 @@ function montar(dados){
         if(problemasCount[p]) problemasCount[p]++;
         else problemasCount[p]=1;
       });
+    }
+
+    // Contagem em faixa de dias críticos
+    for(let i=0;i<faixas.length-1;i++){
+      if(dias>faixas[i] && dias<=faixas[i+1]){
+        diasCriticosFaixas[i]++;
+        break;
+      }
     }
 
     rankingGlobal.push({
@@ -257,6 +270,7 @@ function montar(dados){
         <td>${r.escola}</td>
         <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
         <td>${r.IPT.toFixed(2)}</td>
+        <td>${r.diasCriticos}</td>
       </tr>`;
   });
 
@@ -298,15 +312,42 @@ function montar(dados){
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
-  // Gráfico dias em status crítico
+  // Gráfico dias críticos por faixa (sem nome de escola)
   new Chart(document.getElementById("graficoDiasCriticos"), {
     type:"bar",
     data:{
-      labels: rankingGlobal.map(r=>r.escola),
-      datasets:[{ label:"Dias Críticos", data: rankingGlobal.map(r=>r.diasCriticos), backgroundColor:"#f44336" }]
+      labels: ["0-30","31-60","61-90","91-180","181-365"],
+      datasets:[
+        { label:"Adequada", data: [], backgroundColor:"#4caf50" },
+        { label:"Alerta", data: [], backgroundColor:"yellow" },
+        { label:"Atenção", data: [], backgroundColor:"#ff7043" },
+        { label:"Crítica", data: [], backgroundColor:"#f44336" }
+      ]
     },
-    options:{ plugins:{ legend:{ display:false } }, responsive:true, scales:{ y:{ beginAtZero:true, stepSize:1 } } }
+    options:{
+      plugins:{ legend:{ position:"top" } },
+      responsive:true,
+      scales:{ y:{ beginAtZero:true, stepSize:1 } }
+    }
   });
+
+  // Preencher dataset do gráfico de dias críticos por faixa e status
+  const grafDias = Chart.getChart("graficoDiasCriticos");
+  faixas.forEach((_,i)=>{
+    if(i>=faixas.length-1) return;
+    const faixaLabel = grafDias.data.labels[i];
+    const faixaStatusCount = {adequada:0, alerta:0, atencao:0, critica:0};
+    rankingGlobal.forEach(r=>{
+      if(r.diasCriticos>faixas[i] && r.diasCriticos<=faixas[i+1]){
+        faixaStatusCount[r.classe]++;
+      }
+    });
+    grafDias.data.datasets[0].data.push(faixaStatusCount.adequada);
+    grafDias.data.datasets[1].data.push(faixaStatusCount.alerta);
+    grafDias.data.datasets[2].data.push(faixaStatusCount.atencao);
+    grafDias.data.datasets[3].data.push(faixaStatusCount.critica);
+  });
+  grafDias.update();
 }
 
 function exportarXLSX(){
