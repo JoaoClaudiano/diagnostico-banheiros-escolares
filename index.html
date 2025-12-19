@@ -9,7 +9,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-DD4SQ88NVT');
 </script>
   
@@ -29,37 +28,40 @@
       font-family: Arial, sans-serif;
       background: #f4f6f8;
       margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     .nav-global {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  display: flex;
-  gap: 8px;
-  z-index: 9999;
-}
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 9999;
+    }
 
-.nav-global button,
-.nav-global a {
-  background: rgba(31,79,216,0.95);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-}
+    .nav-global button,
+    .nav-global a {
+      background: rgba(31,79,216,0.95);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
 
-.nav-global button:hover,
-.nav-global a:hover {
-  background: #163aa9;
-}
+    .nav-global button:hover,
+    .nav-global a:hover {
+      background: #163aa9;
+    }
 
     /* ===== HEADER SIMPLES ===== */
     .header {
@@ -73,6 +75,7 @@
       margin: 40px auto;
       padding: 0 20px;
       text-align: center;
+      flex: 1;
     }
 
     /* ===== LOGO CENTRAL ===== */
@@ -141,13 +144,8 @@
 
 <body>
 <div class="nav-global">
-  <button onclick="history.back()" title="Voltar">
-    ⬅️
-  </button>
-
-  <a href="./index.html" title="Início">
-    🏠
-  </a>
+  <button onclick="history.back()" title="Voltar">⬅️</button>
+  <a href="./index.html" title="Início">🏠</a>
 </div>
   
 <!-- Faixa azul -->
@@ -180,38 +178,37 @@
 
   <!-- Cards verticais -->
 <div class="actions">
-  <a href="./avaliacao.html" class="btn-primary">
-    📝 Realizar Avaliação
-  </a>
-
-  <a href="./painel/" class="btn-secondary">
-    📊 Painel Técnico
-  </a>
-
-  <a href="./mapa/" class="btn-secondary">
-    🗺️ Mapa da Secretaria
-  </a>
-
-  <a href="./metodologia.html" class="btn-secondary">
-    📘 Metodologia Técnica
-  </a>
-    <a href="./analise-espacial.html" class="btn-secondary">
-    🧭 Análise Espacial
-    </a>
-
+  <a href="./avaliacao.html" class="btn-primary">📝 Realizar Avaliação</a>
+  <a href="./painel/" class="btn-secondary">📊 Painel Técnico</a>
+  <a href="./mapa/" class="btn-secondary">🗺️ Mapa da Secretaria</a>
+  <a href="./metodologia.html" class="btn-secondary">📘 Metodologia Técnica</a>
+  <a href="./analise-espacial.html" class="btn-secondary">🧭 Análise Espacial</a>
 </div>
 
 </main>
-  
-    <!-- Footer -->
-<div id="footer-container"></div>
-<script>
-fetch('pages/footer.html')
-  .then(response => response.text())
-  .then(html => {
-    document.getElementById('footer-container').innerHTML = html;
-  });
-</script>
+
+<!-- ===== FOOTER FIXO ===== -->
+<footer style="
+  background:#1f4fd8; 
+  color:#fff; 
+  text-align:center; 
+  padding:16px 10px; 
+  font-size:12px; 
+  line-height:1.4;
+">
+  <div style="max-width:600px; margin:0 auto;">
+    <p style="margin:0 0 8px;">
+      © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
+    </p>
+    <a href="opensource.org">
+  <img src="img.shields.io" alt="License: MIT">
+</a>
+
+    <p style="margin:0; font-size:11px;">
+      🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
+    </p>
+  </div>
+</footer>
 
 <script>
 if ("serviceWorker" in navigator) {
@@ -220,13 +217,6 @@ if ("serviceWorker" in navigator) {
     .catch(err => console.error("Erro no Service Worker", err));
 }
 </script>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js")
-    .then(() => console.log("Service Worker registrado"))
-    .catch(err => console.error("Erro no SW", err));
-}
-</script>
-  
+
 </body>
 </html>
