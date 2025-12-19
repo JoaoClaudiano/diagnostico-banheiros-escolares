@@ -7,11 +7,10 @@
 <meta name="theme-color" content="#1f4fd8">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.esm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; }
+body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
 .card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
 .grid { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; }
@@ -29,7 +28,6 @@ th { background:#f4f6f8; text-align:left; }
 button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100vw; position:relative; left:0; }
 @media (max-width: 600px){
   .grid { grid-template-columns:1fr; }
   .kpi strong { font-size:34px; }
@@ -41,10 +39,11 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
   table td:nth-child(2)::before { content:"Escola"; }
   table td:nth-child(3)::before { content:"Status"; }
   table td:nth-child(4)::before { content:"IPT"; }
+  table td:nth-child(5)::before { content:"Dias Críticos"; }
   .modal-content { width:90%; }
 }
 @media (max-width: 480px) {
-  footer div { padding:0 8px; }
+  footer div { padding: 0 8px; }
   footer p { font-size:10px; }
   footer img { width:50%; max-width:80px; }
 }
@@ -108,11 +107,6 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 </div>
 
 <div class="card">
-  <h3>📈 Linha do Tempo – Status Críticos</h3>
-  <canvas id="graficoLinhaTempo"></canvas>
-</div>
-
-<div class="card">
   <h3>📘 Metodologia – Índice de Prioridade Técnica (IPT)</h3>
   <p>O IPT é um índice autoral do CheckInfra, inspirado em práticas de priorização técnica de engenharia diagnóstica, avaliação multicritério (MCDA) e gestão de ativos públicos.</p>
   <p>Ele combina três dimensões:
@@ -135,9 +129,8 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { Chart, registerables } from "https://cdn.jsdelivr.net/npm/chart.js";
-import zoomPlugin from "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.esm.js";
 
-Chart.register(...registerables, zoomPlugin);
+Chart.register(...registerables);
 
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
@@ -159,13 +152,11 @@ async function carregarAvaliacoes(){
   const dados = [];
   snapshot.forEach(doc=>{
     const d = doc.data();
-    if(d.status && d.createdAt){
-      // Converter Timestamp para Date string
-      const dataAvaliacao = d.createdAt instanceof Timestamp ? d.createdAt.toDate() : new Date(d.createdAt);
-      // Calcular dias críticos
-      const hoje = new Date();
-      const diasCriticos = Math.max(Math.round((hoje - dataAvaliacao)/(1000*60*60*24)),0);
-      dados.push({...d, data_avaliacao: dataAvaliacao.toISOString().split('T')[0], dias_criticos: diasCriticos});
+    if(d.status && d.createdAt instanceof Timestamp){
+      // converte timestamp para string de data
+      d.data_avaliacao = d.createdAt.toDate().toISOString().split("T")[0];
+      d.dias_criticos = d.dias_criticos || 0;
+      dados.push(d);
     }
   });
   montar(dados);
@@ -178,7 +169,6 @@ function montar(dados){
   let critica=0, atencao=0, somaIPT=0;
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
   const problemasCount={};
-  const diasMap={};
 
   dados.forEach(d=>{
     let peso=1, classe="adequada";
@@ -189,25 +179,22 @@ function montar(dados){
     else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++;}
     else statusCount.adequada++;
 
-    const pont=Number(d.pontuacao||0);
-    const dias=Math.min(Number(d.dias_criticos||0),30);
-    const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
-    somaIPT+=IPT;
+    const pont = Number(d.pontuacao||0);
+    const dias = Math.min(Number(d.dias_criticos||0),30);
+    const IPT = (peso*0.4) + (pont*0.4) + (dias*0.2);
+    somaIPT += IPT;
 
+    // contar problemas
     if(d.problemas && Array.isArray(d.problemas)){
       d.problemas.forEach(p=>{
         problemasCount[p] = (problemasCount[p]||0)+1;
       });
     }
 
-    const dia = d.data_avaliacao;
-    if(!diasMap[dia]) diasMap[dia]={critica:[],atencao:[],alerta:[],adequada:[]};
-    diasMap[dia][classe].push(d.escola);
-
     rankingGlobal.push({
-      escola:d.escola||"Sem nome",
+      escola: d.escola||"Sem nome",
       classe,
-      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+      statusLabel: classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
       IPT,
       diasCriticos: dias
     });
@@ -215,6 +202,7 @@ function montar(dados){
 
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
+  // tabela
   rankingGlobal.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
@@ -226,76 +214,43 @@ function montar(dados){
       </tr>`;
   });
 
+  // KPIs
   kpiCritica.innerText = critica;
   kpiAtencao.innerText = atencao;
   kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
 
+  // gráficos de status
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
-    data:{ labels:["Adequada","Alerta","Atenção","Crítica"], datasets:[{ data:Object.values(statusCount), backgroundColor:["#4caf50","yellow","#ff7043","#f44336"] }] }
+    data:{
+      labels:["Adequada","Alerta","Atenção","Crítica"],
+      datasets:[{ data:Object.values(statusCount), backgroundColor:["#4caf50","yellow","#ff7043","#f44336"] }]
+    }
   });
 
+  // gráfico top prioridades
   const topN = window.innerWidth<600?5:10;
   new Chart(document.getElementById("graficoIndice"),{
     type:"bar",
-    data:{ labels:rankingGlobal.slice(0,topN).map(r=>r.escola), datasets:[{ data:rankingGlobal.slice(0,topN).map(r=>r.IPT.toFixed(2)), backgroundColor:"#1f4fd8" }] },
+    data:{
+      labels: rankingGlobal.slice(0,topN).map(r=>r.escola),
+      datasets:[{ data: rankingGlobal.slice(0,topN).map(r=>r.IPT.toFixed(2)), backgroundColor:"#1f4fd8" }]
+    },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
+  // gráfico frequência de problemas
   new Chart(document.getElementById("graficoProblemas"),{
     type:"bar",
     data:{ labels:Object.keys(problemasCount), datasets:[{ label:"Ocorrências", data:Object.values(problemasCount), backgroundColor:"#ff9800" }] },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
+  // gráfico dias críticos
   new Chart(document.getElementById("graficoDiasCriticos"),{
     type:"bar",
     data:{ labels:rankingGlobal.map(r=>r.escola), datasets:[{ label:"Dias Críticos", data:rankingGlobal.map(r=>r.diasCriticos), backgroundColor:"#f44336" }] },
     options:{ plugins:{ legend:{ display:false } }, responsive:true, scales:{ y:{ beginAtZero:true, stepSize:1 } } }
-  });
-
-  const dias = Object.keys(diasMap).sort((a,b)=>new Date(a)-new Date(b));
-  const datasetCritica = dias.map(d=>diasMap[d].critica.length);
-  const datasetAtencao = dias.map(d=>diasMap[d].atencao.length);
-  const datasetAlerta = dias.map(d=>diasMap[d].alerta.length);
-  const datasetAdequada = dias.map(d=>diasMap[d].adequada.length);
-
-  new Chart(document.getElementById("graficoLinhaTempo"),{
-    type:"line",
-    data:{
-      labels:dias,
-      datasets:[
-        { label:"Crítica", data:datasetCritica, borderColor:"#f44336", backgroundColor:"#f4433655", fill:true },
-        { label:"Atenção", data:datasetAtencao, borderColor:"#ff7043", backgroundColor:"#ff704355", fill:true },
-        { label:"Alerta", data:datasetAlerta, borderColor:"yellow", backgroundColor:"yellow55", fill:true },
-        { label:"Adequada", data:datasetAdequada, borderColor:"#4caf50", backgroundColor:"#4caf5055", fill:true }
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{ position:"top" },
-        tooltip:{
-          callbacks:{
-            afterBody:(ctx)=>{
-              const dia = ctx[0].label;
-              const lines = [];
-              ["critica","atencao","alerta","adequada"].forEach(status=>{
-                if(diasMap[dia][status].length){
-                  lines.push(`${status.toUpperCase()}: ${diasMap[dia][status].join(", ")}`);
-                }
-              });
-              return lines;
-            }
-          }
-        },
-        zoom:{
-          pan:{ enabled:true, mode:"x" },
-          zoom:{ wheel:{ enabled:true }, pinch:{ enabled:true }, mode:"x" }
-        }
-      },
-      scales:{ y:{ beginAtZero:true } }
-    }
   });
 }
 
@@ -313,22 +268,19 @@ function fecharModal(){ modalIPT.style.display="none"; }
 carregarAvaliacoes();
 </script>
 
-<footer>
+<footer style="background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4;">
   <div style="max-width:600px; margin:0 auto;">
-    <p style="margin:0 0 6px;">© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
-    <p style="margin:0 0 6px;">
+    <p>© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
+    <p>
       <a href="./pages/sobre.html" style="color:#fff; text-decoration:underline;">Sobre</a> | 
       <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
       <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
       <a href="./pages/termos-de-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
     </p>
-    <p style="margin:0 0 6px;">
+    <p>
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
         <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:80px; width:35%;">
       </a>
-    </p>
-    <p style="margin:0; font-size:11px;">
-      🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
 </footer>
