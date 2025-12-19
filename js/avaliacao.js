@@ -37,7 +37,10 @@ async function sincronizarOffline(){
   if(!l.length) return;
 
   for(const d of l){
-    await setDoc(doc(db,"avaliacoes",d.id),{...d,createdAt:serverTimestamp()});
+    await setDoc(doc(db,"avaliacoes",d.id),{
+      ...d,
+      createdAt: serverTimestamp()
+    });
   }
   localStorage.removeItem(STORAGE_KEY);
 }
@@ -50,21 +53,23 @@ async function gerarPDF(d) {
   const margin = 20;
   let y = margin;
 
-  // Logo
   if(d.logo){
     pdf.addImage(d.logo,"PNG",80,y,50,30);
   }
+
   y += 35;
-  pdf.setFontSize(14);
-  pdf.setFont("helvetica","bold");
+  pdf.setFontSize(14).setFont("helvetica","bold");
   pdf.text("CheckInfra",105,y,{align:"center"});
   y += 7;
-  pdf.setFontSize(12);
-  pdf.setFont("helvetica","normal");
-  pdf.text("RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR",105,y,{align:"center"});
+
+  pdf.setFontSize(12).setFont("helvetica","normal");
+  pdf.text(
+    "RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR",
+    105,y,{align:"center"}
+  );
   y += 12;
 
-  // === Card: Identificação ===
+  // Identificação
   pdf.setFillColor(240,240,240);
   pdf.rect(margin,y,170,35,"F");
   pdf.setFont("helvetica","bold");
@@ -75,59 +80,36 @@ async function gerarPDF(d) {
   pdf.text(`Data da Avaliação: ${new Date().toLocaleDateString()}`,margin+3,y+29);
   y += 40;
 
-  // === Card: Problemas ===
+  // Problemas
   pdf.setFillColor(240,240,240);
-  pdf.rect(margin,y,170, d.problemas.length*7 + 20,"F");
+  pdf.rect(margin,y,170,d.problemas.length*7 + 20,"F");
   pdf.setFont("helvetica","bold");
   pdf.text("Problemas apontados",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-  let yProblema = y + 14;
+
+  let yP = y + 14;
   d.problemas.forEach(p=>{
-    pdf.text(`- ${p}`,margin+5,yProblema);
-    yProblema += 7;
+    pdf.text(`- ${p}`,margin+5,yP);
+    yP += 7;
   });
-  y = yProblema + 5;
+  y = yP + 5;
 
-  // === Card: Registro Fotográfico ===
+  // Resultado
   pdf.setFillColor(240,240,240);
-  pdf.rect(margin,y,170,65,"F");
-  pdf.setFont("helvetica","bold");
-  pdf.text("Registro Fotográfico",margin+3,y+7);
-  if(d.fotos.length){
-    let x = margin+3, yImg = y+15;
-    d.fotos.forEach(img=>{
-      pdf.addImage(img,"JPEG",x,yImg,80,60);
-      x += 90;
-      if(x+80>210-margin){x=margin+3;yImg+=70;}
-      if(yImg+60>297-margin){pdf.addPage();yImg=margin;x=margin+3;}
-    });
-  }
-  y += 70;
-
-  // === Card: Resultado ===
-  pdf.setFillColor(240,240,240);
-  pdf.rect(margin,y,170,20,"F");
+  pdf.rect(margin,y,170,22,"F");
   pdf.setFont("helvetica","bold");
   pdf.text("Resultado",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-  pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+14);
-  pdf.text(`Status: ${d.status}`,margin+60,y+14);
-  pdf.text(`ID Diagnóstico: ${d.id}`,margin+120,y+14);
-  y += 25;
+  pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+15);
+  pdf.text(`Status: ${d.status}`,margin+60,y+15);
+  pdf.text(`ID: ${d.id}`,margin+120,y+15);
+  y += 27;
 
-  // === Aviso Legal ===
-  pdf.setFont("helvetica","normal");
-  pdf.text("Este relatório é um diagnóstico preliminar e não substitui vistoria técnica presencial ou laudo de engenharia.",margin,y);
-
-  // === Rodapé com data de impressão ===
-  const footerText = `Impressão em: ${new Date().toLocaleDateString()}`;
   pdf.setFontSize(9);
-  pdf.setTextColor(80);
-  const pageCount = pdf.getNumberOfPages();
-  for(let i=1;i<=pageCount;i++){
-    pdf.setPage(i);
-    pdf.text(footerText,105,287,{align:"center"});
-  }
+  pdf.text(
+    "Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.",
+    margin,y
+  );
 
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
@@ -162,71 +144,71 @@ document.addEventListener("DOMContentLoaded",()=>{
   form.addEventListener("submit", async e=>{
     e.preventDefault();
 
-    // Pontuação e problemas
     let pontuacao = 0;
     let problemas = [];
+
     document.querySelectorAll(".check-card.selected").forEach(c=>{
       pontuacao += Number(c.dataset.peso);
       problemas.push(c.innerText.trim());
     });
 
-    // Status baseado nos quatro níveis
     let status="Adequada",classe="ok";
     if(pontuacao >= 12){ status="Crítica"; classe="critico"; }
     else if(pontuacao >= 8){ status="Atenção"; classe="atencao"; }
     else if(pontuacao >= 4){ status="Alerta"; classe="alerta"; }
-    else { status="Adequada"; classe="ok"; }
 
-    // Escola selecionada e lat/lng da lista escolas.js
     const escolaSelecionada = document.getElementById("escola").value;
-    const objEscola = window.escolas.find(e=>e.nome===escolaSelecionada) || {lat:null,lng:null};
+    const objEscola = window.escolas.find(e=>e.nome===escolaSelecionada) || {};
 
     const dados = {
       id: gerarIdCheckInfra(),
       escola: escolaSelecionada,
-      lat: objEscola.lat,
-      lng: objEscola.lng,
+      lat: objEscola.lat || null,
+      lng: objEscola.lng || null,
       avaliador: document.getElementById("avaliador").value,
+
       pontuacao,
       status,
       classe,
+
+      // ================= METODOLOGIA IPT =================
+      // RT = Persistência recorrente
+      // Regra: inicia em 0 e é acumulado posteriormente pelo sistema
+      rt: 0,
+
       problemas,
       fotos: fotosBase64,
       logo: "./assets/logo-checkinfra.png"
     };
 
-    window.idcheckinfra = dados.id;
-
-    // Atualiza card
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + classe;
     resultado.innerHTML = `
       <div class="selo">
-        ${classe === "ok" ? "Condição adequada" :
-          classe === "alerta" ? "Situação de alerta" :
-          classe === "atencao" ? "Atenção Elevada" :
+        ${classe==="ok"?"Condição adequada":
+          classe==="alerta"?"Situação de alerta":
+          classe==="atencao"?"Atenção Elevada":
           "Condição crítica"}
       </div>
       <strong>ID:</strong> ${dados.id}<br>
       <strong>Pontuação:</strong> ${pontuacao}<br>
       <strong>Avaliador:</strong> ${dados.avaliador}<br>
-      ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
+      ${navigator.onLine?"☁️ Enviado ao sistema":"📴 Salvo offline"}
     `;
 
-    // Salva no Firebase ou offline
     try{
       if(navigator.onLine){
-        await setDoc(doc(db,"avaliacoes",dados.id),{...dados,createdAt:serverTimestamp()});
-      }else salvarOffline(dados);
+        await setDoc(doc(db,"avaliacoes",dados.id),{
+          ...dados,
+          createdAt: serverTimestamp()
+        });
+      } else salvarOffline(dados);
     }catch{
       salvarOffline(dados);
     }
 
-    // Gera PDF
     gerarPDF(dados);
-
-    // Reset do formulário e preview
     form.reset();
-    preview.innerHTML=[];
+    preview.innerHTML="";
   });
 });
