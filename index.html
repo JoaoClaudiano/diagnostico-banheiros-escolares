@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DD4SQ88NVT');
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DD4SQ88NVT');
+  </script>
   
   <title>CheckInfra – Diagnóstico Sanitário Escolar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,7 +55,6 @@
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     }
 
     .nav-global button:hover,
@@ -63,11 +62,13 @@
       background: #163aa9;
     }
 
+    /* ===== HEADER SIMPLES ===== */
     .header {
       background: #1f4fd8;
       height: 70px;
     }
 
+    /* ===== CONTEÚDO CENTRAL ===== */
     .container {
       max-width: 420px;
       margin: 40px auto;
@@ -76,6 +77,7 @@
       flex: 1;
     }
 
+    /* ===== LOGO CENTRAL ===== */
     .logo-central {
       margin-bottom: 30px;
     }
@@ -99,6 +101,7 @@
       margin-top: 6px;
     }
 
+    /* ===== AÇÕES / CARDS ===== */
     .actions {
       display: flex;
       flex-direction: column;
@@ -136,6 +139,7 @@
       background: #f0f2f5;
     }
 
+    /* ===== FOOTER ===== */
     footer {
       background:#1f4fd8;
       color:#fff;
@@ -157,16 +161,17 @@
     }
 
     footer img {
-      max-width:120px;
-      width:50%;
+      max-width:90px;
+      width:40%;
     }
 
+    /* ===== MOBILE ===== */
     @media (max-width: 480px) {
       footer div {
         padding:0 8px;
       }
       footer p {
-        font-size:12px;
+        font-size:10px;
       }
       footer img {
         width:60%;
@@ -217,33 +222,37 @@
 <!-- ===== FOOTER ===== -->
 <footer>
   <div>
+    <!-- Copyright -->
     <p style="margin:0 0 6px; font-size:12px;">
       © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
     </p>
 
+    <!-- Links institucionais -->
     <p style="margin:0 0 6px; font-size:12px;">
       <a href="./pages/contato.html">Contato</a> | 
       <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
       <a href="./pages/termos-de-uso.html">Termos de Uso</a>
     </p>
 
-    <p style="margin:0 0 6px; display:flex; justify-content:center; gap:12px; align-items:center;">
-      <!-- Badge MIT License completo -->
+    <!-- Badges -->
+    <p style="margin:8px 0 6px; display:flex; justify-content:center; gap:12px; align-items:center;">
+      <!-- Badge MIT License -->
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.shields.io/badge/License-MIT%20License-yellow.svg" alt="License: MIT License" style="height:26px;">
+        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:90px; width:40%;">
       </a>
-      <!-- GitHub -->
+      <!-- Badge GitHub do mesmo tamanho -->
       <a href="https://github.com/JoaoClaudiano" target="_blank" rel="noopener noreferrer" 
-         style="display:inline-flex; align-items:center; justify-content:center; background-color:#ffffff; width:36px; height:36px; border-radius:50%; text-decoration:none; transition: transform 0.2s;"
+         style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; min-width:36px; border-radius:50%; background-color:#24292f; text-decoration:none; transition: transform 0.2s;"
          onmouseover="this.style.transform='scale(1.1)';" 
          onmouseout="this.style.transform='scale(1)';"
          aria-label="Perfil do GitHub">
-        <svg height="20" width="20" viewBox="0 0 16 16" style="fill: #24292f;" aria-hidden="true">
+        <svg height="20" width="20" viewBox="0 0 16 16" style="fill:#ffffff;" aria-hidden="true">
           <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
         </svg>
       </a>
     </p>
 
+    <!-- LGPD -->
     <p style="margin:0; font-size:12px;">
       🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
