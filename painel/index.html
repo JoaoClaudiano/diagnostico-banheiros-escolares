@@ -28,12 +28,17 @@ body {
   border-radius:10px; 
 }
 
-/* Grid e KPI */
-.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+/* Grid de KPIs */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
 
-.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
-.kpi h4 { margin:0; font-size:14px; color:#555; }
-.kpi strong { font-size:30px; display:block; margin-top:6px; }
+.kpi { background:#f9fafb; border-radius:10px; padding:14px; font-size:14px; }
+.kpi h4 { margin:0 0 4px 0; font-size:13px; color:#555; }
+.kpi strong { font-size:26px; display:block; margin-top:4px; }
 
 .info { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1f4fd8; color:#fff; font-size:12px; cursor:pointer; margin-left:6px; }
 
@@ -47,18 +52,20 @@ table { width:100%; border-collapse: collapse; font-size:14px; }
 th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; text-align:left; }
 
-button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
+button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:6px; }
+
+.tab-container { display:flex; margin-bottom:12px; }
+.tab { padding:8px 12px; background:#e0e0e0; border-radius:6px 6px 0 0; margin-right:4px; cursor:pointer; }
+.tab.active { background:#1f4fd8; color:#fff; }
+
+.tab-content { display:none; }
+.tab-content.active { display:block; }
 
 /* Modal */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
-/* Aba ativa */
-.tabs { display:flex; gap:4px; margin-bottom:12px; }
-.tab { flex:1; padding:8px; background:#eee; text-align:center; cursor:pointer; border-radius:6px; }
-.tab.active { background:#1f4fd8; color:#fff; }
-
-/* Footer fixo */
+/* Footer fixo no final */
 footer {
   background:#1f4fd8;
   color:#fff;
@@ -74,8 +81,8 @@ footer {
 
 /* Mobile */
 @media (max-width: 600px){
-  .grid { grid-template-columns:1fr; }
-  .kpi strong { font-size:28px; }
+  .kpi strong { font-size:22px; }
+  .kpi h4 { font-size:12px; }
   table thead { display:none; }
   table tr { display:block; margin-bottom:12px; border:1px solid #eee; border-radius:8px; padding:10px; }
   table td { display:block; border:none; padding:4px 0; }
@@ -95,7 +102,7 @@ footer {
   <small>Síntese executiva e priorização técnica</small>
 </div>
 
-<div class="card grid">
+<div class="card kpi-grid">
   <div class="kpi">
     <h4>Unidades Críticas</h4>
     <strong id="kpiCritica">–</strong>
@@ -109,8 +116,8 @@ footer {
     <strong id="kpiMedio">–</strong>
   </div>
   <div class="kpi">
-    <h4>Escolas Avaliadas Recentemente</h4>
-    <strong id="kpiRecentes">–</strong>
+    <h4>Frequência de Problemas</h4>
+    <strong id="kpiProblemas">–</strong>
   </div>
 </div>
 
@@ -123,19 +130,24 @@ footer {
     <h3>Top Prioridades (IPT)</h3>
     <canvas id="graficoIndice"></canvas>
   </div>
+</div>
+
+<div class="card grid">
   <div>
     <h3>Frequência de Problemas</h3>
-    <canvas id="graficoProblemas"></canvas>
+    <canvas id="graficoProblemasChart"></canvas>
   </div>
 </div>
 
 <div class="card">
-  <div class="tabs">
-    <div class="tab active" onclick="abrirRanking()">Ranking</div>
-    <div class="tab" onclick="abrirHistorico()">Histórico</div>
+  <div class="tab-container">
+    <div class="tab active" data-tab="ranking">Ranking</div>
+    <div class="tab" data-tab="historico">Histórico</div>
     <button onclick="exportarXLSX()">⬇️ Baixar XLSX</button>
+    <button onclick="exportarHistorico()">📂 Baixar Histórico</button>
   </div>
-  <div id="rankingContainer">
+
+  <div id="ranking" class="tab-content active">
     <table>
       <thead>
         <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
@@ -143,10 +155,11 @@ footer {
       <tbody id="tabelaRanking"></tbody>
     </table>
   </div>
-  <div id="historicoContainer" style="display:none;">
+
+  <div id="historico" class="tab-content">
     <table>
       <thead>
-        <tr><th>Data</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
+        <tr><th>Escola</th><th>Avaliador</th><th>Status</th><th>IPT</th><th>Data</th></tr>
       </thead>
       <tbody id="tabelaHistorico"></tbody>
     </table>
@@ -176,6 +189,7 @@ footer {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { Chart, registerables } from "https://cdn.jsdelivr.net/npm/chart.js";
+
 Chart.register(...registerables);
 
 const firebaseConfig = {
@@ -193,21 +207,7 @@ const tabelaHistorico = document.getElementById("tabelaHistorico");
 const kpiCritica = document.getElementById("kpiCritica");
 const kpiAtencao = document.getElementById("kpiAtencao");
 const kpiMedio = document.getElementById("kpiMedio");
-const kpiRecentes = document.getElementById("kpiRecentes");
-
-function abrirRanking(){
-  document.getElementById("rankingContainer").style.display="block";
-  document.getElementById("historicoContainer").style.display="none";
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.querySelector(".tab:nth-child(1)").classList.add("active");
-}
-
-function abrirHistorico(){
-  document.getElementById("rankingContainer").style.display="none";
-  document.getElementById("historicoContainer").style.display="block";
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.querySelector(".tab:nth-child(2)").classList.add("active");
-}
+const kpiProblemas = document.getElementById("kpiProblemas");
 
 async function carregarAvaliacoes(){
   const snapshot = await getDocs(collection(db,"avaliacoes"));
@@ -227,64 +227,64 @@ function montar(dados){
   tabelaRanking.innerHTML = "";
   tabelaHistorico.innerHTML = "";
 
-  let critica=0, atencao=0, somaIPT=0, recentes=0;
+  const ultimaEscola = {};
+  let critica=0, atencao=0, somaIPT=0;
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
   const problemasCount={};
-  const hoje = new Date();
 
-  // Agrupa por escola (mais recente)
-  const grouped = {};
   dados.forEach(d=>{
-    const idEscola = d.escola || "Sem nome";
-    if(!grouped[idEscola] || d.createdAt.toDate() > grouped[idEscola].createdAt.toDate()){
-      grouped[idEscola] = d;
-    }
-  });
-
-  Object.values(grouped).forEach(d=>{
     let peso=1, classe="adequada";
     const s=(d.status||"").toLowerCase();
+
     if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++;}
     else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++;}
     else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++;}
     else statusCount.adequada++;
 
     const pont = Number(d.pontuacao||0);
-    const dias = Math.min(Number(d.dias_criticos||0),30);
+    const dias = Number(d.dias_criticos||0);
     const IPT = (peso*0.4)+(pont*0.4)+(dias*0.2);
     somaIPT += IPT;
 
-    // Frequência de problemas
-    if(d.problemas && Array.isArray(d.problemas)){
-      d.problemas.forEach(p=>{
-        problemasCount[p] = (problemasCount[p]||0)+1;
-      });
-    }
-
-    // Contagem recente (últimos 7 dias)
-    if(hoje - d.createdAt.toDate() <= 7*24*60*60*1000) recentes++;
-
     rankingGlobal.push({
-      escola: d.escola || "Sem nome",
+      escola: d.escola||"Sem nome",
       classe,
       statusLabel: classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
       IPT,
-      data_avaliacao: d.data_avaliacao
+      problemas: d.problemas||[],
+      data: d.data_avaliacao,
+      avaliador: d.avaliador
     });
 
-    // Histórico completo
+    // Historico
     tabelaHistorico.innerHTML += `
       <tr>
-        <td>${d.data_avaliacao}</td>
         <td>${d.escola}</td>
-        <td><span class="badge ${classe}">${classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada"}</span></td>
+        <td>${d.avaliador}</td>
+        <td>${d.status}</td>
         <td>${IPT.toFixed(2)}</td>
-      </tr>`;
+        <td>${d.data_avaliacao}</td>
+      </tr>
+    `;
+
+    // Frequência de problemas
+    if(d.problemas && Array.isArray(d.problemas)){
+      d.problemas.forEach(p=>problemasCount[p]=(problemasCount[p]||0)+1);
+    }
   });
 
-  rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
+  // Ranking: apenas última avaliação por escola
+  const rankingFiltrado = [];
+  const seen = new Set();
+  rankingGlobal.sort((a,b)=>new Date(b.data) - new Date(a.data));
+  for(const r of rankingGlobal){
+    if(!seen.has(r.escola)){
+      rankingFiltrado.push(r);
+      seen.add(r.escola);
+    }
+  }
 
-  rankingGlobal.forEach((r,i)=>{
+  rankingFiltrado.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
         <td>${i+1}</td>
@@ -294,13 +294,12 @@ function montar(dados){
       </tr>`;
   });
 
-  // Atualiza KPIs
   kpiCritica.innerText = critica;
   kpiAtencao.innerText = atencao;
-  kpiMedio.innerText = (somaIPT/rankingGlobal.length).toFixed(2);
-  kpiRecentes.innerText = recentes;
+  kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
+  kpiProblemas.innerText = Object.keys(problemasCount).length;
 
-  // Gráfico status
+  // Gráficos
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
     data:{
@@ -309,19 +308,16 @@ function montar(dados){
     }
   });
 
-  // Gráfico top prioridades
-  const topN = window.innerWidth<600?5:10;
   new Chart(document.getElementById("graficoIndice"),{
     type:"bar",
     data:{
-      labels: rankingGlobal.slice(0,topN).map(r=>r.escola),
-      datasets:[{ data: rankingGlobal.slice(0,topN).map(r=>r.IPT.toFixed(2)), backgroundColor:"#1f4fd8" }]
+      labels: rankingFiltrado.slice(0,10).map(r=>r.escola),
+      datasets:[{ data: rankingFiltrado.slice(0,10).map(r=>r.IPT.toFixed(2)), backgroundColor:"#1f4fd8" }]
     },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
-  // Gráfico frequência de problemas
-  new Chart(document.getElementById("graficoProblemas"),{
+  new Chart(document.getElementById("graficoProblemasChart"),{
     type:"bar",
     data:{ labels:Object.keys(problemasCount), datasets:[{ label:"Ocorrências", data:Object.values(problemasCount), backgroundColor:"#ff9800" }] },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
@@ -329,17 +325,49 @@ function montar(dados){
 }
 
 window.exportarXLSX = function(){
-  if(rankingGlobal.length===0){ alert("Nenhum dado disponível."); return; }
-  const ws = XLSX.utils.json_to_sheet(rankingGlobal.map(r=>({Escola:r.escola, Status:r.statusLabel, IPT:r.IPT.toFixed(2)})));
+  const rankingFiltrado = Array.from(document.querySelectorAll("#tabelaRanking tr")).map(tr=>{
+    const tds = tr.querySelectorAll("td");
+    return {
+      Escola: tds[1].innerText,
+      Status: tds[2].innerText,
+      IPT: tds[3].innerText
+    };
+  });
+  if(!rankingFiltrado.length){ alert("Nenhum dado disponível"); return; }
+  const ws = XLSX.utils.json_to_sheet(rankingFiltrado);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Ranking IPT");
+  XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
   XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
+};
+
+window.exportarHistorico = function(){
+  if(!rankingGlobal.length){ alert("Nenhum dado disponível"); return; }
+  const ws = XLSX.utils.json_to_sheet(rankingGlobal.map(r=>({
+    Escola: r.escola,
+    Avaliador: r.avaliador,
+    Status: r.statusLabel,
+    IPT: r.IPT.toFixed(2),
+    Data: r.data
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Historico Avaliações");
+  XLSX.writeFile(wb,"historico_checkinfra.xlsx");
 };
 
 function abrirModal(){ modalIPT.style.display="flex"; }
 function fecharModal(){ modalIPT.style.display="none"; }
 
 carregarAvaliacoes();
+
+// Abas
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+    document.getElementById(tab.dataset.tab).classList.add("active");
+  });
+});
 </script>
 
 <footer>
