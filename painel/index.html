@@ -154,62 +154,67 @@ const kpiCritica = document.getElementById("kpiCritica");
 const kpiAtencao = document.getElementById("kpiAtencao");
 const kpiMedio = document.getElementById("kpiMedio");
 
-async function carregarAvaliacoes(){
-  const snapshot = await getDocs(collection(db,"avaliacoes"));
+async function carregarAvaliacoes() {
+  const snapshot = await getDocs(collection(db, "avaliacoes"));
   const dados = [];
-  snapshot.forEach(doc=>{
+  snapshot.forEach(doc => {
     const d = doc.data();
-    if(d.status && d.data_avaliacao) dados.push(d);
+    if (d.status && d.createdAt) dados.push(d);
   });
   montar(dados);
 }
 
-function montar(dados){
+function calcularDiasCriticos(dataAvaliacao) {
+  const hoje = new Date();
+  const avaliacao = new Date(dataAvaliacao);
+  const diffTime = hoje - avaliacao;
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function montar(dados) {
   rankingGlobal = [];
   tabelaRanking.innerHTML = "";
 
-  let critica=0, atencao=0, somaIPT=0;
-  const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
-  const problemasCount={};
-  const diasMap={};
+  let critica = 0, atencao = 0, somaIPT = 0;
+  const statusCount = { adequada: 0, alerta: 0, atencao: 0, critica: 0 };
+  const problemasCount = {};
+  const diasMap = {};
 
-  dados.forEach(d=>{
-    let peso=1, classe="adequada";
-    const s=(d.status||"").toLowerCase();
+  dados.forEach(d => {
+    let peso = 1, classe = "adequada";
+    const s = (d.status || "").toLowerCase();
 
-    if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++;}
-    else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++;}
-    else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++;}
+    if (s.includes("crít")) { peso = 4; classe = "critica"; critica++; statusCount.critica++; }
+    else if (s.includes("aten")) { peso = 3; classe = "atencao"; atencao++; statusCount.atencao++; }
+    else if (s.includes("alerta")) { peso = 2; classe = "alerta"; statusCount.alerta++; }
     else statusCount.adequada++;
 
-    const pont=Number(d.pontuacao||0);
-    const dias=Math.min(Number(d.dias_criticos||0),30);
-    const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
-    somaIPT+=IPT;
+    const pont = Number(d.pontuacao || 0);
+    const dias = Math.min(calcularDiasCriticos(d.createdAt), 30);
+    const IPT = (peso * 0.4) + (pont * 0.4) + (dias * 0.2);
+    somaIPT += IPT;
 
-    if(d.problemas && Array.isArray(d.problemas)){
-      d.problemas.forEach(p=>{
-        problemasCount[p] = (problemasCount[p]||0)+1;
+    if (d.problemas && Array.isArray(d.problemas)) {
+      d.problemas.forEach(p => {
+        problemasCount[p] = (problemasCount[p] || 0) + 1;
       });
     }
 
-    // Agrupar por data para linha do tempo
-    const dia = d.data_avaliacao;
-    if(!diasMap[dia]) diasMap[dia]={critica:[],atencao:[],alerta:[],adequada:[]};
+    const dia = new Date(d.createdAt).toISOString().slice(0,10);
+    if (!diasMap[dia]) diasMap[dia] = { critica: [], atencao: [], alerta: [], adequada: [] };
     diasMap[dia][classe].push(d.escola);
 
     rankingGlobal.push({
-      escola:d.escola||"Sem nome",
+      escola: d.escola || "Sem nome",
       classe,
-      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+      statusLabel: classe === "critica" ? "Crítica" : classe === "atencao" ? "Atenção Elevada" : classe === "alerta" ? "Alerta" : "Adequada",
       IPT,
       diasCriticos: dias
     });
   });
 
-  rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
+  rankingGlobal.sort((a, b) => b.IPT - a.IPT);
 
-  // Tabela
   rankingGlobal.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
@@ -225,13 +230,11 @@ function montar(dados){
   kpiAtencao.innerText = atencao;
   kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
 
-  // Gráfico status
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
     data:{ labels:["Adequada","Alerta","Atenção","Crítica"], datasets:[{ data:Object.values(statusCount), backgroundColor:["#4caf50","yellow","#ff7043","#f44336"] }] }
   });
 
-  // Gráfico top prioridades
   const topN = window.innerWidth<600?5:10;
   new Chart(document.getElementById("graficoIndice"),{
     type:"bar",
@@ -239,21 +242,18 @@ function montar(dados){
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
-  // Gráfico frequência de problemas
   new Chart(document.getElementById("graficoProblemas"),{
     type:"bar",
     data:{ labels:Object.keys(problemasCount), datasets:[{ label:"Ocorrências", data:Object.values(problemasCount), backgroundColor:"#ff9800" }] },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
-  // Gráfico dias críticos
   new Chart(document.getElementById("graficoDiasCriticos"),{
     type:"bar",
     data:{ labels:rankingGlobal.map(r=>r.escola), datasets:[{ label:"Dias Críticos", data:rankingGlobal.map(r=>r.diasCriticos), backgroundColor:"#f44336" }] },
     options:{ plugins:{ legend:{ display:false } }, responsive:true, scales:{ y:{ beginAtZero:true, stepSize:1 } } }
   });
 
-  // Linha do tempo
   const dias = Object.keys(diasMap).sort((a,b)=>new Date(a)-new Date(b));
   const datasetCritica = dias.map(d=>diasMap[d].critica.length);
   const datasetAtencao = dias.map(d=>diasMap[d].atencao.length);
@@ -299,7 +299,7 @@ function montar(dados){
   });
 }
 
-function exportarXLSX(){
+function exportarXLSX() {
   if(rankingGlobal.length===0){ alert("Nenhum dado disponível para exportação."); return; }
   const ws = XLSX.utils.json_to_sheet(rankingGlobal);
   const wb = XLSX.utils.book_new();
