@@ -187,30 +187,68 @@
 
 </main>
 
-<!-- ===== FOOTER FIXO ===== -->
+<!-- ===== FOOTER STICKY RESPONSIVO ===== -->
 <footer style="
-  background:#1f4fd8; 
-  color:#fff; 
-  text-align:center; 
-  padding:16px 10px; 
-  font-size:12px; 
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:16px 10px;
+  font-size:12px;
   line-height:1.4;
+  box-sizing:border-box;
+  z-index:9999;
 ">
   <div style="max-width:600px; margin:0 auto;">
-    <p style="margin:0 0 8px;">
+    
+    <!-- Copyright -->
+    <p style="margin:0 0 6px;">
       © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
     </p>
 
-    <!-- Badge MIT License -->
-    <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
-      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
-    </a>
+    <!-- Links institucionais -->
+    <p style="margin:0 0 6px;">
+      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
+      <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
+      <a href="./pages/termos-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
+    </p>
 
-    <p style="margin:8px 0 0; font-size:11px;">
+    <!-- Badge MIT License -->
+    <p style="margin:0 0 6px;">
+      <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
+        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:120px; width:50%;">
+      </a>
+    </p>
+
+    <!-- Aviso LGPD -->
+    <p style="margin:0; font-size:11px;">
       🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
 </footer>
+
+<!-- ===== MEDIA QUERY PARA MOBILE ===== -->
+<style>
+  @media (max-width: 480px) {
+    footer div {
+      padding: 0 8px;
+    }
+    footer p {
+      font-size: 10px;
+    }
+    footer img {
+      width: 60%;
+    }
+  }
+
+  /* Ajuste do padding inferior do body para não sobrepor conteúdo */
+  body {
+    padding-bottom: 180px; /* ajustar se necessário dependendo da altura do footer */
+  }
+</style>
 
 <script>
 if ("serviceWorker" in navigator) {
