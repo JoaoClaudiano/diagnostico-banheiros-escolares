@@ -63,8 +63,13 @@
       background: #163aa9;
     }
 
-    .header { background: #1f4fd8; height: 70px; }
+    /* ===== HEADER SIMPLES ===== */
+    .header {
+      background: #1f4fd8;
+      height: 70px;
+    }
 
+    /* ===== CONTEÚDO CENTRAL ===== */
     .container {
       max-width: 420px;
       margin: 40px auto;
@@ -73,6 +78,7 @@
       flex: 1;
     }
 
+    /* ===== LOGO CENTRAL ===== */
     .logo-central {
       margin-bottom: 30px;
     }
@@ -96,6 +102,7 @@
       margin-top: 6px;
     }
 
+    /* ===== AÇÕES / CARDS ===== */
     .actions {
       display: flex;
       flex-direction: column;
@@ -114,11 +121,26 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
 
-    .btn-primary { background: #1f4fd8; color: #fff; }
-    .btn-primary:hover { background: #163ca6; }
-    .btn-secondary { background: #ffffff; color: #333; border: 1px solid #ddd; }
-    .btn-secondary:hover { background: #f0f2f5; }
+    .btn-primary {
+      background: #1f4fd8;
+      color: #fff;
+    }
 
+    .btn-primary:hover {
+      background: #163ca6;
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+      background: #f0f2f5;
+    }
+
+    /* ===== FOOTER ===== */
     footer {
       background:#1f4fd8;
       color:#fff;
@@ -129,16 +151,32 @@
       box-sizing:border-box;
     }
 
-    footer div { max-width:600px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:6px; }
+    footer div {
+      max-width:600px;
+      margin:0 auto;
+    }
 
-    footer a { color:#fff; text-decoration:underline; }
+    footer a {
+      color:#fff;
+      text-decoration:underline;
+    }
 
-    footer img { max-width:120px; width:50%; }
+    footer img {
+      max-width:120px;
+      width:50%;
+    }
 
+    /* ===== MOBILE ===== */
     @media (max-width: 480px) {
-      footer div { padding:0 8px; }
-      footer p { font-size:10px; }
-      footer img { width:60%; }
+      footer div {
+        padding: 0 8px;
+      }
+      footer p {
+        font-size: 10px;
+      }
+      footer img {
+        width: 60%;
+      }
     }
   </style>
 </head>
@@ -182,22 +220,25 @@
   </div>
 </main>
 
-<!-- ===== FOOTER ===== -->
+<!-- ===== FOOTER FIXO NO FINAL DA PÁGINA ===== -->
 <footer>
   <div>
-    <p style="margin:0;">
+    <!-- Copyright -->
+    <p style="margin:0 0 6px;">
       © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
     </p>
 
-    <p style="margin:0;">
-      <a href="./pages/contato.html">Contato</a> | 
-      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
-      <a href="./pages/termos-de-uso.html">Termos de Uso</a>
+    <!-- Links institucionais -->
+    <p style="margin:0 0 6px;">
+      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
+      <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
+      <a href="./pages/termos-de-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
     </p>
 
-    <p style="margin:0; display:flex; gap:12px; align-items:center;">
+    <!-- MIT Badge e GitHub Circle -->
+    <p style="margin:6px 0 0 0; display:flex; gap:12px; align-items:center; justify-content:center;">
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
-        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:90px; width:40%;">
+        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="width:36px; height:36px;">
       </a>
 
       <a href="https://github.com/JoaoClaudiano/checkinfra" target="_blank" rel="noopener noreferrer" style="
@@ -220,7 +261,8 @@
       </a>
     </p>
 
-    <p style="margin:0; font-size:11px; text-align:center;">
+    <!-- Aviso LGPD -->
+    <p style="margin:6px 0 0 0; font-size:11px;">
       🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
