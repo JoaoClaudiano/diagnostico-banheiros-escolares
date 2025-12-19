@@ -139,6 +139,45 @@
     .btn-secondary:hover {
       background: #f0f2f5;
     }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background:#1f4fd8;
+      color:#fff;
+      text-align:center;
+      padding:16px 10px;
+      font-size:12px;
+      line-height:1.4;
+      box-sizing:border-box;
+    }
+
+    footer div {
+      max-width:600px;
+      margin:0 auto;
+    }
+
+    footer a {
+      color:#fff;
+      text-decoration:underline;
+    }
+
+    footer img {
+      max-width:120px;
+      width:50%;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 480px) {
+      footer div {
+        padding:0 8px;
+      }
+      footer p {
+        font-size:10px;
+      }
+      footer img {
+        width:60%;
+      }
+    }
   </style>
 </head>
 
@@ -148,98 +187,66 @@
   <a href="./index.html" title="Início">🏠</a>
 </div>
   
-<!-- Faixa azul -->
 <header class="header"></header>
 
-<!-- Conteúdo -->
 <main class="container">
-
-  <!-- Logo central -->
   <div class="logo-central">
     <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
     <h1>CheckInfra</h1>
     <p>Diagnóstico Sanitário de Banheiros Escolares</p>
   </div>
   
-<section style="font-size:14px;color:#555;line-height:1.6;margin-top:20px;">
-  <p>
-    O <strong>CheckInfra</strong> é uma plataforma digital de diagnóstico da
-    infraestrutura sanitária de escolas públicas, desenvolvida para apoiar
-    gestores, secretarias municipais e equipes técnicas na identificação de
-    riscos e priorização de intervenções.
-  </p>
+  <section style="font-size:14px;color:#555;line-height:1.6;margin-top:20px;">
+    <p>
+      O <strong>CheckInfra</strong> é uma plataforma digital de diagnóstico da
+      infraestrutura sanitária de escolas públicas, desenvolvida para apoiar
+      gestores, secretarias municipais e equipes técnicas na identificação de
+      riscos e priorização de intervenções.
+    </p>
 
-  <p>
-    A ferramenta utiliza checklists técnicos, registro fotográfico e leitura
-    territorial dos dados para transformar avaliações de campo em informações
-    estruturadas para apoio à gestão pública.
-  </p>
-</section>
+    <p>
+      A ferramenta utiliza checklists técnicos, registro fotográfico e leitura
+      territorial dos dados para transformar avaliações de campo em informações
+      estruturadas para apoio à gestão pública.
+    </p>
+  </section>
 
-  <!-- Cards verticais -->
-<div class="actions">
-  <a href="./avaliacao.html" class="btn-primary">📝 Realizar Avaliação</a>
-  <a href="./painel/" class="btn-secondary">📊 Painel Técnico</a>
-  <a href="./mapa/" class="btn-secondary">🗺️ Mapa da Secretaria</a>
-  <a href="./metodologia.html" class="btn-secondary">📘 Metodologia Técnica</a>
-  <a href="./analise-espacial.html" class="btn-secondary">🧭 Análise Espacial</a>
-</div>
-
+  <div class="actions">
+    <a href="./avaliacao.html" class="btn-primary">📝 Realizar Avaliação</a>
+    <a href="./painel/" class="btn-secondary">📊 Painel Técnico</a>
+    <a href="./mapa/" class="btn-secondary">🗺️ Mapa da Secretaria</a>
+    <a href="./metodologia.html" class="btn-secondary">📘 Metodologia Técnica</a>
+    <a href="./analise-espacial.html" class="btn-secondary">🧭 Análise Espacial</a>
+  </div>
 </main>
 
-<!-- ===== FOOTER ESTÁTICO RESPONSIVO ===== -->
-<footer style="
-  background:#1f4fd8;
-  color:#fff;
-  text-align:center;
-  padding:16px 10px;
-  font-size:12px;
-  line-height:1.4;
-  box-sizing:border-box;
-  margin-top:40px;
-">
-  <div style="max-width:600px; margin:0 auto;">
-    
-    <!-- Copyright -->
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div>
     <p style="margin:0 0 6px;">
       © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
     </p>
 
-    <!-- Links institucionais -->
     <p style="margin:0 0 6px;">
-      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
-      <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
-      <a href="./pages/termos-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
+      <a href="./pages/contato.html">Contato</a> | 
+      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
+      <a href="./pages/termos-uso.html">Termos de Uso</a>
     </p>
 
-    <!-- Badge MIT License -->
     <p style="margin:0 0 6px;">
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:120px; width:50%;">
+        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
       </a>
     </p>
 
-    <!-- Aviso LGPD -->
     <p style="margin:0; font-size:11px;">
       🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
 </footer>
 
-<!-- ===== MEDIA QUERY PARA MOBILE ===== -->
-<style>
-  @media (max-width: 480px) {
-    footer div {
-      padding: 0 8px;
-    }
-    footer p {
-      font-size: 10px;
-    }
-    footer img {
-      width: 60%;
-    }
-  }
-</style>
+<!-- ===== SERVICE WORKER ===== -->
+<script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./service-worker.js")
     .then(() => console.log("Service Worker registrado"))
