@@ -220,34 +220,67 @@
   </div>
 </main>
 
-<!-- ===== FOOTER ===== -->
-<footer>
-  <div>
-    <!-- Copyright -->
-    <p style="margin:0 0 6px;">
+<!-- ===== FOOTER FIXO SEM SOBREPOSIÇÃO ===== -->
+<footer style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:12px 10px;
+  font-size:12px;
+  line-height:1.4;
+  box-sizing:border-box;
+  z-index: 999;
+">
+  <div style="max-width:600px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:4px;">
+    
+    <p style="margin:0;">
       © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
     </p>
 
-    <!-- Links institucionais -->
-    <p style="margin:0 0 6px;">
-      <a href="./pages/contato.html">Contato</a> | 
-      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
-      <a href="./pages/termos-de-uso.html">Termos de Uso</a>
+    <p style="margin:0;">
+      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
+      <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
+      <a href="./pages/termos-de-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
     </p>
 
-    <!-- Badge MIT License menor -->
-    <p style="margin:0 0 6px;">
+    <p style="margin:0;">
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:90px; width:40%;">
+        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:70px; width:30%;">
       </a>
     </p>
 
-    <!-- Aviso LGPD -->
     <p style="margin:0; font-size:11px;">
       🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
 </footer>
+
+<!-- ===== AJUSTE DO CONTEÚDO PARA NÃO FICAR COBERTO ===== -->
+<style>
+  main {
+    margin-bottom: 160px; /* altura aproximada do footer */
+  }
+
+  @media (max-width: 480px) {
+    footer div {
+      padding: 0 8px;
+    }
+    footer p {
+      font-size: 10px;
+    }
+    footer img {
+      width: 45%;
+      max-width: 50px;
+    }
+    main {
+      margin-bottom: 180px; /* aumenta espaço para mobile */
+    }
+  }
+</style>
 
 <!-- ===== SERVICE WORKER ===== -->
 <script>
