@@ -125,6 +125,17 @@ footer {
   </div>
 </div>
 
+<div class="card grid">
+  <div>
+    <h3>Frequência de Problemas</h3>
+    <canvas id="graficoProblemas"></canvas>
+  </div>
+  <div>
+    <h3>Dias em Status Crítico</h3>
+    <canvas id="graficoDiasCriticos"></canvas>
+  </div>
+</div>
+
 <div class="card">
   <h3>🏆 Ranking Geral de Prioridade Técnica</h3>
   <button onclick="exportarXLSX()">⬇️ Baixar XLSX</button>
@@ -203,6 +214,7 @@ function montar(dados){
 
   let critica=0, atencao=0, somaIPT=0;
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
+  const problemasCount={}; // frequência de problemas
 
   dados.forEach(d=>{
     let peso=1, classe="adequada";
@@ -218,11 +230,20 @@ function montar(dados){
     const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
     somaIPT+=IPT;
 
+    // Contagem de problemas
+    if(d.problemas && Array.isArray(d.problemas)){
+      d.problemas.forEach(p => {
+        if(problemasCount[p]) problemasCount[p]++;
+        else problemasCount[p]=1;
+      });
+    }
+
     rankingGlobal.push({
       escola:d.escola||"Sem nome",
       classe,
       statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
-      IPT
+      IPT,
+      diasCriticos: dias
     });
   });
 
@@ -266,27 +287,38 @@ function montar(dados){
     },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
+
+  // Gráfico frequência de problemas
+  new Chart(document.getElementById("graficoProblemas"), {
+    type:"bar",
+    data:{
+      labels: Object.keys(problemasCount),
+      datasets:[{ label:"Ocorrências", data: Object.values(problemasCount), backgroundColor:"#ff9800" }]
+    },
+    options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
+  });
+
+  // Gráfico dias em status crítico
+  new Chart(document.getElementById("graficoDiasCriticos"), {
+    type:"bar",
+    data:{
+      labels: rankingGlobal.map(r=>r.escola),
+      datasets:[{ label:"Dias Críticos", data: rankingGlobal.map(r=>r.diasCriticos), backgroundColor:"#f44336" }]
+    },
+    options:{ plugins:{ legend:{ display:false } }, responsive:true, scales:{ y:{ beginAtZero:true, stepSize:1 } } }
+  });
 }
 
-// Exportação XLSX corrigida
-window.exportarXLSX = function() {
-  if(rankingGlobal.length === 0){
+function exportarXLSX(){
+  if(rankingGlobal.length===0){
     alert("Nenhum dado disponível para exportação.");
     return;
   }
-
-  // Dados simples para exportação
-  const exportData = rankingGlobal.map(r => ({
-    Escola: r.escola,
-    Status: r.statusLabel,
-    IPT: r.IPT.toFixed(2)
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(exportData);
+  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
   XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
-};
+}
 
 function abrirModal(){ modalIPT.style.display="flex"; }
 function fecharModal(){ modalIPT.style.display="none"; }
@@ -294,7 +326,6 @@ function fecharModal(){ modalIPT.style.display="none"; }
 carregarAvaliacoes();
 </script>
 
-<!-- ===== FOOTER FIXO NO FINAL DA PÁGINA ===== -->
 <footer>
   <div style="max-width:600px; margin:0 auto;">
     <p style="margin:0 0 6px;">
