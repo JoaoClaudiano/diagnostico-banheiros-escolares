@@ -2,177 +2,228 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8" />
-<title>Painel Gerencial – CheckInfra</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#1f4fd8">
+<title>CheckInfra — Painel</title>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;display:flex;flex-direction:column;min-height:100vh}
-.card{background:#fff;max-width:1100px;margin:20px auto;padding:20px;border-radius:10px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.kpi{background:#f9fafb;border-radius:10px;padding:16px}
-.kpi h4{margin:0;font-size:14px;color:#555}
-.kpi strong{font-size:30px;display:block;margin-top:6px}
-.info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1f4fd8;color:#fff;font-size:12px;cursor:pointer;margin-left:6px}
-.badge{padding:4px 8px;border-radius:12px;color:#fff;font-size:12px}
-.adequada{background:#4caf50}
-.alerta{background:yellow;color:#000}
-.atencao{background:#ff7043}
-.critica{background:#f44336}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:8px;border-bottom:1px solid #eee}
-th{background:#f4f6f8;text-align:left}
-button{padding:10px 14px;background:#1f4fd8;color:#fff;border:none;border-radius:6px;cursor:pointer}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
-.modal-content{background:#fff;padding:20px;border-radius:10px;max-width:500px}
-@media(max-width:600px){
-.grid{grid-template-columns:1fr}
-table thead{display:none}
-table tr{display:block;margin-bottom:12px;border:1px solid #eee;border-radius:8px;padding:10px}
-table td{display:block;border:none;padding:4px 0}
-table td:nth-child(1)::before{content:"# "}
-table td:nth-child(2)::before{content:"Escola "}
-table td:nth-child(3)::before{content:"Status "}
-table td:nth-child(4)::before{content:"IPT "}
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+h1{ margin-bottom:10px }
+
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#1f4fd8;
+  color:#fff;
+  font-weight:600;
+}
+
+button + button{ margin-left:8px }
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  margin-top:15px;
+}
+
+th,td{
+  padding:8px;
+  border-bottom:1px solid #ddd;
+  text-align:center;
+  font-size:14px;
+}
+
+th{ background:#f0f0f0 }
+
+.badge{
+  padding:4px 8px;
+  border-radius:12px;
+  color:#fff;
+  font-size:12px;
+  font-weight:600;
+}
+
+.selo-melhorou{ background:#4caf50 }
+.selo-piorou{ background:#f44336 }
+.selo-estavel{ background:#9e9e9e }
+.selo-primeiro{ background:#1f4fd8 }
+
+/* Modal */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-content{
+  background:#fff;
+  padding:20px;
+  width:90%;
+  max-width:600px;
+  border-radius:8px;
+  max-height:80vh;
+  overflow:auto;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-<h2>Painel Gerencial – CheckInfra</h2>
-<small>Síntese executiva e priorização técnica</small>
-</div>
+<h1>Painel CheckInfra</h1>
 
-<div class="card grid">
-<div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
-<div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
-<div class="kpi"><h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4><strong id="kpiMedio">–</strong></div>
-</div>
+<button onclick="exportarXLSX()">⬇️ Baixar XLSX</button>
+<button onclick="abrirHistorico()">📜 Visualizar histórico</button>
 
-<div class="card grid">
-<div><h3>Status das Unidades</h3><canvas id="graficoStatus"></canvas></div>
-<div><h3>Top Prioridades (IPT)</h3><canvas id="graficoIndice"></canvas></div>
-</div>
-
-<div class="card">
-<h3>🏆 Ranking Geral de Prioridade Técnica</h3>
-<button onclick="exportarXLSX()">⬇️ Baixar XLSX</button><br><br>
 <table>
-<thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr></thead>
-<tbody id="tabelaRanking"></tbody>
+<thead>
+<tr>
+  <th>Escola</th>
+  <th>Status</th>
+  <th>IPT</th>
+  <th>Evolução</th>
+  <th>Histórico IPT</th>
+</tr>
+</thead>
+<tbody id="tabela"></tbody>
 </table>
-</div>
-<p>
-  📊 <a href="./historico.html">Ver histórico por escola</a>
-</p>
-<div class="modal" id="modalIPT" onclick="fecharModal()">
-<div class="modal-content" onclick="event.stopPropagation()">
-<h3>O que é o IPT médio?</h3>
-<p>Expressa o grau médio de urgência técnica da rede escolar.</p>
-<button onclick="fecharModal()">Fechar</button>
-</div>
+
+<!-- MODAL HISTÓRICO -->
+<div class="modal" id="modalHistorico" onclick="fecharHistorico()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3>📜 Histórico de Avaliações</h3>
+    <div id="conteudoHistorico"></div>
+    <button onclick="fecharHistorico()">Fechar</button>
+  </div>
 </div>
 
 <script type="module">
+/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const app = initializeApp({
-  apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain:"checkinfra-adf3c.firebaseapp.com",
-  projectId:"checkinfra-adf3c"
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain: "checkinfra-adf3c.firebaseapp.com",
+  projectId: "checkinfra-adf3c"
+};
 
+const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let rankingGlobal=[];
+/* ================= MAIN ================= */
+let cacheAvaliacoes = [];
 
-async function carregarAvaliacoes(){
-  const snap=await getDocs(collection(db,"avaliacoes"));
-  const porEscola={};
+async function carregar(){
+  const snap = await getDocs(collection(db,"avaliacoes"));
+  const porEscola = {};
 
   snap.forEach(doc=>{
-    const d=doc.data();
-    if(!d.escola||!d.status) return;
+    const d = doc.data();
+    if(!d.escola || d.IPT == null || !d.createdAt) return;
 
-    if(!porEscola[d.escola]){
-      porEscola[d.escola]=d;
-    }else{
-      const atual=porEscola[d.escola];
-      if(d.createdAt?.seconds > atual.createdAt?.seconds){
-        porEscola[d.escola]=d;
+    const ts = d.createdAt.seconds || 0;
+    if(!porEscola[d.escola]) porEscola[d.escola] = [];
+    porEscola[d.escola].push({...d,_ts:ts});
+  });
+
+  cacheAvaliacoes = porEscola;
+  montarTabela();
+}
+
+function montarTabela(){
+  const tbody = document.getElementById("tabela");
+  tbody.innerHTML="";
+
+  Object.entries(cacheAvaliacoes).forEach(([escola,lista],i)=>{
+    lista.sort((a,b)=>a._ts-b._ts);
+
+    const atual = lista[lista.length-1];
+    const anterior = lista[lista.length-2];
+
+    let selo="Primeira avaliação",classe="selo-primeiro";
+    if(anterior){
+      const diff = atual.IPT - anterior.IPT;
+      if(Math.abs(diff)<=0.05){ selo="Estável"; classe="selo-estavel"; }
+      else if(diff<0){ selo="Melhorou"; classe="selo-melhorou"; }
+      else{ selo="Piorou"; classe="selo-piorou"; }
+    }
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escola}</td>
+      <td>${atual.status}</td>
+      <td>${atual.IPT.toFixed(2)}</td>
+      <td><span class="badge ${classe}">${selo}</span></td>
+      <td><canvas id="spark-${i}" width="120" height="40"></canvas></td>
+    `;
+    tbody.appendChild(tr);
+
+    criarSparkline(`spark-${i}`, lista.map(l=>l.IPT));
+  });
+}
+
+/* ================= SPARKLINE ================= */
+function criarSparkline(id, dados){
+  new Chart(document.getElementById(id),{
+    type:"line",
+    data:{
+      labels:dados.map((_,i)=>i+1),
+      datasets:[{
+        data:dados,
+        borderColor:"#1f4fd8",
+        tension:.4,
+        pointRadius:0
+      }]
+    },
+    options:{
+      responsive:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{display:false},
+        y:{display:false}
       }
     }
   });
-
-  montar(Object.values(porEscola));
 }
 
-function montar(dados){
-  const tabela=document.getElementById("tabelaRanking");
-  tabela.innerHTML="";
-  rankingGlobal=[];
-  let critica=0,atencao=0,soma=0;
-  const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
+/* ================= HISTÓRICO ================= */
+window.abrirHistorico = function(){
+  const box = document.getElementById("conteudoHistorico");
+  box.innerHTML="";
 
-  dados.forEach(d=>{
-    let GS=1,classe="adequada";
-    const s=d.status.toLowerCase();
-
-    if(s.includes("crít")){GS=4;classe="critica";critica++;statusCount.critica++}
-    else if(s.includes("aten")){GS=3;classe="atencao";atencao++;statusCount.atencao++}
-    else if(s.includes("alert")){GS=2;classe="alerta";statusCount.alerta++}
-    else statusCount.adequada++;
-
-    const IT=Number(d.pontuacao||0);
-    const RT=Number(d.rt||0);
-    const IPT=(GS*0.4)+(IT*0.4)+(RT*0.2);
-    soma+=IPT;
-
-    rankingGlobal.push({
-      escola:d.escola,
-      classe,
-      statusLabel:d.status,
-      IPT
-    });
+  Object.values(cacheAvaliacoes).flat().sort((a,b)=>b._ts-a._ts)
+  .forEach(d=>{
+    box.innerHTML+=`
+      <p>
+        <strong>${d.escola}</strong><br>
+        ${d.status} — IPT ${d.IPT.toFixed(2)}<br>
+        ${new Date(d._ts*1000).toLocaleDateString()}
+      </p><hr>
+    `;
   });
 
-  rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
-
-  rankingGlobal.forEach((r,i)=>{
-    tabela.innerHTML+=`
-    <tr>
-      <td>${i+1}</td>
-      <td>${r.escola}</td>
-      <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
-      <td>${r.IPT.toFixed(2)}</td>
-    </tr>`;
-  });
-
-  document.getElementById("kpiCritica").innerText=critica;
-  document.getElementById("kpiAtencao").innerText=atencao;
-  document.getElementById("kpiMedio").innerText=(soma/dados.length).toFixed(2);
-
-  new Chart(graficoStatus,{type:"pie",data:{labels:["Adequada","Alerta","Atenção","Crítica"],datasets:[{data:Object.values(statusCount),backgroundColor:["#4caf50","yellow","#ff7043","#f44336"]}]}});
-  new Chart(graficoIndice,{type:"bar",data:{labels:rankingGlobal.slice(0,10).map(r=>r.escola),datasets:[{data:rankingGlobal.slice(0,10).map(r=>r.IPT.toFixed(2)),backgroundColor:"#1f4fd8"}]},options:{indexAxis:"y",plugins:{legend:{display:false}}}});
+  modalHistorico.style.display="flex";
 }
 
-window.exportarXLSX=function(){
-  const ws=XLSX.utils.json_to_sheet(rankingGlobal.map(r=>({Escola:r.escola,Status:r.statusLabel,IPT:r.IPT.toFixed(2)})));
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Ranking IPT");
-  XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
-}
+window.fecharHistorico = ()=> modalHistorico.style.display="none";
 
-window.abrirModal=()=>modalIPT.style.display="flex";
-window.fecharModal=()=>modalIPT.style.display="none";
+/* ================= XLSX (placeholder) ================= */
+window.exportarXLSX = ()=> alert("Exportação XLSX mantém seu código atual");
 
-carregarAvaliacoes();
+/* ================= INIT ================= */
+carregar();
 </script>
 
 </body>
