@@ -1,252 +1,48 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DD4SQ88NVT');
-</script>
-  
-  <title>CheckInfra – Diagnóstico Sanitário Escolar</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-  
-  <meta name="theme-color" content="#1f4fd8">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="CheckInfra">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    .nav-global {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      display: flex;
-      gap: 8px;
-      z-index: 9999;
-    }
-
-    .nav-global button,
-    .nav-global a {
-      background: rgba(31,79,216,0.95);
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      cursor: pointer;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-    }
-
-    .nav-global button:hover,
-    .nav-global a:hover {
-      background: #163aa9;
-    }
-
-    .header { background: #1f4fd8; height: 70px; }
-
-    .container {
-      max-width: 420px;
-      margin: 40px auto;
-      padding: 0 20px;
-      text-align: center;
-      flex: 1;
-    }
-
-    .logo-central {
-      margin-bottom: 30px;
-    }
-
-    .logo-central img {
-      width: 160px;
-      height: auto;
-      display: block;
-      margin: 0 auto 10px;
-    }
-
-    .logo-central h1 {
-      font-size: 22px;
-      margin: 0;
-      color: #1f4fd8;
-    }
-
-    .logo-central p {
-      font-size: 14px;
-      color: #555;
-      margin-top: 6px;
-    }
-
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 30px;
-    }
-
-    .actions a {
-      text-decoration: none;
-      padding: 18px;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 16px;
-      transition: 0.2s;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
-
-    .btn-primary { background: #1f4fd8; color: #fff; }
-    .btn-primary:hover { background: #163ca6; }
-
-    .btn-secondary { background: #ffffff; color: #333; border: 1px solid #ddd; }
-    .btn-secondary:hover { background: #f0f2f5; }
-
-    footer {
-      background:#1f4fd8;
-      color:#fff;
-      text-align:center;
-      padding:16px 10px;
-      font-size:12px;
-      line-height:1.4;
-      box-sizing:border-box;
-    }
-
-    footer div { max-width:600px; margin:0 auto; }
-
-    footer a { color:#fff; text-decoration:underline; }
-
-    footer img { max-width:90px; width:40%; vertical-align:middle; }
-
-    .github-circle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #24292f;
-      color: #ffffff;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      text-decoration: none;
-      margin-left: 8px;
-      transition: transform 0.2s, background-color 0.2s;
-      vertical-align: middle;
-    }
-
-    .github-circle:hover {
-      background-color: #0070e0;
-      transform: scale(1.1);
-    }
-
-    .github-circle svg {
-      width: 20px;
-      height: 20px;
-      fill: #ffffff;
-    }
-
-    @media (max-width: 480px) {
-      footer div { padding: 0 8px; }
-      footer p { font-size: 12px; }
-      footer img { width: 36%; }
-      .github-circle { width: 32px; height: 32px; }
-      .github-circle svg { width: 18px; height: 18px; }
-    }
-  </style>
-</head>
-
-<body>
-<div class="nav-global">
-  <button onclick="history.back()" title="Voltar">⬅️</button>
-  <a href="./index.html" title="Início">🏠</a>
-</div>
-  
-<header class="header"></header>
-
-<main class="container">
-  <div class="logo-central">
-    <img src="./assets/logo-checkinfra.png" alt="CheckInfra">
-    <h1>CheckInfra</h1>
-    <p>Diagnóstico Sanitário de Banheiros Escolares</p>
-  </div>
-  
-  <section style="font-size:14px;color:#555;line-height:1.6;margin-top:20px;">
-    <p>
-      O <strong>CheckInfra</strong> é uma plataforma digital de diagnóstico da
-      infraestrutura sanitária de escolas públicas, desenvolvida para apoiar
-      gestores, secretarias municipais e equipes técnicas na identificação de
-      riscos e priorização de intervenções.
-    </p>
-
-    <p>
-      A ferramenta utiliza checklists técnicos, registro fotográfico e leitura
-      territorial dos dados para transformar avaliações de campo em informações
-      estruturadas para apoio à gestão pública.
-    </p>
-  </section>
-
-  <div class="actions">
-    <a href="./avaliacao.html" class="btn-primary">📝 Realizar Avaliação</a>
-    <a href="./painel/" class="btn-secondary">📊 Painel Técnico</a>
-    <a href="./mapa/" class="btn-secondary">🗺️ Mapa da Secretaria</a>
-    <a href="./metodologia.html" class="btn-secondary">📘 Metodologia Técnica</a>
-    <a href="./analise-espacial.html" class="btn-secondary">🧭 Análise Espacial</a>
-  </div>
-</main>
-
-<footer>
-  <div>
+<footer style="
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:16px 10px;
+  font-size:12px;
+  line-height:1.4;
+  box-sizing:border-box;
+  width:100%;
+">
+  <div style="max-width:600px; margin:0 auto;">
+    
+    <!-- Copyright -->
     <p style="margin:0 0 6px; font-size:12px;">
       © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
     </p>
 
+    <!-- Links institucionais -->
     <p style="margin:0 0 6px; font-size:12px;">
-      <a href="./pages/contato.html">Contato</a> | 
-      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
-      <a href="./pages/termos-de-uso.html">Termos de Uso</a>
+      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
+      <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
+      <a href="./pages/termos-de-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
     </p>
 
-    <div class="footer-badges">
+    <!-- Badges -->
+    <p style="margin:0 0 6px; display:flex; justify-content:center; gap:12px; align-items:center;">
+      <!-- Badge MIT License -->
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+        <img src="https://img.shields.io/badge/MIT-yellow.svg" alt="License: MIT" style="height:26px;">
       </a>
-
-      <a href="https://github.com/JoaoClaudiano/checkinfra" target="_blank" rel="noopener noreferrer" class="github-circle" aria-label="Repositório GitHub">
-        <svg viewBox="0 0 16 16">
-          <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/>
+      <!-- GitHub -->
+      <a href="https://github.com/JoaoClaudiano" target="_blank" rel="noopener noreferrer" 
+         style="display:inline-flex; align-items:center; justify-content:center; background-color:#ffffff; width:36px; height:36px; border-radius:50%; text-decoration:none; transition: transform 0.2s, background-color 0.2s;"
+         onmouseover="this.style.transform='scale(1.1)';" 
+         onmouseout="this.style.transform='scale(1)';"
+         aria-label="Perfil do GitHub">
+        <svg height="20" width="20" viewBox="0 0 16 16" style="fill: #24292f;" aria-hidden="true">
+          <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
         </svg>
       </a>
-    </div>
+    </p>
 
-    <p style="margin:6px 0 0 0; font-size:12px;">
+    <!-- Aviso LGPD -->
+    <p style="margin:0; font-size:12px;">
       🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
 </footer>
-
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js")
-    .then(() => console.log("Service Worker registrado"))
-    .catch(err => console.error("Erro no Service Worker", err));
-}
-</script>
-
-</body>
-</html>
