@@ -10,29 +10,35 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
+body { 
+  font-family: Arial, sans-serif; 
+  background:#f4f6f8; 
+  margin:0; 
+  display:flex; 
+  flex-direction:column; 
+  min-height:100vh; 
 }
 
 /* Cards */
-.card {
-  background:#fff;
-  max-width:1100px;
-  margin:20px auto;
-  padding:20px;
-  border-radius:10px;
+.card { 
+  background:#fff; 
+  max-width:1100px; 
+  margin:20px auto; 
+  padding:20px; 
+  border-radius:10px; 
 }
 
-/* Grid e KPI */
-.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
-.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
-.kpi h4 { margin:0; font-size:14px; color:#555; }
-.kpi strong { font-size:30px; display:block; margin-top:6px; }
+/* Grid de KPIs */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.kpi { background:#f9fafb; border-radius:10px; padding:14px; font-size:14px; }
+.kpi h4 { margin:0 0 4px 0; font-size:13px; color:#555; }
+.kpi strong { font-size:26px; display:block; margin-top:4px; }
 
 .info { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1f4fd8; color:#fff; font-size:12px; cursor:pointer; margin-left:6px; }
 
@@ -46,11 +52,14 @@ table { width:100%; border-collapse: collapse; font-size:14px; }
 th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; text-align:left; }
 
-button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
+button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:6px; }
 
-.tabs { display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap; }
-.tab { padding:8px 16px; background:#e0e0e0; border-radius:6px; cursor:pointer; }
+.tab-container { display:flex; margin-bottom:12px; }
+.tab { padding:8px 12px; background:#e0e0e0; border-radius:6px 6px 0 0; margin-right:4px; cursor:pointer; }
 .tab.active { background:#1f4fd8; color:#fff; }
+
+.tab-content { display:none; }
+.tab-content.active { display:block; }
 
 /* Modal */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
@@ -72,8 +81,8 @@ footer {
 
 /* Mobile */
 @media (max-width: 600px){
-  .grid { grid-template-columns:1fr; }
-  .kpi strong { font-size:28px; }
+  .kpi strong { font-size:22px; }
+  .kpi h4 { font-size:12px; }
   table thead { display:none; }
   table tr { display:block; margin-bottom:12px; border:1px solid #eee; border-radius:8px; padding:10px; }
   table td { display:block; border:none; padding:4px 0; }
@@ -82,8 +91,6 @@ footer {
   table td:nth-child(2)::before { content:"Escola"; }
   table td:nth-child(3)::before { content:"Status"; }
   table td:nth-child(4)::before { content:"IPT"; }
-  table td:nth-child(5)::before { content:"Dias no Status"; }
-  .modal-content { width:90%; }
 }
 </style>
 </head>
@@ -95,7 +102,7 @@ footer {
   <small>Síntese executiva e priorização técnica</small>
 </div>
 
-<div class="card grid">
+<div class="card kpi-grid">
   <div class="kpi">
     <h4>Unidades Críticas</h4>
     <strong id="kpiCritica">–</strong>
@@ -105,13 +112,11 @@ footer {
     <strong id="kpiAtencao">–</strong>
   </div>
   <div class="kpi">
-    <h4>IPT Médio
-      <span class="info" onclick="abrirModal()">i</span>
-    </h4>
+    <h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4>
     <strong id="kpiMedio">–</strong>
   </div>
   <div class="kpi">
-    <h4>Problemas Frequentes</h4>
+    <h4>Frequência de Problemas</h4>
     <strong id="kpiProblemas">–</strong>
   </div>
 </div>
@@ -125,53 +130,57 @@ footer {
     <h3>Top Prioridades (IPT)</h3>
     <canvas id="graficoIndice"></canvas>
   </div>
+</div>
+
+<div class="card grid">
   <div>
     <h3>Frequência de Problemas</h3>
-    <canvas id="graficoProblemas"></canvas>
+    <canvas id="graficoProblemasChart"></canvas>
   </div>
 </div>
 
 <div class="card">
-  <div class="tabs">
-    <div class="tab active" onclick="mostrarAba('ranking')">Ranking</div>
-    <div class="tab" onclick="mostrarAba('historico')">Histórico</div>
-    <div class="tab" onclick="mostrarAba('metodologia')">Metodologia</div>
+  <div class="tab-container">
+    <div class="tab active" data-tab="ranking">Ranking</div>
+    <div class="tab" data-tab="historico">Histórico</div>
+    <button onclick="exportarXLSX()">⬇️ Baixar XLSX</button>
+    <button onclick="exportarHistorico()">📂 Baixar Histórico</button>
   </div>
 
-  <div id="aba-ranking">
-    <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button>
-    <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
-    <br><br>
+  <div id="ranking" class="tab-content active">
     <table>
       <thead>
-        <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Dias no Status</th></tr>
+        <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
       </thead>
       <tbody id="tabelaRanking"></tbody>
     </table>
   </div>
 
-  <div id="aba-historico" style="display:none;">
+  <div id="historico" class="tab-content">
     <table>
       <thead>
-        <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr>
+        <tr><th>Escola</th><th>Avaliador</th><th>Status</th><th>IPT</th><th>Data</th></tr>
       </thead>
       <tbody id="tabelaHistorico"></tbody>
     </table>
   </div>
+</div>
 
-  <div id="aba-metodologia" style="display:none;">
-    <iframe src="metodo.html" style="width:100%;height:500px;border:none;"></iframe>
-  </div>
+<div class="card">
+  <h3>📘 Metodologia – Índice de Prioridade Técnica (IPT)</h3>
+  <p>O IPT é um índice autoral do CheckInfra, inspirado em práticas de priorização técnica de engenharia diagnóstica, avaliação multicritério (MCDA) e gestão de ativos públicos.</p>
+  <p>Ele combina três dimensões:
+    <br>• Gravidade do status (peso 40%)
+    <br>• Pontuação técnica observada (peso 40%)
+    <br>• Persistência temporal do problema (peso 20%)
+  </p>
+  <p>O IPT médio representa o <strong>nível médio de criticidade da rede</strong>. Valores altos indicam pressão sistêmica por investimento e manutenção.</p>
 </div>
 
 <div class="modal" id="modalIPT" onclick="fecharModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3>O que é o IPT médio?</h3>
-    <p>
-      O IPT médio expressa o grau médio de urgência técnica da rede escolar.
-      Ele não aponta uma escola específica, mas indica o <strong>estado geral
-      da infraestrutura</strong>.
-    </p>
+    <p>O IPT médio expressa o grau médio de urgência técnica da rede escolar. Ele não aponta uma escola específica, mas indica o <strong>estado geral da infraestrutura</strong>.</p>
     <button onclick="fecharModal()">Fechar</button>
   </div>
 </div>
@@ -193,8 +202,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 let rankingGlobal = [];
-let rankingHistorico = [];
-
 const tabelaRanking = document.getElementById("tabelaRanking");
 const tabelaHistorico = document.getElementById("tabelaHistorico");
 const kpiCritica = document.getElementById("kpiCritica");
@@ -207,10 +214,8 @@ async function carregarAvaliacoes(){
   const dados = [];
   snapshot.forEach(doc=>{
     const d = doc.data();
-    if(d.status){
-      if(d.createdAt instanceof Timestamp){
-        d.data_avaliacao = d.createdAt.toDate().toISOString().split("T")[0];
-      } else d.data_avaliacao = new Date().toISOString().split("T")[0];
+    if(d.status && d.createdAt instanceof Timestamp){
+      d.data_avaliacao = d.createdAt.toDate().toISOString().split("T")[0];
       dados.push(d);
     }
   });
@@ -219,88 +224,82 @@ async function carregarAvaliacoes(){
 
 function montar(dados){
   rankingGlobal = [];
-  rankingHistorico = [];
   tabelaRanking.innerHTML = "";
   tabelaHistorico.innerHTML = "";
 
+  const ultimaEscola = {};
+  let critica=0, atencao=0, somaIPT=0;
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
   const problemasCount={};
-  const escolasMap = {}; // para pegar apenas a avaliação mais recente
-
-  let somaIPT=0, critica=0, atencao=0;
 
   dados.forEach(d=>{
     let peso=1, classe="adequada";
     const s=(d.status||"").toLowerCase();
+
     if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++;}
     else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++;}
     else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++;}
     else statusCount.adequada++;
 
     const pont = Number(d.pontuacao||0);
-    const dias = Math.min(Number(d.dias_criticos||0),30); 
+    const dias = Number(d.dias_criticos||0);
     const IPT = (peso*0.4)+(pont*0.4)+(dias*0.2);
     somaIPT += IPT;
 
-    // problemas
-    if(d.problemas && Array.isArray(d.problemas)){
-      d.problemas.forEach(p=>{
-        problemasCount[p] = (problemasCount[p]||0)+1;
-      });
-    }
-
-    const registro = {
-      escola:d.escola||"Sem nome",
+    rankingGlobal.push({
+      escola: d.escola||"Sem nome",
       classe,
-      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+      statusLabel: classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
       IPT,
-      diasNoStatus:d.dias_criticos||0,
-      data:d.data_avaliacao
-    };
+      problemas: d.problemas||[],
+      data: d.data_avaliacao,
+      avaliador: d.avaliador
+    });
 
-    rankingHistorico.push(registro);
+    // Historico
+    tabelaHistorico.innerHTML += `
+      <tr>
+        <td>${d.escola}</td>
+        <td>${d.avaliador}</td>
+        <td>${d.status}</td>
+        <td>${IPT.toFixed(2)}</td>
+        <td>${d.data_avaliacao}</td>
+      </tr>
+    `;
 
-    // somente a mais recente por escola
-    if(!escolasMap[registro.escola] || new Date(registro.data) > new Date(escolasMap[registro.escola].data)){
-      escolasMap[registro.escola] = registro;
+    // Frequência de problemas
+    if(d.problemas && Array.isArray(d.problemas)){
+      d.problemas.forEach(p=>problemasCount[p]=(problemasCount[p]||0)+1);
     }
   });
 
-  rankingGlobal = Object.values(escolasMap);
+  // Ranking: apenas última avaliação por escola
+  const rankingFiltrado = [];
+  const seen = new Set();
+  rankingGlobal.sort((a,b)=>new Date(b.data) - new Date(a.data));
+  for(const r of rankingGlobal){
+    if(!seen.has(r.escola)){
+      rankingFiltrado.push(r);
+      seen.add(r.escola);
+    }
+  }
 
-  // KPIs
-  kpiCritica.innerText = critica;
-  kpiAtencao.innerText = atencao;
-  kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
-  kpiProblemas.innerText = Object.keys(problemasCount).length;
-
-  // tabela ranking
-  rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
-  rankingGlobal.forEach((r,i)=>{
+  rankingFiltrado.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
         <td>${i+1}</td>
         <td>${r.escola}</td>
         <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
         <td>${r.IPT.toFixed(2)}</td>
-        <td>${r.diasNoStatus}</td>
       </tr>`;
   });
 
-  // tabela histórico
-  rankingHistorico.sort((a,b)=>new Date(b.data)-new Date(a.data));
-  rankingHistorico.forEach((r,i)=>{
-    tabelaHistorico.innerHTML += `
-      <tr>
-        <td>${i+1}</td>
-        <td>${r.escola}</td>
-        <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
-        <td>${r.IPT.toFixed(2)}</td>
-        <td>${r.data}</td>
-      </tr>`;
-  });
+  kpiCritica.innerText = critica;
+  kpiAtencao.innerText = atencao;
+  kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
+  kpiProblemas.innerText = Object.keys(problemasCount).length;
 
-  // gráficos
+  // Gráficos
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
     data:{
@@ -312,62 +311,63 @@ function montar(dados){
   new Chart(document.getElementById("graficoIndice"),{
     type:"bar",
     data:{
-      labels: rankingGlobal.slice(0,10).map(r=>r.escola),
-      datasets:[{ data: rankingGlobal.slice(0,10).map(r=>r.IPT.toFixed(2)), backgroundColor:"#1f4fd8" }]
+      labels: rankingFiltrado.slice(0,10).map(r=>r.escola),
+      datasets:[{ data: rankingFiltrado.slice(0,10).map(r=>r.IPT.toFixed(2)), backgroundColor:"#1f4fd8" }]
     },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
-  new Chart(document.getElementById("graficoProblemas"),{
+  new Chart(document.getElementById("graficoProblemasChart"),{
     type:"bar",
     data:{ labels:Object.keys(problemasCount), datasets:[{ label:"Ocorrências", data:Object.values(problemasCount), backgroundColor:"#ff9800" }] },
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 }
 
-// export ranking
-window.exportarXLSX = function() {
-  if(rankingGlobal.length === 0){ alert("Nenhum dado disponível para exportação."); return; }
-  const exportData = rankingGlobal.map(r => ({
-    Escola:r.escola,
-    Status:r.statusLabel,
-    IPT:r.IPT.toFixed(2),
-    DiasNoStatus:r.diasNoStatus
-  }));
-  const ws = XLSX.utils.json_to_sheet(exportData);
+window.exportarXLSX = function(){
+  const rankingFiltrado = Array.from(document.querySelectorAll("#tabelaRanking tr")).map(tr=>{
+    const tds = tr.querySelectorAll("td");
+    return {
+      Escola: tds[1].innerText,
+      Status: tds[2].innerText,
+      IPT: tds[3].innerText
+    };
+  });
+  if(!rankingFiltrado.length){ alert("Nenhum dado disponível"); return; }
+  const ws = XLSX.utils.json_to_sheet(rankingFiltrado);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
-  XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
+  XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
 };
 
-// export histórico
 window.exportarHistorico = function(){
-  if(rankingHistorico.length === 0){ alert("Nenhum dado disponível para exportação."); return; }
-  const exportData = rankingHistorico.map(r => ({
-    Escola:r.escola,
-    Status:r.statusLabel,
-    IPT:r.IPT.toFixed(2),
-    Data:r.data
-  }));
-  const ws = XLSX.utils.json_to_sheet(exportData);
+  if(!rankingGlobal.length){ alert("Nenhum dado disponível"); return; }
+  const ws = XLSX.utils.json_to_sheet(rankingGlobal.map(r=>({
+    Escola: r.escola,
+    Avaliador: r.avaliador,
+    Status: r.statusLabel,
+    IPT: r.IPT.toFixed(2),
+    Data: r.data
+  })));
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Historico Completo");
-  XLSX.writeFile(wb, "historico_checkinfra.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "Historico Avaliações");
+  XLSX.writeFile(wb,"historico_checkinfra.xlsx");
 };
 
 function abrirModal(){ modalIPT.style.display="flex"; }
 function fecharModal(){ modalIPT.style.display="none"; }
 
-function mostrarAba(aba){
-  document.getElementById("aba-ranking").style.display = "none";
-  document.getElementById("aba-historico").style.display = "none";
-  document.getElementById("aba-metodologia").style.display = "none";
-  document.getElementById("aba-"+aba).style.display = "block";
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.querySelector(`.tab[onclick="mostrarAba('${aba}')"]`).classList.add("active");
-}
-
 carregarAvaliacoes();
+
+// Abas
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+    document.getElementById(tab.dataset.tab).classList.add("active");
+  });
+});
 </script>
 
 <footer>
@@ -383,6 +383,9 @@ carregarAvaliacoes();
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
         <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:80px; width:35%;">
       </a>
+    </p>
+    <p style="margin:0; font-size:11px;">
+      🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
     </p>
   </div>
 </footer>
