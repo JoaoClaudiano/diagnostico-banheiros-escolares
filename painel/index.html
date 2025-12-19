@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#1f4fd8">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -18,56 +19,25 @@ body {
   flex-direction:column; 
   min-height:100vh; 
 }
-
-/* Cards */
-.card { 
-  background:#fff; 
-  max-width:1100px; 
-  margin:20px auto; 
-  padding:20px; 
-  border-radius:10px; 
-}
-
-/* Grid e KPI */
+.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
 .grid { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
-
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
-
 .info { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1f4fd8; color:#fff; font-size:12px; cursor:pointer; margin-left:6px; }
-
 .badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
 .adequada { background:#4caf50; }
 .alerta { background:yellow; color:#000; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
-
 table { width:100%; border-collapse: collapse; font-size:14px; }
 th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; text-align:left; }
-
 button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-
-/* Modal */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100vw; position:relative; left:0; }
 
-/* Footer fixo no final */
-footer {
-  background:#1f4fd8;
-  color:#fff;
-  text-align:center;
-  padding:16px 10px;
-  font-size:12px;
-  line-height:1.4;
-  box-sizing:border-box;
-  width:100vw;
-  position:relative;
-  left:0;
-}
-
-/* Mobile */
 @media (max-width: 600px){
   .grid { grid-template-columns:1fr; }
   .kpi strong { font-size:34px; }
@@ -79,10 +49,8 @@ footer {
   table td:nth-child(2)::before { content:"Escola"; }
   table td:nth-child(3)::before { content:"Status"; }
   table td:nth-child(4)::before { content:"IPT"; }
-  table td:nth-child(5)::before { content:"Dias Críticos"; }
   .modal-content { width:90%; }
 }
-
 @media (max-width: 480px) {
   footer div { padding:0 8px; }
   footer p { font-size:10px; }
@@ -90,7 +58,6 @@ footer {
 }
 </style>
 </head>
-
 <body>
 
 <div class="card">
@@ -132,7 +99,7 @@ footer {
     <canvas id="graficoProblemas"></canvas>
   </div>
   <div>
-    <h3>Dias em Status Crítico (Agrupado)</h3>
+    <h3>Dias em Status Crítico</h3>
     <canvas id="graficoDiasCriticos"></canvas>
   </div>
 </div>
@@ -147,6 +114,11 @@ footer {
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
+</div>
+
+<div class="card">
+  <h3>📈 Evolução de Dias Críticos – Linha do Tempo</h3>
+  <canvas id="graficoLinhaTempo"></canvas>
 </div>
 
 <div class="card">
@@ -215,11 +187,8 @@ function montar(dados){
 
   let critica=0, atencao=0, somaIPT=0;
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
-  const problemasCount={}; // frequência de problemas
-
-  // Faixas de dias críticos (em dias)
-  const faixas = [0,30,60,90,180,365];
-  const diasCriticosFaixas = Array(faixas.length-1).fill(0);
+  const problemasCount={};
+  const linhaTempo = [];
 
   dados.forEach(d=>{
     let peso=1, classe="adequada";
@@ -231,11 +200,10 @@ function montar(dados){
     else statusCount.adequada++;
 
     const pont=Number(d.pontuacao||0);
-    const dias=Math.min(Number(d.dias_criticos||0),365);
+    const dias=Math.min(Number(d.dias_criticos||0),30);
     const IPT=(peso*0.4)+(pont*0.4)+(dias*0.2);
     somaIPT+=IPT;
 
-    // Contagem de problemas
     if(d.problemas && Array.isArray(d.problemas)){
       d.problemas.forEach(p => {
         if(problemasCount[p]) problemasCount[p]++;
@@ -243,13 +211,14 @@ function montar(dados){
       });
     }
 
-    // Contagem em faixa de dias críticos
-    for(let i=0;i<faixas.length-1;i++){
-      if(dias>faixas[i] && dias<=faixas[i+1]){
-        diasCriticosFaixas[i]++;
-        break;
-      }
-    }
+    // Linha do tempo: usar dataUltimaAvaliacao do Firebase
+    linhaTempo.push({
+      x: new Date(d.dataUltimaAvaliacao || new Date()),
+      y: dias,
+      escola: d.escola || "Sem nome",
+      statusLabel: classe==="critica"?"Crítica":classe==="atencao"?"Atenção":classe==="alerta"?"Alerta":"Adequada",
+      classe
+    });
 
     rankingGlobal.push({
       escola:d.escola||"Sem nome",
@@ -262,7 +231,6 @@ function montar(dados){
 
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
 
-  // Tabela
   rankingGlobal.forEach((r,i)=>{
     tabelaRanking.innerHTML += `
       <tr>
@@ -274,24 +242,18 @@ function montar(dados){
       </tr>`;
   });
 
-  // KPIs
   kpiCritica.innerText = critica;
   kpiAtencao.innerText = atencao;
   kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
 
-  // Gráfico status
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
     data:{
       labels:["Adequada","Alerta","Atenção","Crítica"],
-      datasets:[{
-        data:Object.values(statusCount),
-        backgroundColor:["#4caf50","yellow","#ff7043","#f44336"]
-      }]
+      datasets:[{ data:Object.values(statusCount), backgroundColor:["#4caf50","yellow","#ff7043","#f44336"] }]
     }
   });
 
-  // Gráfico top prioridades
   const topN = window.innerWidth<600 ? 5 : 10;
   new Chart(document.getElementById("graficoIndice"),{
     type:"bar",
@@ -302,7 +264,6 @@ function montar(dados){
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
-  // Gráfico frequência de problemas
   new Chart(document.getElementById("graficoProblemas"), {
     type:"bar",
     data:{
@@ -312,42 +273,51 @@ function montar(dados){
     options:{ indexAxis:"y", plugins:{ legend:{ display:false } } }
   });
 
-  // Gráfico dias críticos por faixa (sem nome de escola)
   new Chart(document.getElementById("graficoDiasCriticos"), {
     type:"bar",
     data:{
-      labels: ["0-30","31-60","61-90","91-180","181-365"],
-      datasets:[
-        { label:"Adequada", data: [], backgroundColor:"#4caf50" },
-        { label:"Alerta", data: [], backgroundColor:"yellow" },
-        { label:"Atenção", data: [], backgroundColor:"#ff7043" },
-        { label:"Crítica", data: [], backgroundColor:"#f44336" }
-      ]
+      labels: rankingGlobal.map(r=>r.escola),
+      datasets:[{ label:"Dias Críticos", data: rankingGlobal.map(r=>r.diasCriticos), backgroundColor:"#f44336" }]
     },
-    options:{
-      plugins:{ legend:{ position:"top" } },
-      responsive:true,
-      scales:{ y:{ beginAtZero:true, stepSize:1 } }
-    }
+    options:{ plugins:{ legend:{ display:false } }, responsive:true, scales:{ y:{ beginAtZero:true, stepSize:1 } } }
   });
 
-  // Preencher dataset do gráfico de dias críticos por faixa e status
-  const grafDias = Chart.getChart("graficoDiasCriticos");
-  faixas.forEach((_,i)=>{
-    if(i>=faixas.length-1) return;
-    const faixaLabel = grafDias.data.labels[i];
-    const faixaStatusCount = {adequada:0, alerta:0, atencao:0, critica:0};
-    rankingGlobal.forEach(r=>{
-      if(r.diasCriticos>faixas[i] && r.diasCriticos<=faixas[i+1]){
-        faixaStatusCount[r.classe]++;
+  // Linha do tempo
+  new Chart(document.getElementById("graficoLinhaTempo"),{
+    type:'scatter',
+    data:{
+      datasets:[{
+        label:'Dias Críticos por Escola',
+        data:linhaTempo,
+        backgroundColor: linhaTempo.map(d=>{
+          if(d.classe==='critica') return '#f44336';
+          if(d.classe==='atencao') return '#ff7043';
+          if(d.classe==='alerta') return 'yellow';
+          return '#4caf50';
+        }),
+        pointRadius:6
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            label: ctx => {
+              const d = ctx.raw;
+              return `${d.escola} — ${d.statusLabel} — ${d.y} dias críticos`;
+            }
+          }
+        },
+        zoom:{ pan:{enabled:true, mode:'xy'}, zoom:{wheel:{enabled:true}, pinch:{enabled:true}, mode:'xy'} }
+      },
+      scales:{
+        x:{ type:'time', title:{ display:true, text:'Data da Avaliação' } },
+        y:{ beginAtZero:true, title:{ display:true, text:'Dias em Status Crítico' } }
       }
-    });
-    grafDias.data.datasets[0].data.push(faixaStatusCount.adequada);
-    grafDias.data.datasets[1].data.push(faixaStatusCount.alerta);
-    grafDias.data.datasets[2].data.push(faixaStatusCount.atencao);
-    grafDias.data.datasets[3].data.push(faixaStatusCount.critica);
+    }
   });
-  grafDias.update();
 }
 
 function exportarXLSX(){
