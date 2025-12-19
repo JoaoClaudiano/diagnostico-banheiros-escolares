@@ -268,16 +268,25 @@ function montar(dados){
   });
 }
 
-function exportarXLSX(){
-  if(rankingGlobal.length===0){
+// Exportação XLSX corrigida
+window.exportarXLSX = function() {
+  if(rankingGlobal.length === 0){
     alert("Nenhum dado disponível para exportação.");
     return;
   }
-  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
+
+  // Dados simples para exportação
+  const exportData = rankingGlobal.map(r => ({
+    Escola: r.escola,
+    Status: r.statusLabel,
+    IPT: r.IPT.toFixed(2)
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
   XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
-}
+};
 
 function abrirModal(){ modalIPT.style.display="flex"; }
 function fecharModal(){ modalIPT.style.display="none"; }
