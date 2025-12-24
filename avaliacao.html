@@ -56,7 +56,7 @@ button:hover { background: #163ca6; }
 
 .selo { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
 
-#resultado strong { display: inline-block; margin-top: 6px; }
+#resultado strong { display: block; margin-top: 6px; }
 
 /* Tooltip discreto */
 .info-tooltip { position: relative; cursor: pointer; display: inline-block; font-weight: bold; color: #1f4fd8; font-size: 16px; }
@@ -67,7 +67,7 @@ button:hover { background: #163ca6; }
   color: #fff; 
   text-align: left; 
   padding: 6px; 
-  border-radius: 8px; 
+  border-radius: 6px; 
   position: absolute; 
   z-index: 10; 
   bottom: 125%; 
@@ -92,14 +92,6 @@ button:hover { background: #163ca6; }
   opacity: 1; 
   transform: translateX(-50%) translateY(0);
 }
-
-/* Destaque nos check-cards selecionados */
-@keyframes highlight-card {
-  0% { box-shadow: 0 0 0 rgba(31,79,216,0); transform: scale(1); }
-  50% { box-shadow: 0 0 15px rgba(31,79,216,0.6); transform: scale(1.05); }
-  100% { box-shadow: 0 0 0 rgba(31,79,216,0); transform: scale(1); }
-}
-.check-card.highlight { animation: highlight-card 0.8s ease-in-out; }
 
 @media(max-width:600px){
   .checklist { grid-template-columns: 1fr; }
@@ -192,12 +184,6 @@ button:hover { background: #163ca6; }
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-  if (!navigator.onLine) {
-    if (!confirm("⚠️ Você está OFFLINE. O sistema irá sincronizar automaticamente quando a conexão voltar. Deseja continuar?")) {
-      return;
-    }
-  }
-
   const select = document.getElementById("escola");
   if (window.escolas) {
     window.escolas.forEach(e => {
@@ -231,19 +217,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.getElementById("form-avaliacao");
   const resultado = document.getElementById("resultado");
-  form.addEventListener("submit", e => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
 
-    // Remove highlights anteriores
     document.querySelectorAll(".check-card.highlight").forEach(card => card.classList.remove("highlight"));
-    // Destaca cards selecionados
     document.querySelectorAll(".check-card.selected").forEach(card => card.classList.add("highlight"));
 
     let pontuacao = 0;
-    let problemas = [];
     document.querySelectorAll(".check-card.selected").forEach(card => {
       pontuacao += parseInt(card.dataset.peso || 0);
-      problemas.push(card.innerText.trim());
     });
 
     let status = "ok";
@@ -257,16 +239,42 @@ document.addEventListener("DOMContentLoaded", () => {
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
     resultado.innerHTML = `
-      <div class="selo">
-        ${bolinha} ${status === "ok" ? "Condição adequada" :
+      <div class="selo">${bolinha} ${status === "ok" ? "Condição adequada" :
           status === "alerta" ? "Situação de alerta" :
-          "Condição crítica"}
-      </div>
+          "Condição crítica"}</div>
       <div><strong>IDCHECKINFRA:</strong> ${idCheckInfra}</div>
       <div><strong>Pontuação:</strong> ${pontuacao}</div>
       <div><strong>Avaliador:</strong> ${avaliador}</div>
       ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
     `;
+
+    // Gerar PDF com imagens
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
+    doc.setFontSize(14);
+    doc.text(`Diagnóstico Sanitário - ${avaliador}`, 10, y); y += 10;
+    doc.text(`${bolinha} ${status === "ok" ? "Condição adequada" :
+          status === "alerta" ? "Situação de alerta" :
+          "Condição crítica"}`, 10, y); y += 10;
+    doc.text(`IDCHECKINFRA: ${idCheckInfra}`, 10, y); y += 10;
+    doc.text(`Pontuação: ${pontuacao}`, 10, y); y += 10;
+
+    // Adicionar imagens ao PDF
+    for (let i = 0; i < fotosInput.files.length; i++) {
+      const file = fotosInput.files[i];
+      await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          doc.addImage(e.target.result, 'JPEG', 10, y, 50, 50);
+          y += 55;
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    doc.save('diagnostico.pdf');
 
     // Redireciona automaticamente após 4 segundos
     setTimeout(() => {
