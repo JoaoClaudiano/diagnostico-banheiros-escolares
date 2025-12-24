@@ -75,9 +75,9 @@ async function gerarPDF(d) {
   pdf.setFont("helvetica","bold");
   pdf.text("Identificação",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-  pdf.text(`Escola: ${d.escola}`,margin+3,y+15);
-  pdf.text(`Avaliador: ${d.avaliador}`,margin+3,y+22);
-  pdf.text(`Data da Avaliação: ${new Date().toLocaleDateString()}`,margin+3,y+29);
+  pdf.text(`Escola:${d.escola}`,margin+3,y+15);
+  pdf.text(`Avaliador:${d.avaliador}`,margin+3,y+22);
+  pdf.text(`Data da Avaliação:${new Date().toLocaleDateString()}`,margin+3,y+29);
   y += 40;
 
   // Problemas
@@ -100,9 +100,9 @@ async function gerarPDF(d) {
   pdf.setFont("helvetica","bold");
   pdf.text("Resultado",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-  pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+15);
-  pdf.text(`Status: ${d.status}`,margin+60,y+15);
-  pdf.text(`ID: ${d.id}`,margin+3,y+22);
+  pdf.text(`Pontuação:${d.pontuacao}`,margin+3,y+15);
+  pdf.text(`Status:${d.status}`,margin+60,y+15);
+  pdf.text(`ID:${d.id}`,margin+3,y+22);
   y += 27;
 
   pdf.setFontSize(9);
