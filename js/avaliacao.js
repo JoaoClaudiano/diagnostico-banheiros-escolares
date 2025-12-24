@@ -38,15 +38,26 @@ async function sincronizarOffline(){
 }
 
 // ================= PDF =================
-function gerarPDF(d) {
-  const { jsPDF } = window.jspdf; // usa o jsPDF do script CDN
+async function gerarPDF(d) {
+  const { jsPDF } = window.jspdf; 
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  const margin = 20;
+  const margin = 15;
   let y = margin;
 
+  // ================= LOGO =================
   if(d.logo){
-    pdf.addImage(d.logo,"PNG",80,y,50,30);
+    const img = new Image();
+    img.src = d.logo;
+    await new Promise(resolve => {
+      img.onload = () => {
+        const ratio = img.width / img.height;
+        const width = 50;
+        const height = width / ratio;
+        pdf.addImage(img, "PNG", 80, y, width, height);
+        resolve();
+      };
+    });
   }
 
   y += 35;
@@ -61,9 +72,9 @@ function gerarPDF(d) {
   );
   y += 12;
 
-  // Identificação
+  // ================= CARD 1: Identificação =================
   pdf.setFillColor(240,240,240);
-  pdf.rect(margin,y,170,35,"F");
+  pdf.rect(margin,y,180,35,"F");
   pdf.setFont("helvetica","bold");
   pdf.text("Identificação",margin+3,y+7);
   pdf.setFont("helvetica","normal");
@@ -72,42 +83,61 @@ function gerarPDF(d) {
   pdf.text(`Data da Avaliação: ${new Date().toLocaleDateString()}`,margin+3,y+29);
   y += 40;
 
-  // Problemas
+  // ================= CARD 2: Problemas apontados =================
   pdf.setFillColor(240,240,240);
-  pdf.rect(margin,y,170,d.problemas.length*7 + 20,"F");
+  const problemasHeight = d.problemas.length*7 + 15;
+  pdf.rect(margin,y,180, problemasHeight, "F");
   pdf.setFont("helvetica","bold");
   pdf.text("Problemas apontados",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-
   let yP = y + 14;
   d.problemas.forEach(p=>{
     pdf.text(`- ${p}`,margin+5,yP);
     yP += 7;
   });
-  y = yP + 5;
+  y = y + problemasHeight + 5;
 
-  // Resultado
+  // ================= CARD 3: Resultado =================
   pdf.setFillColor(240,240,240);
-  pdf.rect(margin,y,170,22,"F");
+  pdf.rect(margin,y,180,22,"F");
   pdf.setFont("helvetica","bold");
   pdf.text("Resultado",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-  pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+15);
-  pdf.text(`Status: ${d.status}`,margin+60,y+15);
-  pdf.text(`ID: ${d.id}`,margin+3,y+22);
+  pdf.text(`Status: ${d.status} ${d.corBolinha}`,margin+3,y+15);
+  pdf.text(`Pontuação: ${d.pontuacao}`,margin+60,y+15);
+  pdf.text(`ID: ${d.id}`,margin+120,y+15);
   y += 27;
 
-  pdf.setFontSize(9);
-  pdf.text(
-    "Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.",
-    margin,y
-  );
+  // ================= CARD 4: Registro fotográfico =================
+  pdf.setFillColor(240,240,240);
+  const fotoHeight = d.fotos.length ? 60 : 25;
+  pdf.rect(margin,y,180,fotoHeight,"F");
+  pdf.setFont("helvetica","bold");
+  pdf.text("Registro fotográfico",margin+3,y+7);
+  pdf.setFont("helvetica","normal");
+  let yF = y + 14;
+  for(const f of d.fotos){
+    pdf.addImage(f, "JPEG", margin+5, yF, 50, 50);
+    yF += 55;
+  }
+  y += fotoHeight + 5;
+
+  // ================= CARD 5: Aviso legal =================
+  pdf.setFillColor(240,240,240);
+  pdf.rect(margin,y,180,15,"F");
+  pdf.setFont("helvetica","normal");
+  pdf.setFontSize(8);
+  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.",margin+3,y+10);
+  y += 20;
+
+  // ================= Data de impressão lateral =================
+  pdf.setTextColor(255,0,0);
+  pdf.setFontSize(8);
+  pdf.text(`Gerado em: ${new Date().toLocaleString()}`, 190, 10, {align:"right", baseline:"top"});
+  pdf.setTextColor(0,0,0); // volta para preto
 
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
-
-// Expondo a função globalmente para o HTML acessar
-window.gerarPDF = gerarPDF;
 
 // ================= MAIN =================
 document.addEventListener("DOMContentLoaded",()=>{
@@ -173,6 +203,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       logo: "./assets/logo-checkinfra.png"
     };
 
+    // Exibe card diagnóstico
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + classe;
     resultado.innerHTML = `
@@ -194,8 +225,17 @@ document.addEventListener("DOMContentLoaded",()=>{
       salvarOffline(dados);
     }
 
-    gerarPDF(dados);
+    // Gera PDF
+    await gerarPDF(dados);
+
+    // Limpa formulário e preview
     form.reset();
     preview.innerHTML="";
+
+    // Redirecionamento automático após 4s
+    setTimeout(() => {
+      window.location.href = './index.html';
+    }, 4000);
+
   });
 });
