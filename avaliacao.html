@@ -3,33 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Avaliação – CheckInfra</title>
+<title>CheckInfra – Avaliação</title>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-/* ===== RESET BÁSICO ===== */
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f7f7f7;
+  background: #f4f6f8;
   color: #333;
 }
 
-/* ===== HEADER PADRÃO ===== */
+/* ===== HEADER ===== */
 .header-app {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   padding: 10px 12px;
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.nav-left,
-.nav-right {
+.nav-left {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -39,9 +38,9 @@ body {
 .nav-left a {
   background: none;
   border: none;
-  font-size: 1.1rem;
-  padding: 6px;
+  font-size: 1.2rem;
   cursor: pointer;
+  padding: 6px;
 }
 
 .header-title {
@@ -58,20 +57,19 @@ body {
   margin: auto;
 }
 
-/* ===== MINI CARDS (ESCOLA / AVALIADOR) ===== */
+/* ===== MINI CARDS ===== */
 .info-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .info-card {
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 10px;
-  font-size: 0.85rem;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e0e0e0;
 }
 
 .info-card strong {
@@ -84,25 +82,21 @@ body {
 .info-card input {
   width: 100%;
   border: none;
-  font-size: 0.85rem;
   outline: none;
+  font-size: 0.85rem;
   background: transparent;
-}
-
-/* impede estouro no mobile */
-.info-card input {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ===== CARDS DE CHECK ===== */
+/* ===== CHECK CARDS ===== */
 .check-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 14px;
   margin-bottom: 10px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e0e0e0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -110,34 +104,29 @@ body {
   transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.check-card:hover {
-  background: #fafafa;
-}
-
-.check-card:active {
-  transform: scale(0.98);
-}
+.check-card:hover { background: #fafafa; }
+.check-card:active { transform: scale(0.98); }
 
 .check-card input {
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .check-card span {
   font-size: 0.9rem;
 }
 
-/* ===== DIAGNÓSTICO ===== */
+/* ===== RESULTADO ===== */
 #resultado {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 14px;
-  margin-top: 14px;
-  border: 1px solid #e5e5e5;
+  margin-top: 16px;
+  border: 1px solid #e0e0e0;
 }
 
 .selo {
   display: inline-block;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
   font-size: 0.8rem;
   margin-bottom: 8px;
@@ -151,11 +140,11 @@ body {
 /* ===== BOTÃO ===== */
 button.primary {
   width: 100%;
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 10px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 12px;
   border: none;
-  background: #1a73e8;
+  background: #1f4fd8;
   color: #fff;
   font-size: 0.95rem;
   cursor: pointer;
@@ -166,7 +155,7 @@ footer {
   text-align: center;
   font-size: 0.7rem;
   color: #777;
-  padding: 16px 8px;
+  padding: 18px 10px;
 }
 </style>
 </head>
@@ -178,60 +167,62 @@ footer {
     <button onclick="history.back()">⬅️</button>
     <a href="index.html">🏠</a>
   </div>
-  <h1 class="header-title">Avaliação</h1>
-  <div class="nav-right"></div>
+  <h1 class="header-title">Avaliação Sanitária</h1>
+  <div></div>
 </header>
 
 <div class="container">
 
-  <!-- MINI CARDS -->
+  <!-- IDENTIFICAÇÃO -->
   <div class="info-cards">
     <div class="info-card">
       <strong>Escola</strong>
-      <input type="text" placeholder="Nome da escola">
+      <input id="escola" placeholder="Nome da escola">
     </div>
     <div class="info-card">
       <strong>Avaliador</strong>
-      <input type="text" placeholder="Seu nome">
+      <input id="avaliador" placeholder="Seu nome">
     </div>
   </div>
 
   <!-- CHECKLIST -->
   <label class="check-card">
-    <input type="checkbox" value="1">
-    <span>Banheiros apresentam vazamentos</span>
+    <input type="checkbox" value="2">
+    <span>Mofo ou umidade excessiva</span>
+  </label>
+
+  <label class="check-card">
+    <input type="checkbox" value="2">
+    <span>Piso danificado ou escorregadio</span>
+  </label>
+
+  <label class="check-card">
+    <input type="checkbox" value="3">
+    <span>Infiltrações visíveis</span>
   </label>
 
   <label class="check-card">
     <input type="checkbox" value="1">
-    <span>Iluminação inadequada</span>
+    <span>Ventilação inadequada</span>
   </label>
 
-  <label class="check-card">
-    <input type="checkbox" value="1">
-    <span>Fiação exposta</span>
-  </label>
+  <button class="primary" onclick="gerarDiagnostico()">Gerar diagnóstico e PDF</button>
 
-  <label class="check-card">
-    <input type="checkbox" value="1">
-    <span>Pisos danificados</span>
-  </label>
-
-  <button class="primary" onclick="avaliar()">Gerar diagnóstico</button>
-
-  <!-- RESULTADO -->
   <div id="resultado" hidden></div>
 
 </div>
 
 <footer>
-  CheckInfra © 2025 · Avaliação orientativa · Não substitui vistoria técnica
+  CheckInfra © 2025 · Diagnóstico orientativo · Não substitui inspeção técnica
 </footer>
 
 <script>
-function avaliar() {
-  const checks = document.querySelectorAll('.check-card input:checked');
-  const pontos = checks.length;
+function gerarDiagnostico() {
+  const { jsPDF } = window.jspdf;
+
+  let pontos = 0;
+  document.querySelectorAll('.check-card input:checked')
+    .forEach(c => pontos += parseInt(c.value));
 
   let classe = "verde";
   let texto = "🟢 Condição adequada";
@@ -247,12 +238,31 @@ function avaliar() {
     texto = "🔴 Condição crítica";
   }
 
+  const escola = document.getElementById("escola").value || "-";
+  const avaliador = document.getElementById("avaliador").value || "-";
+
   const resultado = document.getElementById("resultado");
   resultado.hidden = false;
   resultado.innerHTML = `
     <div class="selo ${classe}">${texto}</div>
+    <div><strong>Escola:</strong> ${escola}</div>
+    <div><strong>Avaliador:</strong> ${avaliador}</div>
     <div><strong>Pontuação:</strong> ${pontos}</div>
   `;
+
+  /* PDF */
+  const pdf = new jsPDF();
+  pdf.text("CheckInfra – Avaliação Sanitária", 10, 10);
+  pdf.text(`Status: ${texto}`, 10, 20);
+  pdf.text(`Escola: ${escola}`, 10, 30);
+  pdf.text(`Avaliador: ${avaliador}`, 10, 40);
+  pdf.text(`Pontuação: ${pontos}`, 10, 50);
+  pdf.save("checkinfra-avaliacao.pdf");
+
+  /* Redirecionamento */
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 4000);
 }
 </script>
 
