@@ -21,6 +21,9 @@ function salvarOffline(dados){
   const l = JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
   l.push(dados);
   localStorage.setItem(STORAGE_KEY,JSON.stringify(l));
+
+  // Pop-up offline
+  showOfflinePopup();
 }
 
 async function sincronizarOffline(){
@@ -29,133 +32,137 @@ async function sincronizarOffline(){
   if(!l.length) return;
 
   for(const d of l){
-    await db.collection("avaliacoes").doc(d.id).set({
-      ...d,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    try{
+      await db.collection("avaliacoes").doc(d.id).set({
+        ...d,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      console.log("Sincronizado:", d.id);
+    } catch(err){
+      console.error("Erro ao sincronizar offline:", err);
+    }
   }
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// ================= PDF =================
-async function gerarPDF(d) {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+// ================= POP-UP OFFLINE =================
+function showOfflinePopup(){
+  const popup = document.createElement("div");
+  popup.style.position = "fixed";
+  popup.style.top = "50%";
+  popup.style.left = "50%";
+  popup.style.transform = "translate(-50%, -50%)";
+  popup.style.background = "#fff3cd";
+  popup.style.color = "#856404";
+  popup.style.padding = "20px 30px";
+  popup.style.borderRadius = "12px";
+  popup.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+  popup.style.zIndex = "9999";
+  popup.style.fontWeight = "bold";
+  popup.style.textAlign = "center";
+  popup.innerHTML = `Você está offline! A avaliação será sincronizada quando a conexão voltar.
+    <button id="closePopup" style="margin-left:10px; background:none; border:none; font-size:16px; cursor:pointer;">❌</button>`;
+  document.body.appendChild(popup);
 
-  const margin = 15;
+  const closeBtn = document.getElementById("closePopup");
+  closeBtn.addEventListener("click", () => popup.remove());
+
+  setTimeout(()=>{ popup.remove(); },3000);
+}
+
+// ================= PDF =================
+function gerarPDF(d) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+
+  const margin = 20;
   let y = margin;
 
-  // LOGO centralizada
+  // Logo centralizada sem distorcer
   if(d.logo){
-    const imgProps = await new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => resolve({ w: img.width, h: img.height });
-      img.src = d.logo;
+    const img = new Image();
+    img.src = d.logo;
+    img.onload = function(){
+      const ratio = img.width / img.height;
+      const w = 50;
+      const h = w / ratio;
+      pdf.addImage(img, "PNG", (210-w)/2, y, w, h);
+      addContent();
+    };
+  } else addContent();
+
+  function addContent(){
+    y += 35;
+    pdf.setFont("times", "bold").setFontSize(14);
+    pdf.text("CheckInfra",105,y,{align:"center"});
+    y += 10;
+
+    // Identificação
+    pdf.setFillColor(240,240,240);
+    pdf.roundedRect(margin,y,170,35,5,5,"F");
+    pdf.setFont("times","bold").setFontSize(12);
+    pdf.text("Identificação",margin+3,y+7);
+    pdf.setFont("times","normal");
+    pdf.text(`Escola: ${d.escola}`,margin+3,y+15);
+    pdf.text(`Avaliador: ${d.avaliador}`,margin+3,y+22);
+    pdf.text(`ID: ${d.id}`,margin+3,y+29);
+    y += 40;
+
+    // Problemas apontados
+    pdf.setFillColor(240,240,240);
+    pdf.roundedRect(margin,y,170,d.problemas.length*7 + 20,5,5,"F");
+    pdf.setFont("times","bold").setFontSize(12);
+    pdf.text("Problemas apontados",margin+3,y+7);
+    pdf.setFont("times","normal");
+    let yP = y + 14;
+    d.problemas.forEach(p=>{
+      pdf.text(`- ${p}`,margin+5,yP);
+      yP += 7;
     });
-    const scale = Math.min(50 / imgProps.w, 30 / imgProps.h);
-    pdf.addImage(d.logo, "PNG", (210 - imgProps.w*scale)/2, y, imgProps.w*scale, imgProps.h*scale);
-  }
+    y = yP + 5;
 
-  y += 35;
-  pdf.setFont("Times","bold");
-  pdf.setFontSize(14);
-  pdf.text("CheckInfra",105,y,{align:"center"});
-  y += 7;
+    // Resultado
+    pdf.setFillColor(240,240,240);
+    pdf.roundedRect(margin,y,170,22,5,5,"F");
+    pdf.setFont("times","bold").setFontSize(12);
+    pdf.text("Resultado",margin+3,y+7);
+    pdf.setFont("times","normal");
+    pdf.text(`Status: ${d.status}`,margin+3,y+15);
+    pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+22);
+    y += 27;
 
-  pdf.setFont("Times","normal");
-  pdf.setFontSize(12);
-  pdf.text(
-    "RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR",
-    105,y,{align:"center"}
-  );
-  y += 12;
-
-  // Função auxiliar para altura mínima do card
-  function alturaMinima(contentHeight, minHeight=25){ return Math.max(contentHeight, minHeight); }
-
-  // CARD 1 — Identificação
-  const alturaIdentificacao = alturaMinima(35);
-  pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin, y, 180, alturaIdentificacao, 5,5,'F');
-  pdf.setFont("Times","bold");
-  pdf.text("Identificação", margin+3, y+7);
-  pdf.setFont("Times","normal");
-  pdf.text(`Escola: ${d.escola}`, margin+3, y+15);
-  pdf.text(`Avaliador: ${d.avaliador}`, margin+3, y+22);
-  pdf.text(`ID: ${d.id}`, margin+3, y+29);
-  y += alturaIdentificacao + 5;
-
-  // CARD 2 — Problemas
-  const alturaProblemas = alturaMinima(d.problemas.length*7 + 20);
-  pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin, y, 180, alturaProblemas, 5,5,'F');
-  pdf.setFont("Times","bold");
-  pdf.text("Problemas apontados", margin+3, y+7);
-  pdf.setFont("Times","normal");
-  let yP = y + 14;
-  d.problemas.forEach(p=>{
-    pdf.text(`- ${p}`, margin+5, yP);
-    yP += 7;
-  });
-  y += alturaProblemas + 5;
-
-  // CARD 3 — Resultado
-  let alturaResultado = alturaMinima(30);
-  pdf.setFillColor(255,255,255);
-  if(d.classe==="ok") pdf.setFillColor(212,237,218);
-  else if(d.classe==="alerta") pdf.setFillColor(255,243,205);
-  else if(d.classe==="atencao") pdf.setFillColor(255,230,204);
-  else if(d.classe==="critico") pdf.setFillColor(248,215,218);
-  pdf.roundedRect(margin, y, 180, alturaResultado, 5,5,'F');
-  pdf.setFont("Times","bold");
-  pdf.text("Resultado", margin+3, y+7);
-  pdf.setFont("Times","normal");
-  pdf.text(`Situação: ${d.status}`, margin+3, y+15);
-  pdf.text(`Pontuação: ${d.pontuacao}`, margin+3, y+22);
-  y += alturaResultado + 5;
-
-  // CARD 4 — Registro fotográfico (altura mínima)
-  let alturaFotos = alturaMinima(d.fotos.length*55, 40);
-  pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin, y, 180, alturaFotos, 5,5,'F');
-  pdf.setFont("Times","bold");
-  pdf.text("Registro fotográfico", margin+3, y+7);
-  pdf.setFont("Times","normal");
-  let yF = y + 14;
-  for(let i=0; i<d.fotos.length; i++){
-    const file = d.fotos[i];
-    await new Promise(resolve=>{
-      const reader = new FileReader();
-      reader.onload = e=>{
-        pdf.addImage(e.target.result,'JPEG',margin+3,yF,50,50);
-        yF += 55;
-        resolve();
-      };
-      reader.readAsDataURL(file);
+    // Registro fotográfico
+    pdf.setFillColor(240,240,240);
+    pdf.roundedRect(margin,y,170,40,5,5,"F");
+    pdf.setFont("times","bold").setFontSize(12);
+    pdf.text("Registro fotográfico",margin+3,y+7);
+    pdf.setFont("times","normal");
+    let yFoto = y + 14;
+    d.fotos.forEach(f=>{
+      pdf.addImage(f,"JPEG",margin+5,yFoto,40,40);
+      yFoto += 45;
     });
+    y += Math.max(yFoto - y, 40) + 5;
+
+    // Aviso legal
+    pdf.setFillColor(240,240,240);
+    pdf.roundedRect(margin,y,170,15,5,5,"F");
+    pdf.setFont("times","normal").setFontSize(9);
+    pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.",margin+85,y+10,{align:"center"});
+    y += 20;
+
+    // Data lateral direita
+    pdf.setTextColor(255,0,0);
+    pdf.setFontSize(10);
+    pdf.text(`Gerado em: ${new Date().toLocaleString()}`, 200, 290, {align:"right"});
+    pdf.setTextColor(0,0,0);
+
+    // Numeração de página
+    pdf.setFontSize(9);
+    pdf.text(`Página 1 de 1`, 105, 295,{align:"center"});
+
+    pdf.save(`CheckInfra-${d.id}.pdf`);
   }
-  y += alturaFotos + 5;
-
-  // CARD 5 — Aviso legal
-  const alturaAviso = alturaMinima(20);
-  pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin, y, 180, alturaAviso, 5,5,'F');
-  pdf.setFont("Times","bold");
-  pdf.text("Aviso legal", 105, y+7, {align:'center'});
-  pdf.setFont("Times","normal");
-  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.", 105, y+15, {align:'center', maxWidth:170});
-  y += alturaAviso + 5;
-
-  // DATA no canto inferior direito
-  pdf.setTextColor(255,0,0);
-  pdf.text(`Gerado em: ${new Date().toLocaleString()}`, 195, 290, {align:'right'});
-  pdf.setTextColor(0,0,0);
-
-  // NUMERAÇÃO de página
-  pdf.setFontSize(10);
-  pdf.text(`Página 1`, 105, 295, {align:'center'});
-
-  pdf.save(`CheckInfra-${d.id}.pdf`);
 }
 
 // ================= MAIN =================
@@ -210,10 +217,10 @@ document.addEventListener("DOMContentLoaded",()=>{
       lat: objEscola.lat || null,
       lng: objEscola.lng || null,
       avaliador: document.getElementById("avaliador").value,
+
       pontuacao,
       status,
       classe,
-      rt: 0,
       problemas,
       fotos: fotosBase64,
       logo: "./assets/logo-checkinfra.png"
@@ -235,13 +242,16 @@ document.addEventListener("DOMContentLoaded",()=>{
           ...dados,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+        console.log("Salvo no Firebase:", dados.id);
       } else salvarOffline(dados);
-    }catch{
+    }catch(err){
+      console.error("Erro ao salvar no Firebase:", err);
       salvarOffline(dados);
     }
 
-    await gerarPDF(dados);
+    gerarPDF(dados);
 
+    // Redirecionamento automático após 4s
     setTimeout(() => {
       window.location.href = './index.html';
     }, 4000);
