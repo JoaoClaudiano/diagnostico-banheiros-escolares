@@ -45,7 +45,7 @@ async function gerarPDF(d) {
   const margin = 15;
   let y = margin;
 
-  // LOGO
+  // LOGO centralizada
   if(d.logo){
     const imgProps = await new Promise(resolve => {
       const img = new Image();
@@ -53,7 +53,7 @@ async function gerarPDF(d) {
       img.src = d.logo;
     });
     const scale = Math.min(50 / imgProps.w, 30 / imgProps.h);
-    pdf.addImage(d.logo, "PNG", 80, y, imgProps.w * scale, imgProps.h * scale);
+    pdf.addImage(d.logo, "PNG", (210 - imgProps.w*scale)/2, y, imgProps.w*scale, imgProps.h*scale);
   }
 
   y += 35;
@@ -70,52 +70,58 @@ async function gerarPDF(d) {
   );
   y += 12;
 
+  // Função auxiliar para altura mínima do card
+  function alturaMinima(contentHeight, minHeight=25){ return Math.max(contentHeight, minHeight); }
+
   // CARD 1 — Identificação
+  const alturaIdentificacao = alturaMinima(35);
   pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin, y, 180, 35, 5,5, 'F');
+  pdf.roundedRect(margin, y, 180, alturaIdentificacao, 5,5,'F');
   pdf.setFont("Times","bold");
   pdf.text("Identificação", margin+3, y+7);
   pdf.setFont("Times","normal");
   pdf.text(`Escola: ${d.escola}`, margin+3, y+15);
   pdf.text(`Avaliador: ${d.avaliador}`, margin+3, y+22);
   pdf.text(`ID: ${d.id}`, margin+3, y+29);
-  y += 40;
+  y += alturaIdentificacao + 5;
 
   // CARD 2 — Problemas
+  const alturaProblemas = alturaMinima(d.problemas.length*7 + 20);
   pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin, y, 180, d.problemas.length*7 + 20, 5,5,'F');
+  pdf.roundedRect(margin, y, 180, alturaProblemas, 5,5,'F');
   pdf.setFont("Times","bold");
   pdf.text("Problemas apontados", margin+3, y+7);
   pdf.setFont("Times","normal");
-  let yP = y+14;
+  let yP = y + 14;
   d.problemas.forEach(p=>{
     pdf.text(`- ${p}`, margin+5, yP);
     yP += 7;
   });
-  y = yP + 5;
+  y += alturaProblemas + 5;
 
   // CARD 3 — Resultado
-  pdf.setFillColor(255,255,255); // padrão
+  let alturaResultado = alturaMinima(30);
+  pdf.setFillColor(255,255,255);
   if(d.classe==="ok") pdf.setFillColor(212,237,218);
   else if(d.classe==="alerta") pdf.setFillColor(255,243,205);
   else if(d.classe==="atencao") pdf.setFillColor(255,230,204);
   else if(d.classe==="critico") pdf.setFillColor(248,215,218);
-  pdf.roundedRect(margin, y, 180, 30, 5,5,'F');
+  pdf.roundedRect(margin, y, 180, alturaResultado, 5,5,'F');
   pdf.setFont("Times","bold");
   pdf.text("Resultado", margin+3, y+7);
   pdf.setFont("Times","normal");
-  pdf.text(`Situação: ${d.status} ${d.corBolinha}`, margin+3, y+15);
+  pdf.text(`Situação: ${d.status}`, margin+3, y+15);
   pdf.text(`Pontuação: ${d.pontuacao}`, margin+3, y+22);
-  y += 35;
+  y += alturaResultado + 5;
 
-  // CARD 4 — Registro fotográfico
+  // CARD 4 — Registro fotográfico (altura mínima)
+  let alturaFotos = alturaMinima(d.fotos.length*55, 40);
   pdf.setFillColor(240,240,240);
-  let cardAltura = Math.max(60, d.fotos.length*55);
-  pdf.roundedRect(margin, y, 180, cardAltura, 5,5,'F');
+  pdf.roundedRect(margin, y, 180, alturaFotos, 5,5,'F');
   pdf.setFont("Times","bold");
   pdf.text("Registro fotográfico", margin+3, y+7);
   pdf.setFont("Times","normal");
-  let yF = y+14;
+  let yF = y + 14;
   for(let i=0; i<d.fotos.length; i++){
     const file = d.fotos[i];
     await new Promise(resolve=>{
@@ -128,26 +134,26 @@ async function gerarPDF(d) {
       reader.readAsDataURL(file);
     });
   }
-  y += cardAltura + 5;
+  y += alturaFotos + 5;
 
   // CARD 5 — Aviso legal
+  const alturaAviso = alturaMinima(20);
   pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin, y, 180, 20, 5,5,'F');
+  pdf.roundedRect(margin, y, 180, alturaAviso, 5,5,'F');
   pdf.setFont("Times","bold");
-  pdf.text("Aviso legal", margin+3, y+7);
+  pdf.text("Aviso legal", 105, y+7, {align:'center'});
   pdf.setFont("Times","normal");
-  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.", margin+3, y+15, {maxWidth:174, align:'center'});
-  y += 25;
+  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.", 105, y+15, {align:'center', maxWidth:170});
+  y += alturaAviso + 5;
 
-  // DATA lateral direita
+  // DATA no canto inferior direito
   pdf.setTextColor(255,0,0);
-  pdf.setFont("Times","normal");
-  pdf.text(`Gerado em: ${new Date().toLocaleString()}`, 195, 10, {angle:90, align:'right'});
+  pdf.text(`Gerado em: ${new Date().toLocaleString()}`, 195, 290, {align:'right'});
   pdf.setTextColor(0,0,0);
 
   // NUMERAÇÃO de página
   pdf.setFontSize(10);
-  pdf.text(`Página 1`, 105, 290, {align:'center'});
+  pdf.text(`Página 1`, 105, 295, {align:'center'});
 
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
@@ -190,10 +196,10 @@ document.addEventListener("DOMContentLoaded",()=>{
       problemas.push(c.innerText.trim());
     });
 
-    let status="Condição adequada",classe="ok",corBolinha="🟢";
-    if(pontuacao >= 12){ status="Condição crítica"; classe="critico"; corBolinha="🔴"; }
-    else if(pontuacao >= 8){ status="Atenção elevada"; classe="atencao"; corBolinha="🟠"; }
-    else if(pontuacao >= 4){ status="Situação de alerta"; classe="alerta"; corBolinha="🟡"; }
+    let status="Condição adequada",classe="ok";
+    if(pontuacao >= 12){ status="Condição crítica"; classe="critico"; }
+    else if(pontuacao >= 8){ status="Atenção elevada"; classe="atencao"; }
+    else if(pontuacao >= 4){ status="Situação de alerta"; classe="alerta"; }
 
     const escolaSelecionada = document.getElementById("escola").value;
     const objEscola = window.escolas.find(e=>e.nome===escolaSelecionada) || {};
@@ -207,7 +213,6 @@ document.addEventListener("DOMContentLoaded",()=>{
       pontuacao,
       status,
       classe,
-      corBolinha,
       rt: 0,
       problemas,
       fotos: fotosBase64,
@@ -217,7 +222,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + classe;
     resultado.innerHTML = `
-      <div class="selo">${status} ${corBolinha}</div>
+      <div class="selo">${status}</div>
       <strong>ID:</strong> ${dados.id}<br>
       <strong>Pontuação:</strong> ${pontuacao}<br>
       <strong>Avaliador:</strong> ${dados.avaliador}<br>
