@@ -24,8 +24,8 @@ body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; min-heigh
 header { background: #1f4fd8; color: #fff; padding: 10px 20px; display: flex; align-items: center; justify-content: center; position: relative; }
 header h1 { margin: 0; font-size: 18px; text-align: center; }
 .nav-header { position: absolute; left: 20px; display: flex; gap: 15px; }
-.nav-header a, .nav-header button { color: #fff; text-decoration: none; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; }
-.nav-header a:hover, .nav-header button:hover { opacity: 0.8; }
+.nav-header button { color: #fff; text-decoration: none; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0; }
+.nav-header button:hover { opacity: 0.8; }
 
 .container { max-width: 900px; margin: 20px auto; padding: 0 16px; flex: 1; display: flex; flex-direction: column; }
 h1 { text-align: center; margin: 20px 0; }
@@ -39,9 +39,25 @@ h1 { text-align: center; margin: 20px 0; }
 .check-card.selected { border-color: #1f4fd8; background: #eaf0ff; font-weight: bold; }
 
 label { font-weight: bold; display: block; margin-bottom: 6px; }
-select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 14px; }
+select, input { width: 100%; padding: 10px; border-radius: 12px; border: 2px solid #e0e0e0; margin-bottom: 14px; box-sizing: border-box; }
 
-.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; cursor: pointer; }
+.upload-box { 
+  border: 2px dashed #bbb; 
+  border-radius: 14px; 
+  padding: 14px; 
+  text-align: center; 
+  background: #fcfcfc; 
+  margin-bottom: 20px; 
+  cursor: pointer; 
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+}
+.upload-box input { display: none; }
+.upload-box span.placeholder { color: #888; font-size: 14px; margin-top: 6px; }
 .upload-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 .upload-preview img { width: 100px; height: auto; border-radius: 8px; border: 1px solid #ccc; }
 
@@ -96,6 +112,7 @@ button:hover { background: #163ca6; }
   .checklist { grid-template-columns: 1fr; }
   .resultado { font-size: 14px; padding: 16px; }
   .upload-preview img { width: 80px; }
+  .nav-header a { display: none; } /* Esconde o emoji home no smartphone */
 }
 </style>
 </head>
@@ -105,7 +122,6 @@ button:hover { background: #163ca6; }
   <h1>CheckInfra – Avaliação Sanitária</h1>
   <nav class="nav-header">
     <button onclick="history.back()" title="Voltar">⬅️</button>
-    <a href="./index.html" title="Início">🏠</a>
   </nav>
 </header>
 
@@ -122,7 +138,7 @@ button:hover { background: #163ca6; }
     </select>
 
     <label>Avaliador</label>
-    <input type="text" id="avaliador" placeholder="Nome do avaliador" required>
+    <input type="text" id="avaliador" placeholder="Nome do avaliador">
   </div>
 
   <!-- CARD 2 — CHECKLIST -->
@@ -167,6 +183,7 @@ button:hover { background: #163ca6; }
   <div class="card upload-box" id="uploadBox">
     <h3>Registro Fotográfico</h3>
     <input type="file" id="fotos" accept="image/*" multiple>
+    <span class="placeholder">Clique aqui para adicionar fotos</span>
     <div id="preview" class="upload-preview"></div>
   </div>
 
@@ -199,14 +216,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Clique na caixa abre input
   const uploadBox = document.getElementById('uploadBox');
   const fotosInput = document.getElementById('fotos');
   const preview = document.getElementById('preview');
+  const placeholder = uploadBox.querySelector('.placeholder');
+
   uploadBox.addEventListener('click', () => fotosInput.click());
 
   fotosInput.addEventListener("change", () => {
     preview.innerHTML = "";
+    if (fotosInput.files.length > 0) {
+      placeholder.style.display = "none";
+    } else {
+      placeholder.style.display = "block";
+    }
     Array.from(fotosInput.files).forEach(file => {
       const reader = new FileReader();
       reader.onload = e => {
@@ -222,9 +245,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultado = document.getElementById("resultado");
   form.addEventListener("submit", async e => {
     e.preventDefault();
-
-    document.querySelectorAll(".check-card.highlight").forEach(card => card.classList.remove("highlight"));
-    document.querySelectorAll(".check-card.selected").forEach(card => card.classList.add("highlight"));
 
     let pontuacao = 0;
     document.querySelectorAll(".check-card.selected").forEach(card => {
@@ -251,7 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
     `;
 
-    // Gerar PDF com imagens
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     let y = 20;
