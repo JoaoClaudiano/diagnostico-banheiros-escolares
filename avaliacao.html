@@ -1,170 +1,171 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>CheckInfra — Avaliação</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>CheckInfra – Avaliação Sanitária</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1f4fd8">
 
-  <!-- estilos já existentes -->
-  <link rel="stylesheet" href="style.css" />
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DD4SQ88NVT');
+</script>
 
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+.header { background: #1f4fd8; color: #fff; padding: 14px 20px; font-size: 18px; font-weight: bold; display:flex; align-items:center; gap:12px; }
+.nav-global button, .nav-global a {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.container { max-width: 900px; margin: 20px auto; padding: 0 16px; flex: 1; display: flex; flex-direction: column; }
+h1 { text-align: center; margin: 20px 0; }
+
+.card { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+.card-grande h3 { margin-bottom: 12px; color: #1f4fd8; }
+
+.checklist { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.check-card { padding: 12px; border-radius: 12px; background: #fafafa; border: 2px solid #e0e0e0; cursor: pointer; transition: all .2s ease; text-align: center; }
+.check-card.selected { border-color: #1f4fd8; background: #eaf0ff; font-weight: bold; }
+
+.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; }
+.upload-box input { display: none; }
+.upload-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.upload-preview img { width: 100px; border-radius: 8px; border: 1px solid #ccc; }
+
+button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+
+.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 10px; display: none; }
+.resultado-verde { background:#d4edda; color:#155724; }
+.resultado-amarelo { background:#fff3cd; color:#856404; }
+.resultado-laranja { background:#ffe5b4; color:#8a4b00; }
+.resultado-vermelho { background:#f8d7da; color:#721c24; }
+
+.selo { display:inline-block; padding:6px 14px; border-radius:20px; margin-bottom:10px; }
+
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:20px 10px; font-size:12px; margin-top:40px; }
+</style>
 </head>
 
 <body>
 
-<header class="header">
-  <nav class="nav">
-    <div class="nav-left">
-      <a href="index.html" class="nav-btn">⬅️</a>
-      <a href="index.html" class="nav-btn">🏠</a>
-    </div>
-    <h1>CheckInfra</h1>
-  </nav>
-</header>
+<div class="header">
+  <div class="nav-global">
+    <button onclick="history.back()">⬅️</button>
+    <a href="./index.html">🏠</a>
+  </div>
+  CheckInfra – Avaliação Sanitária
+</div>
 
-<main class="container">
+<div class="container">
+<h1>Avaliação Sanitária Escolar</h1>
 
-  <section class="info">
-    <h2 id="nomeEscola">Escola Municipal</h2>
-    <p id="nomeAvaliador">Avaliador: —</p>
-  </section>
+<form id="form-avaliacao">
 
-  <form id="formAvaliacao">
+<div class="card">
+  <label>Escola</label>
+  <select id="escola" required>
+    <option value="">Selecione a escola</option>
+  </select>
 
-    <!-- CARDS VERTICAIS (mantidos) -->
-    <section class="cards">
+  <label style="margin-top:12px;">Avaliador</label>
+  <input type="text" id="avaliador" required>
+</div>
 
-      <label class="card">
-        <input type="checkbox" value="1">
-        Instalações elétricas inadequadas
-      </label>
+<div class="card card-grande">
+  <h3>🏗️ Estrutura</h3>
+  <div class="checklist">
+    <div class="check-card" data-peso="3">Mofo ou umidade excessiva</div>
+    <div class="check-card" data-peso="2">Piso quebrado ou escorregadio</div>
+    <div class="check-card" data-peso="2">Infiltrações visíveis</div>
+  </div>
+</div>
 
-      <label class="card">
-        <input type="checkbox" value="1">
-        Vazamentos ou infiltrações
-      </label>
+<div class="card card-grande">
+  <h3>🧹 Higiene</h3>
+  <div class="checklist">
+    <div class="check-card" data-peso="2">Limpeza inadequada</div>
+    <div class="check-card" data-peso="2">Mau cheiro persistente</div>
+  </div>
+</div>
 
-      <label class="card">
-        <input type="checkbox" value="1">
-        Banheiros sem condições de uso
-      </label>
+<div class="card card-grande">
+  <h3>💡 Conforto</h3>
+  <div class="checklist">
+    <div class="check-card" data-peso="1">Iluminação insuficiente</div>
+    <div class="check-card" data-peso="1">Ventilação inadequada</div>
+  </div>
+</div>
 
-      <label class="card">
-        <input type="checkbox" value="1">
-        Problemas estruturais visíveis
-      </label>
+<button type="submit">Gerar Diagnóstico e PDF</button>
+</form>
 
-      <label class="card">
-        <input type="checkbox" value="1">
-        Falta de acessibilidade
-      </label>
+<div id="resultado" class="resultado"></div>
 
-      <label class="card">
-        <input type="checkbox" value="1">
-        Iluminação insuficiente
-      </label>
+</div>
 
-      <label class="card">
-        <input type="checkbox" value="1">
-        Ventilação inadequada
-      </label>
-
-      <label class="card">
-        <input type="checkbox" value="1">
-        Risco sanitário identificado
-      </label>
-
-      <label class="card">
-        <input type="checkbox" value="1">
-        Risco imediato à segurança
-      </label>
-
-    </section>
-
-    <button type="submit" class="btn">Finalizar Avaliação</button>
-  </form>
-
-  <!-- CARD FINAL DE DIAGNÓSTICO -->
-  <section id="resultado" class="resultado" style="display:none;"></section>
-
-</main>
-
-<footer class="footer">
-  <p>CheckInfra — Ferramenta de apoio à decisão técnica</p>
+<footer>
+© 2025 CheckInfra — Projeto acadêmico e tecnológico — Licença MIT
 </footer>
 
+<script src="./mapa/escolas.js"></script>
+
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded",()=>{
 
-  const form = document.getElementById("formAvaliacao");
-  const resultado = document.getElementById("resultado");
-
-  const escola = localStorage.getItem("escola") || "Escola Municipal";
-  const avaliador = localStorage.getItem("avaliador") || "Não informado";
-
-  document.getElementById("nomeEscola").textContent = escola;
-  document.getElementById("nomeAvaliador").textContent = "Avaliador: " + avaliador;
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    let pontuacao = 0;
-    document.querySelectorAll("input[type='checkbox']:checked")
-      .forEach(c => pontuacao += Number(c.value));
-
-    let classe = "", texto = "", icone = "";
-
-    if (pontuacao <= 3) {
-      classe = "verde";
-      texto = "Condição adequada";
-      icone = "🟢";
-    } else if (pontuacao <= 6) {
-      classe = "amarelo";
-      texto = "Situação de alerta";
-      icone = "🟡";
-    } else if (pontuacao <= 8) {
-      classe = "laranja";
-      texto = "Atenção elevada";
-      icone = "🟠";
-    } else {
-      classe = "vermelho";
-      texto = "Condição crítica";
-      icone = "🔴";
-    }
-
-    resultado.className = `resultado resultado-${classe}`;
-    resultado.style.display = "block";
-
-    resultado.innerHTML = `
-      <div class="selo selo-${classe}">
-        ${icone} ${texto}
-      </div>
-      <strong>Escola:</strong> ${escola}<br>
-      <strong>Avaliador:</strong> ${avaliador}<br>
-      <strong>Pontuação:</strong> ${pontuacao}<br>
-      ${navigator.onLine ? "☁️ Enviado" : "📴 Salvo offline"}
-    `;
-
-    // PDF
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.text("CheckInfra — Diagnóstico", 10, 10);
-    pdf.text(`Escola: ${escola}`, 10, 20);
-    pdf.text(`Avaliador: ${avaliador}`, 10, 30);
-    pdf.text(`Pontuação: ${pontuacao}`, 10, 40);
-    pdf.text(`Status: ${texto}`, 10, 50);
-    pdf.save("diagnostico_checkinfra.pdf");
-
-    // redirecionamento após 4s
-    setTimeout(() => {
-      window.location.href = "index.html";
-    }, 4000);
-
-    form.reset();
+const select=document.getElementById("escola");
+if(window.escolas){
+  window.escolas.forEach(e=>{
+    const o=document.createElement("option");
+    o.value=e.nome;
+    o.textContent=e.nome;
+    select.appendChild(o);
   });
+}
 
+document.querySelectorAll(".check-card").forEach(c=>{
+  c.onclick=()=>c.classList.toggle("selected");
+});
+
+document.getElementById("form-avaliacao").onsubmit=e=>{
+e.preventDefault();
+
+let pontuacao=0;
+document.querySelectorAll(".check-card.selected").forEach(c=>{
+  pontuacao+=parseInt(c.dataset.peso);
+});
+
+let classe,icone,texto;
+if(pontuacao<=3){classe="verde";icone="🟢";texto="Condição adequada";}
+else if(pontuacao<=6){classe="amarelo";icone="🟡";texto="Situação de alerta";}
+else if(pontuacao<=8){classe="laranja";icone="🟠";texto="Atenção elevada";}
+else{classe="vermelho";icone="🔴";texto="Condição crítica";}
+
+const r=document.getElementById("resultado");
+r.className=`resultado resultado-${classe}`;
+r.style.display="block";
+r.innerHTML=`
+<div class="selo">${icone} ${texto}</div>
+<strong>Escola:</strong> ${escola.value}<br>
+<strong>Avaliador:</strong> ${avaliador.value}<br>
+<strong>Pontuação:</strong> ${pontuacao}<br>
+${navigator.onLine?"☁️ Enviado":"📴 Salvo offline"}
+`;
+
+setTimeout(()=>window.location.href="./index.html",4000);
+};
 });
 </script>
 
