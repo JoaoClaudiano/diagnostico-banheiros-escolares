@@ -1,4 +1,4 @@
-// ================= FIREBASE =================
+// ================= IMPORTS =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getFirestore,
@@ -6,7 +6,9 @@ import {
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { jsPDF } from "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
 
+// ================= FIREBASE =================
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
@@ -46,8 +48,7 @@ async function sincronizarOffline(){
 }
 
 // ================= PDF =================
-async function gerarPDF(d) {
-  const { jsPDF } = window.jspdf;
+function gerarPDF(d) {
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
 
   const margin = 20;
@@ -75,9 +76,9 @@ async function gerarPDF(d) {
   pdf.setFont("helvetica","bold");
   pdf.text("Identificação",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-  pdf.text(`Escola:${d.escola}`,margin+3,y+15);
-  pdf.text(`Avaliador:${d.avaliador}`,margin+3,y+22);
-  pdf.text(`Data da Avaliação:${new Date().toLocaleDateString()}`,margin+3,y+29);
+  pdf.text(`Escola: ${d.escola}`,margin+3,y+15);
+  pdf.text(`Avaliador: ${d.avaliador}`,margin+3,y+22);
+  pdf.text(`Data da Avaliação: ${new Date().toLocaleDateString()}`,margin+3,y+29);
   y += 40;
 
   // Problemas
@@ -100,9 +101,9 @@ async function gerarPDF(d) {
   pdf.setFont("helvetica","bold");
   pdf.text("Resultado",margin+3,y+7);
   pdf.setFont("helvetica","normal");
-  pdf.text(`Pontuação:${d.pontuacao}`,margin+3,y+15);
-  pdf.text(`Status:${d.status}`,margin+60,y+15);
-  pdf.text(`ID:${d.id}`,margin+3,y+22);
+  pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+15);
+  pdf.text(`Status: ${d.status}`,margin+60,y+15);
+  pdf.text(`ID: ${d.id}`,margin+3,y+22);
   y += 27;
 
   pdf.setFontSize(9);
@@ -181,7 +182,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + classe;
     resultado.innerHTML = `
-      <div class="selo">${status}${corBolinha}</div>
+      <div class="selo">${status} ${corBolinha}</div>
       <strong>ID:</strong>${dados.id}<br>
       <strong>Pontuação:</strong>${pontuacao}<br>
       <strong>Avaliador:</strong>${dados.avaliador}<br>
