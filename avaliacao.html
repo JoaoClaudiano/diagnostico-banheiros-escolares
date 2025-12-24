@@ -16,9 +16,6 @@
   gtag('config', 'G-DD4SQ88NVT');
 </script>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
 body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
 header { background: #1f4fd8; color: #fff; padding: 10px 20px; display: flex; align-items: center; justify-content: center; position: relative; }
@@ -243,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.getElementById("form-avaliacao");
   const resultado = document.getElementById("resultado");
-  form.addEventListener("submit", async e => {
+  form.addEventListener("submit", e => {
     e.preventDefault();
 
     let pontuacao = 0;
@@ -259,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const avaliador = document.getElementById("avaliador").value;
     const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
 
-    // Card diagnóstico com bolinha alinhada verticalmente
+    // Card diagnóstico
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
     resultado.innerHTML = `
@@ -274,32 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
       <div><strong>Avaliador:</strong> ${avaliador}</div>
       <div>${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}</div>
     `;
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    let y = 20;
-    doc.setFontSize(14);
-    doc.text(`Diagnóstico Sanitário - ${avaliador}`, 10, y); y += 10;
-    doc.text(`${status === "ok" ? "Condição adequada" :
-          status === "alerta" ? "Situação de alerta" :
-          "Condição crítica"} ${bolinha}`, 10, y); y += 10;
-    doc.text(`ID: ${idCheckInfra}`, 10, y); y += 10;
-    doc.text(`Pontuação: ${pontuacao}`, 10, y); y += 10;
-
-    for (let i = 0; i < fotosInput.files.length; i++) {
-      const file = fotosInput.files[i];
-      await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          doc.addImage(e.target.result, 'JPEG', 10, y, 50, 50);
-          y += 55;
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    doc.save('diagnostico.pdf');
 
     setTimeout(() => {
       window.scrollTo(0,0);
