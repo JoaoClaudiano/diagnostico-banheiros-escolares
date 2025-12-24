@@ -7,7 +7,6 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#1f4fd8">
 
-<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -16,7 +15,6 @@
   gtag('config', 'G-DD4SQ88NVT');
 </script>
 
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -39,11 +37,6 @@ h1 { text-align: center; margin: 20px 0; }
 .checklist { display: grid; grid-template-columns: 1fr; gap: 12px; }
 .check-card { padding: 12px; border-radius: 12px; background: #fafafa; border: 2px solid #e0e0e0; cursor: pointer; transition: all .2s ease; text-align: center; }
 .check-card.selected { border-color: #1f4fd8; background: #eaf0ff; font-weight: bold; }
-
-.upload-box { border: 2px dashed #bbb; border-radius: 14px; padding: 20px; text-align: center; background: #fcfcfc; margin-bottom: 20px; }
-.upload-box input { display: none; }
-.upload-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-.upload-preview img { width: 100px; border-radius: 8px; border: 1px solid #ccc; }
 
 button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 
@@ -157,11 +150,11 @@ const r=document.getElementById("resultado");
 r.className=`resultado resultado-${classe}`;
 r.style.display="block";
 r.innerHTML=`
-<div class="selo">${icone} ${texto}</div>
-<strong>Escola:</strong> ${escola.value}<br>
-<strong>Avaliador:</strong> ${avaliador.value}<br>
-<strong>Pontuação:</strong> ${pontuacao}<br>
-${navigator.onLine?"☁️ Enviado":"📴 Salvo offline"}
+  <div class="selo">${icone} ${texto}</div>
+  <strong>Escola:</strong> ${escola.value}<br>
+  <strong>Avaliador:</strong> ${avaliador.value}<br>
+  <strong>Pontuação:</strong> ${pontuacao}<br>
+  ${navigator.onLine?"☁️ Enviado":"📴 Salvo offline"}
 `;
 
 setTimeout(()=>window.location.href="./index.html",4000);
