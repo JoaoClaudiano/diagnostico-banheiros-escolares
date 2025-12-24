@@ -106,6 +106,9 @@ function gerarPDF(d) {
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
 
+// Expondo a função globalmente para o HTML acessar
+window.gerarPDF = gerarPDF;
+
 // ================= MAIN =================
 document.addEventListener("DOMContentLoaded",()=>{
 
