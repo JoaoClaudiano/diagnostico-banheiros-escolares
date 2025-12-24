@@ -20,7 +20,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-/* ======= MESMO CSS QUE VOCÊ ENVIOU ======= */
 body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
 header { background: #1f4fd8; color: #fff; padding: 10px 20px; display: flex; align-items: center; justify-content: center; position: relative; }
 header h1 { margin: 0; font-size: 18px; text-align: center; }
@@ -74,6 +73,7 @@ button:hover { background: #163ca6; }
 
 #resultado strong { display: block; margin-top: 6px; }
 
+/* Tooltip discreto */
 .info-tooltip { position: relative; cursor: pointer; display: inline-block; font-weight: bold; color: #1f4fd8; font-size: 16px; }
 .tooltip-text { 
   visibility: hidden; 
@@ -195,10 +195,13 @@ button:hover { background: #163ca6; }
 </div>
 
 <script src="./mapa/escolas.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script type="module" src="./js/avaliacao.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
   const select = document.getElementById("escola");
   if (window.escolas) {
     window.escolas.forEach(e => {
@@ -224,8 +227,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fotosInput.addEventListener("change", () => {
     preview.innerHTML = "";
-    if (fotosInput.files.length > 0) placeholder.style.display = "none";
-    else placeholder.style.display = "block";
+    if (fotosInput.files.length > 0) {
+      placeholder.style.display = "none";
+    } else {
+      placeholder.style.display = "block";
+    }
     Array.from(fotosInput.files).forEach(file => {
       const reader = new FileReader();
       reader.onload = e => {
@@ -235,59 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       reader.readAsDataURL(file);
     });
-  });
-
-  const form = document.getElementById("form-avaliacao");
-  const resultado = document.getElementById("resultado");
-
-  form.addEventListener("submit", async e => {
-    e.preventDefault();
-
-    let pontuacao = 0;
-    document.querySelectorAll(".check-card.selected").forEach(card => {
-      pontuacao += parseInt(card.dataset.peso || 0);
-    });
-
-    let status = "ok";
-    let bolinha = "🟢";
-    if (pontuacao >= 6 && pontuacao < 10) { status = "alerta"; bolinha="🟡"; }
-    else if (pontuacao >= 10) { status = "critico"; bolinha="🔴"; }
-
-    const avaliador = document.getElementById("avaliador").value;
-    const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
-
-    resultado.style.display = "block";
-    resultado.className = "resultado resultado-" + status;
-    resultado.innerHTML = `
-      <div class="selo" style="font-size:16px; font-weight:bold; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-        <span>${status === "ok" ? "Condição adequada" :
-          status === "alerta" ? "Situação de alerta" :
-          "Condição crítica"}</span>
-        <span style="font-size:18px; line-height:1;">${bolinha}</span>
-      </div>
-      <div><strong>ID:</strong> ${idCheckInfra}</div>
-      <div><strong>Pontuação:</strong> ${pontuacao}</div>
-      <div><strong>Avaliador:</strong> ${avaliador}</div>
-      <div>${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}</div>
-    `;
-
-    // ================== CHAMA PDF DO avaliacao.js ==================
-    if (window.gerarPDF) window.gerarPDF({
-      id: idCheckInfra,
-      pontuacao,
-      status: status === "ok" ? "Condição adequada" :
-              status === "alerta" ? "Situação de alerta" :
-              "Condição crítica",
-      avaliador,
-      fotos: Array.from(fotosInput.files).map(f => f),
-      escola: document.getElementById("escola").value,
-      logo: "./assets/logo-checkinfra.png"
-    });
-
-    setTimeout(() => {
-      window.scrollTo(0,0);
-      window.location.href = './index.html';
-    }, 4000);
   });
 
   document.querySelectorAll('.info-tooltip').forEach(item => {
