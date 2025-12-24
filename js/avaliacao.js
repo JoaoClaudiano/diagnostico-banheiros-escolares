@@ -21,7 +21,6 @@ function salvarOffline(dados){
   const l = JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
   l.push(dados);
   localStorage.setItem(STORAGE_KEY,JSON.stringify(l));
-  mostrarToast("📴 Você está offline! A avaliação foi salva localmente e será sincronizada automaticamente.");
 }
 
 async function sincronizarOffline(){
@@ -38,129 +37,99 @@ async function sincronizarOffline(){
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// ================= TOAST OFFLINE =================
-function mostrarToast(mensagem){
-  let toast = document.createElement("div");
-  toast.textContent = mensagem;
-  toast.style.position = "fixed";
-  toast.style.bottom = "20px";
-  toast.style.right = "20px";
-  toast.style.background = "#333";
-  toast.style.color = "#fff";
-  toast.style.padding = "12px 18px";
-  toast.style.borderRadius = "8px";
-  toast.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-  toast.style.zIndex = 9999;
-  toast.style.fontSize = "14px";
-  toast.style.opacity = "0";
-  toast.style.transition = "opacity 0.3s ease";
-  document.body.appendChild(toast);
-
-  setTimeout(()=>{ toast.style.opacity = "1"; }, 50); // fade in
-  setTimeout(()=>{
-    toast.style.opacity = "0";
-    setTimeout(()=>{ toast.remove(); }, 300);
-  }, 4000); // desaparece após 4s
-}
-
 // ================= PDF =================
-function gerarPDF(d) {
+async function gerarPDF(d) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-
-  const margin = 20;
+  const margin = 15;
   let y = margin;
 
-  // Logo
+  // ================= LOGO =================
   if(d.logo){
-    const larguraLogo = 40;
-    const alturaLogo = 25;
-    pdf.addImage(d.logo,"PNG",(210-larguraLogo)/2,y,larguraLogo,alturaLogo);
+    const img = new Image();
+    img.src = d.logo;
+    await new Promise(res=>{
+      img.onload = ()=>{
+        const w = 50; // largura fixa
+        const h = (img.height/img.width)*w; // manter proporção
+        pdf.addImage(img.src, "PNG", 80, y, w, h);
+        y += h + 5;
+        res();
+      };
+    });
   }
 
-  y += 30;
-  pdf.setFont("times","bold");
-  pdf.setFontSize(16);
+  // ================= TÍTULO =================
+  pdf.setFont("times","normal");
+  pdf.setFontSize(14);
   pdf.text("CheckInfra",105,y,{align:"center"});
-  y += 10;
-
-  pdf.setFont("times","normal");
+  y += 8;
   pdf.setFontSize(12);
-  pdf.text(
-    "RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR",
-    105,y,{align:"center"}
-  );
-  y += 15;
+  pdf.text("RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR",105,y,{align:"center"});
+  y += 12;
 
-  // CARD 1 — Identificação
+  // ================= CARD IDENTIFICAÇÃO =================
   pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin,y,170,30,5,5,"F");
-  pdf.setFont("times","bold");
+  pdf.rect(margin,y,180,35, "F");
+  pdf.setFontSize(11);
   pdf.text("Identificação",margin+3,y+7);
-  pdf.setFont("times","normal");
   pdf.text(`Escola: ${d.escola}`,margin+3,y+15);
   pdf.text(`Avaliador: ${d.avaliador}`,margin+3,y+22);
-  pdf.text(`ID: ${d.id}`,margin+3,y+29);
-  y += 35;
+  // Espaço extra para o ID
+  pdf.text(`ID: ${d.id}`, margin+3, y+29);
+  y += 40;
 
-  // CARD 2 — Problemas apontados
+  // ================= CARD PROBLEMAS =================
   pdf.setFillColor(240,240,240);
-  const alturaProblemas = d.problemas.length*7 + 10;
-  pdf.roundedRect(margin,y,170,alturaProblemas,5,5,"F");
-  pdf.setFont("times","bold");
-  pdf.text("Problemas apontados",margin+3,y+7);
-  pdf.setFont("times","normal");
+  pdf.rect(margin,y,180,d.problemas.length*7 + 10,"F");
+  pdf.text("Problemas apontados", margin+3, y+7);
   let yP = y + 14;
   d.problemas.forEach(p=>{
-    pdf.text(`- ${p}`,margin+5,yP);
+    pdf.text(`- ${p}`, margin+5, yP);
     yP += 7;
   });
-  y += alturaProblemas + 5;
+  y = yP + 5;
 
-  // CARD 3 — Resultado
+  // ================= CARD RESULTADO =================
   pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin,y,170,25,5,5,"F");
-  pdf.setFont("times","bold");
-  pdf.text("Resultado",margin+3,y+7);
-  pdf.setFont("times","normal");
-  pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+15);
-  pdf.text(`Status: ${d.status} ${d.corBolinha}`,margin+3,y+22);
+  pdf.rect(margin,y,180,25,"F");
+  pdf.text("Resultado", margin+3, y+7);
+  pdf.text(`Pontuação: ${d.pontuacao}`, margin+3, y+15);
+  pdf.text(`Status: ${d.status} ${d.corBolinha}`, margin+3, y+22);
   y += 30;
 
-  // CARD 4 — Registro Fotográfico
-  const alturaFotos = d.fotos.length > 0 ? 60 : 20;
+  // ================= CARD REGISTRO FOTOGRÁFICO =================
   pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin,y,170,alturaFotos,5,5,"F");
-  pdf.setFont("times","bold");
-  pdf.text("Registro Fotográfico",margin+3,y+7);
-  pdf.setFont("times","normal");
-  let yF = y + 15;
-  for(const f of d.fotos){
-    pdf.addImage(f,'JPEG',margin+3,yF,50,50);
+  const fotosAltura = d.fotos.length > 0 ? 60 : 20;
+  pdf.rect(margin,y,180,fotosAltura,"F");
+  pdf.text("Registro Fotográfico", margin+3, y+7);
+  let yF = y + 12;
+  for(let i=0;i<d.fotos.length;i++){
+    pdf.addImage(d.fotos[i],'JPEG', margin+3, yF, 50, 50);
     yF += 55;
   }
-  y += alturaFotos + 5;
+  y += fotosAltura + 5;
 
-  // CARD 5 — Aviso legal
+  // ================= CARD AVISO LEGAL =================
   pdf.setFillColor(240,240,240);
-  pdf.roundedRect(margin,y,170,20,5,5,"F");
-  pdf.setFont("times","normal");
-  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.",105,y+10,{align:"center"});
+  pdf.rect(margin,y,180,20,"F");
+  pdf.setFontSize(9);
+  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.", margin+90, y+10, {align:"center"});
   y += 25;
 
-  // Data lateral direita
-  const data = new Date().toLocaleString();
+  // ================= DATA NA LATERAL =================
+  const dataStr = `Data de geração: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
   pdf.setTextColor(255,0,0);
-  pdf.setFontSize(10);
-  pdf.text(`Data da geração: ${data}`,205,10,{align:"right",baseline:'top'});
+  pdf.setFontSize(8);
+  pdf.text(dataStr, 200, 10, {angle:90}); // vertical à direita
   pdf.setTextColor(0,0,0);
 
-  // Numeração
-  const totalPaginas = pdf.getNumberOfPages();
-  for(let i=1;i<=totalPaginas;i++){
+  // ================= NUMERAÇÃO =================
+  const totalPages = pdf.internal.getNumberOfPages();
+  for(let i=1;i<=totalPages;i++){
     pdf.setPage(i);
-    pdf.setFontSize(10);
-    pdf.text(`Página ${i}`,105,290,{align:"center"});
+    pdf.setFontSize(8);
+    pdf.text(`Página ${i} de ${totalPages}`, 105, 290, {align:"center"});
   }
 
   pdf.save(`CheckInfra-${d.id}.pdf`);
@@ -234,9 +203,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     resultado.className = "resultado resultado-" + classe;
     resultado.innerHTML = `
       <div class="selo">${status} ${corBolinha}</div>
-      <strong>ID:</strong>${dados.id}<br>
-      <strong>Pontuação:</strong>${pontuacao}<br>
-      <strong>Avaliador:</strong>${dados.avaliador}<br>
+      <strong>ID:</strong> ${dados.id}<br>
+      <strong>Pontuação:</strong> ${pontuacao}<br>
+      <strong>Avaliador:</strong> ${dados.avaliador}<br>
       ${navigator.onLine?"☁️ Enviado ao sistema":"📴 Salvo offline"}
     `;
 
@@ -251,13 +220,15 @@ document.addEventListener("DOMContentLoaded",()=>{
       salvarOffline(dados);
     }
 
-    gerarPDF(dados);
+    await gerarPDF(dados);
 
     form.reset();
     preview.innerHTML="";
 
+    // Redirecionamento automático
     setTimeout(() => {
       window.location.href = './index.html';
     }, 4000);
+
   });
 });
