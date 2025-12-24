@@ -1,13 +1,3 @@
-// ================= IMPORTS =================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { jsPDF } from "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
-
 // ================= FIREBASE =================
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
@@ -15,8 +5,8 @@ const firebaseConfig = {
   projectId: "checkinfra-adf3c"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // ================= ID =================
 function gerarIdCheckInfra() {
@@ -39,9 +29,9 @@ async function sincronizarOffline(){
   if(!l.length) return;
 
   for(const d of l){
-    await setDoc(doc(db,"avaliacoes",d.id),{
+    await db.collection("avaliacoes").doc(d.id).set({
       ...d,
-      createdAt: serverTimestamp()
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }
   localStorage.removeItem(STORAGE_KEY);
@@ -49,6 +39,7 @@ async function sincronizarOffline(){
 
 // ================= PDF =================
 function gerarPDF(d) {
+  const { jsPDF } = window.jspdf; // usa o jsPDF do script CDN
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
 
   const margin = 20;
@@ -191,9 +182,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     try{
       if(navigator.onLine){
-        await setDoc(doc(db,"avaliacoes",dados.id),{
+        await db.collection("avaliacoes").doc(dados.id).set({
           ...dados,
-          createdAt: serverTimestamp()
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       } else salvarOffline(dados);
     }catch{
