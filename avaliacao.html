@@ -112,7 +112,7 @@ button:hover { background: #163ca6; }
   .checklist { grid-template-columns: 1fr; }
   .resultado { font-size: 14px; padding: 16px; }
   .upload-preview img { width: 80px; }
-  .nav-header a { display: none; } /* Esconde o emoji home no smartphone */
+  .nav-header a { display: none; }
 }
 </style>
 </head>
@@ -259,16 +259,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const avaliador = document.getElementById("avaliador").value;
     const idCheckInfra = window.idcheckinfra || "ID ainda não gerado pelo sistema";
 
+    // Card diagnóstico com bolinha alinhada verticalmente
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + status;
     resultado.innerHTML = `
-      <div class="selo">${bolinha} ${status === "ok" ? "Condição adequada" :
+      <div class="selo" style="font-size:16px; font-weight:bold; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+        <span>${status === "ok" ? "Condição adequada" :
           status === "alerta" ? "Situação de alerta" :
-          "Condição crítica"}</div>
-      <div><strong>IDCHECKINFRA:</strong> ${idCheckInfra}</div>
+          "Condição crítica"}</span>
+        <span style="font-size:18px; line-height:1;">${bolinha}</span>
+      </div>
+      <div><strong>ID:</strong> ${idCheckInfra}</div>
       <div><strong>Pontuação:</strong> ${pontuacao}</div>
       <div><strong>Avaliador:</strong> ${avaliador}</div>
-      ${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}
+      <div>${navigator.onLine ? "☁️ Enviado ao sistema" : "📴 Salvo offline — será sincronizado"}</div>
     `;
 
     const { jsPDF } = window.jspdf;
@@ -276,10 +280,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let y = 20;
     doc.setFontSize(14);
     doc.text(`Diagnóstico Sanitário - ${avaliador}`, 10, y); y += 10;
-    doc.text(`${bolinha} ${status === "ok" ? "Condição adequada" :
+    doc.text(`${status === "ok" ? "Condição adequada" :
           status === "alerta" ? "Situação de alerta" :
-          "Condição crítica"}`, 10, y); y += 10;
-    doc.text(`IDCHECKINFRA: ${idCheckInfra}`, 10, y); y += 10;
+          "Condição crítica"} ${bolinha}`, 10, y); y += 10;
+    doc.text(`ID: ${idCheckInfra}`, 10, y); y += 10;
     doc.text(`Pontuação: ${pontuacao}`, 10, y); y += 10;
 
     for (let i = 0; i < fotosInput.files.length; i++) {
