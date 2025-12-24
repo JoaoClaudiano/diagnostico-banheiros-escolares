@@ -29,10 +29,15 @@ async function sincronizarOffline(){
   if(!l.length) return;
 
   for(const d of l){
-    await db.collection("avaliacoes").doc(d.id).set({
-      ...d,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    try{
+      await db.collection("avaliacoes").doc(d.id).set({
+        ...d,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      console.log("✅ Sincronizado do offline:", d.id);
+    }catch(err){
+      console.error("❌ Erro ao sincronizar offline:", err);
+    }
   }
   localStorage.removeItem(STORAGE_KEY);
 }
@@ -70,7 +75,6 @@ async function gerarPDF(d) {
   );
   y += 12;
 
-  // Função auxiliar para altura mínima do card
   function alturaMinima(contentHeight, minHeight=25){ return Math.max(contentHeight, minHeight); }
 
   // CARD 1 — Identificação
@@ -101,7 +105,6 @@ async function gerarPDF(d) {
 
   // CARD 3 — Resultado
   let alturaResultado = alturaMinima(30);
-  pdf.setFillColor(255,255,255);
   if(d.classe==="ok") pdf.setFillColor(212,237,218);
   else if(d.classe==="alerta") pdf.setFillColor(255,243,205);
   else if(d.classe==="atencao") pdf.setFillColor(255,230,204);
@@ -114,7 +117,7 @@ async function gerarPDF(d) {
   pdf.text(`Pontuação: ${d.pontuacao}`, margin+3, y+22);
   y += alturaResultado + 5;
 
-  // CARD 4 — Registro fotográfico (altura mínima)
+  // CARD 4 — Registro fotográfico
   let alturaFotos = alturaMinima(d.fotos.length*55, 40);
   pdf.setFillColor(240,240,240);
   pdf.roundedRect(margin, y, 180, alturaFotos, 5,5,'F');
@@ -146,12 +149,10 @@ async function gerarPDF(d) {
   pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.", 105, y+15, {align:'center', maxWidth:170});
   y += alturaAviso + 5;
 
-  // DATA no canto inferior direito
+  // DATA e numeração
   pdf.setTextColor(255,0,0);
   pdf.text(`Gerado em: ${new Date().toLocaleString()}`, 195, 290, {align:'right'});
   pdf.setTextColor(0,0,0);
-
-  // NUMERAÇÃO de página
   pdf.setFontSize(10);
   pdf.text(`Página 1`, 105, 295, {align:'center'});
 
@@ -235,8 +236,13 @@ document.addEventListener("DOMContentLoaded",()=>{
           ...dados,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-      } else salvarOffline(dados);
-    }catch{
+        console.log("✅ Avaliação salva no Firebase:", dados.id);
+      } else {
+        salvarOffline(dados);
+        console.log("📴 Offline, salvo localmente:", dados.id);
+      }
+    }catch(err){
+      console.error("❌ Erro ao salvar no Firebase:", err);
       salvarOffline(dados);
     }
 
