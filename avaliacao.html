@@ -7,6 +7,7 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#1f4fd8">
 
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -15,40 +16,165 @@
   gtag('config', 'G-DD4SQ88NVT');
 </script>
 
+<!-- jsPDF (mantido) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-.header { background: #1f4fd8; color: #fff; padding: 14px 20px; font-size: 18px; font-weight: bold; display:flex; align-items:center; gap:12px; }
-.nav-global button, .nav-global a {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  text-decoration: none;
+/* BASE */
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
 }
-.container { max-width: 900px; margin: 20px auto; padding: 0 16px; flex: 1; display: flex; flex-direction: column; }
-h1 { text-align: center; margin: 20px 0; }
 
-.card { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
-.card-grande h3 { margin-bottom: 12px; color: #1f4fd8; }
+/* HEADER */
+.header{
+  background:#1f4fd8;
+  color:#fff;
+  padding:12px 14px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+}
+.nav-global{
+  display:flex;
+  gap:10px;
+}
+.nav-global button,
+.nav-global a{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  text-decoration:none;
+}
+.header-title{
+  text-align:center;
+  font-weight:bold;
+  font-size:17px;
+}
 
-.checklist { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.check-card { padding: 12px; border-radius: 12px; background: #fafafa; border: 2px solid #e0e0e0; cursor: pointer; transition: all .2s ease; text-align: center; }
-.check-card.selected { border-color: #1f4fd8; background: #eaf0ff; font-weight: bold; }
+/* CONTAINER */
+.container{
+  max-width:900px;
+  margin:14px auto;
+  padding:0 14px;
+  flex:1;
+}
+h1{
+  text-align:center;
+  margin:14px 0;
+  font-size:20px;
+}
 
-button { width: 100%; padding: 16px; background: #1f4fd8; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+/* CARDS */
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+.card-grande h3{
+  margin-bottom:10px;
+  color:#1f4fd8;
+}
 
-.resultado { padding: 20px; border-radius: 14px; font-weight: bold; margin-top: 10px; display: none; }
-.resultado-verde { background:#d4edda; color:#155724; }
-.resultado-amarelo { background:#fff3cd; color:#856404; }
-.resultado-laranja { background:#ffe5b4; color:#8a4b00; }
-.resultado-vermelho { background:#f8d7da; color:#721c24; }
+/* IDENTIFICAÇÃO */
+.identificacao{
+  display:flex;
+  flex-direction:column;
+  gap:8px; /* próximos */
+}
+.mini-card{
+  background:#fafafa;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:12px;
+}
+label{font-weight:bold; display:block; margin-bottom:6px;}
+select,input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
 
-.selo { display:inline-block; padding:6px 14px; border-radius:20px; margin-bottom:10px; }
+/* CHECKLIST */
+.checklist{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+.check-card{
+  padding:12px;
+  border-radius:12px;
+  background:#fafafa;
+  border:1.5px solid #ddd;
+  cursor:pointer;
+  transition: background .15s ease, border-color .15s ease;
+  text-align:center;
+}
+.check-card:hover{
+  background:#f1f4ff;
+}
+.check-card.selected{
+  background:#eaf0ff;
+  border-color:#1f4fd8;
+  font-weight:bold;
+}
 
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:20px 10px; font-size:12px; margin-top:40px; }
+/* BOTÃO */
+button{
+  width:100%;
+  padding:16px;
+  background:#1f4fd8;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* RESULTADO */
+.resultado{
+  padding:16px;
+  border-radius:14px;
+  font-weight:bold;
+  margin-top:12px;
+  display:none;
+}
+.resultado-verde{background:#d4edda;color:#155724;}
+.resultado-amarelo{background:#fff3cd;color:#856404;}
+.resultado-laranja{background:#ffe5b4;color:#8a4b00;}
+.resultado-vermelho{background:#f8d7da;color:#721c24;}
+.selo{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:20px;
+  margin-bottom:10px;
+}
+
+/* FOOTER */
+footer{
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:18px 10px;
+  font-size:12px;
+  margin-top:30px;
+}
+
+/* MOBILE */
+@media(max-width:480px){
+  h1{font-size:18px;}
+  .header-title{font-size:16px;}
+}
 </style>
 </head>
 
@@ -59,7 +185,8 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:20px 10px; f
     <button onclick="history.back()">⬅️</button>
     <a href="./index.html">🏠</a>
   </div>
-  CheckInfra – Avaliação Sanitária
+  <div class="header-title">CheckInfra – Avaliação Sanitária</div>
+  <div></div>
 </div>
 
 <div class="container">
@@ -67,42 +194,49 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:20px 10px; f
 
 <form id="form-avaliacao">
 
-<div class="card">
-  <label>Escola</label>
-  <select id="escola" required>
-    <option value="">Selecione a escola</option>
-  </select>
-
-  <label style="margin-top:12px;">Avaliador</label>
-  <input type="text" id="avaliador" required>
-</div>
-
-<div class="card card-grande">
-  <h3>🏗️ Estrutura</h3>
-  <div class="checklist">
-    <div class="check-card" data-peso="3">Mofo ou umidade excessiva</div>
-    <div class="check-card" data-peso="2">Piso quebrado ou escorregadio</div>
-    <div class="check-card" data-peso="2">Infiltrações visíveis</div>
+  <!-- IDENTIFICAÇÃO -->
+  <div class="card identificacao">
+    <div class="mini-card">
+      <label>Escola</label>
+      <select id="escola" required>
+        <option value="">Selecione a escola</option>
+      </select>
+    </div>
+    <div class="mini-card">
+      <label>Avaliador</label>
+      <input type="text" id="avaliador" required>
+    </div>
   </div>
-</div>
 
-<div class="card card-grande">
-  <h3>🧹 Higiene</h3>
-  <div class="checklist">
-    <div class="check-card" data-peso="2">Limpeza inadequada</div>
-    <div class="check-card" data-peso="2">Mau cheiro persistente</div>
+  <!-- ESTRUTURA -->
+  <div class="card card-grande">
+    <h3>🏗️ Estrutura</h3>
+    <div class="checklist">
+      <div class="check-card" data-peso="3">Mofo ou umidade excessiva</div>
+      <div class="check-card" data-peso="2">Piso quebrado ou escorregadio</div>
+      <div class="check-card" data-peso="2">Infiltrações visíveis</div>
+    </div>
   </div>
-</div>
 
-<div class="card card-grande">
-  <h3>💡 Conforto</h3>
-  <div class="checklist">
-    <div class="check-card" data-peso="1">Iluminação insuficiente</div>
-    <div class="check-card" data-peso="1">Ventilação inadequada</div>
+  <!-- HIGIENE -->
+  <div class="card card-grande">
+    <h3>🧹 Higiene</h3>
+    <div class="checklist">
+      <div class="check-card" data-peso="2">Limpeza inadequada</div>
+      <div class="check-card" data-peso="2">Mau cheiro persistente</div>
+    </div>
   </div>
-</div>
 
-<button type="submit">Gerar Diagnóstico e PDF</button>
+  <!-- CONFORTO -->
+  <div class="card card-grande">
+    <h3>💡 Conforto</h3>
+    <div class="checklist">
+      <div class="check-card" data-peso="1">Iluminação insuficiente</div>
+      <div class="check-card" data-peso="1">Ventilação inadequada</div>
+    </div>
+  </div>
+
+  <button type="submit">Gerar Diagnóstico e PDF</button>
 </form>
 
 <div id="resultado" class="resultado"></div>
@@ -116,49 +250,56 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:20px 10px; f
 <script src="./mapa/escolas.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded", () => {
 
-const select=document.getElementById("escola");
-if(window.escolas){
-  window.escolas.forEach(e=>{
-    const o=document.createElement("option");
-    o.value=e.nome;
-    o.textContent=e.nome;
-    select.appendChild(o);
+  // Preenche escolas
+  const select = document.getElementById("escola");
+  if (window.escolas) {
+    window.escolas.forEach(e => {
+      const opt = document.createElement("option");
+      opt.value = e.nome;
+      opt.textContent = e.nome;
+      select.appendChild(opt);
+    });
+  }
+
+  // Seleção dos cards
+  document.querySelectorAll(".check-card").forEach(card => {
+    card.addEventListener("click", () => {
+      card.classList.toggle("selected");
+    });
   });
-}
 
-document.querySelectorAll(".check-card").forEach(c=>{
-  c.onclick=()=>c.classList.toggle("selected");
-});
+  // Submit
+  const form = document.getElementById("form-avaliacao");
+  const resultado = document.getElementById("resultado");
 
-document.getElementById("form-avaliacao").onsubmit=e=>{
-e.preventDefault();
+  form.addEventListener("submit", e => {
+    e.preventDefault();
 
-let pontuacao=0;
-document.querySelectorAll(".check-card.selected").forEach(c=>{
-  pontuacao+=parseInt(c.dataset.peso);
-});
+    let pontuacao = 0;
+    document.querySelectorAll(".check-card.selected").forEach(c => {
+      pontuacao += parseInt(c.dataset.peso || 0);
+    });
 
-let classe,icone,texto;
-if(pontuacao<=3){classe="verde";icone="🟢";texto="Condição adequada";}
-else if(pontuacao<=6){classe="amarelo";icone="🟡";texto="Situação de alerta";}
-else if(pontuacao<=8){classe="laranja";icone="🟠";texto="Atenção elevada";}
-else{classe="vermelho";icone="🔴";texto="Condição crítica";}
+    let classe, icone, texto;
+    if (pontuacao <= 3) { classe="verde"; icone="🟢"; texto="Condição adequada"; }
+    else if (pontuacao <= 6) { classe="amarelo"; icone="🟡"; texto="Situação de alerta"; }
+    else if (pontuacao <= 8) { classe="laranja"; icone="🟠"; texto="Atenção elevada"; }
+    else { classe="vermelho"; icone="🔴"; texto="Condição crítica"; }
 
-const r=document.getElementById("resultado");
-r.className=`resultado resultado-${classe}`;
-r.style.display="block";
-r.innerHTML=`
-  <div class="selo">${icone} ${texto}</div>
-  <strong>Escola:</strong> ${escola.value}<br>
-  <strong>Avaliador:</strong> ${avaliador.value}<br>
-  <strong>Pontuação:</strong> ${pontuacao}<br>
-  ${navigator.onLine?"☁️ Enviado":"📴 Salvo offline"}
-`;
+    resultado.className = `resultado resultado-${classe}`;
+    resultado.style.display = "block";
+    resultado.innerHTML = `
+      <div class="selo">${icone} ${texto}</div>
+      <strong>Escola:</strong> ${escola.value}<br>
+      <strong>Avaliador:</strong> ${avaliador.value}<br>
+      <strong>Pontuação:</strong> ${pontuacao}<br>
+      ${navigator.onLine ? "☁️ Enviado" : "📴 Salvo offline"}
+    `;
 
-setTimeout(()=>window.location.href="./index.html",4000);
-};
+    setTimeout(() => { window.location.href = "./index.html"; }, 4000);
+  });
 });
 </script>
 
