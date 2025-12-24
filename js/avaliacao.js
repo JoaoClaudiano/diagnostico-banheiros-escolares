@@ -42,112 +42,103 @@ async function gerarPDF(d) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-  const margin = 15;
+  const margin = 20;
   let y = margin;
 
-  // Logo proporcional
+  // Logo
   if(d.logo){
     const imgProps = pdf.getImageProperties(d.logo);
     const maxWidth = 40;
     const ratio = imgProps.width / imgProps.height;
-    const width = maxWidth;
-    const height = width / ratio;
-    pdf.addImage(d.logo,"PNG",(210-width)/2,y,width,height);
-    y += height + 5;
+    const logoWidth = Math.min(maxWidth, imgProps.width);
+    const logoHeight = logoWidth / ratio;
+    pdf.addImage(d.logo,"PNG",margin,y,logoWidth,logoHeight);
   }
 
-  // Título central
-  pdf.setFont("times","bold");
-  pdf.setFontSize(16);
+  // Título centralizado
+  y += 30;
+  pdf.setFont("Times","bold").setFontSize(16);
   pdf.text("CheckInfra",105,y,{align:"center"});
   y += 8;
-
-  pdf.setFontSize(12);
-  pdf.setFont("times","normal");
-  pdf.text(
-    "RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR",
-    105,y,{align:"center"}
-  );
+  pdf.setFont("Times","normal").setFontSize(14);
+  pdf.text("RELATÓRIO DE DIAGNÓSTICO DE INFRAESTRUTURA SANITÁRIA ESCOLAR",105,y,{align:"center"});
   y += 12;
 
-  // Data lateral direita em vermelho
-  const dataGeracao = new Date().toLocaleString();
-  pdf.setFontSize(9);
-  pdf.setTextColor(255,0,0);
-  pdf.text(`Gerado em: ${dataGeracao}`, 200, margin, {align:"right"});
+  // Data lateral
+  const dataPrint = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
+  pdf.setFontSize(9).setTextColor(255,0,0);
+  pdf.text(dataPrint, 200, margin, {align:"right", baseline:"top"});
   pdf.setTextColor(0,0,0);
 
-  // ---------------- CARD 1 — IDENTIFICAÇÃO ----------------
-  pdf.setFillColor(220,235,255); // azul clarinho
-  pdf.roundedRect(margin,y,180,30,5,5,"F");
-  pdf.setFont("times","bold"); pdf.setFontSize(12);
-  pdf.text("Identificação", margin+3, y+7);
-  pdf.setFont("times","normal"); pdf.setFontSize(10);
-  pdf.text(`Escola: ${d.escola}`, margin+3, y+15);
-  pdf.text(`Avaliador: ${d.avaliador}`, margin+3, y+22);
-  pdf.text(`ID: ${d.id}`, margin+3, y+29);
-  y += 35;
+  // CARD 1 — Identificação
+  pdf.setFillColor(240,240,240);
+  pdf.roundedRect(margin,y,170,35,4,4,"F");
+  pdf.setFont("Times","bold").setFontSize(14);
+  pdf.text("Identificação",margin+3,y+7);
+  pdf.setFont("Times","normal").setFontSize(12);
+  pdf.text(`Escola: ${d.escola}`,margin+3,y+15);
+  pdf.text(`Avaliador: ${d.avaliador}`,margin+3,y+22);
+  pdf.text(`ID: ${d.id} `,margin+3,y+29); // espaço extra no final
+  y += 40;
 
-  // ---------------- CARD 2 — PROBLEMAS APONTADOS ----------------
-  pdf.setFillColor(255,250,200); // amarelo suave
-  const alturaProblemas = Math.max(20, d.problemas.length * 7 + 10);
-  pdf.roundedRect(margin,y,180,alturaProblemas,5,5,"F");
-  pdf.setFont("times","bold"); pdf.setFontSize(12);
-  pdf.text("Problemas Apontados", margin+3, y+7);
-  pdf.setFont("times","normal"); pdf.setFontSize(10);
-  let yP = y+14;
+  // CARD 2 — Problemas apontados
+  pdf.setFillColor(240,240,240);
+  pdf.roundedRect(margin,y,170,d.problemas.length*7 + 15,4,4,"F");
+  pdf.setFont("Times","bold").setFontSize(14);
+  pdf.text("Problemas apontados",margin+3,y+7);
+  pdf.setFont("Times","normal").setFontSize(12);
+  let yP = y + 14;
   d.problemas.forEach(p=>{
-    pdf.text(`- ${p}`, margin+5, yP);
+    pdf.text(`- ${p}`,margin+5,yP);
     yP += 7;
   });
-  y += alturaProblemas + 5;
+  y = yP + 5;
 
-  // ---------------- CARD 3 — RESULTADO ----------------
-  let corResultado;
-  switch(d.classe){
-    case "ok": corResultado = [200,255,200]; break; // verde
-    case "alerta": corResultado = [255,245,200]; break; // amarelo
-    case "atencao": corResultado = [255,230,180]; break; // laranja
-    case "critico": corResultado = [255,200,200]; break; // vermelho
-    default: corResultado=[240,240,240];
-  }
-  pdf.setFillColor(...corResultado);
-  pdf.roundedRect(margin,y,180,30,5,5,"F");
-  pdf.setFont("times","bold"); pdf.setFontSize(12);
-  pdf.text("Resultado", margin+3, y+7);
-  pdf.setFont("times","normal"); pdf.setFontSize(10);
-  pdf.text(`Status: ${d.status} ${d.corBolinha}`, margin+3, y+15);
-  pdf.text(`Pontuação: ${d.pontuacao}`, margin+3, y+22);
+  // CARD 3 — Resultado
+  pdf.setFillColor(240,240,240);
+  pdf.roundedRect(margin,y,170,30,4,4,"F");
+  pdf.setFont("Times","bold").setFontSize(14);
+  pdf.text("Resultado",margin+3,y+7);
+  pdf.setFont("Times","normal").setFontSize(12);
+  pdf.text(`Pontuação: ${d.pontuacao}`,margin+3,y+15);
+  pdf.text(`Status: ${d.status} ${d.corBolinha}`,margin+3,y+22);
   y += 35;
 
-  // ---------------- CARD 4 — REGISTRO FOTOGRÁFICO ----------------
-  const alturaFotos = d.fotos.length ? 55*d.fotos.length : 20;
-  pdf.setFillColor(230,230,230); // cinza neutro
-  pdf.roundedRect(margin,y,180,alturaFotos,5,5,"F");
-  pdf.setFont("times","bold"); pdf.setFontSize(12);
-  pdf.text("Registro Fotográfico", margin+3, y+7);
-  pdf.setFont("times","normal"); pdf.setFontSize(10);
-  let yF = y + 14;
+  // CARD 4 — Registro fotográfico
+  pdf.setFillColor(240,240,240);
+  const cardAlturaFotos = d.fotos.length > 0 ? 60 : 25;
+  pdf.roundedRect(margin,y,170,cardAlturaFotos,4,4,"F");
+  pdf.setFont("Times","bold").setFontSize(14);
+  pdf.text("Registro fotográfico",margin+3,y+7);
+  y += 12;
   for(let i=0;i<d.fotos.length;i++){
+    const file = d.fotos[i];
     await new Promise(resolve=>{
-      const reader = new Image();
-      reader.src = d.fotos[i];
-      reader.onload = ()=>{
-        pdf.addImage(d.fotos[i],'JPEG',margin+3, yF, 50, 50);
-        yF += 55;
+      const reader = new FileReader();
+      reader.onload = e=>{
+        pdf.addImage(e.target.result,'JPEG',margin+5,y,50,50);
+        y+=55;
         resolve();
       };
+      reader.readAsDataURL(file);
     });
   }
-  y += alturaFotos + 5;
+  y += 5;
 
-  // ---------------- CARD 5 — AVISO LEGAL ----------------
-  pdf.setFillColor(245,245,245); // cinza claro
-  pdf.roundedRect(margin,y,180,15,5,5,"F");
-  pdf.setFont("times","bold"); pdf.setFontSize(10);
-  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.", margin+3, y+10);
+  // CARD 5 — Aviso legal
+  pdf.setFillColor(240,240,240);
+  pdf.roundedRect(margin,y,170,20,4,4,"F");
+  pdf.setFont("Times","normal").setFontSize(10);
+  pdf.text("Diagnóstico preliminar. Não substitui vistoria técnica presencial ou laudo de engenharia.",105,y+10,{align:"center"});
 
-  // Salvar PDF
+  // Numeração página
+  pdf.setFontSize(9).setFont("Times","normal");
+  const pageCount = pdf.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    pdf.setPage(i);
+    pdf.text(`Página ${i} de ${pageCount}`,105,290,{align:"center"});
+  }
+
   pdf.save(`CheckInfra-${d.id}.pdf`);
 }
 
@@ -208,14 +199,12 @@ document.addEventListener("DOMContentLoaded",()=>{
       status,
       classe,
       corBolinha,
-
       rt: 0,
       problemas,
       fotos: fotosBase64,
       logo: "./assets/logo-checkinfra.png"
     };
 
-    // Mostrar card diagnóstico
     resultado.style.display = "block";
     resultado.className = "resultado resultado-" + classe;
     resultado.innerHTML = `
@@ -237,17 +226,14 @@ document.addEventListener("DOMContentLoaded",()=>{
       salvarOffline(dados);
     }
 
-    // Gerar PDF
     await gerarPDF(dados);
 
-    // Reset formulário e preview
-    form.reset();
-    preview.innerHTML="";
-
-    // Redirecionamento automático após 4 segundos
+    // Redirecionamento automático após 4s
     setTimeout(() => {
       window.location.href = './index.html';
     }, 4000);
 
+    form.reset();
+    preview.innerHTML="";
   });
 });
