@@ -13,17 +13,24 @@ header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; ove
 header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
+
 .main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+
 .card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
 h2,h3{color:#1f4fd8;}
-p,li{line-height:1.6;font-size:14px;}
+p,li{line-height:1.6;font-size:14px; text-align:justify;}
 ul{padding-left:20px;}
 .badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
-.critica{background:#f44336}
-.atencao{background:#ff7043}
-.alerta{background:#fbc02d;color:#000}
-.adequada{background:#4caf50}
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100%; }
+footer {
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:16px 10px;
+  font-size:12px;
+  line-height:1.4;
+  box-sizing:border-box;
+  width:100%;
+}
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
 </style>
@@ -37,53 +44,55 @@ footer a { color:#fff; text-decoration:underline; }
 </header>
 
 <div class="main">
+
   <div class="card">
-    <h2>Intensidade Técnica (IT)</h2>
+    <h2>O que é a Intensidade Técnica (IT)?</h2>
     <p>
-      O componente <strong>IT</strong> representa a complexidade e extensão das não conformidades
-      observadas na infraestrutura escolar. Ele complementa o GS ao trazer uma medida quantitativa
-      da severidade técnica dos problemas.
+      A <strong>Intensidade Técnica</strong> reflete a gravidade técnica das não conformidades encontradas em cada escola. 
+      Diferente do GS, que considera o status global, o IT é derivado da soma ponderada das observações feitas em cada item do checklist.
+      Quanto maior o IT, maior a complexidade, extensão e severidade técnica dos problemas.
     </p>
   </div>
 
   <div class="card">
-    <h3>Cálculo do IT</h3>
+    <h3>Faixas de IT e Impacto</h3>
     <p>
-      Cada problema identificado no checklist recebe um peso proporcional à sua criticidade técnica. 
-      O IT é a soma ponderada dessas ocorrências:
+      O IT é calculado com base na pontuação de cada não conformidade, ponderando sua criticidade e extensão.
+      Por exemplo, problemas estruturais graves recebem mais peso que problemas menores de manutenção.
     </p>
-    <ul>
-      <li>Problema menor: peso 1</li>
-      <li>Problema médio: peso 2</li>
-      <li>Problema grave: peso 3</li>
-      <li>Problema crítico: peso 4</li>
-    </ul>
-    <p>
-      A pontuação final do IT é normalizada para manter consistência na fórmula do IPT.
-      Fórmula: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>
-    </p>
+    <table>
+      <thead>
+        <tr><th>IT</th><th>Intensidade</th><th>Descrição</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1-2</td><td>Baixa</td><td>Problemas menores de manutenção, risco mínimo</td></tr>
+        <tr><td>3-4</td><td>Média</td><td>Problemas que exigem reparos técnicos regulares</td></tr>
+        <tr><td>5-6</td><td>Alta</td><td>Problemas graves que podem comprometer o uso seguro da infraestrutura</td></tr>
+        <tr><td>7-8</td><td>Crítica</td><td>Problemas severos que requerem ação imediata de engenharia</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="card">
     <h3>Exemplo Prático</h3>
-    <p>Escola com problemas:</p>
     <ul>
-      <li>Vaso sanitário quebrado (médio) → 2 pts</li>
-      <li>Torneira vazando (menor) → 1 pt</li>
-      <li>Infiltração grave no teto → 3 pts</li>
+      <li>Escola A: IT = 2 → pequenas manutenções</li>
+      <li>Escola B: IT = 5 → reparos significativos necessários</li>
+      <li>Escola C: IT = 7 → reparos urgentes, risco à operação da escola</li>
     </ul>
-    <p>IT total = 2 + 1 + 3 = 6</p>
+    <p>O IT é usado na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>.</p>
   </div>
 
   <div class="card">
     <h3>Referências</h3>
     <ul>
-      <li>ISO 31000 – Gestão de riscos, 2018.</li>
-      <li>MCDA: Multi-Criteria Decision Analysis in Infrastructure, Belton & Stewart, 2002.</li>
-      <li>ABNT NBR 9050: Acessibilidade e segurança em edificações. 2020.</li>
-      <li>Exemplos de gestão de ativos públicos: Public Infrastructure Asset Management, McRae, 2019.</li>
+      <li>ABNT NBR 5674: Manutenção de edificações – requisitos para manutenção. 2012.</li>
+      <li>UNICEF. WASH in Schools: Good Practice. 2019.</li>
+      <li>MCDA aplicado à gestão de infraestrutura pública, Saaty 2008.</li>
+      <li>CheckInfra Documentation, 2025.</li>
     </ul>
   </div>
+
 </div>
 
 <footer>
@@ -91,7 +100,7 @@ footer a { color:#fff; text-decoration:underline; }
 </footer>
 
 <script>
-function toggleSidebar(){alert("Sidebar não implementada nesta página.");}
+function toggleSidebar(){ alert("Sidebar não implementada nesta página."); }
 </script>
 
 </body>
