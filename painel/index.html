@@ -68,8 +68,48 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
 /* FOOTER */
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 0; font-size:12px; line-height:1.4; width:100%; box-sizing:border-box; }
-footer div { width:100%; margin:0; }
+ footer {
+      background:#1f4fd8;
+      color:#fff;
+      text-align:center;
+      padding:16px 10px;
+      font-size:12px;
+      line-height:1.4;
+      box-sizing:border-box;
+    }
+
+    footer div {
+      max-width:600px;
+      margin:0 auto;
+    }
+
+    footer a {
+      color:#fff;
+      text-decoration:underline;
+    }
+
+    footer img {
+      max-width:90px;
+      width:40%;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 480px) {
+      footer div {
+        padding: 0 8px;
+      }
+      footer p {
+        font-size: 10px;
+      }
+      footer img {
+        width: 60%;
+      }
+      footer p[style*="display:flex"] {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+    }
 </style>
 </head>
 
@@ -171,10 +211,16 @@ function toggleSidebar(){
 
 <footer>
   <div>
-    <p style="margin:0 0 6px;">© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
-    <p style="margin:0 0 6px;">
-      <a href="./pages/sobre.html" style="color:#fff; text-decoration:underline;">Sobre</a> | 
-      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a>
+    <!-- Copyright -->
+    <p style="margin:0 0 6px; font-size:12px;">
+      © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
+    </p>
+    <!-- Links institucionais -->
+    <p style="margin:0 0 16px; font-size:12px;">
+      <a href="./pages/sobre.html">Sobre</a> | 
+      <a href="./pages/contato.html">Contato</a> | 
+      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
+      <a href="./pages/termos-de-uso.html">Termos de Uso</a>
     </p>
   </div>
 </footer>
