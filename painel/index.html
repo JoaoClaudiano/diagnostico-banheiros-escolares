@@ -12,33 +12,36 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; }
+body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden; }
 
 /* HEADER */
 header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; }
-header h1 { margin:0; font-size:22px; text-align:center; }
+header h1 { margin:0; font-size:22px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; transition:0.2s; }
 header button:hover { filter: brightness(0.9); }
-header button.voltar { left:20px; }
-header button.menu { right:20px; }
+header button.voltar { left:10px; }
+header button.menu { right:10px; }
 
 /* SIDEBAR */
-.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; }
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; z-index:1000; }
 .sidebar.open { right:0; }
-.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:space-between; align-items:center; }
-.sidebar h3 span { cursor:pointer; font-weight:bold; }
+.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:flex-end; align-items:center; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; font-size:20px; }
 .sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
 
-/* Remove faixa azul ao lado do sidebar */
-body::-webkit-scrollbar { width:8px; }
-body::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.2); border-radius:4px; }
-
 /* CONTEÚDO PRINCIPAL */
-.main { margin:20px auto; padding:0 20px; max-width:1100px; }
+.main { margin:20px auto; padding:0 20px; max-width:1200px; flex:1; box-sizing:border-box; }
 
 /* CARDS */
-.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; }
-.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
+.grid { display:grid; gap:16px; }
+@media(min-width:1024px){
+  .grid.kpi-grid { grid-template-columns: repeat(4, 1fr); }
+  .grid.charts-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media(max-width:1023px){
+  .grid.kpi-grid, .grid.charts-grid { grid-template-columns: 1fr; }
+}
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; transition:0.2s; }
 .kpi:hover { filter: brightness(0.97); }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
@@ -64,26 +67,27 @@ button:hover { filter: brightness(0.9); }
 .tab.active { background:#1f4fd8; color:#fff; }
 
 /* MODAL */
-.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:2000; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
 /* FOOTER */
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; width:100%; }
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 0; font-size:12px; line-height:1.4; width:100%; position:relative; bottom:0; }
 footer div { max-width:600px; margin:0 auto; }
+
 </style>
 </head>
 
 <body>
 
 <header>
-  <button class="voltar" onclick="history.back()">← Voltar</button>
+  <button class="voltar" onclick="history.back()">←</button>
   <h1>Painel Gerencial – CheckInfra</h1>
-  <button class="menu" onclick="toggleSidebar()">☰ Menu</button>
+  <button class="menu" onclick="toggleSidebar()">☰</button>
 </header>
 
 <div class="main">
 
-<div class="card grid">
+<div class="card grid kpi-grid">
   <div class="kpi">
     <h4>Unidades Críticas</h4>
     <strong id="kpiCritica">–</strong>
@@ -102,7 +106,7 @@ footer div { max-width:600px; margin:0 auto; }
   </div>
 </div>
 
-<div class="card grid">
+<div class="card grid charts-grid">
   <div>
     <h3>Status das Unidades</h3>
     <canvas id="graficoStatus"></canvas>
@@ -158,7 +162,7 @@ footer div { max-width:600px; margin:0 auto; }
 </div>
 
 <div class="sidebar" id="sidebar">
-  <h3>☰ Menu <span onclick="toggleSidebar()">×</span></h3>
+  <h3><span onclick="toggleSidebar()">×</span></h3>
   <a href="metodo.html">📘 Metodologia</a>
 </div>
 
