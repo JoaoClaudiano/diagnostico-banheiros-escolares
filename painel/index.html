@@ -1,59 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Painel — CheckInfra</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<title>Painel Gerencial – CheckInfra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#1f4fd8">
 
-<link rel="manifest" href="manifest.json">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{margin:0;font-family:Arial;background:#f4f6f8}
+body { font-family: Arial; background:#f4f6f8; margin:0; min-height:100vh; }
 header{
-  display:flex;align-items:center;justify-content:space-between;
-  background:#1f4fd8;color:#fff;padding:12px 16px;
+  background:#1f4fd8;
+  color:#fff;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
-header h1{margin:0;font-size:18px;text-align:center;flex:1}
+header h2{ margin:0; font-size:18px; text-align:center; flex:1; }
 header button{
-  background:none;border:none;color:#fff;font-size:22px;cursor:pointer
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
 }
-.container{padding:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.card{
-  background:#fff;border-radius:10px;padding:16px
+.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
+.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
+.kpi h4 { margin:0; font-size:14px; color:#555; }
+.kpi strong { font-size:28px; display:block; margin-top:6px; }
+.badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
+.adequada{background:#4caf50}
+.alerta{background:#fbc02d;color:#000}
+.atencao{background:#ff7043}
+.critica{background:#f44336}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px;border-bottom:1px solid #eee;text-align:center}
+th{text-align:left;background:#f4f6f8}
+
+.tabs{display:flex;gap:10px;margin-bottom:12px}
+.tab{padding:8px 16px;background:#e0e0e0;border-radius:6px;cursor:pointer}
+.tab.active{background:#1f4fd8;color:#fff}
+
+.sidebar{
+  position:fixed;
+  top:0;
+  right:-260px;
+  width:260px;
+  height:100%;
+  background:#fff;
+  box-shadow:-2px 0 10px rgba(0,0,0,.2);
+  padding:20px;
+  transition:.3s;
+  z-index:1000;
 }
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{
-  border-bottom:1px solid #ddd;
-  padding:8px;
+.sidebar.open{right:0}
+.sidebar h3{margin-top:0}
+.sidebar a{display:block;margin:12px 0;color:#1f4fd8;text-decoration:none}
+
+footer{
+  background:#1f4fd8;
+  color:#fff;
   text-align:center;
-}
-th{background:#f0f2f5}
-
-.badge{padding:4px 8px;border-radius:12px;color:#fff;font-size:12px}
-.Adequada{background:#4caf50}
-.Alerta{background:#fbc02d;color:#000}
-.Atenção{background:#ff7043}
-.Crítica{background:#f44336}
-
-canvas{max-height:300px}
-
-/* Sidebar */
-#sidebar{
-  position:fixed;top:0;right:-280px;
-  width:260px;height:100%;
-  background:#1f4fd8;color:#fff;
-  padding:16px;transition:.3s;z-index:1000
-}
-#sidebar.open{right:0}
-#sidebar a{color:#fff;text-decoration:none;display:block;margin:12px 0}
-#sidebar .close{
-  font-size:20px;text-align:right;cursor:pointer
+  padding:16px;
+  font-size:12px;
 }
 </style>
 </head>
@@ -62,143 +80,156 @@ canvas{max-height:300px}
 
 <header>
   <button onclick="history.back()">←</button>
-  <h1>Painel CheckInfra</h1>
+  <h2>Painel Gerencial – CheckInfra</h2>
   <button onclick="toggleSidebar()">☰</button>
 </header>
 
-<div id="sidebar">
-  <div class="close" onclick="toggleSidebar()">✕</div>
-  <a href="metodologia.html">📘 Metodologia IPT</a>
+<div class="sidebar" id="sidebar">
+  <button onclick="toggleSidebar()" style="float:right">✕</button>
+  <h3>Menu</h3>
+  <a href="metodo.html" target="_blank">📘 Metodologia IPT</a>
 </div>
 
-<div class="container">
-
-<div class="grid">
-  <div class="card">
-    <h3>Status das Unidades</h3>
-    <canvas id="graficoStatus"></canvas>
-  </div>
-  <div class="card">
-    <h3>Frequência de Problemas</h3>
-    <canvas id="graficoProblemas"></canvas>
-  </div>
+<div class="card grid">
+  <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
+  <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
+  <div class="kpi"><h4>IPT Médio</h4><strong id="kpiMedio">–</strong></div>
+  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
 </div>
 
-<div class="card">
-  <h3>Ranking por IPT</h3>
-  <table id="ranking">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Escola</th>
-        <th>Status</th>
-        <th>IPT</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<div class="card grid">
+  <div><h3>Status das Unidades</h3><canvas id="graficoStatus"></canvas></div>
+  <div><h3>Top Prioridades (IPT)</h3><canvas id="graficoIndice"></canvas></div>
+  <div><h3>Frequência de Problemas</h3><canvas id="graficoProblemas"></canvas></div>
 </div>
 
 <div class="card">
-  <h3>Histórico de Avaliações</h3>
-  <table id="historico">
-    <thead>
-      <tr>
-        <th>Escola</th>
-        <th>Status</th>
-        <th>IPT</th>
-        <th>Data</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+  <div class="tabs">
+    <div class="tab active" onclick="mostrarAba('ranking')">Ranking</div>
+    <div class="tab" onclick="mostrarAba('historico')">Histórico</div>
+  </div>
 
+  <div id="aba-ranking">
+    <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button><br><br>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>RT</th></tr>
+      </thead>
+      <tbody id="tabelaRanking"></tbody>
+    </table>
+  </div>
+
+  <div id="aba-historico" style="display:none">
+    <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button><br><br>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr>
+      </thead>
+      <tbody id="tabelaHistorico"></tbody>
+    </table>
+  </div>
 </div>
 
 <script>
-const firebaseConfig = {
-  /* MESMA CONFIGURAÇÃO QUE VOCÊ JÁ USA */
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+firebase.initializeApp({
+  apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain:"checkinfra-adf3c.firebaseapp.com",
+  projectId:"checkinfra-adf3c"
+});
+const db = firebase.firestore();
 
-function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("open");
+const tabelaRanking = document.getElementById("tabelaRanking");
+const tabelaHistorico = document.getElementById("tabelaHistorico");
+
+let rankingGlobal=[], rankingHistorico=[];
+
+function montar(dados){
+  const escolas = {};
+  const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
+  const problemasCount={};
+
+  dados.forEach(d=>{
+    const escola=d.escola||"Sem nome";
+    if(!escolas[escola]) escolas[escola]=[];
+    escolas[escola].push(d);
+  });
+
+  rankingGlobal=[]; rankingHistorico=[];
+
+  Object.keys(escolas).forEach(escola=>{
+    const avals=escolas[escola].sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
+    const atual=avals[0];
+    const RT=Math.min(avals.length,5);
+
+    let GS=1, classe="adequada";
+    const s=(atual.status||"").toLowerCase();
+    if(s.includes("crít")){GS=4;classe="critica";statusCount.critica++}
+    else if(s.includes("aten")){GS=3;classe="atencao";statusCount.atencao++}
+    else if(s.includes("alerta")){GS=2;classe="alerta";statusCount.alerta++}
+    else statusCount.adequada++;
+
+    const IT=Number(atual.pontuacao||0);
+
+    const IPT=(GS*4)+(IT*4)+(RT*2);
+
+    rankingGlobal.push({escola,classe,GS,IT,RT,IPT,data:atual.createdAt.seconds});
+    avals.forEach(a=>rankingHistorico.push({...rankingGlobal.at(-1)}));
+
+    (atual.problemas||[]).forEach(p=>problemasCount[p]=(problemasCount[p]||0)+1);
+  });
+
+  rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
+
+  tabelaRanking.innerHTML=rankingGlobal.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.escola}</td>
+      <td><span class="badge ${r.classe}">${r.classe}</span></td>
+      <td>${r.IPT}</td>
+      <td>${r.RT}</td>
+    </tr>`).join("");
+
+  tabelaHistorico.innerHTML=rankingHistorico.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.escola}</td>
+      <td><span class="badge ${r.classe}">${r.classe}</span></td>
+      <td>${r.IPT}</td>
+      <td>${new Date(r.data*1000).toLocaleDateString()}</td>
+    </tr>`).join("");
+
+  new Chart(graficoStatus,{type:"pie",
+    data:{labels:["Adequada","Alerta","Atenção","Crítica"],
+    datasets:[{data:Object.values(statusCount),
+    backgroundColor:["#4caf50","#fbc02d","#ff7043","#f44336"]}]}});
+
+  new Chart(graficoIndice,{type:"bar",
+    data:{labels:rankingGlobal.slice(0,10).map(r=>r.escola),
+    datasets:[{data:rankingGlobal.slice(0,10).map(r=>r.IPT),backgroundColor:"#1f4fd8"}]},
+    options:{indexAxis:"y",plugins:{legend:{display:false}}}});
+
+  new Chart(graficoProblemas,{type:"bar",
+    data:{labels:Object.keys(problemasCount),
+    datasets:[{data:Object.values(problemasCount),backgroundColor:"#ff9800"}]},
+    options:{indexAxis:"y",plugins:{legend:{display:false}}}});
 }
 
-const pesoGS=0.4, pesoIT=0.4, pesoRT=0.2;
-const mapaGS={Adequada:1,Alerta:2,Atenção:3,Crítica:4};
-
-db.ref("avaliacoes").once("value").then(snap=>{
-  const dados=Object.values(snap.val()||{});
-
-  const historicoBody=document.querySelector("#historico tbody");
-  const rankingBody=document.querySelector("#ranking tbody");
-
-  const porEscola={}, statusCount={}, problemasCount={};
-
-  dados.forEach(a=>{
-    const d=new Date(a.createdAt||Date.now());
-    historicoBody.innerHTML+=`
-      <tr>
-        <td>${a.escola}</td>
-        <td><span class="badge ${a.status}">${a.status}</span></td>
-        <td>${a.ipt||"-"}</td>
-        <td>${d.toLocaleDateString()}</td>
-      </tr>
-    `;
-
-    if(!porEscola[a.escola] || d > porEscola[a.escola].data){
-      porEscola[a.escola]={...a,data:d};
-    }
-
-    statusCount[a.status]=(statusCount[a.status]||0)+1;
-
-    (a.problemas||[]).forEach(p=>{
-      problemasCount[p]=(problemasCount[p]||0)+1;
-    });
-  });
-
-  const ranking=[];
-  Object.values(porEscola).forEach(e=>{
-    const gs=mapaGS[e.status]||1;
-    const it=e.pontuacao||0;
-
-    const recorrencia=dados.filter(d=>d.escola===e.escola && d.status===e.status).length;
-    const rt=Math.min(recorrencia,5);
-
-    const ipt=Math.round(gs*pesoGS + it*pesoIT + rt*pesoRT);
-
-    ranking.push({...e,ipt});
-  });
-
-  ranking.sort((a,b)=>b.ipt-a.ipt);
-
-  ranking.forEach((e,i)=>{
-    rankingBody.innerHTML+=`
-      <tr>
-        <td>${i+1}</td>
-        <td>${e.escola}</td>
-        <td><span class="badge ${e.status}">${e.status}</span></td>
-        <td>${e.ipt}</td>
-      </tr>
-    `;
-  });
-
-  new Chart(graficoStatus,{
-    type:"pie",
-    data:{labels:Object.keys(statusCount),
-      datasets:[{data:Object.values(statusCount)}]}
-  });
-
-  new Chart(graficoProblemas,{
-    type:"bar",
-    data:{labels:Object.keys(problemasCount),
-      datasets:[{data:Object.values(problemasCount)}]}
-  });
+db.collection("avaliacoes").get().then(snap=>{
+  const dados=[]; snap.forEach(d=>dados.push(d.data())); montar(dados);
 });
+
+function mostrarAba(a){
+  document.getElementById("aba-ranking").style.display=a==="ranking"?"block":"none";
+  document.getElementById("aba-historico").style.display=a==="historico"?"block":"none";
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  event.target.classList.add("active");
+}
+function toggleSidebar(){sidebar.classList.toggle("open")}
 </script>
+
+<footer>
+  © 2025 CheckInfra — Metodologia pública, transparente e auditável
+</footer>
 
 </body>
 </html>
