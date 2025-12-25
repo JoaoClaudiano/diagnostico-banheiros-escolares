@@ -4,7 +4,9 @@
 <meta charset="UTF-8" />
 <title>Painel Gerencial – CheckInfra</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#1f4fd8">
+
+<!-- Evita erro 404 do favicon -->
+<link rel="icon" href="data:,">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -44,13 +46,18 @@ footer{background:#1f4fd8;color:#fff;text-align:center;padding:16px 10px;font-si
   <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
   <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
   <div class="kpi"><h4>IPT Médio</h4><strong id="kpiMedio">–</strong></div>
-  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
+  <div class="kpi"><h4>Total de Unidades</h4><strong id="kpiTotal">–</strong></div>
 </div>
 
 <div class="card grid">
-  <div><h3>Status das Unidades</h3><canvas id="graficoStatus"></canvas></div>
-  <div><h3>Top Prioridades (IPT)</h3><canvas id="graficoIndice"></canvas></div>
-  <div><h3>Frequência de Problemas</h3><canvas id="graficoProblemas"></canvas></div>
+  <div>
+    <h3>Status das Unidades</h3>
+    <canvas id="graficoStatus"></canvas>
+  </div>
+  <div>
+    <h3>Top Prioridades (IPT)</h3>
+    <canvas id="graficoIndice"></canvas>
+  </div>
 </div>
 
 <div class="card">
@@ -64,9 +71,6 @@ footer{background:#1f4fd8;color:#fff;text-align:center;padding:16px 10px;font-si
         <th>#</th>
         <th>Escola</th>
         <th>Status</th>
-        <th>GS</th>
-        <th>IT</th>
-        <th>RT</th>
         <th>IPT</th>
       </tr>
     </thead>
@@ -107,8 +111,10 @@ function classe(status){
 
 async function carregar(){
   const snap=await db.collection("avaliacoes").get();
-  const porEscola={},freq={},problemas={};
+  const porEscola={},freq={};
+
   let soma=0,crit=0,aten=0;
+  let contAde=0,contAle=0,contAte=0,contCri=0;
 
   snap.forEach(doc=>{
     const d=doc.data();
@@ -125,11 +131,14 @@ async function carregar(){
     const ipt=(gs*0.4)+(it*0.4)+(rt*0.2);
 
     if(!porEscola[d.escola]||ipt>porEscola[d.escola].IPT){
-      porEscola[d.escola]={escola:d.escola,status:d.status,gs,it,rt,IPT:ipt};
+      porEscola[d.escola]={escola:d.escola,status:d.status,IPT:ipt};
     }
+
     soma+=ipt;
-    if(gs===4)crit++;
-    if(gs===3)aten++;
+    if(gs===4){crit++;contCri++;}
+    else if(gs===3){aten++;contAte++;}
+    else if(gs===2){contAle++;}
+    else{contAde++;}
   });
 
   rankingGlobal=Object.values(porEscola).sort((a,b)=>b.IPT-a.IPT);
@@ -137,7 +146,7 @@ async function carregar(){
   document.getElementById("kpiCritica").innerText=crit;
   document.getElementById("kpiAtencao").innerText=aten;
   document.getElementById("kpiMedio").innerText=(soma/historico.length).toFixed(2);
-  document.getElementById("kpiProblemas").innerText=rankingGlobal.length;
+  document.getElementById("kpiTotal").innerText=rankingGlobal.length;
 
   rankingGlobal.forEach((r,i)=>{
     tabela.innerHTML+=`
@@ -145,15 +154,32 @@ async function carregar(){
       <td>${i+1}</td>
       <td>${r.escola}</td>
       <td><span class="badge ${classe(r.status)}">${r.status}</span></td>
-      <td>${r.gs}</td>
-      <td>${r.it}</td>
-      <td>${r.rt}</td>
       <td>${r.IPT.toFixed(2)}</td>
     </tr>`;
   });
 
-  new Chart(graficoStatus,{type:"pie",data:{labels:["Adequada","Alerta","Atenção","Crítica"],datasets:[{data:[...rankingGlobal.reduce((a,r)=>{a[r.gs]=(a[r.gs]||0)+1;return a},{})].slice(1),backgroundColor:["#4caf50","yellow","#ff7043","#f44336"]}]}})
-  new Chart(graficoIndice,{type:"bar",data:{labels:rankingGlobal.slice(0,10).map(r=>r.escola),datasets:[{data:rankingGlobal.slice(0,10).map(r=>r.IPT),backgroundColor:"#1f4fd8"}]},options:{indexAxis:"y"}})
+  new Chart(graficoStatus,{
+    type:"pie",
+    data:{
+      labels:["Adequada","Alerta","Atenção","Crítica"],
+      datasets:[{
+        data:[contAde,contAle,contAte,contCri],
+        backgroundColor:["#4caf50","yellow","#ff7043","#f44336"]
+      }]
+    }
+  });
+
+  new Chart(graficoIndice,{
+    type:"bar",
+    data:{
+      labels:rankingGlobal.slice(0,10).map(r=>r.escola),
+      datasets:[{
+        data:rankingGlobal.slice(0,10).map(r=>r.IPT),
+        backgroundColor:"#1f4fd8"
+      }]
+    },
+    options:{indexAxis:"y"}
+  });
 }
 
 function exportarRanking(){
