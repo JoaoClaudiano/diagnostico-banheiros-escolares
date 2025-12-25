@@ -12,24 +12,24 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden; }
+/* RESET & BODY */
+html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
 
 /* HEADER */
-header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; }
+header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
 header h1 { margin:0; font-size:22px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; transition:0.2s; }
-header button:hover { filter: brightness(0.9); }
+header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
 
 /* SIDEBAR */
-.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; z-index:1000; }
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; z-index:1000; box-sizing:border-box; }
 .sidebar.open { right:0; }
 .sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:flex-end; align-items:center; }
 .sidebar h3 span { cursor:pointer; font-weight:bold; font-size:20px; }
 .sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
 
-/* CONTEÚDO PRINCIPAL */
+/* MAIN CONTENT */
 .main { margin:20px auto; padding:0 20px; max-width:1200px; flex:1; box-sizing:border-box; }
 
 /* CARDS */
@@ -42,8 +42,7 @@ header button.menu { right:10px; }
 @media(max-width:1023px){
   .grid.kpi-grid, .grid.charts-grid { grid-template-columns: 1fr; }
 }
-.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; transition:0.2s; }
-.kpi:hover { filter: brightness(0.97); }
+.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
 .info { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1f4fd8; color:#fff; font-size:12px; cursor:pointer; margin-left:6px; }
@@ -57,13 +56,11 @@ table { width:100%; border-collapse: collapse; font-size:14px; text-align:center
 th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; }
 
-button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; transition:0.2s; }
-button:hover { filter: brightness(0.9); }
+button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
 
-/* ABAS */
+/* TABS */
 .tabs { display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap; }
-.tab { padding:8px 16px; background:#e0e0e0; border-radius:6px; cursor:pointer; transition:0.2s; }
-.tab:hover { filter: brightness(0.95); }
+.tab { padding:8px 16px; background:#e0e0e0; border-radius:6px; cursor:pointer; }
 .tab.active { background:#1f4fd8; color:#fff; }
 
 /* MODAL */
@@ -71,9 +68,8 @@ button:hover { filter: brightness(0.9); }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
 /* FOOTER */
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 0; font-size:12px; line-height:1.4; width:100vw; position:relative; bottom:0; }
-footer div { max-width:none; margin:0 auto; }
-
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 0; font-size:12px; line-height:1.4; width:100%; box-sizing:border-box; }
+footer div { width:100%; margin:0; }
 </style>
 </head>
 
