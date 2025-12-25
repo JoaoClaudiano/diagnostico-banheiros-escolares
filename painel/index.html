@@ -207,13 +207,15 @@ async function carregarAvaliacoes(){
     const snapshot = await getDocs(collection(db,"avaliacoes"));
     const dados = snapshot.docs.map(doc=>{
       const d = doc.data();
+      if(!d.status) return null; // ignora registros sem status
       if(d.createdAt && d.createdAt.toDate) d.data_avaliacao = d.createdAt.toDate().toISOString().split("T")[0];
       else d.data_avaliacao = new Date().toISOString().split("T")[0];
       return d;
-    });
+    }).filter(Boolean); // remove nulls
     montar(dados);
   } catch(err){
     console.error("Erro ao carregar avaliações do Firebase:", err);
+    alert("Não foi possível carregar os dados. Verifique o console.");
   }
 }
 
@@ -268,7 +270,7 @@ function montar(dados){
 
   kpiCritica.innerText = critica;
   kpiAtencao.innerText = atencao;
-  kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
+  kpiMedio.innerText = dados.length>0?(somaIPT/dados.length).toFixed(2):"–";
   kpiProblemas.innerText = Object.keys(problemasCount).length;
 
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
