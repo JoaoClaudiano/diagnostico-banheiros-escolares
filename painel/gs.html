@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1f4fd8">
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
 header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
@@ -48,6 +51,8 @@ footer {
 }
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
+
+canvas { max-width:100%; height:auto; margin-top:10px; }
 </style>
 </head>
 
@@ -68,51 +73,27 @@ footer a { color:#fff; text-decoration:underline; }
 </div>
 
 <div class="main">
+
   <div class="card">
     <h2>Gravidade Sanitária (GS)</h2>
     <p>
-      O componente <strong>GS</strong> representa a severidade da infraestrutura escolar
-      em termos sanitários, conforme os critérios do checklist técnico do <strong>CheckInfra</strong>.
-      Ele é a base do IPT, refletindo problemas críticos que impactam diretamente a saúde e a segurança dos alunos.
+      O componente <strong>GS</strong> mede a severidade das condições sanitárias das escolas. Ele permite priorizar
+      aquelas que representam risco à saúde e segurança dos alunos. As escolas são classificadas em quatro faixas:
     </p>
-  </div>
-
-  <div class="card">
-    <h3>Faixas de GS e Impacto no IPT</h3>
-    <table>
-      <tr>
-        <th>Status</th>
-        <th>Valor GS</th>
-        <th>Impacto no IPT</th>
-      </tr>
-      <tr>
-        <td><span class="badge adequada">Adequada</span></td>
-        <td>1</td>
-        <td>Sem risco significativo, contribuição baixa no IPT</td>
-      </tr>
-      <tr>
-        <td><span class="badge alerta">Alerta</span></td>
-        <td>2</td>
-        <td>Problemas pontuais, atenção preventiva no IPT</td>
-      </tr>
-      <tr>
-        <td><span class="badge atencao">Atenção</span></td>
-        <td>3</td>
-        <td>Risco médio, aumento relevante no IPT</td>
-      </tr>
-      <tr>
-        <td><span class="badge critica">Crítica</span></td>
-        <td>4</td>
-        <td>Risco imediato à saúde, impacto máximo no IPT</td>
-      </tr>
-    </table>
+    <ul>
+      <li><span class="badge adequada">Adequada (GS = 1)</span> — Infraestrutura atende a padrões mínimos. Nenhum risco significativo detectado.</li>
+      <li><span class="badge alerta">Alerta (GS = 2)</span> — Pequenas não conformidades. Monitoramento recomendado.</li>
+      <li><span class="badge atencao">Atenção (GS = 3)</span> — Problemas significativos que afetam saúde ou uso. Intervenção planejada necessária.</li>
+      <li><span class="badge critica">Crítica (GS = 4)</span> — Problemas graves, risco imediato. Prioridade máxima para intervenção.</li>
+    </ul>
+    <p>
+      Avaliar as escolas com o GS ajuda a identificar rapidamente onde há riscos sanitários mais elevados e
+      permite orientar gestores sobre intervenções urgentes.
+    </p>
   </div>
 
   <div class="card">
     <h3>Exemplo Prático</h3>
-    <p>
-      Considerando três escolas avaliadas pelo CheckInfra:
-    </p>
     <ul>
       <li>Escola A: Adequada → GS = 1</li>
       <li>Escola B: Atenção → GS = 3</li>
@@ -120,17 +101,22 @@ footer a { color:#fff; text-decoration:underline; }
     </ul>
     <p>
       Na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>, 
-      o GS contribui diretamente para priorizar escolas com problemas sanitários graves.
+      o GS reflete o impacto imediato de problemas sanitários graves.
     </p>
   </div>
 
   <div class="card">
-    <h3>Mini Gráfico Comparativo</h3>
+    <h3>Distribuição das Escolas por Faixa (Gráfico)</h3>
+    <canvas id="graficoGS"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Mini Tabela Comparativa</h3>
     <table>
-      <tr><th>Escola</th><th>GS</th></tr>
-      <tr><td>Escola A</td><td style="background:#4caf50; color:#fff;">1</td></tr>
-      <tr><td>Escola B</td><td style="background:#ff7043; color:#fff;">3</td></tr>
-      <tr><td>Escola C</td><td style="background:#f44336; color:#fff;">4</td></tr>
+      <tr><th>Escola</th><th>GS</th><th>Status</th></tr>
+      <tr><td>Escola A</td><td>1</td><td><span class="badge adequada">Adequada</span></td></tr>
+      <tr><td>Escola B</td><td>3</td><td><span class="badge atencao">Atenção</span></td></tr>
+      <tr><td>Escola C</td><td>4</td><td><span class="badge critica">Crítica</span></td></tr>
     </table>
   </div>
 
@@ -139,7 +125,7 @@ footer a { color:#fff; text-decoration:underline; }
     <ul>
       <li>[1] ABNT NBR 9050: Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos. 2020.</li>
       <li>[2] WHO – Water, Sanitation and Hygiene in Schools. 2018.</li>
-      <li>[3] Saaty, T. L. Metodologias de avaliação multicritério (MCDA) aplicadas a ativos públicos. 2008.</li>
+      <li>[3] Saaty, T. L. Avaliação multicritério de ativos públicos. 2008.</li>
     </ul>
   </div>
 </div>
@@ -152,6 +138,21 @@ footer a { color:#fff; text-decoration:underline; }
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
 }
+
+// Gráfico GS
+const ctxGS = document.getElementById('graficoGS').getContext('2d');
+new Chart(ctxGS, {
+  type: 'pie',
+  data: {
+    labels: ['Adequada', 'Alerta', 'Atenção', 'Crítica'],
+    datasets: [{
+      label: 'Número de Escolas',
+      data: [12, 5, 7, 3], // Exemplo de distribuição
+      backgroundColor: ['#4caf50','#fbc02d','#ff7043','#f44336']
+    }]
+  },
+  options: { plugins: { legend: { position: 'bottom' } } }
+});
 </script>
 
 </body>
