@@ -14,13 +14,28 @@ header button { position:absolute; top:50%; transform:translateY(-50%); backgrou
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
 
-.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; z-index:1000; box-sizing:border-box; }
+.sidebar.open { right:0; }
+.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:flex-end; align-items:center; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; font-size:20px; }
+.sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
+
+.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; text-align:justify; }
 
 .card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
 h2,h3{color:#1f4fd8;}
-p,li{line-height:1.6;font-size:14px; text-align:justify;}
+p,li{line-height:1.6;font-size:14px;}
 ul{padding-left:20px;}
 .badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
+.critica{background:#f44336;}
+.atencao{background:#ff7043;}
+.alerta{background:#fbc02d;color:#000;}
+.adequada{background:#4caf50;}
+
+table { width:100%; border-collapse: collapse; margin-top:10px; }
+th, td { border:1px solid #ddd; padding:8px; text-align:center; font-size:14px; }
+th { background:#f4f6f8; }
+
 footer {
   background:#1f4fd8;
   color:#fff;
@@ -35,6 +50,7 @@ footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -43,56 +59,73 @@ footer a { color:#fff; text-decoration:underline; }
   <button class="menu" onclick="toggleSidebar()">☰</button>
 </header>
 
-<div class="main">
+<div class="sidebar" id="sidebar">
+  <h3><span onclick="toggleSidebar()">×</span></h3>
+  <a href="gs.html">GS – Gravidade Sanitária</a>
+  <a href="it.html">IT – Intensidade Técnica</a>
+  <a href="rt.html">RT – Recorrência Temporal</a>
+  <a href="metodo.html">Metodologia</a>
+</div>
 
+<div class="main">
   <div class="card">
-    <h2>O que é a Intensidade Técnica (IT)?</h2>
+    <h2>Intensidade Técnica (IT)</h2>
     <p>
-      A <strong>Intensidade Técnica</strong> reflete a gravidade técnica das não conformidades encontradas em cada escola. 
-      Diferente do GS, que considera o status global, o IT é derivado da soma ponderada das observações feitas em cada item do checklist.
-      Quanto maior o IT, maior a complexidade, extensão e severidade técnica dos problemas.
+      O componente <strong>IT</strong> do IPT reflete a complexidade e extensão das
+      não conformidades observadas durante a avaliação sanitária das escolas.
+      Diferente do GS, que é qualitativo, o IT é quantitativo e acumulativo.
     </p>
   </div>
 
   <div class="card">
-    <h3>Faixas de IT e Impacto</h3>
+    <h3>Como é calculado</h3>
     <p>
-      O IT é calculado com base na pontuação de cada não conformidade, ponderando sua criticidade e extensão.
-      Por exemplo, problemas estruturais graves recebem mais peso que problemas menores de manutenção.
+      O IT é obtido somando os pesos de todos os problemas detectados no checklist,
+      considerando sua severidade e impacto técnico. Cada problema recebe um valor numérico
+      proporcional ao risco que representa para saúde e segurança.
     </p>
-    <table>
-      <thead>
-        <tr><th>IT</th><th>Intensidade</th><th>Descrição</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>1-2</td><td>Baixa</td><td>Problemas menores de manutenção, risco mínimo</td></tr>
-        <tr><td>3-4</td><td>Média</td><td>Problemas que exigem reparos técnicos regulares</td></tr>
-        <tr><td>5-6</td><td>Alta</td><td>Problemas graves que podem comprometer o uso seguro da infraestrutura</td></tr>
-        <tr><td>7-8</td><td>Crítica</td><td>Problemas severos que requerem ação imediata de engenharia</td></tr>
-      </tbody>
-    </table>
+    <ul>
+      <li>Problema leve: 1 ponto</li>
+      <li>Problema moderado: 2 pontos</li>
+      <li>Problema grave: 3 pontos</li>
+      <li>Problema crítico: 4 pontos</li>
+    </ul>
   </div>
 
   <div class="card">
     <h3>Exemplo Prático</h3>
+    <p>
+      Supondo três escolas avaliadas:
+    </p>
     <ul>
-      <li>Escola A: IT = 2 → pequenas manutenções</li>
-      <li>Escola B: IT = 5 → reparos significativos necessários</li>
-      <li>Escola C: IT = 7 → reparos urgentes, risco à operação da escola</li>
+      <li>Escola A: 5 problemas leves → IT = 5</li>
+      <li>Escola B: 3 problemas moderados e 1 grave → IT = 3*2 + 3 = 9</li>
+      <li>Escola C: 2 problemas graves e 2 críticos → IT = 2*3 + 2*4 = 14</li>
     </ul>
-    <p>O IT é usado na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>.</p>
+    <p>
+      Na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>,
+      o IT permite diferenciar escolas com mesmo status mas diferentes cargas técnicas.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Mini Gráfico Comparativo</h3>
+    <table>
+      <tr><th>Escola</th><th>IT</th></tr>
+      <tr><td>Escola A</td><td style="background:#4caf50; color:#fff;">5</td></tr>
+      <tr><td>Escola B</td><td style="background:#ff7043; color:#fff;">9</td></tr>
+      <tr><td>Escola C</td><td style="background:#f44336; color:#fff;">14</td></tr>
+    </table>
   </div>
 
   <div class="card">
     <h3>Referências</h3>
     <ul>
-      <li>ABNT NBR 5674: Manutenção de edificações – requisitos para manutenção. 2012.</li>
-      <li>UNICEF. WASH in Schools: Good Practice. 2019.</li>
-      <li>MCDA aplicado à gestão de infraestrutura pública, Saaty 2008.</li>
-      <li>CheckInfra Documentation, 2025.</li>
+      <li>[1] ABNT NBR 9050: Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos. 2020.</li>
+      <li>[2] WHO – Water, Sanitation and Hygiene in Schools. 2018.</li>
+      <li>[3] Saaty, T. L. Avaliação multicritério de ativos públicos. 2008.</li>
     </ul>
   </div>
-
 </div>
 
 <footer>
@@ -100,7 +133,9 @@ footer a { color:#fff; text-decoration:underline; }
 </footer>
 
 <script>
-function toggleSidebar(){ alert("Sidebar não implementada nesta página."); }
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
 </script>
 
 </body>
