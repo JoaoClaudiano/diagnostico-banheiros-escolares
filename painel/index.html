@@ -8,27 +8,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
 body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; }
-
 /* HEADER */
 header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; }
 header h1 { margin:0; font-size:22px; text-align:center; }
 header button { position:absolute; left:20px; background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 
 /* SIDEBAR */
-.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-260px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s; z-index:10; }
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; }
 .sidebar.open { right:0; }
 .sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:space-between; align-items:center; }
 .sidebar h3 span { cursor:pointer; font-weight:bold; }
 .sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
-
-/* SIDEBAR TOGGLE */
-.toggle-sidebar { position:fixed; right:20px; top:20px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; z-index:11; }
 
 /* CONTEÚDO PRINCIPAL */
 .main { margin:20px auto; padding:0 20px; max-width:1100px; }
@@ -70,9 +65,8 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 <header>
   <button onclick="history.back()">← Voltar</button>
   <h1>Painel Gerencial – CheckInfra</h1>
+  <button style="position:absolute; right:20px;" onclick="toggleSidebar()">☰ Menu</button>
 </header>
-
-<button class="toggle-sidebar" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ Menu</button>
 
 <div class="main">
 
@@ -150,12 +144,17 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
   </div>
 </div>
 
-</div>
-
-<div class="sidebar">
-  <h3>☰ Menu <span onclick="document.querySelector('.sidebar').classList.remove('open')">×</span></h3>
+<div class="sidebar" id="sidebar">
+  <h3>☰ Menu <span onclick="toggleSidebar()">×</span></h3>
   <a href="metodo.html">📘 Metodologia</a>
 </div>
+
+<script src="./painel/painel.js"></script>
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+</script>
 
 <footer>
   <div style="max-width:600px; margin:0 auto;">
