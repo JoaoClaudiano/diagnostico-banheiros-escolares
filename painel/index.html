@@ -1,54 +1,43 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Painel Gerencial – CheckInfra</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1f4fd8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel • CheckInfra</title>
 
-<!-- Chart.js (NÃO MODULE) -->
+<!-- Firebase (compat – igual ao que funcionou) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<!-- Chart.js (VERSÃO CORRETA SEM MODULE) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-<!-- Firebase compat -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
 <style>
-* { box-sizing:border-box; }
-
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f4f6f8;
-  overflow-x:hidden;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:#f5f6f7;
+  color:#222;
 }
 
 /* HEADER */
 header{
-  background:#1f4fd8;
-  color:#fff;
-  padding:12px 14px;
-  display:flex;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
   align-items:center;
-  position:relative;
+  padding:12px 16px;
+  background:#0d3b66;
+  color:#fff;
 }
-
-header h1{
-  margin:0;
-  font-size:18px;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-}
-
+header h1{font-size:1.1rem;text-align:center}
 header button{
   background:none;
   border:none;
   color:#fff;
-  font-size:20px;
+  font-size:1.4rem;
   cursor:pointer;
 }
 
@@ -59,122 +48,56 @@ header button{
   right:-260px;
   width:260px;
   height:100%;
-  background:#fff;
-  box-shadow:-2px 0 6px rgba(0,0,0,.2);
+  background:#0d3b66;
   padding:20px;
   transition:.3s;
   z-index:1000;
 }
-
-.sidebar.open{ right:0; }
-
-.sidebar h3{ margin-top:0; }
-
+.sidebar.open{right:0}
 .sidebar a{
   display:block;
-  margin:10px 0;
-  color:#1f4fd8;
+  color:#fff;
   text-decoration:none;
-  font-weight:bold;
+  padding:12px 0;
+  font-weight:500;
 }
 
-/* CARDS */
-.card{
+/* MAIN */
+main{padding:16px}
+section{
   background:#fff;
-  max-width:1100px;
-  margin:16px auto;
   padding:16px;
-  border-radius:10px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:16px;
-}
-
-.kpi{
-  background:#f9fafb;
-  border-radius:10px;
-  padding:14px;
-  text-align:center;
-}
-
-.kpi strong{
-  font-size:30px;
-  display:block;
-  margin-top:6px;
-}
-
-.badge{
-  padding:4px 8px;
   border-radius:12px;
-  color:#fff;
-  font-size:12px;
+  margin-bottom:32px;
 }
 
-.adequada{ background:#4caf50; }
-.alerta{ background:yellow; color:#000; }
-.atencao{ background:#ff7043; }
-.critica{ background:#f44336; }
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-
-th,td{
-  padding:8px;
-  border-bottom:1px solid #eee;
-}
-
-th{ background:#f4f6f8; }
-
-.tabs{
+/* GRAFICOS */
+.graficos{
   display:flex;
-  gap:10px;
-  margin-bottom:12px;
+  flex-direction:column;
+  gap:32px;
 }
+canvas{width:100%!important;height:auto!important}
 
-.tab{
-  padding:8px 16px;
-  background:#e0e0e0;
+/* BOTOES */
+.btn{
+  padding:8px 12px;
+  border:none;
   border-radius:6px;
-  cursor:pointer;
-}
-
-.tab.active{
-  background:#1f4fd8;
+  background:#0d3b66;
   color:#fff;
+  cursor:pointer;
+  margin-top:8px;
 }
 
 /* FOOTER */
 footer{
-  background:#1f4fd8;
-  color:#fff;
   text-align:center;
-  padding:16px 10px;
-  font-size:12px;
+  font-size:.85rem;
+  padding:16px;
+  color:#555;
 }
-footer a{ color:#fff; text-decoration:underline; }
-
-/* MOBILE */
-@media(max-width:600px){
-  table thead{ display:none; }
-  table tr{
-    display:block;
-    margin-bottom:12px;
-    border:1px solid #eee;
-    border-radius:8px;
-    padding:10px;
-  }
-  table td{
-    display:block;
-    border:none;
-    padding:4px 0;
-  }
-}
+footer a{color:#0d3b66;text-decoration:none;margin:0 6px}
 </style>
 </head>
 
@@ -183,143 +106,142 @@ footer a{ color:#fff; text-decoration:underline; }
 <header>
   <button onclick="history.back()">←</button>
   <h1>Painel CheckInfra</h1>
-  <button onclick="toggleSidebar()">☰</button>
+  <button onclick="abrirSidebar()">☰</button>
 </header>
 
-<div class="sidebar" id="sidebar">
-  <h3>Documentação</h3>
-  <a href="./metodo.html" target="_blank">Metodologia</a>
-</div>
+<aside id="sidebar" class="sidebar">
+  <a href="metodo.html">Metodologia</a>
+</aside>
 
-<div class="card grid">
-  <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
-  <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
-  <div class="kpi"><h4>IPT Médio</h4><strong id="kpiMedio">–</strong></div>
-  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
-</div>
+<main>
 
-<div class="card grid">
-  <div><h3>Status</h3><canvas id="graficoStatus"></canvas></div>
-  <div><h3>Top IPT</h3><canvas id="graficoIndice"></canvas></div>
-  <div><h3>Problemas</h3><canvas id="graficoProblemas"></canvas></div>
-</div>
-
-<div class="card">
-  <div class="tabs">
-    <div class="tab active" onclick="mostrarAba('ranking')">Ranking</div>
-    <div class="tab" onclick="mostrarAba('historico')">Histórico</div>
+<section>
+  <h2>Ranking IPT</h2>
+  <button class="btn" onclick="exportarRankingXLSX()">Baixar XLSX</button>
+  <div class="graficos">
+    <canvas id="graficoRanking"></canvas>
   </div>
+</section>
 
-  <div id="aba-ranking">
-    <table>
-      <thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr></thead>
-      <tbody id="tabelaRanking"></tbody>
-    </table>
+<section>
+  <h2>Problemas mais recorrentes</h2>
+  <div class="graficos">
+    <canvas id="graficoProblemas"></canvas>
   </div>
+</section>
 
-  <div id="aba-historico" style="display:none;">
-    <table>
-      <thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr></thead>
-      <tbody id="tabelaHistorico"></tbody>
-    </table>
+<section>
+  <h2>Histórico de Avaliações</h2>
+  <button class="btn" onclick="exportarHistoricoXLSX()">Baixar XLSX</button>
+  <div class="graficos">
+    <canvas id="graficoHistorico"></canvas>
   </div>
-</div>
+</section>
+
+</main>
 
 <footer>
-  <p>© 2025 CheckInfra</p>
-  <p>
-    <a href="/pages/sobre.html">Sobre</a> |
-    <a href="/pages/contato.html">Contato</a> |
-    <a href="/pages/politica-privacidade.html">Privacidade</a> |
-    <a href="/pages/termos-de-uso.html">Termos</a>
-  </p>
+  <a href="/pages/sobre.html">Sobre</a> |
+  <a href="/pages/contato.html">Contato</a> |
+  <a href="/pages/termos.html">Termos</a>
 </footer>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-function toggleSidebar(){
+/* SIDEBAR */
+function abrirSidebar(){
   document.getElementById("sidebar").classList.toggle("open");
 }
 
-function mostrarAba(a){
-  document.getElementById("aba-ranking").style.display="none";
-  document.getElementById("aba-historico").style.display="none";
-  document.getElementById("aba-"+a).style.display="block";
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  event.target.classList.add("active");
-}
+/* FIREBASE */
+const firebaseConfig={
+  apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain:"checkinfra-adf3c.firebaseapp.com",
+  projectId:"checkinfra-adf3c"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
 
-async function carregar(){
-  const snap = await db.collection("avaliacoes").get();
-  const dados = [];
-  snap.forEach(d=>dados.push(d.data()));
-  montar(dados);
-}
+/* DADOS GLOBAIS */
+let dadosRanking=[];
+let dadosHistorico=[];
 
-function montar(dados){
-  const tabelaRanking=document.getElementById("tabelaRanking");
-  const tabelaHistorico=document.getElementById("tabelaHistorico");
-  tabelaRanking.innerHTML="";
-  tabelaHistorico.innerHTML="";
-
-  let critica=0, atencao=0, soma=0;
-  const statusCount=[0,0,0,0];
+/* CARREGAR */
+async function carregarAvaliacoes(){
+  const snap=await db.collection("avaliacoes").get();
   const problemas={};
 
-  dados.forEach((d,i)=>{
-    let classe="adequada",peso=1;
-    if(d.classe==="critico"){classe="critica";peso=4;critica++;statusCount[3]++;}
-    else if(d.classe==="atencao"){classe="atencao";peso=3;atencao++;statusCount[2]++;}
-    else if(d.classe==="alerta"){classe="alerta";peso=2;statusCount[1]++;}
-    else statusCount[0]++;
+  snap.forEach(doc=>{
+    const d=doc.data();
+    dadosHistorico.push(d);
+    dadosRanking.push({escola:d.escola,pontuacao:d.pontuacao});
 
-    const IPT=peso*0.4+(d.pontuacao||0)*0.4;
-    soma+=IPT;
-
-    tabelaRanking.innerHTML+=`
-      <tr><td>${i+1}</td><td>${d.escola}</td>
-      <td><span class="badge ${classe}">${d.status}</span></td>
-      <td>${IPT.toFixed(2)}</td></tr>`;
-
-    tabelaHistorico.innerHTML+=`
-      <tr><td>${i+1}</td><td>${d.escola}</td>
-      <td>${d.status}</td><td>${IPT.toFixed(2)}</td>
-      <td>${new Date().toLocaleDateString()}</td></tr>`;
-
-    (d.problemas||[]).forEach(p=>problemas[p]=(problemas[p]||0)+1);
+    (d.problemas||[]).forEach(p=>{
+      problemas[p]=(problemas[p]||0)+1;
+    });
   });
 
-  document.getElementById("kpiCritica").innerText=critica;
-  document.getElementById("kpiAtencao").innerText=atencao;
-  document.getElementById("kpiMedio").innerText=(soma/dados.length||0).toFixed(2);
-  document.getElementById("kpiProblemas").innerText=Object.keys(problemas).length;
+  montarRanking();
+  montarProblemas(problemas);
+  montarHistorico();
+}
 
-  new Chart(document.getElementById("graficoStatus"),{
-    type:"pie",
-    data:{labels:["Adequada","Alerta","Atenção","Crítica"],datasets:[{data:statusCount,backgroundColor:["#4caf50","yellow","#ff7043","#f44336"]}]}
-  });
-
-  new Chart(document.getElementById("graficoIndice"),{
+/* GRAFICOS */
+function montarRanking(){
+  dadosRanking.sort((a,b)=>b.pontuacao-a.pontuacao);
+  new Chart(graficoRanking,{
     type:"bar",
-    data:{labels:dados.map(d=>d.escola),datasets:[{data:dados.map(d=>d.pontuacao||0),backgroundColor:"#1f4fd8"}]}
-  });
-
-  new Chart(document.getElementById("graficoProblemas"),{
-    type:"bar",
-    data:{labels:Object.keys(problemas),datasets:[{data:Object.values(problemas),backgroundColor:"#ff9800"}]},
-    options:{indexAxis:"y"}
+    data:{
+      labels:dadosRanking.map(d=>d.escola),
+      datasets:[{data:dadosRanking.map(d=>d.pontuacao)}]
+    },
+    options:{
+      indexAxis:"y",
+      scales:{
+        y:{
+          ticks:{
+            callback:(v,i)=>dadosRanking[i].escola.slice(0,25)
+          }
+        }
+      }
+    }
   });
 }
 
-carregar();
+function montarProblemas(p){
+  new Chart(graficoProblemas,{
+    type:"bar",
+    data:{
+      labels:Object.keys(p),
+      datasets:[{data:Object.values(p)}]
+    }
+  });
+}
+
+function montarHistorico(){
+  new Chart(graficoHistorico,{
+    type:"line",
+    data:{
+      labels:dadosHistorico.map(d=>d.id),
+      datasets:[{data:dadosHistorico.map(d=>d.pontuacao)}]
+    }
+  });
+}
+
+/* XLSX */
+function exportarRankingXLSX(){
+  const ws=XLSX.utils.json_to_sheet(dadosRanking);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Ranking");
+  XLSX.writeFile(wb,"ranking.xlsx");
+}
+function exportarHistoricoXLSX(){
+  const ws=XLSX.utils.json_to_sheet(dadosHistorico);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Historico");
+  XLSX.writeFile(wb,"historico.xlsx");
+}
+
+carregarAvaliacoes();
 </script>
 
 </body>
