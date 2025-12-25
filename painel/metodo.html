@@ -8,26 +8,40 @@
 
 <style>
 html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
+
+/* HEADER */
 header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
 header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
+
+/* SIDEBAR */
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; z-index:1000; box-sizing:border-box; }
+.sidebar.open { right:0; }
+.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:flex-end; align-items:center; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; font-size:20px; }
+.sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
+
+/* MAIN CONTENT */
 .main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
-.card { background:#fff; margin:20px 0; padding:24px; border-radius:10px; box-sizing:border-box; text-align:justify; }
-h2,h3 { color:#1f4fd8; }
-p, li { line-height:1.6; font-size:14px; }
-ul { padding-left:20px; }
-.badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; color:#fff; }
+.card { background:#fff; margin:20px 0; padding:24px; border-radius:10px; box-sizing:border-box; }
+h2,h3{color:#1f4fd8;}
+p,li{line-height:1.6; font-size:14px; margin-bottom:10px;}
+ul{padding-left:20px;}
+.badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
 .critica{background:#f44336}
 .atencao{background:#ff7043}
 .alerta{background:#fbc02d;color:#000}
 .adequada{background:#4caf50}
+
+/* FOOTER */
 footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100%; }
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -35,6 +49,14 @@ footer a { color:#fff; text-decoration:underline; }
   <h1>Metodologia — CheckInfra</h1>
   <button class="menu" onclick="toggleSidebar()">☰</button>
 </header>
+
+<div class="sidebar" id="sidebar">
+  <h3><span onclick="toggleSidebar()">×</span></h3>
+  <a href="metodologia.html">Metodologia</a>
+  <a href="gs.html">GS — Gravidade Sanitária</a>
+  <a href="it.html">IT — Intensidade Técnica</a>
+  <a href="rt.html">RT — Recorrência Temporal</a>
+</div>
 
 <div class="main">
 
@@ -68,10 +90,12 @@ footer a { color:#fff; text-decoration:underline; }
     inspirado em práticas de engenharia diagnóstica, avaliação multicritério
     (MCDA) e gestão de ativos públicos.
   </p>
+
   <p><strong>Fórmula geral:</strong></p>
   <p style="font-size:16px;"><strong>
     IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)
   </strong></p>
+
   <ul>
     <li><strong>GS</strong> — Gravidade Sanitária</li>
     <li><strong>IT</strong> — Intensidade Técnica</li>
@@ -102,6 +126,7 @@ footer a { color:#fff; text-decoration:underline; }
     A Gravidade Sanitária é derivada do status final da avaliação,
     conforme os critérios do checklist técnico.
   </p>
+
   <ul>
     <li><span class="badge adequada">Adequada</span> → GS = 1</li>
     <li><span class="badge alerta">Alerta</span> → GS = 2</li>
@@ -128,10 +153,13 @@ footer a { color:#fff; text-decoration:underline; }
     O componente RT representa a <strong>persistência recorrente</strong>
     dos problemas ao longo do tempo.
   </p>
+  <p>
+    No modelo atual do CheckInfra, o RT é definido como:
+  </p>
   <ul>
-    <li>Quantidade de avaliações já registradas para a mesma escola.</li>
-    <li>Utilizada como proxy de reincidência estrutural.</li>
-    <li>Limitada por teto técnico para evitar distorções.</li>
+    <li>Quantidade de avaliações já registradas para a mesma escola</li>
+    <li>Utilizada como proxy de reincidência estrutural</li>
+    <li>Limitada por teto técnico para evitar distorções</li>
   </ul>
   <p>
     Esse fator permite identificar problemas crônicos, independentemente
@@ -145,10 +173,10 @@ footer a { color:#fff; text-decoration:underline; }
     Para fins de leitura executiva, o painel:
   </p>
   <ul>
-    <li>Exibe apenas <strong>uma linha por escola</strong>.</li>
-    <li>Considera sempre a <strong>avaliação mais recente</strong>.</li>
-    <li>Recalcula o IPT dinamicamente.</li>
-    <li>Preserva todo o histórico para consulta.</li>
+    <li>Exibe apenas <strong>uma linha por escola</strong></li>
+    <li>Considera sempre a <strong>avaliação mais recente</strong></li>
+    <li>Recalcula o IPT dinamicamente</li>
+    <li>Preserva todo o histórico para consulta</li>
   </ul>
 </div>
 
@@ -164,17 +192,13 @@ footer a { color:#fff; text-decoration:underline; }
 </div>
 
 <footer>
-  <div>
-    © 2026 CheckInfra — Metodologia pública, transparente e auditável | 
-    <a href="/pages/sobre.html">Sobre</a> | 
-    <a href="/pages/contato.html">Contato</a> | 
-    <a href="/pages/politica-privacidade.html">Política de Privacidade</a> | 
-    <a href="/pages/termos-de-uso.html">Termos de Uso</a>
-  </div>
+  <div>© 2025 CheckInfra — Metodologia pública, transparente e auditável</div>
 </footer>
 
 <script>
-function toggleSidebar(){alert("Sidebar não implementada nesta página.");}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
 </script>
 
 </body>
