@@ -6,66 +6,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1f4fd8">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  padding:20px;
-  text-align: justify;
-}
-.card{
-  background:#fff;
-  max-width:1000px;
-  margin:20px auto;
-  padding:24px;
-  border-radius:10px;
-}
-h2,h3{
-  color:#1f4fd8;
-}
-p,li{
-  line-height:1.6;
-  font-size:14px;
-}
-ul{
-  padding-left:20px;
-}
-.badge{
-  display:inline-block;
-  padding:4px 10px;
-  border-radius:12px;
-  font-size:12px;
-  color:#fff;
-}
+html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
+header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
+header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
+header button.voltar { left:10px; }
+header button.menu { right:10px; }
+.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+.card { background:#fff; margin:20px 0; padding:24px; border-radius:10px; box-sizing:border-box; text-align:justify; }
+h2,h3 { color:#1f4fd8; }
+p, li { line-height:1.6; font-size:14px; }
+ul { padding-left:20px; }
+.badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; color:#fff; }
 .critica{background:#f44336}
 .atencao{background:#ff7043}
 .alerta{background:#fbc02d;color:#000}
 .adequada{background:#4caf50}
-footer{
-  text-align:center;
-  font-size:12px;
-  color:#fff;
-  background:#1f4fd8;
-  padding:16px;
-  margin-top:40px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  margin-top: 10px;
-}
-table, th, td { border: 1px solid #ccc; }
-th, td { padding: 6px; text-align: center; }
-th { background: #1f4fd8; color: #fff; }
-.chart-container { width: 100%; max-width: 400px; margin: 10px auto; }
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100%; }
+footer div { max-width:600px; margin:0 auto; }
+footer a { color:#fff; text-decoration:underline; }
 </style>
 </head>
-
 <body>
+
+<header>
+  <button class="voltar" onclick="history.back()">← Voltar</button>
+  <h1>Metodologia — CheckInfra</h1>
+  <button class="menu" onclick="toggleSidebar()">☰</button>
+</header>
+
+<div class="main">
 
 <div class="card">
   <h2>📘 Metodologia — Índice de Prioridade Técnica (IPT)</h2>
@@ -97,12 +68,10 @@ th { background: #1f4fd8; color: #fff; }
     inspirado em práticas de engenharia diagnóstica, avaliação multicritério
     (MCDA) e gestão de ativos públicos.
   </p>
-
   <p><strong>Fórmula geral:</strong></p>
   <p style="font-size:16px;"><strong>
     IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)
   </strong></p>
-
   <ul>
     <li><strong>GS</strong> — Gravidade Sanitária</li>
     <li><strong>IT</strong> — Intensidade Técnica</li>
@@ -111,109 +80,80 @@ th { background: #1f4fd8; color: #fff; }
 </div>
 
 <div class="card">
-  <h3>2a. Intervalos do IPT</h3>
+  <h3>3. Faixas e interpretação do IPT</h3>
   <p>
-    O IPT varia em uma escala de <strong>1 a 4</strong>, onde cada faixa indica o nível médio de urgência técnica da escola:
+    O IPT assume valores entre 1 e 4, onde cada faixa representa a urgência técnica da escola:
   </p>
   <ul>
-    <li><strong>IPT ≤ 1,5</strong>: Baixa prioridade – a escola apresenta condições adequadas ou pequenas não conformidades.</li>
-    <li><strong>IPT 1,5 – 2,5</strong>: Prioridade moderada – problemas que devem ser monitorados e corrigidos em médio prazo.</li>
-    <li><strong>IPT 2,5 – 3,5</strong>: Prioridade alta – problemas significativos requerem intervenção rápida.</li>
-    <li><strong>IPT > 3,5</strong>: Prioridade crítica – risco imediato à saúde ou segurança; ação corretiva urgente necessária.</li>
+    <li><strong>IPT 1,0 – 1,5:</strong> Infraestrutura adequada, problemas mínimos. Intervenção não prioritária.</li>
+    <li><strong>IPT 1,6 – 2,5:</strong> Atenção moderada, presença de pequenas não conformidades que devem ser monitoradas.</li>
+    <li><strong>IPT 2,6 – 3,5:</strong> Problemas significativos, risco médio à segurança e saúde. Intervenção planejada e priorizada.</li>
+    <li><strong>IPT 3,6 – 4,0:</strong> Crítico, risco alto. Intervenção imediata necessária.</li>
   </ul>
-  <div class="chart-container">
-    <canvas id="graficoIPT"></canvas>
-  </div>
-  <script>
-    const ctxIPT = document.getElementById('graficoIPT').getContext('2d');
-    new Chart(ctxIPT, {
-      type: 'bar',
-      data: {
-        labels: ['Baixa', 'Moderada', 'Alta', 'Crítica'],
-        datasets: [{
-          label: 'Faixa IPT',
-          data: [1.5, 2.5, 3, 4],
-          backgroundColor: ['#4caf50','#fbc02d','#ff7043','#f44336']
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        indexAxis: 'y',
-        scales: {
-          x: { min: 0, max: 4 }
-        }
-      }
-    });
-  </script>
+  <p>
+    Essa faixa permite aos gestores identificar escolas com diferentes níveis de prioridade,
+    e comparar a situação geral da rede escolar. IPT médio da rede indica estado geral de urgência.
+  </p>
 </div>
 
 <div class="card">
-  <h3>3. Gravidade Sanitária (GS)</h3>
+  <h3>4. Gravidade Sanitária (GS)</h3>
   <p>
     A Gravidade Sanitária é derivada do status final da avaliação,
-    conforme os critérios do checklist técnico. Reflete a gravidade de problemas críticos que impactam diretamente a saúde e segurança dos alunos.
+    conforme os critérios do checklist técnico.
   </p>
-
   <ul>
     <li><span class="badge adequada">Adequada</span> → GS = 1</li>
     <li><span class="badge alerta">Alerta</span> → GS = 2</li>
     <li><span class="badge atencao">Atenção</span> → GS = 3</li>
     <li><span class="badge critica">Crítica</span> → GS = 4</li>
   </ul>
-  <p>
-    Exemplo: Se uma escola possui torneiras vazando e alguns vasos sanitários quebrados, pode receber GS = 3 (Atenção). Este valor aumenta o IPT, sinalizando a necessidade de ação técnica.
-  </p>
-  <table>
-    <tr>
-      <th>GS</th><th>Significado</th><th>Impacto no IPT</th>
-    </tr>
-    <tr><td>1</td><td>Adequada</td><td>Baixo</td></tr>
-    <tr><td>2</td><td>Alerta</td><td>Médio-baixo</td></tr>
-    <tr><td>3</td><td>Atenção</td><td>Médio-alto</td></tr>
-    <tr><td>4</td><td>Crítica</td><td>Alto</td></tr>
-  </table>
 </div>
 
 <div class="card">
-  <h3>4. Intensidade Técnica (IT)</h3>
+  <h3>5. Intensidade Técnica (IT)</h3>
   <p>
     A Intensidade Técnica corresponde à pontuação total obtida na avaliação,
     calculada a partir da soma ponderada dos problemas identificados no checklist.
-    Quanto maior a severidade e quantidade de não conformidades, maior o valor do IT.
+  </p>
+  <p>
+    Esse componente reflete a <strong>complexidade, extensão e severidade técnica</strong>
+    das não conformidades observadas.
   </p>
 </div>
 
 <div class="card">
-  <h3>5. Recorrência Temporal (RT)</h3>
+  <h3>6. Recorrência Temporal (RT)</h3>
   <p>
     O componente RT representa a <strong>persistência recorrente</strong>
     dos problemas ao longo do tempo.
   </p>
   <ul>
-    <li>Quantidade de avaliações já registradas para a mesma escola</li>
-    <li>Utilizada como proxy de reincidência estrutural</li>
-    <li>Limitada por teto técnico para evitar distorções</li>
+    <li>Quantidade de avaliações já registradas para a mesma escola.</li>
+    <li>Utilizada como proxy de reincidência estrutural.</li>
+    <li>Limitada por teto técnico para evitar distorções.</li>
   </ul>
   <p>
-    Esse fator permite identificar problemas crônicos, mesmo que a pontuação em uma avaliação isolada seja baixa.
+    Esse fator permite identificar problemas crônicos, independentemente
+    de variações pontuais entre avaliadores.
   </p>
 </div>
 
 <div class="card">
-  <h3>6. Consolidação e Ranking</h3>
+  <h3>7. Consolidação e Ranking</h3>
   <p>
     Para fins de leitura executiva, o painel:
   </p>
   <ul>
-    <li>Exibe apenas <strong>uma linha por escola</strong></li>
-    <li>Considera sempre a <strong>avaliação mais recente</strong></li>
-    <li>Recalcula o IPT dinamicamente</li>
-    <li>Preserva todo o histórico para consulta</li>
+    <li>Exibe apenas <strong>uma linha por escola</strong>.</li>
+    <li>Considera sempre a <strong>avaliação mais recente</strong>.</li>
+    <li>Recalcula o IPT dinamicamente.</li>
+    <li>Preserva todo o histórico para consulta.</li>
   </ul>
 </div>
 
 <div class="card">
-  <h3>7. Aviso Técnico</h3>
+  <h3>8. Aviso Técnico</h3>
   <p>
     O CheckInfra não substitui inspeções presenciais, laudos técnicos ou
     projetos de engenharia. Trata-se de uma ferramenta de apoio à gestão,
@@ -221,9 +161,21 @@ th { background: #1f4fd8; color: #fff; }
   </p>
 </div>
 
-<div class="footer">
-  © 2025 CheckInfra — Metodologia pública, transparente e auditável
 </div>
+
+<footer>
+  <div>
+    © 2026 CheckInfra — Metodologia pública, transparente e auditável | 
+    <a href="/pages/sobre.html">Sobre</a> | 
+    <a href="/pages/contato.html">Contato</a> | 
+    <a href="/pages/politica-privacidade.html">Política de Privacidade</a> | 
+    <a href="/pages/termos-de-uso.html">Termos de Uso</a>
+  </div>
+</footer>
+
+<script>
+function toggleSidebar(){alert("Sidebar não implementada nesta página.");}
+</script>
 
 </body>
 </html>
