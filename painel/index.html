@@ -14,196 +14,203 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0;min-height:100vh}
-.card{background:#fff;max-width:1100px;margin:20px auto;padding:20px;border-radius:10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
-.kpi{background:#f9fafb;border-radius:10px;padding:16px;text-align:center}
-.kpi h4{margin:0;font-size:14px;color:#555}
-.kpi strong{font-size:30px;display:block;margin-top:6px}
-.info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#1f4fd8;color:#fff;font-size:12px;cursor:pointer;margin-left:6px}
-.badge{padding:4px 8px;border-radius:12px;color:#fff;font-size:12px}
-.adequada{background:#4caf50}
-.alerta{background:yellow;color:#000}
-.atencao{background:#ff7043}
-.critica{background:#f44336}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:8px;border-bottom:1px solid #eee;text-align:center}
-th{background:#f4f6f8}
-button{padding:10px 14px;background:#1f4fd8;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-right:8px}
-.tabs{display:flex;gap:10px;margin-bottom:12px}
-.tab{padding:8px 16px;background:#e0e0e0;border-radius:6px;cursor:pointer}
-.tab.active{background:#1f4fd8;color:#fff}
+* { box-sizing: border-box; }
 
-/* HEADER */
-.header{
-  background:#1f4fd8;
-  color:#fff;
+body {
+  margin:0;
+  font-family: Arial;
+  background:#f4f6f8;
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 16px;
 }
-.header h2{margin:0;font-size:18px;text-align:center;flex:1}
-.header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
 
 /* SIDEBAR */
-.sidebar{
-  position:fixed;
-  top:0;
-  right:-260px;
-  width:260px;
-  height:100%;
-  background:#fff;
-  box-shadow:-2px 0 8px rgba(0,0,0,.2);
+.sidebar {
+  width:240px;
+  background:#1f4fd8;
+  color:#fff;
   padding:20px;
-  transition:.3s;
-  z-index:1000
+  position:fixed;
+  right:0;
+  top:0;
+  bottom:0;
 }
-.sidebar.active{right:0}
-.sidebar h3{margin-top:0;color:#1f4fd8}
-.sidebar a{display:block;margin:10px 0;color:#1f4fd8;text-decoration:none;font-weight:bold}
 
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
-.modal-content{background:#fff;padding:20px;border-radius:10px;max-width:500px}
+.sidebar h3 {
+  margin-top:0;
+  font-size:18px;
+}
 
-footer{background:#1f4fd8;color:#fff;text-align:center;padding:16px;font-size:12px}
+.sidebar a {
+  display:block;
+  color:#fff;
+  text-decoration:none;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.2);
+}
+
+/* CONTEÚDO */
+.main {
+  margin-right:240px;
+  width:calc(100% - 240px);
+  padding:20px;
+}
+
+/* CARDS */
+.card {
+  background:#fff;
+  max-width:1100px;
+  margin:20px auto;
+  padding:20px;
+  border-radius:10px;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap:16px;
+}
+
+.kpi {
+  background:#f9fafb;
+  border-radius:10px;
+  padding:16px;
+  text-align:center;
+}
+
+.kpi h4 { margin:0; font-size:14px; color:#555; }
+.kpi strong { font-size:30px; display:block; margin-top:6px; }
+
+.badge {
+  padding:4px 8px;
+  border-radius:12px;
+  color:#fff;
+  font-size:12px;
+}
+.adequada { background:#4caf50; }
+.alerta { background:yellow; color:#000; }
+.atencao { background:#ff7043; }
+.critica { background:#f44336; }
+
+table {
+  width:100%;
+  border-collapse: collapse;
+  font-size:14px;
+}
+
+th, td {
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
+
+th {
+  background:#f4f6f8;
+}
+
+button {
+  padding:10px 14px;
+  background:#1f4fd8;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin-right:8px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <button onclick="history.back()">⬅️</button>
-  <h2>Painel Gerencial – CheckInfra</h2>
-  <button onclick="toggleSidebar()">☰</button>
-</div>
-
 <!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-  <h3>Menu</h3>
-  <a href="#" onclick="mostrarAba('ranking');toggleSidebar()">Ranking</a>
-  <a href="#" onclick="mostrarAba('historico');toggleSidebar()">Histórico</a>
-  <a href="#" onclick="mostrarAba('metodologia');toggleSidebar()">Metodologia</a>
+<div class="sidebar">
+  <h3>☰ Menu</h3>
+  <a href="metodo.html">📘 Metodologia</a>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="main">
+
+<div class="card">
+  <h2>Painel Gerencial – CheckInfra</h2>
+  <small>Síntese executiva e priorização técnica</small>
 </div>
 
 <div class="card grid">
-  <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
-  <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
-  <div class="kpi"><h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4><strong id="kpiMedio">–</strong></div>
-  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
+  <div class="kpi"><h4>Críticas</h4><strong id="kpiCritica">–</strong></div>
+  <div class="kpi"><h4>Atenção</h4><strong id="kpiAtencao">–</strong></div>
+  <div class="kpi"><h4>IPT Médio</h4><strong id="kpiMedio">–</strong></div>
+  <div class="kpi"><h4>Problemas</h4><strong id="kpiProblemas">–</strong></div>
 </div>
 
 <div class="card grid">
-  <div><h3>Status das Unidades</h3><canvas id="graficoStatus"></canvas></div>
-  <div><h3>Top Prioridades (IPT)</h3><canvas id="graficoIndice"></canvas></div>
-  <div><h3>Frequência de Problemas</h3><canvas id="graficoProblemas"></canvas></div>
+  <div><h3>Status</h3><canvas id="graficoStatus"></canvas></div>
+  <div><h3>Top IPT</h3><canvas id="graficoIndice"></canvas></div>
+  <div><h3>Problemas</h3><canvas id="graficoProblemas"></canvas></div>
 </div>
 
 <div class="card">
-  <div class="tabs">
-    <div class="tab active" onclick="mostrarAba('ranking')">Ranking</div>
-    <div class="tab" onclick="mostrarAba('historico')">Histórico</div>
-    <div class="tab" onclick="mostrarAba('metodologia')">Metodologia</div>
-  </div>
-
-  <div id="aba-ranking">
-    <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button>
-    <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
-    <table>
-      <thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>RT</th></tr></thead>
-      <tbody id="tabelaRanking"></tbody>
-    </table>
-  </div>
-
-  <div id="aba-historico" style="display:none">
-    <table>
-      <thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr></thead>
-      <tbody id="tabelaHistorico"></tbody>
-    </table>
-  </div>
-
-  <div id="aba-metodologia" style="display:none">
-    <iframe src="metodo.html" style="width:100%;height:500px;border:none"></iframe>
-  </div>
+  <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button>
+  <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
+  <br><br>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>RT</th></tr>
+    </thead>
+    <tbody id="tabelaRanking"></tbody>
+  </table>
 </div>
 
-<div class="modal" id="modalIPT" onclick="fecharModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <h3>IPT Médio</h3>
-    <p>Expressa o grau médio de urgência técnica da rede escolar.</p>
-    <button onclick="fecharModal()">Fechar</button>
-  </div>
 </div>
 
 <script>
 firebase.initializeApp({
-  apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain:"checkinfra-adf3c.firebaseapp.com",
-  projectId:"checkinfra-adf3c"
+  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain: "checkinfra-adf3c.firebaseapp.com",
+  projectId: "checkinfra-adf3c"
 });
-const db=firebase.firestore();
 
-const tabelaRanking=document.getElementById("tabelaRanking");
-const tabelaHistorico=document.getElementById("tabelaHistorico");
+const db = firebase.firestore();
+const tabelaRanking = document.getElementById("tabelaRanking");
 
-function montar(dados){
-  const escolasMap={},statusCount={adequada:0,alerta:0,atencao:0,critica:0};
-  const problemasCount={};
-  let somaIPT=0,crit=0,aten=0;
+let rankingGlobal = [];
 
-  dados.forEach(d=>{
-    const status=(d.status||"").toLowerCase();
-    let GS=1,classe="adequada";
-    if(status.includes("crít")){GS=4;classe="critica";crit++;statusCount.critica++}
-    else if(status.includes("aten")){GS=3;classe="atencao";aten++;statusCount.atencao++}
-    else if(status.includes("alert")){GS=2;classe="alerta";statusCount.alerta++}
-    else statusCount.adequada++;
+window.exportarXLSX = function(){
+  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Ranking");
+  XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
+};
 
-    const IT=Number(d.pontuacao||0);
-    const RT=Math.min(dados.filter(x=>x.escola===d.escola).length,4);
-    const IPT=(GS*0.4)+(IT*0.4)+(RT*0.2);
-    somaIPT+=IPT;
-
-    if(d.problemas) d.problemas.forEach(p=>problemasCount[p]=(problemasCount[p]||0)+1);
-
-    const data=d.createdAt?.seconds?new Date(d.createdAt.seconds*1000).toISOString().split("T")[0]:new Date().toISOString().split("T")[0];
-
-    const reg={escola:d.escola,classe,statusLabel:GS===4?"Crítica":GS===3?"Atenção":GS===2?"Alerta":"Adequada",IPT,RT,data};
-    tabelaHistorico.innerHTML+=`<tr><td>*</td><td>${reg.escola}</td><td><span class="badge ${classe}">${reg.statusLabel}</span></td><td>${IPT.toFixed(2)}</td><td>${data}</td></tr>`;
-    if(!escolasMap[d.escola]||data>escolasMap[d.escola].data) escolasMap[d.escola]=reg;
-  });
-
-  document.getElementById("kpiCritica").innerText=crit;
-  document.getElementById("kpiAtencao").innerText=aten;
-  document.getElementById("kpiMedio").innerText=(somaIPT/dados.length).toFixed(2);
-  document.getElementById("kpiProblemas").innerText=Object.keys(problemasCount).length;
-
-  Object.values(escolasMap).sort((a,b)=>b.IPT-a.IPT).forEach((r,i)=>{
-    tabelaRanking.innerHTML+=`<tr><td>${i+1}</td><td>${r.escola}</td><td><span class="badge ${r.classe}">${r.statusLabel}</span></td><td>${r.IPT.toFixed(2)}</td><td>${r.RT}</td></tr>`;
-  });
-
-  new Chart(graficoStatus,{type:"pie",data:{labels:["Adequada","Alerta","Atenção","Crítica"],datasets:[{data:Object.values(statusCount),backgroundColor:["#4caf50","yellow","#ff7043","#f44336"]}]}});
-  new Chart(graficoIndice,{type:"bar",data:{labels:Object.values(escolasMap).slice(0,10).map(r=>r.escola),datasets:[{data:Object.values(escolasMap).slice(0,10).map(r=>r.IPT),backgroundColor:"#1f4fd8"}]},options:{indexAxis:"y",plugins:{legend:{display:false}}}});
-  new Chart(graficoProblemas,{type:"bar",data:{labels:Object.keys(problemasCount),datasets:[{data:Object.values(problemasCount),backgroundColor:"#ff9800"}]},options:{indexAxis:"y",plugins:{legend:{display:false}}}});
-}
+window.exportarHistorico = function(){
+  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Historico");
+  XLSX.writeFile(wb, "historico_checkinfra.xlsx");
+};
 
 db.collection("avaliacoes").get().then(snap=>{
-  const dados=[];snap.forEach(d=>dados.push(d.data()));montar(dados);
+  let dados=[];
+  snap.forEach(d=>dados.push(d.data()));
+
+  rankingGlobal = dados.map((d,i)=>({
+    "#":i+1,
+    Escola:d.escola,
+    Status:d.status,
+    IPT:d.pontuacao || 0,
+    RT:1
+  }));
+
+  rankingGlobal.forEach(r=>{
+    tabelaRanking.innerHTML+=`
+      <tr>
+        <td>${r["#"]}</td>
+        <td>${r.Escola}</td>
+        <td>${r.Status}</td>
+        <td>${r.IPT}</td>
+        <td>${r.RT}</td>
+      </tr>`;
+  });
 });
-
-function mostrarAba(a){
-  ["ranking","historico","metodologia"].forEach(x=>document.getElementById("aba-"+x).style.display="none");
-  document.getElementById("aba-"+a).style.display="block";
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.querySelector(`.tab[onclick="mostrarAba('${a}')"]`).classList.add("active");
-}
-function toggleSidebar(){document.getElementById("sidebar").classList.toggle("active")}
-function abrirModal(){modalIPT.style.display="flex"}
-function fecharModal(){modalIPT.style.display="none"}
 </script>
-
-<footer>© 2025 CheckInfra — Metodologia pública, transparente e auditável</footer>
 
 </body>
 </html>
