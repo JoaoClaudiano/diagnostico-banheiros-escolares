@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>IT – Intensidade Técnica | CheckInfra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f4fd8">
+
+<style>
+html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
+header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
+header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
+header button.voltar { left:10px; }
+header button.menu { right:10px; }
+.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
+h2,h3{color:#1f4fd8;}
+p,li{line-height:1.6;font-size:14px;}
+ul{padding-left:20px;}
+.badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
+.critica{background:#f44336}
+.atencao{background:#ff7043}
+.alerta{background:#fbc02d;color:#000}
+.adequada{background:#4caf50}
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100%; }
+footer div { max-width:600px; margin:0 auto; }
+footer a { color:#fff; text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="voltar" onclick="history.back()">← Voltar</button>
+  <h1>IT – Intensidade Técnica</h1>
+  <button class="menu" onclick="toggleSidebar()">☰</button>
+</header>
+
+<div class="main">
+  <div class="card">
+    <h2>Intensidade Técnica (IT)</h2>
+    <p>
+      O componente <strong>IT</strong> representa a complexidade e extensão das não conformidades
+      observadas na infraestrutura escolar. Ele complementa o GS ao trazer uma medida quantitativa
+      da severidade técnica dos problemas.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Cálculo do IT</h3>
+    <p>
+      Cada problema identificado no checklist recebe um peso proporcional à sua criticidade técnica. 
+      O IT é a soma ponderada dessas ocorrências:
+    </p>
+    <ul>
+      <li>Problema menor: peso 1</li>
+      <li>Problema médio: peso 2</li>
+      <li>Problema grave: peso 3</li>
+      <li>Problema crítico: peso 4</li>
+    </ul>
+    <p>
+      A pontuação final do IT é normalizada para manter consistência na fórmula do IPT.
+      Fórmula: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Exemplo Prático</h3>
+    <p>Escola com problemas:</p>
+    <ul>
+      <li>Vaso sanitário quebrado (médio) → 2 pts</li>
+      <li>Torneira vazando (menor) → 1 pt</li>
+      <li>Infiltração grave no teto → 3 pts</li>
+    </ul>
+    <p>IT total = 2 + 1 + 3 = 6</p>
+  </div>
+
+  <div class="card">
+    <h3>Referências</h3>
+    <ul>
+      <li>ISO 31000 – Gestão de riscos, 2018.</li>
+      <li>MCDA: Multi-Criteria Decision Analysis in Infrastructure, Belton & Stewart, 2002.</li>
+      <li>ABNT NBR 9050: Acessibilidade e segurança em edificações. 2020.</li>
+      <li>Exemplos de gestão de ativos públicos: Public Infrastructure Asset Management, McRae, 2019.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <div>© 2026 CheckInfra — Metodologia detalhada</div>
+</footer>
+
+<script>
+function toggleSidebar(){alert("Sidebar não implementada nesta página.");}
+</script>
+
+</body>
+</html>
