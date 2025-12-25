@@ -13,17 +13,24 @@ header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; ove
 header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
+
 .main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+
 .card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
 h2,h3{color:#1f4fd8;}
-p,li{line-height:1.6;font-size:14px;}
+p,li{line-height:1.6;font-size:14px; text-align:justify;}
 ul{padding-left:20px;}
-.badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
-.critica{background:#f44336}
-.atencao{background:#ff7043}
-.alerta{background:#fbc02d;color:#000}
-.adequada{background:#4caf50}
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100%; }
+
+footer {
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:16px 10px;
+  font-size:12px;
+  line-height:1.4;
+  box-sizing:border-box;
+  width:100%;
+}
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
 </style>
@@ -37,50 +44,55 @@ footer a { color:#fff; text-decoration:underline; }
 </header>
 
 <div class="main">
+
   <div class="card">
-    <h2>Recorrência Temporal (RT)</h2>
+    <h2>O que é a Recorrência Temporal (RT)?</h2>
     <p>
-      O componente <strong>RT</strong> indica a frequência com que problemas são observados
-      em uma escola ao longo do tempo. Ele identifica problemas crônicos que persistem
-      independentemente de intervenções pontuais.
+      O componente <strong>RT</strong> mede a persistência de problemas em cada escola ao longo do tempo. 
+      Ele identifica questões crônicas, permitindo diferenciar problemas pontuais de recorrentes.
     </p>
   </div>
 
   <div class="card">
-    <h3>Método de Cálculo</h3>
-    <p>
-      RT é calculado como o número de avaliações registradas com o mesmo problema,
-      limitado por um teto técnico para evitar distorções na pontuação. No CheckInfra,
-      utiliza-se como proxy de reincidência estrutural:
-    </p>
+    <h3>Como é calculado?</h3>
     <ul>
-      <li>RT = quantidade de avaliações existentes para a escola</li>
-      <li>Normalizado entre 0 e 1 para aplicação na fórmula IPT</li>
-      <li>Garante que problemas crônicos tenham impacto proporcional</li>
+      <li>Contagem de avaliações registradas para a mesma escola</li>
+      <li>Problemas recorrentes recebem maior peso na fórmula do IPT</li>
+      <li>Limitado por teto técnico para evitar distorções em escolas com muitas avaliações</li>
     </ul>
-    <p>Fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong></p>
+    <p>
+      O RT ajuda gestores a priorizar escolas que apresentam problemas persistentes, mesmo que não sejam os mais críticos individualmente.
+    </p>
   </div>
 
   <div class="card">
     <h3>Exemplo Prático</h3>
-    <p>Escola com 3 avaliações:</p>
     <ul>
-      <li>Avaliação 1: Problema X presente → RT parcial</li>
-      <li>Avaliação 2: Problema X persistente → RT aumenta</li>
-      <li>Avaliação 3: Problema X ainda presente → RT final considerado no IPT</li>
+      <li>Escola A: RT = 1 → problema recente, sem histórico</li>
+      <li>Escola B: RT = 2 → problema identificado em 2 avaliações consecutivas</li>
+      <li>Escola C: RT = 3 → problema crônico, presente em 3 ou mais avaliações</li>
     </ul>
-    <p>Esse procedimento ajuda a priorizar intervenções em escolas com problemas recorrentes.</p>
+    <p>Na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>, escolas com RT maior têm sua prioridade aumentada.</p>
+  </div>
+
+  <div class="card">
+    <h3>Impacto na Gestão Escolar</h3>
+    <p>
+      O RT permite que gestores detectem padrões recorrentes de problemas e priorizem intervenções, mesmo que algumas escolas não apresentem os valores mais altos de GS ou IT. 
+      Dessa forma, problemas estruturais crônicos recebem atenção contínua no planejamento de obras e manutenção.
+    </p>
   </div>
 
   <div class="card">
     <h3>Referências</h3>
     <ul>
-      <li>ISO 31000 – Gestão de riscos, 2018.</li>
-      <li>MCDA em gestão de infraestrutura, Belton & Stewart, 2002.</li>
-      <li>Estudos de reincidência de problemas estruturais: Asset Management Review, McRae, 2019.</li>
-      <li>ABNT NBR 9050: Padrões de acessibilidade e segurança em edificações escolares.</li>
+      <li>ABNT NBR 5674: Manutenção de edificações – requisitos para manutenção. 2012.</li>
+      <li>WHO – Water, Sanitation and Hygiene in Schools. 2018.</li>
+      <li>MCDA aplicado à priorização de ativos públicos, Saaty 2008.</li>
+      <li>CheckInfra Documentation, 2025.</li>
     </ul>
   </div>
+
 </div>
 
 <footer>
@@ -88,7 +100,7 @@ footer a { color:#fff; text-decoration:underline; }
 </footer>
 
 <script>
-function toggleSidebar(){alert("Sidebar não implementada nesta página.");}
+function toggleSidebar(){ alert("Sidebar não implementada nesta página."); }
 </script>
 
 </body>
