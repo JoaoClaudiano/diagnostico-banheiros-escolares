@@ -6,13 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#1f4fd8">
 
-<!-- Chart.js via script normal -->
+<!-- Chart.js via CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
 <style>
-/* --- Manter todos os estilos existentes --- */
-body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; }
+/* === MANTIDO DO SEU CÓDIGO === */
+body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; }
 .card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
 .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
@@ -59,39 +63,16 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 </div>
 
 <div class="card grid">
-  <div class="kpi">
-    <h4>Unidades Críticas</h4>
-    <strong id="kpiCritica">–</strong>
-  </div>
-  <div class="kpi">
-    <h4>Unidades em Atenção</h4>
-    <strong id="kpiAtencao">–</strong>
-  </div>
-  <div class="kpi">
-    <h4>IPT Médio
-      <span class="info" onclick="abrirModal()">i</span>
-    </h4>
-    <strong id="kpiMedio">–</strong>
-  </div>
-  <div class="kpi">
-    <h4>Problemas Frequentes</h4>
-    <strong id="kpiProblemas">–</strong>
-  </div>
+  <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
+  <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
+  <div class="kpi"><h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4><strong id="kpiMedio">–</strong></div>
+  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
 </div>
 
 <div class="card grid">
-  <div>
-    <h3>Status das Unidades</h3>
-    <canvas id="graficoStatus"></canvas>
-  </div>
-  <div>
-    <h3>Top Prioridades (IPT)</h3>
-    <canvas id="graficoIndice"></canvas>
-  </div>
-  <div>
-    <h3>Frequência de Problemas</h3>
-    <canvas id="graficoProblemas"></canvas>
-  </div>
+  <div><h3>Status das Unidades</h3><canvas id="graficoStatus"></canvas></div>
+  <div><h3>Top Prioridades (IPT)</h3><canvas id="graficoIndice"></canvas></div>
+  <div><h3>Frequência de Problemas</h3><canvas id="graficoProblemas"></canvas></div>
 </div>
 
 <div class="card">
@@ -106,18 +87,14 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
     <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
     <br><br>
     <table>
-      <thead>
-        <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Dias no Status</th></tr>
-      </thead>
+      <thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Dias no Status</th></tr></thead>
       <tbody id="tabelaRanking"></tbody>
     </table>
   </div>
 
   <div id="aba-historico" style="display:none;">
     <table>
-      <thead>
-        <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr>
-      </thead>
+      <thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr></thead>
       <tbody id="tabelaHistorico"></tbody>
     </table>
   </div>
@@ -130,24 +107,24 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 <div class="modal" id="modalIPT" onclick="fecharModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3>O que é o IPT médio?</h3>
-    <p>
-      O IPT médio expressa o grau médio de urgência técnica da rede escolar.
-      Ele não aponta uma escola específica, mas indica o <strong>estado geral
-      da infraestrutura</strong>.
-    </p>
+    <p>O IPT médio expressa o grau médio de urgência técnica da rede escolar. Ele não aponta uma escola específica, mas indica o <strong>estado geral da infraestrutura</strong>.</p>
     <button onclick="fecharModal()">Fechar</button>
   </div>
 </div>
 
 <script>
+/* === CONFIGURAÇÃO FIREBASE === */
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
   projectId: "checkinfra-adf3c"
 };
-
-firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+/* === VARIÁVEIS === */
+let rankingGlobal = [];
+let rankingHistorico = [];
 
 const tabelaRanking = document.getElementById("tabelaRanking");
 const tabelaHistorico = document.getElementById("tabelaHistorico");
@@ -156,20 +133,43 @@ const kpiAtencao = document.getElementById("kpiAtencao");
 const kpiMedio = document.getElementById("kpiMedio");
 const kpiProblemas = document.getElementById("kpiProblemas");
 
-function montar(dados){
-  let rankingGlobal=[], rankingHistorico=[], somaIPT=0, critica=0, atencao=0;
-  const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
-  const problemasCount={}, escolasMap={};
+/* === FUNÇÕES === */
+async function carregarAvaliacoes(){
+  try{
+    const snapshot = await db.collection("avaliacoes").get();
+    const dados = [];
+    snapshot.forEach(doc=>{
+      const d = doc.data();
+      if(d.status){
+        if(d.createdAt && d.createdAt.toDate){
+          d.data_avaliacao = d.createdAt.toDate().toISOString().split("T")[0];
+        } else d.data_avaliacao = new Date().toISOString().split("T")[0];
+        dados.push(d);
+      }
+    });
+    montar(dados);
+  }catch(err){
+    console.error("❌ Erro ao carregar dados do Firebase:", err);
+  }
+}
 
-  tabelaRanking.innerHTML="";
-  tabelaHistorico.innerHTML="";
+function montar(dados){
+  rankingGlobal = [];
+  rankingHistorico = [];
+  tabelaRanking.innerHTML = "";
+  tabelaHistorico.innerHTML = "";
+
+  const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
+  const problemasCount={};
+  const escolasMap = {};
+  let somaIPT=0, critica=0, atencao=0;
 
   dados.forEach(d=>{
     let peso=1, classe="adequada";
     const s=(d.status||"").toLowerCase();
-    if(s.includes("crít")){peso=4;classe="critica";critica++;statusCount.critica++;}
-    else if(s.includes("aten")){peso=3;classe="atencao";atencao++;statusCount.atencao++;}
-    else if(s.includes("alerta")){peso=2;classe="alerta";statusCount.alerta++;}
+    if(s.includes("crít")){peso=4;classe="critica";critica++; statusCount.critica++;}
+    else if(s.includes("aten")){peso=3;classe="atencao";atencao++; statusCount.atencao++;}
+    else if(s.includes("alerta")){peso=2;classe="alerta"; statusCount.alerta++;}
     else statusCount.adequada++;
 
     const pont = Number(d.pontuacao||0);
@@ -189,7 +189,7 @@ function montar(dados){
       statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
       IPT,
       diasNoStatus:d.dias_criticos||0,
-      data:d.createdAt?.toDate?.()?.toISOString().split("T")[0] || new Date().toISOString().split("T")[0]
+      data:d.data_avaliacao
     };
 
     rankingHistorico.push(registro);
@@ -201,35 +201,25 @@ function montar(dados){
 
   rankingGlobal = Object.values(escolasMap);
 
+  // KPIs
   kpiCritica.innerText = critica;
   kpiAtencao.innerText = atencao;
   kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
   kpiProblemas.innerText = Object.keys(problemasCount).length;
 
+  // Ranking
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
   rankingGlobal.forEach((r,i)=>{
-    tabelaRanking.innerHTML += `
-      <tr>
-        <td>${i+1}</td>
-        <td>${r.escola}</td>
-        <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
-        <td>${r.IPT.toFixed(2)}</td>
-        <td>${r.diasNoStatus}</td>
-      </tr>`;
+    tabelaRanking.innerHTML += `<tr><td>${i+1}</td><td>${r.escola}</td><td><span class="badge ${r.classe}">${r.statusLabel}</span></td><td>${r.IPT.toFixed(2)}</td><td>${r.diasNoStatus}</td></tr>`;
   });
 
+  // Histórico
   rankingHistorico.sort((a,b)=>new Date(b.data)-new Date(a.data));
   rankingHistorico.forEach((r,i)=>{
-    tabelaHistorico.innerHTML += `
-      <tr>
-        <td>${i+1}</td>
-        <td>${r.escola}</td>
-        <td><span class="badge ${r.classe}">${r.statusLabel}</span></td>
-        <td>${r.IPT.toFixed(2)}</td>
-        <td>${r.data}</td>
-      </tr>`;
+    tabelaHistorico.innerHTML += `<tr><td>${i+1}</td><td>${r.escola}</td><td><span class="badge ${r.classe}">${r.statusLabel}</span></td><td>${r.IPT.toFixed(2)}</td><td>${r.data}</td></tr>`;
   });
 
+  // Gráficos
   new Chart(document.getElementById("graficoStatus"),{
     type:"pie",
     data:{
@@ -254,20 +244,30 @@ function montar(dados){
   });
 }
 
-async function carregarAvaliacoes(){
-  try{
-    const snapshot = await db.collection("avaliacoes").get();
-    const dados = snapshot.docs.map(doc=>{
-      const d = doc.data();
-      return d;
-    });
-    console.log("✅ Dados carregados do Firebase:", dados);
-    montar(dados);
-  }catch(err){
-    console.error("❌ Erro ao carregar dados do Firebase:", err);
-  }
-}
+/* Exportação XLSX */
+window.exportarXLSX = function() {
+  if(rankingGlobal.length === 0){ alert("Nenhum dado disponível para exportação."); return; }
+  const exportData = rankingGlobal.map(r => ({
+    Escola:r.escola, Status:r.statusLabel, IPT:r.IPT.toFixed(2), DiasNoStatus:r.diasNoStatus
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
+  XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
+};
 
+window.exportarHistorico = function(){
+  if(rankingHistorico.length === 0){ alert("Nenhum dado disponível para exportação."); return; }
+  const exportData = rankingHistorico.map(r => ({
+    Escola:r.escola, Status:r.statusLabel, IPT:r.IPT.toFixed(2), Data:r.data
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Historico Completo");
+  XLSX.writeFile(wb, "historico_checkinfra.xlsx");
+};
+
+/* Modais e abas */
 function abrirModal(){ document.getElementById("modalIPT").style.display="flex"; }
 function fecharModal(){ document.getElementById("modalIPT").style.display="none"; }
 function mostrarAba(aba){
@@ -279,6 +279,7 @@ function mostrarAba(aba){
   document.querySelector(`.tab[onclick="mostrarAba('${aba}')"]`).classList.add("active");
 }
 
+/* Carregar dados */
 carregarAvaliacoes();
 </script>
 
