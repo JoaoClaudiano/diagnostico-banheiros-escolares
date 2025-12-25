@@ -12,36 +12,66 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-/* RESET & BODY */
-html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
+body {
+  font-family: Arial;
+  background:#f4f6f8;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
 
 /* HEADER */
-header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
-header h1 { margin:0; font-size:22px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
-header button.voltar { left:10px; }
-header button.menu { right:10px; }
+header {
+  background:#1f4fd8;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px 20px;
+  position:relative;
+}
+header h1 {
+  margin:0;
+  font-size:22px;
+  text-align:center;
+}
+header button {
+  position:absolute;
+  background:#fff;
+  color:#1f4fd8;
+  border:none;
+  border-radius:6px;
+  padding:6px 12px;
+  cursor:pointer;
+}
+header .btn-voltar { left:20px; }
+header .btn-sidebar { right:20px; }
 
 /* SIDEBAR */
-.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; z-index:1000; box-sizing:border-box; }
+.sidebar {
+  width:240px;
+  background:#1f4fd8;
+  color:#fff;
+  padding:20px;
+  position:fixed;
+  right:-240px;
+  top:0;
+  bottom:0;
+  overflow-y:auto;
+  transition: right 0.3s ease;
+}
 .sidebar.open { right:0; }
 .sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:flex-end; align-items:center; }
-.sidebar h3 span { cursor:pointer; font-weight:bold; font-size:20px; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; }
 .sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
 
-/* MAIN CONTENT */
-.main { margin:20px auto; padding:0 20px; max-width:1200px; flex:1; box-sizing:border-box; }
+/* CONTEÚDO PRINCIPAL */
+.main { margin:20px auto; padding:0 20px; max-width:1100px; }
 
 /* CARDS */
-.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
-.grid { display:grid; gap:16px; }
-@media(min-width:1024px){
-  .grid.kpi-grid { grid-template-columns: repeat(4, 1fr); }
-  .grid.charts-grid { grid-template-columns: repeat(3, 1fr); }
-}
-@media(max-width:1023px){
-  .grid.kpi-grid, .grid.charts-grid { grid-template-columns: 1fr; }
-}
+.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; }
+.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
@@ -58,72 +88,43 @@ th { background:#f4f6f8; }
 
 button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
 
-/* TABS */
+/* ABAS */
 .tabs { display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap; }
 .tab { padding:8px 16px; background:#e0e0e0; border-radius:6px; cursor:pointer; }
 .tab.active { background:#1f4fd8; color:#fff; }
 
 /* MODAL */
-.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:2000; }
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
 /* FOOTER */
- footer {
-      background:#1f4fd8;
-      color:#fff;
-      text-align:center;
-      padding:16px 10px;
-      font-size:12px;
-      line-height:1.4;
-      box-sizing:border-box;
-    }
-
-    footer div {
-      max-width:600px;
-      margin:0 auto;
-    }
-
-    footer a {
-      color:#fff;
-      text-decoration:underline;
-    }
-
-    footer img {
-      max-width:90px;
-      width:40%;
-    }
-
-    /* ===== MOBILE ===== */
-    @media (max-width: 480px) {
-      footer div {
-        padding: 0 8px;
-      }
-      footer p {
-        font-size: 10px;
-      }
-      footer img {
-        width: 60%;
-      }
-      footer p[style*="display:flex"] {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-      }
-    }
+footer {
+  background:#1f4fd8;
+  color:#fff;
+  text-align:center;
+  padding:16px 0;
+  font-size:12px;
+  line-height:1.4;
+  width:100%;
+  box-sizing:border-box;
+  position:relative;
+}
+footer div { max-width:600px; margin:0 auto; padding:0 20px; box-sizing:border-box; }
+footer a { color:#fff; text-decoration:underline; }
 </style>
 </head>
 
 <body>
 
 <header>
-  <button class="voltar" onclick="history.back()">←</button>
+  <button class="btn-voltar" onclick="history.back()">← Voltar</button>
   <h1>Painel Gerencial – CheckInfra</h1>
-  <button class="menu" onclick="toggleSidebar()">☰</button>
+  <button class="btn-sidebar" onclick="toggleSidebar()">☰</button>
 </header>
 
 <div class="main">
 
-<div class="card grid kpi-grid">
+<div class="card grid">
   <div class="kpi">
     <h4>Unidades Críticas</h4>
     <strong id="kpiCritica">–</strong>
@@ -142,7 +143,7 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
   </div>
 </div>
 
-<div class="card grid charts-grid">
+<div class="card grid">
   <div>
     <h3>Status das Unidades</h3>
     <canvas id="graficoStatus"></canvas>
@@ -198,8 +199,8 @@ button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-
 </div>
 
 <div class="sidebar" id="sidebar">
-  <h3><span onclick="toggleSidebar()">×</span></h3>
-  <a href="metodo.html">📘 Metodologia</a>
+  <span onclick="toggleSidebar()" style="float:right; cursor:pointer;">×</span>
+  <a href="pages/metodo.html">📘 Metodologia</a>
 </div>
 
 <script src="painel.js"></script>
@@ -211,16 +212,10 @@ function toggleSidebar(){
 
 <footer>
   <div>
-    <!-- Copyright -->
-    <p style="margin:0 0 6px; font-size:12px;">
-      © 2026 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
-    </p>
-    <!-- Links institucionais -->
-    <p style="margin:0 0 16px; font-size:12px;">
-      <a href="/pages/sobre.html">Sobre</a> | 
-      <a href="/pages/contato.html">Contato</a> | 
-      <a href="/pages/politica-privacidade.html">Política de Privacidade</a> | 
-      <a href="/pages/termos-de-uso.html">Termos de Uso</a>
+    <p style="margin:0 0 6px;">© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
+    <p style="margin:0 0 6px;">
+      <a href="pages/sobre.html">Sobre</a> | 
+      <a href="pages/contato.html">Contato</a>
     </p>
   </div>
 </footer>
