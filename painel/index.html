@@ -9,53 +9,34 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-<!-- Firebase compat (funciona com scripts globais, sem módulo) -->
+<!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-body {
-  font-family: Arial;
-  background:#f4f6f8;
-  margin:0;
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
-}
-/* Cards */
+/* MESMO ESTILO DO SEU PAINEL ORIGINAL */
+body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; }
 .card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
-/* Grid e KPI */
 .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
-
 .info { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:#1f4fd8; color:#fff; font-size:12px; cursor:pointer; margin-left:6px; }
-
 .badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
 .adequada { background:#4caf50; }
 .alerta { background:yellow; color:#000; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
-
 table { width:100%; border-collapse: collapse; font-size:14px; }
 th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; text-align:left; }
-
 button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
-
 .tabs { display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap; }
 .tab { padding:8px 16px; background:#e0e0e0; border-radius:6px; cursor:pointer; }
 .tab.active { background:#1f4fd8; color:#fff; }
-
-/* Modal */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
-
-/* Footer fixo no final */
 footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100vw; position:relative; left:0; }
-
-/* Mobile */
 @media (max-width: 600px){
   .grid { grid-template-columns:1fr; }
   .kpi strong { font-size:28px; }
@@ -180,10 +161,14 @@ const kpiAtencao = document.getElementById("kpiAtencao");
 const kpiMedio = document.getElementById("kpiMedio");
 const kpiProblemas = document.getElementById("kpiProblemas");
 
-// Função principal de montar dados
+// DADOS
+let rankingGlobal = [];
+let rankingHistorico = [];
+
+// FUNÇÃO MONTAR
 function montar(dados){
-  let rankingGlobal = [];
-  let rankingHistorico = [];
+  rankingGlobal = [];
+  rankingHistorico = [];
   tabelaRanking.innerHTML = "";
   tabelaHistorico.innerHTML = "";
 
@@ -285,7 +270,7 @@ function montar(dados){
   });
 }
 
-// Carregar avaliações do Firebase
+// CARREGAR DADOS
 async function carregarAvaliacoes(){
   try{
     const snapshot = await db.collection("avaliacoes").get();
@@ -299,13 +284,36 @@ async function carregarAvaliacoes(){
   }
 }
 
+// EXPORTAR XLSX
 window.exportarXLSX = function() {
-  alert("Função de exportação funcionando");
-};
-window.exportarHistorico = function() {
-  alert("Função de exportação funcionando");
+  if(rankingGlobal.length === 0){ alert("Nenhum dado disponível para exportação."); return; }
+  const exportData = rankingGlobal.map(r => ({
+    Escola:r.escola,
+    Status:r.statusLabel,
+    IPT:r.IPT.toFixed(2),
+    DiasNoStatus:r.diasNoStatus
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
+  XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
 };
 
+window.exportarHistorico = function(){
+  if(rankingHistorico.length === 0){ alert("Nenhum dado disponível para exportação."); return; }
+  const exportData = rankingHistorico.map(r => ({
+    Escola:r.escola,
+    Status:r.statusLabel,
+    IPT:r.IPT.toFixed(2),
+    Data:r.data
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Historico Completo");
+  XLSX.writeFile(wb, "historico_checkinfra.xlsx");
+};
+
+// MODAL E ABAS
 function abrirModal(){ modalIPT.style.display="flex"; }
 function fecharModal(){ modalIPT.style.display="none"; }
 function mostrarAba(aba){
@@ -317,6 +325,7 @@ function mostrarAba(aba){
   document.querySelector(`.tab[onclick="mostrarAba('${aba}')"]`).classList.add("active");
 }
 
+// INICIALIZA CARREGAMENTO
 carregarAvaliacoes();
 </script>
 
