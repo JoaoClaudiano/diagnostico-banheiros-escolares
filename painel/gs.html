@@ -13,16 +13,23 @@ header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; ove
 header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
+
 .main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+
 .card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
 h2,h3{color:#1f4fd8;}
-p,li{line-height:1.6;font-size:14px;}
+p,li{line-height:1.6;font-size:14px; text-align:justify;}
 ul{padding-left:20px;}
 .badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
 .critica{background:#f44336}
 .atencao{background:#ff7043}
 .alerta{background:#fbc02d;color:#000}
 .adequada{background:#4caf50}
+
+table { width:100%; border-collapse: collapse; margin-top:10px; }
+th, td { padding:8px; border:1px solid #ddd; text-align:center; font-size:14px; }
+th { background:#f4f6f8; }
+
 footer {
   background:#1f4fd8;
   color:#fff;
@@ -46,44 +53,63 @@ footer a { color:#fff; text-decoration:underline; }
 </header>
 
 <div class="main">
+
   <div class="card">
-    <h2>Gravidade Sanitária (GS)</h2>
+    <h2>O que é a Gravidade Sanitária (GS)?</h2>
     <p>
-      O componente <strong>GS</strong> representa a severidade da infraestrutura escolar
-      em termos sanitários, conforme os critérios do checklist técnico do <strong>CheckInfra</strong>.
-      Ele é a base do IPT, refletindo problemas críticos que impactam diretamente a saúde e a segurança dos alunos.
+      O componente <strong>GS</strong> representa a severidade dos problemas sanitários encontrados nas escolas, 
+      conforme os critérios do checklist técnico do <strong>CheckInfra</strong>. Ele é a base do IPT e reflete 
+      o impacto direto de cada não conformidade na saúde e segurança dos alunos.
     </p>
   </div>
 
   <div class="card">
-    <h3>Critérios de Classificação</h3>
-    <ul>
-      <li><span class="badge adequada">Adequada</span>: Nenhuma não conformidade relevante. Estrutura atende aos padrões mínimos de higiene e segurança.</li>
-      <li><span class="badge alerta">Alerta</span>: Pequenas não conformidades que exigem atenção futura. Ex.: torneiras com vazamento, lixeiras inadequadas.</li>
-      <li><span class="badge atencao">Atenção</span>: Problemas significativos, risco médio à saúde ou ao uso da infraestrutura. Ex.: vasos sanitários quebrados, infiltrações moderadas.</li>
-      <li><span class="badge critica">Crítica</span>: Problemas graves, risco imediato à saúde ou segurança. Ex.: ausência de água potável, esgoto exposto, falhas estruturais sérias.</li>
-    </ul>
+    <h3>Faixas de GS e Significado</h3>
+    <table>
+      <thead>
+        <tr><th>Status</th><th>GS</th><th>Descrição</th><th>Exemplo de Problema</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="badge adequada">Adequada</span></td><td>1</td><td>Conformidade completa, risco mínimo</td><td>Estrutura em bom estado, água potável e saneamento adequado</td></tr>
+        <tr><td><span class="badge alerta">Alerta</span></td><td>2</td><td>Pequenas não conformidades, atenção futura</td><td>Torneiras com vazamento, lixeiras inadequadas</td></tr>
+        <tr><td><span class="badge atencao">Atenção</span></td><td>3</td><td>Problemas significativos, risco médio</td><td>Vasos sanitários quebrados, infiltrações moderadas</td></tr>
+        <tr><td><span class="badge critica">Crítica</span></td><td>4</td><td>Problemas graves, risco imediato</td><td>Ausência de água potável, esgoto exposto, falhas estruturais sérias</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="card">
-    <h3>Exemplo Prático</h3>
+    <h3>Exemplo Prático de Cálculo do IPT</h3>
     <p>Considerando três escolas avaliadas:</p>
     <ul>
-      <li>Escola A: Adequada → GS = 1</li>
-      <li>Escola B: Atenção → GS = 3</li>
-      <li>Escola C: Crítica → GS = 4</li>
+      <li>Escola A: GS = 1, IT = 2, RT = 1 → IPT = (1×0,4)+(2×0,4)+(1×0,2)=1,4</li>
+      <li>Escola B: GS = 3, IT = 3, RT = 2 → IPT = (3×0,4)+(3×0,4)+(2×0,2)=3,0</li>
+      <li>Escola C: GS = 4, IT = 4, RT = 3 → IPT = (4×0,4)+(4×0,4)+(3×0,2)=4,2</li>
     </ul>
-    <p>O GS é utilizado na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>.</p>
+    <p>
+      Quanto maior o GS, maior a prioridade de intervenção da escola no painel do CheckInfra.
+    </p>
   </div>
 
   <div class="card">
-    <h3>Referências</h3>
+    <h3>Impacto na Gestão Escolar</h3>
+    <p>
+      O GS influencia diretamente o ranking de prioridades no painel gerencial. 
+      Escolas com GS crítica têm maior peso no cálculo do IPT, elevando sua posição no ranking e sinalizando necessidade de ação imediata.
+      Problemas recorrentes ou graves em saúde e infraestrutura são destacados pelos KPIs do painel.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Referências Bibliográficas</h3>
     <ul>
       <li>Associação Brasileira de Normas Técnicas (ABNT). NBR 9050: Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos. 2020.</li>
-      <li>WHO – World Health Organization. Water, Sanitation and Hygiene in Schools. 2018.</li>
-      <li>Metodologias de avaliação multicritério e gestão de ativos públicos (MCDA). Saaty, T. L., 2008.</li>
+      <li>World Health Organization (WHO). Water, Sanitation and Hygiene in Schools. 2018.</li>
+      <li>Saaty, T. L. (2008). Decision Making with the Analytic Hierarchy Process. Springer.</li>
+      <li>Metodologias MCDA aplicadas à gestão de ativos públicos. CheckInfra Documentation, 2025.</li>
     </ul>
   </div>
+
 </div>
 
 <footer>
@@ -91,7 +117,9 @@ footer a { color:#fff; text-decoration:underline; }
 </footer>
 
 <script>
-function toggleSidebar(){alert("Sidebar não implementada nesta página.");}
+function toggleSidebar(){
+  alert("Sidebar não implementada nesta página.");
+}
 </script>
 
 </body>
