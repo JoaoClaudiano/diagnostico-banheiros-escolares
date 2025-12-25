@@ -15,8 +15,24 @@
 
 <style>
 body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-direction:column; min-height:100vh; }
-.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
-.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; justify-items:center; }
+
+/* HEADER */
+header { background:#1f4fd8; color:#fff; display:flex; align-items:center; padding:14px 20px; }
+header h1 { margin:0; font-size:22px; flex:1; }
+header button { background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; margin-right:10px; }
+
+/* SIDEBAR */
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:0; top:0; bottom:0; overflow-y:auto; }
+.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:space-between; align-items:center; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; }
+.sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
+
+/* CONTEÚDO PRINCIPAL */
+.main { margin:20px auto; padding:0 20px; max-width:1100px; }
+
+/* CARDS */
+.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; }
+.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
 .kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
@@ -26,51 +42,67 @@ body { font-family: Arial; background:#f4f6f8; margin:0; display:flex; flex-dire
 .alerta { background:yellow; color:#000; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
-table { width:100%; border-collapse: collapse; font-size:14px; }
-th, td { padding:8px; border-bottom:1px solid #eee; text-align:center; }
+
+table { width:100%; border-collapse: collapse; font-size:14px; text-align:center; }
+th, td { padding:8px; border-bottom:1px solid #eee; }
 th { background:#f4f6f8; }
+
 button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
-.tabs { display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap; justify-content:center; }
+
+/* ABAS */
+.tabs { display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap; }
 .tab { padding:8px 16px; background:#e0e0e0; border-radius:6px; cursor:pointer; }
 .tab.active { background:#1f4fd8; color:#fff; }
+
+/* MODAL */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100vw; position:relative; left:0; }
-@media (max-width: 600px){
-  .grid { grid-template-columns:1fr; }
-  .kpi strong { font-size:28px; }
-  table thead { display:none; }
-  table tr { display:block; margin-bottom:12px; border:1px solid #eee; border-radius:8px; padding:10px; }
-  table td { display:block; border:none; padding:4px 0; }
-  table td::before { font-weight:bold; color:#666; display:inline-block; width:90px; }
-  table td:nth-child(1)::before { content:"#"; }
-  table td:nth-child(2)::before { content:"Escola"; }
-  table td:nth-child(3)::before { content:"Status"; }
-  table td:nth-child(4)::before { content:"IPT"; }
-  table td:nth-child(5)::before { content:"Data"; }
-  .modal-content { width:90%; }
-}
+
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; width:100vw; }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h2 style="color:#1f4fd8;">Painel Gerencial – CheckInfra</h2>
-  <small>Síntese executiva e priorização técnica</small>
+<header>
+  <button onclick="history.back()">← Voltar</button>
+  <h1>Painel Gerencial – CheckInfra</h1>
+</header>
+
+<div class="main">
+
+<div class="card grid">
+  <div class="kpi">
+    <h4>Unidades Críticas</h4>
+    <strong id="kpiCritica">–</strong>
+  </div>
+  <div class="kpi">
+    <h4>Unidades em Atenção</h4>
+    <strong id="kpiAtencao">–</strong>
+  </div>
+  <div class="kpi">
+    <h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4>
+    <strong id="kpiMedio">–</strong>
+  </div>
+  <div class="kpi">
+    <h4>Problemas Frequentes</h4>
+    <strong id="kpiProblemas">–</strong>
+  </div>
 </div>
 
 <div class="card grid">
-  <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
-  <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
-  <div class="kpi"><h4>IPT Médio <span class="info" onclick="abrirModal()">i</span></h4><strong id="kpiMedio">–</strong></div>
-  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
-</div>
-
-<div class="card grid">
-  <div><h3>Status das Unidades</h3><canvas id="graficoStatus"></canvas></div>
-  <div><h3>Top Prioridades (IPT)</h3><canvas id="graficoIndice"></canvas></div>
-  <div><h3>Frequência de Problemas</h3><canvas id="graficoProblemas"></canvas></div>
+  <div>
+    <h3>Status das Unidades</h3>
+    <canvas id="graficoStatus"></canvas>
+  </div>
+  <div>
+    <h3>Top Prioridades (IPT)</h3>
+    <canvas id="graficoIndice"></canvas>
+  </div>
+  <div>
+    <h3>Frequência de Problemas</h3>
+    <canvas id="graficoProblemas"></canvas>
+  </div>
 </div>
 
 <div class="card">
@@ -92,8 +124,6 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
   </div>
 
   <div id="aba-historico" style="display:none;">
-    <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
-    <br><br>
     <table>
       <thead>
         <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr>
@@ -110,9 +140,19 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 <div class="modal" id="modalIPT" onclick="fecharModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
     <h3>O que é o IPT médio?</h3>
-    <p>O IPT médio expressa o grau médio de urgência técnica da rede escolar. Ele indica o <strong>estado geral da infraestrutura</strong>.</p>
+    <p>
+      O IPT médio expressa o grau médio de urgência técnica da rede escolar.
+      Ele não aponta uma escola específica, mas indica o <strong>estado geral da infraestrutura</strong>.
+    </p>
     <button onclick="fecharModal()">Fechar</button>
   </div>
+</div>
+
+</div>
+
+<div class="sidebar">
+  <h3>☰ Menu <span onclick="document.querySelector('.sidebar').style.display='none'">×</span></h3>
+  <a href="metodo.html">📘 Metodologia</a>
 </div>
 
 <script>
@@ -121,6 +161,7 @@ const firebaseConfig = {
   authDomain: "checkinfra-adf3c.firebaseapp.com",
   projectId: "checkinfra-adf3c"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -132,85 +173,59 @@ const kpiAtencao = document.getElementById("kpiAtencao");
 const kpiMedio = document.getElementById("kpiMedio");
 const kpiProblemas = document.getElementById("kpiProblemas");
 
-// DADOS
 let rankingGlobal = [];
 let rankingHistorico = [];
 
-// FUNÇÃO MONTAR
+// Monta os dados e cálculos
 function montar(dados){
-  tabelaRanking.innerHTML = "";
-  tabelaHistorico.innerHTML = "";
-  const freqStatus = {};
+  rankingGlobal=[]; rankingHistorico=[];
+  tabelaRanking.innerHTML=""; tabelaHistorico.innerHTML="";
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
   const problemasCount={};
   const escolasMap={};
   let somaIPT=0, critica=0, atencao=0;
 
   dados.forEach(d=>{
-    const escola = d.escola || "Sem nome";
-    const s = (d.status || "").toLowerCase();
-
-    // Contagem de frequência por escola
-    if(!freqStatus[escola]) freqStatus[escola] = { critica:0, atencao:0, alerta:0, adequada:0 };
-    if(s.includes("crít")) freqStatus[escola].critica++;
-    else if(s.includes("aten")) freqStatus[escola].atencao++;
-    else if(s.includes("alerta")) freqStatus[escola].alerta++;
-    else freqStatus[escola].adequada++;
-
-    // KPIs
-    if(s.includes("crít")){ critica++; statusCount.critica++; }
-    else if(s.includes("aten")){ atencao++; statusCount.atencao++; }
-    else if(s.includes("alerta")) statusCount.alerta++;
+    let peso=1, classe="adequada";
+    const s=(d.status||"").toLowerCase();
+    if(s.includes("crít")){peso=4;classe="critica";critica++; statusCount.critica++;}
+    else if(s.includes("aten")){peso=3;classe="atencao"; atencao++; statusCount.atencao++;}
+    else if(s.includes("alerta")){peso=2;classe="alerta"; statusCount.alerta++;}
     else statusCount.adequada++;
 
+    const pont = Number(d.pontuacao||0);
+    const dias = Number(d.dias_criticos||0); // Frequência no status
+    const IPT = (peso*0.4)+(pont*0.4)+(dias*0.2);
+    somaIPT += IPT;
+
     if(d.problemas && Array.isArray(d.problemas)){
-      d.problemas.forEach(p=>problemasCount[p]=(problemasCount[p]||0)+1);
+      d.problemas.forEach(p=>{ problemasCount[p]=(problemasCount[p]||0)+1; });
     }
 
-    // Registro histórico
-    const classe = s.includes("crít")?"critica":s.includes("aten")?"atencao":s.includes("alerta")?"alerta":"adequada";
-    const statusLabel = classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada";
     const registro = {
-      escola,
+      escola:d.escola||"Sem nome",
       classe,
-      statusLabel,
-      pontuacao:Number(d.pontuacao||0),
-      diasNoStatus:1,
+      statusLabel:classe==="critica"?"Crítica":classe==="atencao"?"Atenção Elevada":classe==="alerta"?"Alerta":"Adequada",
+      IPT,
+      diasNoStatus:d.dias_criticos||0,
       data:d.createdAt?new Date(d.createdAt.seconds*1000).toISOString().split("T")[0]:new Date().toISOString().split("T")[0]
     };
+
     rankingHistorico.push(registro);
-
-    // Registrar apenas a última avaliação para ranking
-    if(!escolasMap[escola] || new Date(registro.data) > new Date(escolasMap[escola].data)){
-      escolasMap[escola] = registro;
+    if(!escolasMap[registro.escola] || new Date(registro.data)>new Date(escolasMap[registro.escola].data)){
+      escolasMap[registro.escola]=registro;
     }
   });
 
-  // Calcular IPT usando GS, IT, RT (RT = frequência)
-  rankingGlobal = Object.values(escolasMap).map(r=>{
-    const s = r.statusLabel.toLowerCase();
-    let GS = s.includes("crítica")?4:s.includes("atenção")?3:s.includes("alerta")?2:1;
-    const IT = r.pontuacao;
-    let RT = 0;
-    const freq = freqStatus[r.escola];
-    if(freq){
-      if(s.includes("crítica")) RT = freq.critica;
-      else if(s.includes("atenção")) RT = freq.atencao;
-      else if(s.includes("alerta")) RT = freq.alerta;
-      else RT = freq.adequada;
-    }
-    const IPT = (GS*0.4)+(IT*0.4)+(RT*0.2);
-    somaIPT += IPT;
-    return {...r, IPT, RT};
-  });
+  rankingGlobal = Object.values(escolasMap);
 
   // KPIs
-  kpiCritica.innerText = critica;
-  kpiAtencao.innerText = atencao;
-  kpiMedio.innerText = (somaIPT/dados.length).toFixed(2);
-  kpiProblemas.innerText = Object.keys(problemasCount).length;
+  kpiCritica.innerText=critica;
+  kpiAtencao.innerText=atencao;
+  kpiMedio.innerText=(somaIPT/dados.length).toFixed(2);
+  kpiProblemas.innerText=Object.keys(problemasCount).length;
 
-  // Tabela ranking
+  // Ranking
   rankingGlobal.sort((a,b)=>b.IPT-a.IPT);
   rankingGlobal.forEach((r,i)=>{
     tabelaRanking.innerHTML += `<tr>
@@ -221,7 +236,7 @@ function montar(dados){
     </tr>`;
   });
 
-  // Tabela histórico
+  // Histórico
   rankingHistorico.sort((a,b)=>new Date(b.data)-new Date(a.data));
   rankingHistorico.forEach((r,i)=>{
     tabelaHistorico.innerHTML += `<tr>
@@ -252,38 +267,47 @@ function montar(dados){
   });
 }
 
-// CARREGAR DADOS
+// Carrega dados do Firebase
 async function carregarAvaliacoes(){
   try{
     const snapshot = await db.collection("avaliacoes").get();
     const dados = [];
-    snapshot.forEach(doc=>dados.push(doc.data()));
+    snapshot.forEach(doc=>{ dados.push(doc.data()); });
     montar(dados);
-  }catch(err){
-    console.error("❌ Erro ao carregar dados do Firebase:", err);
-  }
+  }catch(err){ console.error("❌ Erro ao carregar dados do Firebase:", err); }
 }
 
-// EXPORTAR XLSX
-window.exportarXLSX = function() {
-  if(rankingGlobal.length===0){ alert("Nenhum dado disponível."); return; }
-  const ws = XLSX.utils.json_to_sheet(rankingGlobal.map(r=>({ Escola:r.escola, Status:r.statusLabel, IPT:r.IPT.toFixed(2) })));
+// Exportação
+window.exportarXLSX=function(){
+  if(!rankingGlobal.length){ alert("Nenhum dado disponível."); return; }
+  const exportData = rankingGlobal.map(r=>({
+    Escola:r.escola,
+    Status:r.statusLabel,
+    IPT:r.IPT.toFixed(2)
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Ranking IPT");
-  XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
+  XLSX.utils.book_append_sheet(wb,ws,"Ranking IPT");
+  XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
 };
 
-window.exportarHistorico = function() {
-  if(rankingHistorico.length===0){ alert("Nenhum dado disponível."); return; }
-  const ws = XLSX.utils.json_to_sheet(rankingHistorico.map(r=>({ Escola:r.escola, Status:r.statusLabel, IPT:r.IPT.toFixed(2), Data:r.data })));
+window.exportarHistorico=function(){
+  if(!rankingHistorico.length){ alert("Nenhum dado disponível."); return; }
+  const exportData = rankingHistorico.map(r=>({
+    Escola:r.escola,
+    Status:r.statusLabel,
+    IPT:r.IPT.toFixed(2),
+    Data:r.data
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Historico Completo");
-  XLSX.writeFile(wb, "historico_checkinfra.xlsx");
+  XLSX.utils.book_append_sheet(wb,ws,"Historico Completo");
+  XLSX.writeFile(wb,"historico_checkinfra.xlsx");
 };
 
-// MODAL E ABAS
-function abrirModal(){ document.getElementById("modalIPT").style.display="flex"; }
-function fecharModal(){ document.getElementById("modalIPT").style.display="none"; }
+// Modal e abas
+function abrirModal(){ modalIPT.style.display="flex"; }
+function fecharModal(){ modalIPT.style.display="none"; }
 function mostrarAba(aba){
   document.getElementById("aba-ranking").style.display="none";
   document.getElementById("aba-historico").style.display="none";
@@ -293,13 +317,17 @@ function mostrarAba(aba){
   document.querySelector(`.tab[onclick="mostrarAba('${aba}')"]`).classList.add("active");
 }
 
-// INICIALIZA
+// Inicializa
 carregarAvaliacoes();
 </script>
 
 <footer>
   <div style="max-width:600px; margin:0 auto;">
     <p style="margin:0 0 6px;">© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
+    <p style="margin:0 0 6px;">
+      <a href="./pages/sobre.html" style="color:#fff; text-decoration:underline;">Sobre</a> | 
+      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a>
+    </p>
   </div>
 </footer>
 
