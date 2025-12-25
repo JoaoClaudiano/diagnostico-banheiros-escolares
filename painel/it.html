@@ -7,201 +7,171 @@
 <meta name="theme-color" content="#1f4fd8">
 
 <style>
+/* Reset e layout base */
 html, body {
-  margin:0; padding:0; width:100%; overflow-x:hidden;
-  font-family: Arial, sans-serif; background:#f4f6f8;
-  min-height:100vh; display:flex; flex-direction:column;
+  margin:0; padding:0; width:100%; font-family: Arial, sans-serif; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column;
 }
 header {
-  background:#1f4fd8; color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  padding:14px 20px; position:relative; width:100%;
-  box-sizing:border-box;
+  background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%;
 }
-header h1 { margin:0; font-size:20px; text-align:center; }
-header button {
-  position:absolute; top:50%; transform:translateY(-50%);
-  background:#fff; color:#1f4fd8; border:none; border-radius:6px;
-  padding:6px 12px; cursor:pointer;
-}
+header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
 
-.sidebar {
-  position:fixed; right:0; top:0; height:100%; width:240px;
-  background:#eaf0ff; padding:20px; box-shadow:-2px 0 5px rgba(0,0,0,.1);
-  transform:translateX(100%); transition:transform .3s;
-  z-index:1000;
+/* Sidebar */
+#sidebar {
+  position: fixed; top:0; right:-280px; width:280px; height:100%; background:#1f4fd8; color:#fff; overflow-y:auto; transition:right 0.3s ease;
+  padding:20px; box-sizing:border-box; z-index:100;
 }
-.sidebar.active { transform:translateX(0); }
-.sidebar h3 { margin-top:0; color:#1f4fd8; font-size:16px; }
-.sidebar a {
-  display:block; color:#1f4fd8; text-decoration:none; margin:12px 0;
-  font-weight:bold;
-}
-.sidebar a:hover { text-decoration:underline; }
+#sidebar.active { right:0; }
+#sidebar h2 { margin-top:0; font-size:18px; }
+#sidebar button.closeSidebar { background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:4px 10px; cursor:pointer; position:absolute; top:10px; left:10px; }
 
-.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+#sidebar a { color:#fff; text-decoration:none; display:block; margin:10px 0; }
+#sidebar a:hover { text-decoration:underline; }
 
-.card { background:#fff; margin:20px 0; padding:24px; border-radius:10px; box-sizing:border-box; line-height:1.6; }
-.card h2,h3 { color:#1f4fd8; margin-bottom:10px; }
-.card p, .card li { font-size:14px; margin-bottom:12px; text-align:justify; }
-ul { padding-left:20px; margin-bottom:12px; }
+/* Main content */
+.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; }
+.card { background:#fff; margin:20px auto; padding:24px; border-radius:10px; line-height:1.7; box-sizing:border-box; }
+h2,h3{color:#1f4fd8;}
+p,li{line-height:1.6;font-size:14px; text-align:justify;}
+ul{padding-left:20px; margin-bottom:10px;}
+.badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;margin:2px;}
+.baixo{background:#4caf50}
+.medio{background:#fbc02d;color:#000}
+.alto{background:#f44336}
 
-.badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
-.critica{background:#f44336;}
-.atencao{background:#ff7043;}
-.alerta{background:#fbc02d;color:#000;}
-.adequada{background:#4caf50;}
-
+/* Footer responsivo */
 footer {
-  background:#1f4fd8; color:#fff; text-align:center;
-  padding:16px 10px; font-size:12px; line-height:1.4;
-  box-sizing:border-box; width:100%;
+  background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; width:100%;
 }
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
 
-canvas { max-width:100%; height:auto; margin-top:12px; }
-
-@media(max-width:600px){
-  .sidebar { width:180px; padding:16px; }
-}
+/* Gráfico */
+canvas { max-width:100%; height:auto; }
 </style>
 </head>
-
 <body>
 
+<!-- Header -->
 <header>
   <button class="voltar" onclick="history.back()">← Voltar</button>
   <h1>IT – Intensidade Técnica</h1>
   <button class="menu" onclick="toggleSidebar()">☰</button>
 </header>
 
-<div class="sidebar" id="sidebar">
-  <h3>Menu</h3>
-  <a href="../metodologia.html">Metodologia</a>
-  <a href="gs.html">Gravidade Sanitária (GS)</a>
-  <a href="rt.html">Recorrência Temporal (RT)</a>
+<!-- Sidebar -->
+<div id="sidebar">
+  <button class="closeSidebar" onclick="toggleSidebar()">X</button>
+  <h2>Índice de Prioridade Técnica</h2>
+  <a href="metodologia.html">Metodologia Geral</a>
+  <a href="gs.html">GS – Gravidade Sanitária</a>
+  <a href="it.html">IT – Intensidade Técnica</a>
+  <a href="rt.html">RT – Recorrência Temporal</a>
 </div>
 
+<!-- Main content -->
 <div class="main">
+
   <div class="card">
-    <h2>1. Definição do Índice de Intensidade Técnica (IT)</h2>
-    <p>
-      O Índice de Intensidade Técnica (IT) mede a magnitude das não conformidades detectadas na avaliação da infraestrutura sanitária escolar.
-      Ele considera a complexidade, extensão e severidade técnica de cada problema, ponderando os itens mais críticos.
-      Quanto maior o IT, mais técnica e complexa é a intervenção necessária.
-    </p>
+    <h2>1. Definição do Índice de Intensidade Técnica</h2>
+    <p>O <strong>Índice de Intensidade Técnica (IT)</strong> mede o grau de complexidade técnica e esforço necessário para realizar intervenções corretivas na infraestrutura sanitária escolar.</p>
+    <p>Ele é calculado considerando quantidade de não conformidades, tipo de equipamento, dificuldade de manutenção e necessidade de mão de obra especializada.</p>
   </div>
 
   <div class="card">
-    <h2>2. O que o IT considera?</h2>
-    <p>
-      O IT avalia todos os problemas técnicos identificados durante a inspeção: infiltrações, danos estruturais, instalações hidráulicas e elétricas, mobiliário inadequado e condições de higiene.
-      Cada item possui um peso específico de acordo com o risco e o esforço necessário para correção, permitindo calcular um valor total ponderado.
-    </p>
+    <h2>2. O que o índice de Intensidade Técnica considera e por quê?</h2>
+    <p>O IT reflete a complexidade das intervenções, permitindo priorizar escolas que demandam mais esforço técnico e recursos.</p>
+    <p>Por exemplo, consertos simples de torneiras apresentam baixo IT, enquanto substituição de tubulação, vaso sanitário quebrado ou instalação de sistemas de água requerem IT alto.</p>
   </div>
 
   <div class="card">
-    <h2>3. Normas e referências</h2>
-    <p>
-      O IT se baseia em práticas de engenharia diagnóstica e manutenção de ativos, incluindo:
-    </p>
+    <h2>3. Normas e referências bibliográficas</h2>
+    <p>O IT se baseia em normas técnicas de instalações prediais, manutenção e engenharia civil, como ABNT NBR 5626 (água fria), ABNT NBR 10844 (instalações prediais de esgoto), e recomendações de gestão de ativos prediais (ISO 55000).</p>
+    <p>Referências:</p>
     <ul>
-      <li>ABNT NBR 5674 – Manutenção de edificações: requisitos para manutenção predial (1)</li>
-      <li>MCDA – Avaliação multicritério para priorização de ações corretivas (Saaty, 2008)</li>
-      <li>Referências de inspeção predial e gestão de infraestrutura pública.</li>
+      <li>ABNT. NBR 5626: Instalações prediais de água fria. 2020.</li>
+      <li>ABNT. NBR 10844: Instalações prediais de esgoto sanitário. 2021.</li>
+      <li>ISO 55000: Asset Management. 2014.</li>
     </ul>
-    <p>
-      Essas normas permitem padronizar a avaliação técnica e estabelecer prioridades de intervenção de maneira objetiva.
-    </p>
   </div>
 
   <div class="card">
-    <h2>4. Interpretação dos valores do IT</h2>
-    <p>
-      O IT varia conforme a quantidade e severidade das não conformidades:
-    </p>
+    <h2>4. Interpretação das faixas de Intensidade Técnica</h2>
     <ul>
-      <li>Valores baixos → Problemas menores, correção simples.</li>
-      <li>Valores médios → Problemas moderados, demandam planejamento técnico e recursos.</li>
-      <li>Valores altos → Problemas graves, exigem intervenção técnica complexa e priorização imediata.</li>
+      <li><span class="badge baixo">Baixo</span> (IT = 1-2): Intervenções simples, baixo esforço técnico.</li>
+      <li><span class="badge medio">Médio</span> (IT = 3-4): Intervenções moderadas, exigem algum conhecimento técnico e recursos.</li>
+      <li><span class="badge alto">Alto</span> (IT = 5-6): Intervenções complexas, alto esforço técnico e recursos especializados.</li>
     </ul>
   </div>
 
   <div class="card">
     <h2>5. Impacto do IT no IPT</h2>
-    <p>
-      O IT é multiplicado pelo peso de 0,4 na fórmula do IPT. Isso significa que escolas com IT elevado influenciam significativamente o IPT total, sinalizando necessidade de ações técnicas prioritárias.
-      A combinação do IT com GS e RT permite uma visão completa da urgência de manutenção ou reforma.
-    </p>
+    <p>O IT é multiplicado por 0,4 na fórmula do IPT (<strong>IPT = GS*0,4 + IT*0,4 + RT*0,2</strong>).</p>
+    <p>Escolas com IT alto aumentam o IPT médio da rede e sinalizam necessidade de recursos técnicos adequados.</p>
   </div>
 
   <div class="card">
-    <h2>6. Mini gráfico ilustrativo</h2>
-    <p>
-      O gráfico abaixo demonstra a distribuição das escolas por nível de IT e a linha do IT médio da rede.
-      Isso ajuda gestores a visualizar rapidamente quais escolas possuem maior intensidade técnica de problemas.
-    </p>
-    <canvas id="itChart"></canvas>
-  </div>
-
-  <div class="card">
-    <h2>7. Vantagens e limitações do IT</h2>
-    <p>
-      <strong>Vantagens:</strong> Permite priorização objetiva, apoio ao planejamento de reformas, comunicação clara sobre complexidade técnica e recurso necessário.
-    </p>
-    <p>
-      <strong>Limitações:</strong> O IT depende da qualidade da avaliação, interpretação do avaliador e ponderação correta de cada item.
-    </p>
-  </div>
-
-  <div class="card">
-    <h3>Referência bibliográfica</h3>
-    <p>
-      (1) ABNT NBR 5674: Manutenção de edificações – Requisitos para manutenção predial, 2012.
-    </p>
+    <h2>6. Gráfico ilustrativo do IT</h2>
+    <canvas id="graficoIT"></canvas>
+    <p>O gráfico mostra a distribuição do IT das escolas. A linha azul indica o <strong>IT médio</strong>.</p>
   </div>
 
 </div>
 
+<!-- Footer -->
 <footer>
   <div>
-    © 2025 CheckInfra — Metodologia detalhada — Projeto acadêmico de alunos de Engenharia Civil
+    © 2025 CheckInfra — Metodologia detalhada e auditável
   </div>
 </footer>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
+// Sidebar toggle
 function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("active");
+  document.getElementById('sidebar').classList.toggle('active');
 }
 
-const ctx = document.getElementById('itChart').getContext('2d');
-const itChart = new Chart(ctx, {
+// Dados IT fictícios
+const itValores = [1,2,4,3,5,2,3,4]; // IT de cada escola
+const itMedio = itValores.reduce((a,b)=>a+b,0)/itValores.length;
+
+// Criação do gráfico
+const ctxIT = document.getElementById('graficoIT').getContext('2d');
+new Chart(ctxIT, {
   type: 'bar',
   data: {
-    labels: ['Baixo','Médio','Alto'],
+    labels: itValores.map((v,i)=>`Escola ${i+1}`),
     datasets: [{
-      label: 'Número de escolas',
-      data: [10, 20, 15],
-      backgroundColor: ['#4caf50','#fbc02d','#f44336']
+      label: 'IT',
+      data: itValores,
+      backgroundColor: itValores.map(v=> {
+        if(v<=2) return '#4caf50';
+        if(v<=4) return '#fbc02d';
+        return '#f44336';
+      })
     },{
-      label: 'IT médio da rede',
-      type:'line',
-      data:[2.0,2.0,2.0],
-      borderColor:'#1f4fd8',
-      borderWidth:2,
-      fill:false
+      label: 'IT Médio',
+      data: Array(itValores.length).fill(itMedio),
+      type: 'line',
+      borderColor: '#2196f3',
+      borderWidth: 2,
+      fill:false,
+      pointRadius:0
     }]
   },
-  options: {
+  options:{
     responsive:true,
-    plugins:{ legend:{ display:true }, tooltip:{ mode:'index', intersect:false } },
-    scales:{ y:{ beginAtZero:true, title:{ display:true, text:'Número de escolas' } } }
+    plugins:{ legend:{display:true}, tooltip:{enabled:true} },
+    scales:{ y:{beginAtZero:true, max:6.5, title:{display:true,text:'IT'}}, x:{title:{display:true,text:'Escolas'}} }
   }
 });
 </script>
+
 </body>
 </html>
