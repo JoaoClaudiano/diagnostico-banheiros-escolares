@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1f4fd8">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
 header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
@@ -48,6 +50,8 @@ footer {
 }
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
+
+canvas { max-width:100%; height:auto; margin-top:10px; }
 </style>
 </head>
 
@@ -68,59 +72,51 @@ footer a { color:#fff; text-decoration:underline; }
 </div>
 
 <div class="main">
+
   <div class="card">
     <h2>Recorrência Temporal (RT)</h2>
     <p>
-      O componente <strong>RT</strong> indica a persistência de problemas detectados ao longo do tempo
-      nas escolas. Ele captura a reincidência de não conformidades e permite priorizar escolas com
-      problemas crônicos, mesmo que atualmente estejam em status aceitável.
+      O componente <strong>RT</strong> indica a persistência de problemas ao longo do tempo.
+      Permite identificar escolas com problemas crônicos ou reincidentes, independentemente de pequenas variações em avaliações pontuais.
     </p>
   </div>
 
   <div class="card">
-    <h3>Como é calculado</h3>
+    <h3>Exemplo de Valores RT</h3>
     <ul>
-      <li>Contagem de avaliações anteriores da mesma escola</li>
-      <li>Problemas reincidentes aumentam o valor do RT</li>
-      <li>Existem tetos técnicos para evitar distorções em escolas muito avaliadas</li>
+      <li>Escola A: 1 avaliação → RT = 0,2</li>
+      <li>Escola B: 3 avaliações → RT = 0,6</li>
+      <li>Escola C: 5 avaliações → RT = 1,0 (teto aplicado)</li>
     </ul>
     <p>
-      Esse componente é fundamental para identificar problemas estruturais persistentes,
-      que exigem intervenção técnica prioritária.
+      RT contribui com 20% do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>, destacando reincidência estrutural.
     </p>
   </div>
 
   <div class="card">
-    <h3>Exemplo Prático</h3>
-    <ul>
-      <li>Escola A: 1 avaliação anterior → RT = 1</li>
-      <li>Escola B: 3 avaliações anteriores → RT = 3</li>
-      <li>Escola C: 5 avaliações anteriores → RT = 5 (teto aplicado = 5)</li>
-    </ul>
-    <p>
-      Na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>, 
-      o RT pondera a reincidência e garante que escolas com problemas crônicos tenham prioridade.
-    </p>
+    <h3>Distribuição RT – Gráfico de Barras</h3>
+    <canvas id="graficoRT"></canvas>
   </div>
 
   <div class="card">
-    <h3>Mini Gráfico Comparativo</h3>
+    <h3>Mini Tabela Comparativa</h3>
     <table>
-      <tr><th>Escola</th><th>RT</th></tr>
-      <tr><td>Escola A</td><td style="background:#4caf50; color:#fff;">1</td></tr>
-      <tr><td>Escola B</td><td style="background:#ff7043; color:#fff;">3</td></tr>
-      <tr><td>Escola C</td><td style="background:#f44336; color:#fff;">5</td></tr>
+      <tr><th>Escola</th><th>RT</th><th>Status</th></tr>
+      <tr><td>Escola A</td><td>0,2</td><td><span class="badge adequada">Baixa</span></td></tr>
+      <tr><td>Escola B</td><td>0,6</td><td><span class="badge atencao">Média</span></td></tr>
+      <tr><td>Escola C</td><td>1,0</td><td><span class="badge critica">Alta</span></td></tr>
     </table>
   </div>
 
   <div class="card">
     <h3>Referências</h3>
     <ul>
-      <li>[1] ABNT NBR 9050: Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos. 2020.</li>
+      <li>[1] ABNT NBR ISO 31000: Gestão de riscos em ativos e infraestrutura. 2018.</li>
       <li>[2] WHO – Water, Sanitation and Hygiene in Schools. 2018.</li>
-      <li>[3] Saaty, T. L. Avaliação multicritério de ativos públicos. 2008.</li>
+      <li>[3] Manual de inspeção e manutenção escolar – MEC, 2020.</li>
     </ul>
   </div>
+
 </div>
 
 <footer>
@@ -131,6 +127,21 @@ footer a { color:#fff; text-decoration:underline; }
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
 }
+
+// Gráfico RT
+const ctxRT = document.getElementById('graficoRT').getContext('2d');
+new Chart(ctxRT, {
+  type: 'bar',
+  data: {
+    labels: ['Escola A', 'Escola B', 'Escola C'],
+    datasets: [{
+      label: 'Valor RT',
+      data: [0.2,0.6,1.0],
+      backgroundColor: ['#4caf50','#ff7043','#f44336']
+    }]
+  },
+  options: { indexAxis: 'y', plugins:{ legend:{ display:false } } }
+});
 </script>
 
 </body>
