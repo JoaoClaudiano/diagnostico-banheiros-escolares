@@ -14,223 +14,202 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; margin:0; overflow-x:hidden; }
+* { box-sizing: border-box; }
 
-/* HEADER */
-header{
-  background:#1f4fd8;
-  color:#fff;
-  padding:14px 16px;
+body {
+  margin:0;
+  font-family: Arial;
+  background:#f4f6f8;
   display:flex;
-  align-items:center;
-  justify-content:space-between;
 }
-header h2{ margin:0; font-size:18px; cursor:default; }
-header span{ font-size:20px; cursor:pointer; }
 
 /* SIDEBAR */
-.sidebar{
-  position:fixed;
-  top:0;
-  right:-260px;
-  width:260px;
-  height:100vh;
-  background:#fff;
-  box-shadow:-2px 0 10px rgba(0,0,0,.15);
+.sidebar {
+  width:240px;
+  background:#1f4fd8;
+  color:#fff;
   padding:20px;
-  transition:.3s;
-  z-index:1000;
+  position:fixed;
+  right:0;
+  top:0;
+  bottom:0;
 }
-.sidebar.active{ right:0; }
-.sidebar .close{
-  position:absolute;
-  top:10px;
-  right:14px;
-  font-size:20px;
-  cursor:pointer;
+
+.sidebar h3 {
+  margin-top:0;
+  font-size:18px;
 }
-.sidebar a{
+
+.sidebar a {
   display:block;
-  margin-top:20px;
+  color:#fff;
   text-decoration:none;
-  color:#1f4fd8;
-  font-weight:bold;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.2);
 }
 
 /* CONTEÚDO */
-.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
-.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
-.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
+.main {
+  margin-right:240px;
+  width:calc(100% - 240px);
+  padding:20px;
+}
+
+/* CARDS */
+.card {
+  background:#fff;
+  max-width:1100px;
+  margin:20px auto;
+  padding:20px;
+  border-radius:10px;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap:16px;
+}
+
+.kpi {
+  background:#f9fafb;
+  border-radius:10px;
+  padding:16px;
+  text-align:center;
+}
+
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
 
-/* TABELA */
-table { width:100%; border-collapse: collapse; font-size:14px; }
-th, td { padding:8px; border-bottom:1px solid #eee; }
-th { background:#f4f6f8; text-align:left; }
-
-/* BADGES */
-.badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
+.badge {
+  padding:4px 8px;
+  border-radius:12px;
+  color:#fff;
+  font-size:12px;
+}
 .adequada { background:#4caf50; }
 .alerta { background:yellow; color:#000; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
 
-button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
-canvas { max-height:260px; }
+table {
+  width:100%;
+  border-collapse: collapse;
+  font-size:14px;
+}
 
-footer{
+th, td {
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
+
+th {
+  background:#f4f6f8;
+}
+
+button {
+  padding:10px 14px;
   background:#1f4fd8;
   color:#fff;
-  text-align:center;
-  padding:16px;
-  font-size:12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin-right:8px;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <span onclick="history.back()">←</span>
-  <h2>Painel Gerencial – CheckInfra</h2>
-  <span onclick="toggleSidebar()">☰</span>
-</header>
-
 <!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-  <span class="close" onclick="toggleSidebar()">✕</span>
-  <h3>Menu</h3>
+<div class="sidebar">
+  <h3>☰ Menu</h3>
   <a href="metodo.html">📘 Metodologia</a>
 </div>
 
-<!-- KPIs -->
-<div class="card grid">
-  <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
-  <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
-  <div class="kpi"><h4>IPT Médio</h4><strong id="kpiMedio">–</strong></div>
-  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
-</div>
+<!-- CONTEÚDO -->
+<div class="main">
 
-<!-- GRÁFICOS -->
-<div class="card grid">
-  <div>
-    <h3>Status das Unidades</h3>
-    <canvas id="graficoStatus"></canvas>
-  </div>
-  <div>
-    <h3>Top Prioridades (IPT)</h3>
-    <canvas id="graficoIndice"></canvas>
-  </div>
-  <div>
-    <h3>Frequência de Problemas</h3>
-    <canvas id="graficoProblemas"></canvas>
-  </div>
-</div>
-
-<!-- RANKING -->
 <div class="card">
-  <button onclick="exportarRanking()">⬇️ Baixar Ranking</button>
+  <h2>Painel Gerencial – CheckInfra</h2>
+  <small>Síntese executiva e priorização técnica</small>
+</div>
+
+<div class="card grid">
+  <div class="kpi"><h4>Críticas</h4><strong id="kpiCritica">–</strong></div>
+  <div class="kpi"><h4>Atenção</h4><strong id="kpiAtencao">–</strong></div>
+  <div class="kpi"><h4>IPT Médio</h4><strong id="kpiMedio">–</strong></div>
+  <div class="kpi"><h4>Problemas</h4><strong id="kpiProblemas">–</strong></div>
+</div>
+
+<div class="card grid">
+  <div><h3>Status</h3><canvas id="graficoStatus"></canvas></div>
+  <div><h3>Top IPT</h3><canvas id="graficoIndice"></canvas></div>
+  <div><h3>Problemas</h3><canvas id="graficoProblemas"></canvas></div>
+</div>
+
+<div class="card">
+  <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button>
   <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
   <br><br>
   <table>
     <thead>
-      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
+      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>RT</th></tr>
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
 </div>
 
-<footer>© 2025 CheckInfra — Projeto acadêmico e tecnológico</footer>
+</div>
 
 <script>
 firebase.initializeApp({
-  apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain:"checkinfra-adf3c.firebaseapp.com",
-  projectId:"checkinfra-adf3c"
+  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain: "checkinfra-adf3c.firebaseapp.com",
+  projectId: "checkinfra-adf3c"
 });
+
 const db = firebase.firestore();
-
-function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("active");
-}
-
 const tabelaRanking = document.getElementById("tabelaRanking");
-const kpiCritica = document.getElementById("kpiCritica");
-const kpiAtencao = document.getElementById("kpiAtencao");
-const kpiMedio = document.getElementById("kpiMedio");
-const kpiProblemas = document.getElementById("kpiProblemas");
 
-let rankingGlobal=[], historico=[];
+let rankingGlobal = [];
 
-function calcularIPT(d){
-  const s=(d.status||"").toLowerCase();
-  let GS=1;
-  if(s.includes("crít")) GS=4;
-  else if(s.includes("aten")) GS=3;
-  else if(s.includes("alerta")) GS=2;
-  const IT=Number(d.pontuacao||0);
-  const RT=Number(d.rt||1);
-  return (GS*0.4)+(IT*0.4)+(RT*0.2);
-}
+window.exportarXLSX = function(){
+  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Ranking");
+  XLSX.writeFile(wb, "ranking_checkinfra.xlsx");
+};
 
-async function carregar(){
-  const snap=await db.collection("avaliacoes").get();
-  const mapa={}, problemas={};
-  let soma=0, crit=0, aten=0;
+window.exportarHistorico = function(){
+  const ws = XLSX.utils.json_to_sheet(rankingGlobal);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Historico");
+  XLSX.writeFile(wb, "historico_checkinfra.xlsx");
+};
 
-  snap.forEach(doc=>{
-    const d=doc.data();
-    if(!d.escola) return;
-    const IPT=calcularIPT(d);
-    historico.push({...d,IPT});
-    if(!mapa[d.escola] || d.createdAt?.seconds > mapa[d.escola].ts){
-      mapa[d.escola]={ escola:d.escola, status:d.status, IPT, ts:d.createdAt?.seconds||0 };
-    }
-    (d.problemas||[]).forEach(p=>problemas[p]=(problemas[p]||0)+1);
-  });
+db.collection("avaliacoes").get().then(snap=>{
+  let dados=[];
+  snap.forEach(d=>dados.push(d.data()));
 
-  rankingGlobal=Object.values(mapa).sort((a,b)=>b.IPT-a.IPT);
+  rankingGlobal = dados.map((d,i)=>({
+    "#":i+1,
+    Escola:d.escola,
+    Status:d.status,
+    IPT:d.pontuacao || 0,
+    RT:1
+  }));
 
-  rankingGlobal.forEach((r,i)=>{
-    soma+=r.IPT;
-    if(r.status.toLowerCase().includes("crít")) crit++;
-    if(r.status.toLowerCase().includes("aten")) aten++;
+  rankingGlobal.forEach(r=>{
     tabelaRanking.innerHTML+=`
       <tr>
-        <td>${i+1}</td>
-        <td>${r.escola}</td>
-        <td>${r.status}</td>
-        <td>${r.IPT.toFixed(2)}</td>
+        <td>${r["#"]}</td>
+        <td>${r.Escola}</td>
+        <td>${r.Status}</td>
+        <td>${r.IPT}</td>
+        <td>${r.RT}</td>
       </tr>`;
   });
-
-  kpiCritica.innerText=crit;
-  kpiAtencao.innerText=aten;
-  kpiMedio.innerText=(soma/rankingGlobal.length).toFixed(2);
-  kpiProblemas.innerText=Object.keys(problemas).length;
-
-  new Chart(graficoProblemas,{
-    type:"bar",
-    data:{ labels:Object.keys(problemas), datasets:[{data:Object.values(problemas)}] },
-    options:{ indexAxis:"y", plugins:{ legend:{display:false} } }
-  });
-}
-
-function exportarRanking(){
-  const ws=XLSX.utils.json_to_sheet(rankingGlobal);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Ranking");
-  XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
-}
-function exportarHistorico(){
-  const ws=XLSX.utils.json_to_sheet(historico);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Historico");
-  XLSX.writeFile(wb,"historico_checkinfra.xlsx");
-}
-
-carregar();
+});
 </script>
 
 </body>
