@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1f4fd8">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
 header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
@@ -48,6 +50,8 @@ footer {
 }
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
+
+canvas { max-width:100%; height:auto; margin-top:10px; }
 </style>
 </head>
 
@@ -68,64 +72,52 @@ footer a { color:#fff; text-decoration:underline; }
 </div>
 
 <div class="main">
+
   <div class="card">
     <h2>Intensidade Técnica (IT)</h2>
     <p>
-      O componente <strong>IT</strong> do IPT reflete a complexidade e extensão das
-      não conformidades observadas durante a avaliação sanitária das escolas.
-      Diferente do GS, que é qualitativo, o IT é quantitativo e acumulativo.
+      O componente <strong>IT</strong> representa a severidade técnica e a complexidade das não conformidades encontradas.
+      Ele é calculado com base na soma ponderada dos problemas identificados no checklist do <strong>CheckInfra</strong>.
+      Quanto maior o IT, mais complexos ou numerosos são os problemas, exigindo maior intervenção técnica.
     </p>
   </div>
 
   <div class="card">
-    <h3>Como é calculado</h3>
-    <p>
-      O IT é obtido somando os pesos de todos os problemas detectados no checklist,
-      considerando sua severidade e impacto técnico. Cada problema recebe um valor numérico
-      proporcional ao risco que representa para saúde e segurança.
-    </p>
+    <h3>Exemplo de Valores IT</h3>
     <ul>
-      <li>Problema leve: 1 ponto</li>
-      <li>Problema moderado: 2 pontos</li>
-      <li>Problema grave: 3 pontos</li>
-      <li>Problema crítico: 4 pontos</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <h3>Exemplo Prático</h3>
-    <p>
-      Supondo três escolas avaliadas:
-    </p>
-    <ul>
-      <li>Escola A: 5 problemas leves → IT = 5</li>
-      <li>Escola B: 3 problemas moderados e 1 grave → IT = 3*2 + 3 = 9</li>
-      <li>Escola C: 2 problemas graves e 2 críticos → IT = 2*3 + 2*4 = 14</li>
+      <li>Escola A: 10 pontos — Problemas leves e poucos (manutenção preventiva)</li>
+      <li>Escola B: 25 pontos — Problemas moderados, requerem reparos pontuais</li>
+      <li>Escola C: 40 pontos — Problemas graves e extensos, demandam intervenção técnica urgente</li>
     </ul>
     <p>
-      Na fórmula do IPT: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>,
-      o IT permite diferenciar escolas com mesmo status mas diferentes cargas técnicas.
+      No IPT, o IT contribui com 40% do cálculo: <strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong>.
     </p>
   </div>
 
   <div class="card">
-    <h3>Mini Gráfico Comparativo</h3>
+    <h3>Distribuição IT – Gráfico de Barras</h3>
+    <canvas id="graficoIT"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Mini Tabela Comparativa</h3>
     <table>
-      <tr><th>Escola</th><th>IT</th></tr>
-      <tr><td>Escola A</td><td style="background:#4caf50; color:#fff;">5</td></tr>
-      <tr><td>Escola B</td><td style="background:#ff7043; color:#fff;">9</td></tr>
-      <tr><td>Escola C</td><td style="background:#f44336; color:#fff;">14</td></tr>
+      <tr><th>Escola</th><th>IT</th><th>Severidade</th></tr>
+      <tr><td>Escola A</td><td>10</td><td><span class="badge adequada">Baixa</span></td></tr>
+      <tr><td>Escola B</td><td>25</td><td><span class="badge atencao">Moderada</span></td></tr>
+      <tr><td>Escola C</td><td>40</td><td><span class="badge critica">Alta</span></td></tr>
     </table>
   </div>
 
   <div class="card">
     <h3>Referências</h3>
     <ul>
-      <li>[1] ABNT NBR 9050: Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos. 2020.</li>
-      <li>[2] WHO – Water, Sanitation and Hygiene in Schools. 2018.</li>
-      <li>[3] Saaty, T. L. Avaliação multicritério de ativos públicos. 2008.</li>
+      <li>[1] ABNT NBR ISO 31000: Gestão de riscos em ativos e infraestrutura. 2018.</li>
+      <li>[2] Saaty, T. L. Avaliação multicritério (MCDA) aplicada a ativos públicos. 2008.</li>
+      <li>[3] Manual de manutenção escolar e boas práticas sanitárias – MEC, 2020.</li>
     </ul>
   </div>
+
 </div>
 
 <footer>
@@ -136,6 +128,21 @@ footer a { color:#fff; text-decoration:underline; }
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
 }
+
+// Gráfico IT
+const ctxIT = document.getElementById('graficoIT').getContext('2d');
+new Chart(ctxIT, {
+  type: 'bar',
+  data: {
+    labels: ['Escola A', 'Escola B', 'Escola C'],
+    datasets: [{
+      label: 'Pontuação IT',
+      data: [10,25,40],
+      backgroundColor: ['#4caf50','#ff7043','#f44336']
+    }]
+  },
+  options: { indexAxis: 'y', plugins:{ legend:{ display:false } } }
+});
 </script>
 
 </body>
