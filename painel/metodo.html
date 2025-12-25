@@ -7,168 +7,195 @@
 <meta name="theme-color" content="#1f4fd8">
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  padding:20px;
-}
-.card{
-  background:#fff;
-  max-width:1000px;
-  margin:20px auto;
-  padding:24px;
-  border-radius:10px;
-}
-h2,h3{
-  color:#1f4fd8;
-}
-p,li{
-  line-height:1.6;
-  font-size:14px;
-}
-ul{
-  padding-left:20px;
-}
-.badge{
-  display:inline-block;
-  padding:4px 10px;
-  border-radius:12px;
-  font-size:12px;
-  color:#fff;
-}
-.critica{background:#f44336}
-.atencao{background:#ff7043}
-.alerta{background:#fbc02d;color:#000}
-.adequada{background:#4caf50}
-.footer{
-  text-align:center;
-  font-size:12px;
-  color:#fff;
+html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
+header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
+header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
+header button.voltar { left:10px; }
+header button.menu { right:10px; }
+
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition: right 0.3s ease; z-index:1000; box-sizing:border-box; }
+.sidebar.open { right:0; }
+.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:flex-end; align-items:center; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; font-size:20px; }
+.sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
+
+.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; text-align:justify; }
+
+.card { background:#fff; margin:20px 0; padding:24px; border-radius:10px; box-sizing:border-box; }
+h2,h3{color:#1f4fd8;}
+p,li{line-height:1.6;font-size:14px;}
+ul{padding-left:20px;}
+.badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
+.critica{background:#f44336;}
+.atencao{background:#ff7043;}
+.alerta{background:#fbc02d;color:#000;}
+.adequada{background:#4caf50;}
+
+a.link-indice { color:#1f4fd8; text-decoration:underline; cursor:pointer; }
+
+table { border-collapse: collapse; width:100%; margin-top:10px; }
+th, td { border:1px solid #ccc; padding:6px 10px; text-align:center; font-size:13px; }
+th { background:#1f4fd8; color:#fff; }
+
+footer {
   background:#1f4fd8;
-  padding:16px;
-  margin-top:40px;
+  color:#fff;
+  text-align:center;
+  padding:16px 10px;
+  font-size:12px;
+  line-height:1.4;
+  box-sizing:border-box;
+  width:100%;
 }
+footer div { max-width:600px; margin:0 auto; }
+footer a { color:#fff; text-decoration:underline; }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h2>📘 Metodologia — Índice de Prioridade Técnica (IPT)</h2>
-  <p>
-    O <strong>CheckInfra</strong> é uma ferramenta de diagnóstico preliminar e
-    priorização técnica da infraestrutura sanitária escolar, voltada ao apoio
-    à gestão pública, planejamento e tomada de decisão baseada em evidências.
-  </p>
+<header>
+  <button class="voltar" onclick="history.back()">← Voltar</button>
+  <h1>Metodologia — Índice de Prioridade Técnica (IPT)</h1>
+  <button class="menu" onclick="toggleSidebar()">☰</button>
+</header>
+
+<div class="sidebar" id="sidebar">
+  <h3><span onclick="toggleSidebar()">×</span></h3>
+  <a href="metodo.html">Resumo Metodologia</a>
+  <a href="gs.html">GS – Gravidade Sanitária</a>
+  <a href="it.html">IT – Intensidade Técnica</a>
+  <a href="rt.html">RT – Recorrência Temporal</a>
 </div>
 
-<div class="card">
-  <h3>1. Unidade de Análise</h3>
-  <p>
-    A unidade principal de análise do sistema é a <strong>escola</strong>.
-    Embora múltiplas avaliações possam existir ao longo do tempo, o painel
-    gerencial considera, para fins de ranking e indicadores consolidados,
-    <strong>apenas a avaliação mais recente de cada escola</strong>.
-  </p>
-  <p>
-    Todas as avaliações anteriores permanecem armazenadas e acessíveis
-    para fins de auditoria, análise histórica e transparência institucional.
-  </p>
+<div class="main">
+  <div class="card">
+    <h2>📘 Metodologia — Índice de Prioridade Técnica (IPT)</h2>
+    <p>
+      O <strong>CheckInfra</strong> é uma ferramenta de diagnóstico preliminar e priorização técnica da infraestrutura sanitária escolar.
+      Ele apoia gestores públicos na tomada de decisão baseada em evidências, permitindo identificar rapidamente quais escolas demandam atenção imediata.
+      O IPT combina três componentes: <strong>GS</strong>, <strong>IT</strong> e <strong>RT</strong>, cada um detalhado em:
+      <a class="link-indice" href="gs.html">GS</a> | 
+      <a class="link-indice" href="it.html">IT</a> | 
+      <a class="link-indice" href="rt.html">RT</a>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>1. Unidade de Análise</h3>
+    <p>
+      A unidade de análise é a <strong>escola</strong>. Mesmo que existam múltiplas avaliações ao longo do tempo, o painel considera apenas a mais recente para fins de ranking e KPIs.
+      Avaliações anteriores permanecem armazenadas para auditoria, transparência e análise histórica de tendências.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>2. Estrutura do IPT</h3>
+    <p>
+      O IPT é calculado com base na fórmula:
+    </p>
+    <p style="font-size:16px; text-align:center;"><strong>IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)</strong></p>
+    <p>
+      Cada componente possui um peso definido, refletindo sua relevância no diagnóstico:
+    </p>
+    <ul>
+      <li><strong>GS</strong> — Gravidade Sanitária: prioridade máxima para problemas críticos de saúde e higiene.</li>
+      <li><strong>IT</strong> — Intensidade Técnica: avalia complexidade e quantidade de problemas técnicos.</li>
+      <li><strong>RT</strong> — Recorrência Temporal: identifica problemas persistentes ou reincidentes, alertando para questões crônicas.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>3. Interpretação e Faixas de IPT</h3>
+    <p>
+      O IPT permite classificar escolas de acordo com prioridade técnica:
+    </p>
+    <table>
+      <tr>
+        <th>Faixa IPT</th>
+        <th>Significado</th>
+        <th>Ação Recomendável</th>
+      </tr>
+      <tr>
+        <td>0–1,5</td>
+        <td>Baixa prioridade</td>
+        <td>Manutenção preventiva e monitoramento</td>
+      </tr>
+      <tr>
+        <td>1,6–2,5</td>
+        <td>Média prioridade</td>
+        <td>Planejamento de intervenção futura</td>
+      </tr>
+      <tr>
+        <td>2,6–3,5</td>
+        <td>Alta prioridade</td>
+        <td>Intervenção técnica programada</td>
+      </tr>
+      <tr>
+        <td>3,6–4</td>
+        <td>Prioridade crítica</td>
+        <td>Intervenção imediata, risco à saúde</td>
+      </tr>
+    </table>
+    <p>
+      Essa classificação permite ao gestor priorizar recursos limitados para escolas com maior risco sanitário ou técnico.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>4. Exemplos Práticos</h3>
+    <p>
+      Considere três escolas fictícias avaliadas pelo CheckInfra:
+    </p>
+    <ul>
+      <li>Escola A: GS=1, IT=1, RT=1 → IPT = 1,0 (Baixa prioridade)</li>
+      <li>Escola B: GS=3, IT=2, RT=1 → IPT = 2,2 (Média prioridade)</li>
+      <li>Escola C: GS=4, IT=4, RT=2 → IPT = 3,6 (Prioridade crítica)</li>
+    </ul>
+    <p>
+      Esse exemplo mostra como diferentes combinações dos índices resultam em prioridades distintas, auxiliando a tomada de decisão.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>5. Benefícios do IPT</h3>
+    <ul>
+      <li>Permite priorizar intervenções em escolas com maior risco.</li>
+      <li>Auxilia no planejamento estratégico de manutenção e reformas.</li>
+      <li>Fornece indicadores para gestão pública baseada em evidências.</li>
+      <li>Possibilita monitoramento de tendências ao longo do tempo.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>6. Aviso Técnico</h3>
+    <p>
+      O CheckInfra não substitui inspeções presenciais, laudos técnicos ou projetos de engenharia. 
+      Trata-se de uma ferramenta de apoio à gestão, priorização e planejamento, com base em dados padronizados.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>7. Referências</h3>
+    <ul>
+      <li>[1] ABNT NBR ISO 31000: Gestão de riscos em ativos e infraestrutura. 2018.</li>
+      <li>[2] WHO – Water, Sanitation and Hygiene in Schools. 2018.</li>
+      <li>[3] Saaty, T. L. Avaliação multicritério (MCDA) aplicada a ativos públicos. 2008.</li>
+      <li>[4] MEC – Manual de inspeção e manutenção escolar. 2020.</li>
+    </ul>
+  </div>
 </div>
 
-<div class="card">
-  <h3>2. Estrutura do Índice IPT</h3>
-  <p>
-    O Índice de Prioridade Técnica (IPT) é um índice autoral do CheckInfra,
-    inspirado em práticas de engenharia diagnóstica, avaliação multicritério
-    (MCDA) e gestão de ativos públicos.
-  </p>
+<footer>
+  <div>© 2026 CheckInfra — Metodologia pública, transparente e auditável</div>
+</footer>
 
-  <p><strong>Fórmula geral:</strong></p>
-  <p style="font-size:16px;"><strong>
-    IPT = (GS × 0,4) + (IT × 0,4) + (RT × 0,2)
-  </strong></p>
-
-  <ul>
-    <li><strong>GS</strong> — Gravidade Sanitária</li>
-    <li><strong>IT</strong> — Intensidade Técnica</li>
-    <li><strong>RT</strong> — Recorrência Temporal (persistência)</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3>3. Gravidade Sanitária (GS)</h3>
-  <p>
-    A Gravidade Sanitária é derivada do status final da avaliação,
-    conforme os critérios do checklist técnico.
-  </p>
-
-  <ul>
-    <li><span class="badge adequada">Adequada</span> → GS = 1</li>
-    <li><span class="badge alerta">Alerta</span> → GS = 2</li>
-    <li><span class="badge atencao">Atenção</span> → GS = 3</li>
-    <li><span class="badge critica">Crítica</span> → GS = 4</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3>4. Intensidade Técnica (IT)</h3>
-  <p>
-    A Intensidade Técnica corresponde à pontuação total obtida na avaliação,
-    calculada a partir da soma ponderada dos problemas identificados no checklist.
-  </p>
-  <p>
-    Esse componente reflete a <strong>complexidade, extensão e severidade técnica</strong>
-    das não conformidades observadas.
-  </p>
-</div>
-
-<div class="card">
-  <h3>5. Recorrência Temporal (RT)</h3>
-  <p>
-    O componente RT representa a <strong>persistência recorrente</strong>
-    dos problemas ao longo do tempo.
-  </p>
-  <p>
-    No modelo atual do CheckInfra, o RT é definido como:
-  </p>
-  <ul>
-    <li>Quantidade de avaliações já registradas para a mesma escola</li>
-    <li>Utilizada como proxy de reincidência estrutural</li>
-    <li>Limitada por teto técnico para evitar distorções</li>
-  </ul>
-  <p>
-    Esse fator permite identificar problemas crônicos, independentemente
-    de variações pontuais entre avaliadores.
-  </p>
-</div>
-
-<div class="card">
-  <h3>6. Consolidação e Ranking</h3>
-  <p>
-    Para fins de leitura executiva, o painel:
-  </p>
-  <ul>
-    <li>Exibe apenas <strong>uma linha por escola</strong></li>
-    <li>Considera sempre a <strong>avaliação mais recente</strong></li>
-    <li>Recalcula o IPT dinamicamente</li>
-    <li>Preserva todo o histórico para consulta</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h3>7. Aviso Técnico</h3>
-  <p>
-    O CheckInfra não substitui inspeções presenciais, laudos técnicos ou
-    projetos de engenharia. Trata-se de uma ferramenta de apoio à gestão,
-    priorização e planejamento.
-  </p>
-</div>
-
-<div class="footer">
-  © 2025 CheckInfra — Metodologia pública, transparente e auditável
-</div>
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+</script>
 
 </body>
 </html>
