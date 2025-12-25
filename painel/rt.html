@@ -7,25 +7,69 @@
 <meta name="theme-color" content="#1f4fd8">
 
 <style>
-html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
-header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
-header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
+html, body {
+  margin:0; padding:0; width:100%; overflow-x:hidden;
+  font-family: Arial, sans-serif; background:#f4f6f8;
+  min-height:100vh; display:flex; flex-direction:column;
+}
+header {
+  background:#1f4fd8; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  padding:14px 20px; position:relative; width:100%;
+  box-sizing:border-box;
+}
+header h1 { margin:0; font-size:20px; text-align:center; }
+header button {
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:#fff; color:#1f4fd8; border:none; border-radius:6px;
+  padding:6px 12px; cursor:pointer;
+}
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
+
+.sidebar {
+  position:fixed; right:0; top:0; height:100%; width:240px;
+  background:#eaf0ff; padding:20px; box-shadow:-2px 0 5px rgba(0,0,0,.1);
+  transform:translateX(100%); transition:transform .3s;
+  z-index:1000;
+}
+.sidebar.active { transform:translateX(0); }
+.sidebar h3 { margin-top:0; color:#1f4fd8; font-size:16px; }
+.sidebar a {
+  display:block; color:#1f4fd8; text-decoration:none; margin:12px 0;
+  font-weight:bold;
+}
+.sidebar a:hover { text-decoration:underline; }
+
 .main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
-.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; text-align:justify; }
-h2,h3{color:#1f4fd8;}
-p,li{line-height:1.6;font-size:14px;}
-ul{padding-left:20px;}
+
+.card { background:#fff; margin:20px 0; padding:24px; border-radius:10px; box-sizing:border-box; line-height:1.6; }
+.card h2,h3 { color:#1f4fd8; margin-bottom:10px; }
+.card p, .card li { font-size:14px; margin-bottom:12px; text-align:justify; }
+ul { padding-left:20px; margin-bottom:12px; }
+
 .badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100%; }
+.critica{background:#f44336;}
+.atencao{background:#ff7043;}
+.alerta{background:#fbc02d;color:#000;}
+.adequada{background:#4caf50;}
+
+footer {
+  background:#1f4fd8; color:#fff; text-align:center;
+  padding:16px 10px; font-size:12px; line-height:1.4;
+  box-sizing:border-box; width:100%;
+}
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
-table { border-collapse: collapse; width: 100%; font-size:14px; margin-top:10px; }
-table, th, td { border:1px solid #ccc; padding:6px; text-align:center; }
+
+canvas { max-width:100%; height:auto; margin-top:12px; }
+
+@media(max-width:600px){
+  .sidebar { width:180px; padding:16px; }
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -34,113 +78,129 @@ table, th, td { border:1px solid #ccc; padding:6px; text-align:center; }
   <button class="menu" onclick="toggleSidebar()">☰</button>
 </header>
 
+<div class="sidebar" id="sidebar">
+  <h3>Menu</h3>
+  <a href="../metodologia.html">Metodologia</a>
+  <a href="gs.html">Gravidade Sanitária (GS)</a>
+  <a href="it.html">Intensidade Técnica (IT)</a>
+</div>
+
 <div class="main">
+  <div class="card">
+    <h2>1. Definição do Índice de Recorrência Temporal (RT)</h2>
+    <p>
+      O Índice de Recorrência Temporal (RT) mede a persistência dos problemas detectados nas avaliações de infraestrutura sanitária escolar ao longo do tempo.
+      Ele identifica questões crônicas e reincidentes, permitindo que gestores priorizem intervenções onde problemas persistem ou se repetem.
+    </p>
+  </div>
 
-<!-- 1. Definição do índice RT -->
-<div class="card">
-  <h2>1. Definição do Índice de Recorrência Temporal (RT)</h2>
-  <p>
-    O Índice de Recorrência Temporal (RT) mede a frequência com que problemas detectados na infraestrutura escolar se repetem ao longo do tempo. Ele é calculado com base no histórico de avaliações de cada escola, permitindo identificar problemas crônicos ou reincidentes.  
-    O RT complementa o GS e IT no cálculo do IPT, evidenciando situações em que problemas persistem apesar de intervenções anteriores, sendo fundamental para priorização de manutenção preventiva e corretiva.
-  </p>
-</div>
+  <div class="card">
+    <h2>2. O que o RT considera?</h2>
+    <p>
+      O RT avalia a frequência de não conformidades ao longo de múltiplas inspeções. Uma escola com problemas que se repetem em várias avaliações terá um RT mais alto, sinalizando reincidência estrutural.
+      Esse índice ajuda a distinguir entre problemas pontuais e falhas crônicas, tornando o planejamento de obras mais eficiente.
+    </p>
+  </div>
 
-<!-- 2. O que considera e por quê -->
-<div class="card">
-  <h2>2. O que o índice RT considera e por que?</h2>
-  <p>
-    O RT considera:
-  </p>
-  <ul>
-    <li><strong>Persistência de não conformidades:</strong> mesmo após reparos, alguns problemas podem reaparecer, indicando falhas estruturais ou manutenção inadequada.</li>
-    <li><strong>Quantidade de avaliações anteriores:</strong> escolas com histórico recorrente recebem RT maior, aumentando prioridade de intervenção.</li>
-    <li><strong>Regularidade do monitoramento:</strong> escolas avaliadas frequentemente fornecem dados mais precisos sobre recorrência.</li>
-  </ul>
-  <p>
-    Essa abordagem permite que gestores identifiquem problemas crônicos que impactam diretamente a saúde, segurança e qualidade do ambiente escolar, mesmo quando o GS ou IT individualmente não são críticos.
-  </p>
-</div>
+  <div class="card">
+    <h2>3. Normas e referências</h2>
+    <p>
+      A metodologia do RT se apoia em referências de inspeção predial e gestão de ativos públicos, incluindo:
+    </p>
+    <ul>
+      <li>ABNT NBR 15575 – Edificações habitacionais – Desempenho e manutenção (1)</li>
+      <li>Gestão de ativos públicos e manutenção preventiva: ISO 55000</li>
+      <li>MCDA – Avaliação multicritério de reincidência e priorização de ações (Saaty, 2008)</li>
+    </ul>
+    <p>
+      Essas referências permitem padronizar a análise temporal e fornecer informações objetivas para tomada de decisão.
+    </p>
+  </div>
 
-<!-- 3. Normas e referências -->
-<div class="card">
-  <h2>3. Normas e referências</h2>
-  <p>
-    O cálculo e interpretação do RT baseiam-se em metodologias de monitoramento de infraestrutura e normas técnicas de manutenção:
-  </p>
-  <ul>
-    <li><strong>ABNT NBR 5674:2012</strong> — Manutenção de edificações: estabelece procedimentos de manutenção preventiva, corretiva e monitoramento contínuo.¹</li>
-    <li><strong>ABNT NBR 14037:2017</strong> — Gestão de ativos em instalações escolares, orientando monitoramento e registro histórico.²</li>
-    <li>MCDA (Multi-Criteria Decision Analysis) aplicado a gestão de ativos públicos para ponderação de recorrência como critério de prioridade.³</li>
-  </ul>
-  <p>
-    O RT incorpora essas referências para indicar problemas que se repetem ao longo do tempo, ajudando gestores a direcionar recursos para intervenções sustentáveis.
-  </p>
-  <p>
-    <strong>Referências:</strong><br>
-    1. ABNT. NBR 5674:2012. Associação Brasileira de Normas Técnicas.<br>
-    2. ABNT. NBR 14037:2017. Associação Brasileira de Normas Técnicas.<br>
-    3. Saaty, T.L. Decision Making with the Analytic Hierarchy Process. International Journal of Services Sciences, 2008.
-  </p>
-</div>
+  <div class="card">
+    <h2>4. Interpretação dos valores do RT</h2>
+    <p>
+      O RT é categorizado de acordo com a persistência dos problemas:
+    </p>
+    <ul>
+      <li>RT baixo → Problema pontual, provavelmente resolvido após intervenção.</li>
+      <li>RT médio → Problema reincidente, exige monitoramento e manutenção contínua.</li>
+      <li>RT alto → Problema crônico, requer priorização de obras e inspeções detalhadas.</li>
+    </ul>
+  </div>
 
-<!-- 4. Faixas do RT -->
-<div class="card">
-  <h2>4. Faixas do Índice de Recorrência Temporal</h2>
-  <p>
-    O RT é avaliado em faixas que indicam a frequência de reincidência dos problemas:
-  </p>
-  <ul>
-    <li><strong>RT Baixo (1–2):</strong> Problemas raros ou solucionados com sucesso em intervenções anteriores.</li>
-    <li><strong>RT Médio (3–5):</strong> Problemas recorrentes moderadamente; requer acompanhamento e manutenção programada.</li>
-    <li><strong>RT Alto (6–8):</strong> Problemas frequentes, indicando falhas estruturais ou manutenção insuficiente.</li>
-    <li><strong>RT Crítico (9–10):</strong> Problemas persistentes e graves, demandando intervenção imediata e planejamento estratégico de reparos.
-    </li>
-  </ul>
-</div>
+  <div class="card">
+    <h2>5. Impacto do RT no IPT</h2>
+    <p>
+      Na fórmula do IPT, o RT tem peso de 0,2. Isso significa que escolas com RT elevado indicam reincidência de problemas e aumentam o IPT total.
+      Assim, mesmo que uma escola tenha GS ou IT moderado, um RT alto sinaliza necessidade de atenção prioritária na rede escolar.
+    </p>
+  </div>
 
-<!-- 5. Mini tabela comparativa RT -->
-<div class="card">
-  <h2>Mini Tabela Comparativa de RT</h2>
-  <table>
-    <tr>
-      <th>Faixa</th>
-      <th>RT</th>
-      <th>Impacto</th>
-      <th>Exemplo</th>
-    </tr>
-    <tr>
-      <td>Baixo</td>
-      <td>1–2</td>
-      <td>Pequeno</td>
-      <td>Problema detectado apenas uma vez, reparado com sucesso</td>
-    </tr>
-    <tr>
-      <td>Médio</td>
-      <td>3–5</td>
-      <td>Moderado</td>
-      <td>Problema reaparece em avaliações consecutivas</td>
-    </tr>
-    <tr>
-      <td>Alto</td>
-      <td>6–8</td>
-      <td>Alto</td>
-      <td>Reincidência frequente de falhas em múltiplos pontos da infraestrutura</td>
-    </tr>
-    <tr>
-      <td>Crítico</td>
-      <td>9–10</td>
-      <td>Extremo</td>
-      <td>Problemas persistem em todas as avaliações, risco à saúde e segurança</td>
-    </tr>
-  </table>
+  <div class="card">
+    <h2>6. Mini gráfico ilustrativo</h2>
+    <p>
+      O gráfico a seguir mostra a distribuição das escolas por RT e a linha do RT médio da rede.
+      Ele ilustra como a quantidade de escolas com problemas reincidentes impacta a prioridade de manutenção e planejamento de reformas.
+    </p>
+    <canvas id="rtChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>7. Vantagens e limitações do RT</h2>
+    <p>
+      <strong>Vantagens:</strong> Permite identificar falhas crônicas, priorizar inspeções e otimizar recursos, complementando os índices GS e IT para uma visão completa da rede.
+    </p>
+    <p>
+      <strong>Limitações:</strong> Depende da consistência das avaliações anteriores, da precisão dos dados históricos e da interpretação correta pelo avaliador.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Referência bibliográfica</h3>
+    <p>
+      (1) ABNT NBR 15575: Edificações habitacionais – Desempenho e manutenção, 2013.
+    </p>
+  </div>
+
 </div>
 
 <footer>
-  <div>© 2026 CheckInfra — Metodologia detalhada</div>
+  <div>
+    © 2025 CheckInfra — Metodologia detalhada — Projeto acadêmico de alunos de Engenharia Civil
+  </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function toggleSidebar(){alert("Sidebar será implementada em futuras versões.");}
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("active");
+}
+
+const ctx = document.getElementById('rtChart').getContext('2d');
+const rtChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Baixo','Médio','Alto'],
+    datasets: [{
+      label: 'Número de escolas',
+      data: [15, 20, 10],
+      backgroundColor: ['#4caf50','#fbc02d','#f44336']
+    },{
+      label: 'RT médio da rede',
+      type:'line',
+      data:[2.0,2.0,2.0],
+      borderColor:'#1f4fd8',
+      borderWidth:2,
+      fill:false
+    }]
+  },
+  options: {
+    responsive:true,
+    plugins:{ legend:{ display:true }, tooltip:{ mode:'index', intersect:false } },
+    scales:{ y:{ beginAtZero:true, title:{ display:true, text:'Número de escolas' } } }
+  }
+});
 </script>
 
 </body>
