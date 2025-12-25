@@ -15,13 +15,7 @@
 
 <style>
 * { box-sizing: border-box; }
-
-body {
-  margin:0;
-  font-family: Arial;
-  background:#f4f6f8;
-  display:flex;
-}
+body { margin:0; font-family: Arial; background:#f4f6f8; display:flex; }
 
 /* SIDEBAR */
 .sidebar {
@@ -33,13 +27,12 @@ body {
   right:0;
   top:0;
   bottom:0;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
 }
-
-.sidebar h3 {
-  margin-top:0;
-  font-size:18px;
-}
-
+.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:space-between; align-items:center; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; }
 .sidebar a {
   display:block;
   color:#fff;
@@ -55,6 +48,17 @@ body {
   padding:20px;
 }
 
+/* HEADER */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  max-width:1100px;
+  margin:0 auto 20px;
+}
+.header h2 { margin:0; flex:1; text-align:center; }
+.header button { background:none; border:none; color:#1f4fd8; font-size:20px; cursor:pointer; }
+
 /* CARDS */
 .card {
   background:#fff;
@@ -63,75 +67,43 @@ body {
   padding:20px;
   border-radius:10px;
 }
-
-.grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-  gap:16px;
-}
-
-.kpi {
-  background:#f9fafb;
-  border-radius:10px;
-  padding:16px;
-  text-align:center;
-}
-
+.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
 .kpi h4 { margin:0; font-size:14px; color:#555; }
 .kpi strong { font-size:30px; display:block; margin-top:6px; }
 
-.badge {
-  padding:4px 8px;
-  border-radius:12px;
-  color:#fff;
-  font-size:12px;
-}
+.badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
 .adequada { background:#4caf50; }
 .alerta { background:yellow; color:#000; }
 .atencao { background:#ff7043; }
 .critica { background:#f44336; }
 
-table {
-  width:100%;
-  border-collapse: collapse;
-  font-size:14px;
-}
+table { width:100%; border-collapse: collapse; font-size:14px; }
+th, td { padding:8px; border-bottom:1px solid #eee; text-align:center; }
+th { background:#f4f6f8; }
 
-th, td {
-  padding:8px;
-  border-bottom:1px solid #eee;
-}
-
-th {
-  background:#f4f6f8;
-}
-
-button {
-  padding:10px 14px;
-  background:#1f4fd8;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  margin-right:8px;
-}
+button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
 </style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-  <span class="close" onclick="toggleSidebar()">x</span>
-  <h3>☰ Menu</h3>
+<div class="sidebar" id="sidebar">
+  <h3>☰ Menu <span onclick="fecharSidebar()">X</span></h3>
   <a href="metodo.html">📘 Metodologia</a>
 </div>
 
 <!-- CONTEÚDO -->
 <div class="main">
 
-<div class="card">
+<div class="header">
+  <button onclick="window.history.back()">←</button>
   <h2>Painel Gerencial – CheckInfra</h2>
+  <div style="width:20px;"></div>
+</div>
+
+<div class="card">
   <small>Síntese executiva e priorização técnica</small>
 </div>
 
@@ -154,7 +126,7 @@ button {
   <br><br>
   <table>
     <thead>
-      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>RT</th></tr>
+      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
@@ -171,10 +143,81 @@ firebase.initializeApp({
 
 const db = firebase.firestore();
 const tabelaRanking = document.getElementById("tabelaRanking");
-
 let rankingGlobal = [];
 
+// Pesos da metodologia
+const PESO_GS = 0.4;
+const PESO_IT = 0.4;
+const PESO_RT = 0.2;
+
+// Classe e cor do status
+function classeStatus(s){
+  s = (s||"").toLowerCase();
+  if(s.includes("crít")) return "critica";
+  if(s.includes("aten")) return "atencao";
+  if(s.includes("alerta")) return "alerta";
+  return "adequada";
+}
+
+// Calcular IPT
+function calcularIPT(d){
+  let GS=1;
+  const status = (d.status||"").toLowerCase();
+  if(status.includes("crít")) GS=4;
+  else if(status.includes("aten")) GS=3;
+  else if(status.includes("alerta")) GS=2;
+
+  const IT = Number(d.pontuacao||0);
+  const RT = Number(d.recorrencia||1); // frequência naquele status
+
+  return (GS*PESO_GS) + (IT*PESO_IT) + (RT*PESO_RT);
+}
+
+function fecharSidebar(){ document.getElementById("sidebar").style.display="none"; }
+
+db.collection("avaliacoes").get().then(snap=>{
+  let dados=[];
+  snap.forEach(d=>dados.push(d.data()));
+
+  // ranking
+  rankingGlobal = dados.map((d,i)=>{
+    const IPT = calcularIPT(d);
+    return {
+      "#": i+1,
+      Escola: d.escola,
+      Status: d.status,
+      IPT: IPT.toFixed(2)
+    };
+  });
+
+  // preencher tabela
+  tabelaRanking.innerHTML="";
+  rankingGlobal.forEach(r=>{
+    const cor = classeStatus(r.Status);
+    tabelaRanking.innerHTML+=`
+      <tr>
+        <td>${r["#"]}</td>
+        <td>${r.Escola}</td>
+        <td class="${cor}">${r.Status}</td>
+        <td>${r.IPT}</td>
+      </tr>`;
+  });
+
+  // KPIs
+  const statusCount = {adequada:0,alerta:0,atencao:0,critica:0};
+  dados.forEach(d=>{
+    const c = classeStatus(d.status);
+    statusCount[c]++;
+  });
+  document.getElementById("kpiCritica").innerText = statusCount.critica;
+  document.getElementById("kpiAtencao").innerText = statusCount.atencao;
+  document.getElementById("kpiMedio").innerText = (rankingGlobal.reduce((a,b)=>a+parseFloat(b.IPT),0)/rankingGlobal.length).toFixed(2);
+  document.getElementById("kpiProblemas").innerText = dados.length;
+});
+
+// Exportar XLSX
 window.exportarXLSX = function(){
+  if(rankingGlobal.length===0) return alert("Nenhum dado disponível");
   const ws = XLSX.utils.json_to_sheet(rankingGlobal);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Ranking");
@@ -182,35 +225,12 @@ window.exportarXLSX = function(){
 };
 
 window.exportarHistorico = function(){
+  if(rankingGlobal.length===0) return alert("Nenhum dado disponível");
   const ws = XLSX.utils.json_to_sheet(rankingGlobal);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Historico");
   XLSX.writeFile(wb, "historico_checkinfra.xlsx");
 };
-
-db.collection("avaliacoes").get().then(snap=>{
-  let dados=[];
-  snap.forEach(d=>dados.push(d.data()));
-
-  rankingGlobal = dados.map((d,i)=>({
-    "#":i+1,
-    Escola:d.escola,
-    Status:d.status,
-    IPT:d.pontuacao || 0,
-    RT:1
-  }));
-
-  rankingGlobal.forEach(r=>{
-    tabelaRanking.innerHTML+=`
-      <tr>
-        <td>${r["#"]}</td>
-        <td>${r.Escola}</td>
-        <td>${r.Status}</td>
-        <td>${r.IPT}</td>
-        <td>${r.RT}</td>
-      </tr>`;
-  });
-});
 </script>
 
 </body>
