@@ -13,28 +13,28 @@ header h1 { margin:0; font-size:20px; text-align:center; white-space:nowrap; ove
 header button { position:absolute; top:50%; transform:translateY(-50%); background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 header button.voltar { left:10px; }
 header button.menu { right:10px; }
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; left:-240px; top:0; bottom:0; overflow-y:auto; transition: left 0.3s ease; z-index:1000; box-sizing:border-box; }
+.sidebar.open { left:0; }
+.sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:flex-end; align-items:center; }
+.sidebar h3 span { cursor:pointer; font-weight:bold; font-size:20px; }
+.sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
 .main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
-.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; text-align:justify; }
+.card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
 h2,h3{color:#1f4fd8;}
-p,li{line-height:1.6;font-size:14px;}
+p,li{line-height:1.6;font-size:14px; text-align:justify;}
 ul{padding-left:20px;}
 .badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;}
 .critica{background:#f44336}
 .atencao{background:#ff7043}
 .alerta{background:#fbc02d;color:#000}
 .adequada{background:#4caf50}
-footer {
-  background:#1f4fd8;
-  color:#fff;
-  text-align:center;
-  padding:16px 10px;
-  font-size:12px;
-  line-height:1.4;
-  box-sizing:border-box;
-  width:100%;
-}
+table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+table, th, td { border: 1px solid #ddd; }
+th, td { padding: 8px; text-align: center; font-size:13px; }
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; box-sizing:border-box; width:100%; }
 footer div { max-width:600px; margin:0 auto; }
 footer a { color:#fff; text-decoration:underline; }
+@media(max-width:480px){footer div{padding:0 8px;} footer p{font-size:10px;}}
 </style>
 </head>
 <body>
@@ -45,121 +45,125 @@ footer a { color:#fff; text-decoration:underline; }
   <button class="menu" onclick="toggleSidebar()">☰</button>
 </header>
 
+<div class="sidebar" id="sidebar">
+  <h3><span onclick="toggleSidebar()">×</span></h3>
+  <a href="gs.html">GS – Gravidade Sanitária</a>
+  <a href="it.html">IT – Intensidade Técnica</a>
+  <a href="rt.html">RT – Recorrência Temporal</a>
+  <a href="metodo.html">Metodologia Geral</a>
+</div>
+
 <div class="main">
+  <div class="card">
+    <h2>Gravidade Sanitária (GS) – Índice Detalhado</h2>
+    <p>
+      O índice de Gravidade Sanitária (GS) é um componente fundamental do Índice de Prioridade Técnica (IPT) do CheckInfra. Ele mensura a severidade das condições sanitárias da infraestrutura escolar, refletindo diretamente riscos à saúde e segurança dos alunos e servidores. A escala de GS vai de 1 a 4, sendo 1 “Adequada” e 4 “Crítica”.
+    </p>
+  </div>
 
-<!-- 1. Definição do índice de gravidade técnica sanitária -->
-<div class="card">
-  <h2>1. Definição do Índice de Gravidade Técnica Sanitária (GS)</h2>
-  <p>
-    O Índice de Gravidade Sanitária (GS) do CheckInfra é um indicador que representa a severidade da infraestrutura escolar em termos sanitários. Ele mede o impacto das não conformidades identificadas durante a avaliação do checklist técnico, refletindo o risco potencial à saúde e à segurança dos alunos. O GS é uma das três componentes que formam o Índice de Prioridade Técnica (IPT), ponderado de forma a indicar escolas que necessitam de intervenção urgente.
-  </p>
-</div>
+  <div class="card">
+    <h3>1. Definição do índice de Gravidade Sanitária</h3>
+    <p>
+      O GS representa a gravidade dos problemas detectados durante a avaliação sanitária da escola. Ele combina critérios técnicos do checklist com indicadores de risco à saúde, impacto funcional e conformidade com normas técnicas. Quanto maior o GS, maior a urgência de intervenção.
+    </p>
+  </div>
 
-<!-- 2. O que o índice considera? Por que? -->
-<div class="card">
-  <h2>2. O que o índice de Gravidade Sanitária considera e por que?</h2>
-  <p>
-    O GS considera aspectos críticos da infraestrutura sanitária escolar, incluindo: disponibilidade de água potável, funcionamento de banheiros, higiene geral, condições de escoamento de esgoto, presença de infiltrações, entre outros. Cada item avaliado reflete diretamente o risco à saúde dos alunos. Escolas com problemas graves nessas áreas recebem valores altos de GS para sinalizar prioridade de intervenção. A utilização desse índice permite que gestores públicos identifiquem rapidamente unidades com risco elevado, otimizando recursos e ações.
-  </p>
-</div>
+  <div class="card">
+    <h3>2. O que o índice de Gravidade Sanitária considera?</h3>
+    <p>
+      Considera múltiplos fatores, tais como ausência de água potável, condições de higiene em banheiros e refeitórios, drenagem adequada, esgoto exposto, presença de mofo, infiltrações e risco estrutural. O objetivo é quantificar o risco sanitário real da unidade escolar de forma objetiva e comparável.
+    </p>
+  </div>
 
-<!-- 3. Normas e referências -->
-<div class="card">
-  <h2>3. Normas e Referências Bibliográficas</h2>
-  <p>
-    O GS é fundamentado em normas técnicas nacionais e internacionais, além de metodologias de avaliação multicritério:
-  </p>
-  <ul>
-    <li><strong>ABNT NBR 9050:2020</strong> — Acessibilidade em edificações, mobiliário, espaços e equipamentos urbanos, garantindo que todos os usuários tenham acesso seguro e adequado às instalações sanitárias.¹</li>
-    <li><strong>WHO – Water, Sanitation and Hygiene in Schools, 2018</strong> — Diretrizes para garantir saneamento adequado, segurança hídrica e higiene em escolas, prevenindo doenças e promovendo saúde.²</li>
-    <li><strong>MCDA (Multi-Criteria Decision Analysis)</strong> — Avaliação multicritério para ponderar gravidade, intensidade e recorrência dos problemas, permitindo priorização de ações.³</li>
-  </ul>
-  <p>
-    Em outros contextos, índices similares são utilizados em gestão de ativos públicos e saúde ambiental escolar, sempre com foco na identificação de riscos críticos e priorização de intervenções. O GS do CheckInfra se adapta a este modelo, oferecendo uma métrica simples, robusta e auditável.
-  </p>
-  <p>
-    <strong>Referências:</strong><br>
-    1. ABNT. NBR 9050:2020. Associação Brasileira de Normas Técnicas.<br>
-    2. WHO. Water, Sanitation and Hygiene in Schools. World Health Organization, 2018.<br>
-    3. Saaty, T.L. Decision Making with the Analytic Hierarchy Process. International Journal of Services Sciences, 2008.
-  </p>
-</div>
+  <div class="card">
+    <h3>3. Normas e referências bibliográficas</h3>
+    <p>
+      O GS se baseia em normas técnicas nacionais e internacionais que regulam infraestrutura escolar e saneamento:
+    </p>
+    <ul>
+      <li>ABNT NBR 9050: Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos<sup>1</sup></li>
+      <li>ABNT NBR 13969: Caixa de descarga de esgoto sanitário – Requisitos<sup>1</sup></li>
+      <li>WHO – Water, Sanitation and Hygiene in Schools, 2018<sup>2</sup></li>
+      <li>Princípios de avaliação multicritério (MCDA) e gestão de ativos públicos<sup>3</sup></li>
+    </ul>
+    <p>
+      Essas referências asseguram que o índice seja alinhado com boas práticas, legislações e padrões internacionais, permitindo priorizar corretamente ações de manutenção e melhorias.
+    </p>
+  </div>
 
-<!-- 4. Adequada -->
-<div class="card">
-  <h2>4. O que o índice de gravidade “Adequada” significa?</h2>
-  <p>
-    Uma escola classificada como <span class="badge adequada">Adequada</span> (GS = 1) indica que sua infraestrutura sanitária atende plenamente aos padrões técnicos, apresenta higiene e segurança satisfatórias, e não apresenta riscos imediatos à saúde dos alunos. Intervenções corretivas não são prioritárias, mas manutenção preventiva deve ser considerada para manter os padrões.
-  </p>
-</div>
+  <div class="card">
+    <h3>4. Interpretação dos valores do GS</h3>
+    <p>
+      A escala do GS permite identificar rapidamente a gravidade das condições da escola:
+    </p>
+    <ul>
+      <li><span class="badge adequada">Adequada (1)</span>: Condições satisfatórias, baixo risco sanitário. A escola atende aos padrões mínimos de higiene e segurança, podendo manter operação regular sem intervenções urgentes.</li>
+      <li><span class="badge alerta">Alerta (2)</span>: Pequenas não conformidades, risco moderado. Problemas pontuais que devem ser monitorados ou corrigidos em curto prazo, evitando que evoluam para situações críticas.</li>
+      <li><span class="badge atencao">Atenção (3)</span>: Problemas significativos, risco elevado. Indica que a escola apresenta falhas que podem impactar a saúde e segurança de estudantes e funcionários, exigindo intervenção técnica planejada.</li>
+      <li><span class="badge critica">Crítica (4)</span>: Problemas graves, risco imediato. Intervenção urgente é necessária, pois a manutenção da operação da escola nas condições atuais representa perigo real.</li>
+    </ul>
+  </div>
 
-<!-- 5. Alerta -->
-<div class="card">
-  <h2>5. O que o índice de gravidade “Alerta” significa?</h2>
-  <p>
-    Escolas com classificação <span class="badge alerta">Alerta</span> (GS = 2) apresentam pequenas não conformidades que podem evoluir para problemas maiores se não forem corrigidas. Exemplos incluem torneiras com vazamento, lixeiras inadequadas ou infiltrações leves. A prioridade é monitoramento e correção preventiva.
-  </p>
-</div>
+  <div class="card">
+    <h3>5. Exemplo prático comparativo</h3>
+    <p>
+      Considerando três escolas avaliadas:
+    </p>
+    <table>
+      <thead>
+        <tr><th>Escola</th><th>Status</th><th>GS</th><th>Interpretação</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Escola A</td><td>Adequada</td><td>1</td><td>Operação regular, manutenção preventiva</td></tr>
+        <tr><td>Escola B</td><td>Atenção</td><td>3</td><td>Problemas significativos, intervenção planejada</td></tr>
+        <tr><td>Escola C</td><td>Crítica</td><td>4</td><td>Risco imediato, ação corretiva urgente</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-<!-- 6. Atenção -->
-<div class="card">
-  <h2>6. O que o índice de gravidade “Atenção” significa?</h2>
-  <p>
-    Uma escola com GS = 3 (<span class="badge atencao">Atenção</span>) apresenta problemas significativos, representando risco médio à saúde ou ao uso da infraestrutura. Exemplos incluem vasos sanitários quebrados, infiltrações moderadas ou banheiros sem ventilação adequada. Intervenções corretivas devem ser planejadas com prioridade.
-  </p>
-</div>
+  <div class="card">
+    <h3>6. Mini gráfico ilustrativo</h3>
+    <p>
+      O gráfico abaixo demonstra a distribuição de GS nas escolas de uma rede fictícia, ilustrando rapidamente a quantidade de escolas em cada faixa:
+    </p>
+    <canvas id="graficoGS" style="max-width:100%; height:200px;"></canvas>
+  </div>
 
-<!-- 7. Crítica -->
-<div class="card">
-  <h2>7. O que o índice de gravidade “Crítica” significa?</h2>
-  <p>
-    Uma escola com GS = 4 (<span class="badge critica">Crítica</span>) apresenta falhas graves, com risco imediato à saúde ou segurança dos alunos. Ex.: ausência de água potável, esgoto exposto, banheiros inutilizáveis ou falhas estruturais graves. A prioridade de intervenção é máxima, exigindo ação imediata.
-  </p>
-</div>
-
-<!-- Mini tabela comparativa -->
-<div class="card">
-  <h2>Mini Tabela Comparativa de GS</h2>
-  <table border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse: collapse; font-size:14px; text-align:center;">
-    <tr>
-      <th>Classificação</th>
-      <th>GS</th>
-      <th>Impacto</th>
-      <th>Exemplo</th>
-    </tr>
-    <tr>
-      <td>Adequada</td>
-      <td>1</td>
-      <td>Baixo</td>
-      <td>Infraestrutura sanitária segura e funcional</td>
-    </tr>
-    <tr>
-      <td>Alerta</td>
-      <td>2</td>
-      <td>Médio</td>
-      <td>Pequenas falhas que exigem atenção</td>
-    </tr>
-    <tr>
-      <td>Atenção</td>
-      <td>3</td>
-      <td>Alto</td>
-      <td>Problemas significativos, risco médio</td>
-    </tr>
-    <tr>
-      <td>Crítica</td>
-      <td>4</td>
-      <td>Extremo</td>
-      <td>Risco imediato à saúde e segurança</td>
-    </tr>
-  </table>
+  <div class="card">
+    <h3>7. Referências bibliográficas</h3>
+    <ul>
+      <li><sup>1</sup> Associação Brasileira de Normas Técnicas (ABNT), NBR 9050 e NBR 13969, 2020.</li>
+      <li><sup>2</sup> WHO – Water, Sanitation and Hygiene in Schools, 2018.</li>
+      <li><sup>3</sup> Saaty, T. L., Multicriteria Decision Making: The Analytic Hierarchy Process. McGraw-Hill, 2008.</li>
+    </ul>
+  </div>
 </div>
 
 <footer>
-  <div>© 2026 CheckInfra — Metodologia detalhada</div>
+  <div>© 2026 CheckInfra — Metodologia detalhada | GS – Gravidade Sanitária</div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function toggleSidebar(){alert("Sidebar será implementada em futuras versões.");}
+// Toggle sidebar
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Dados exemplo para gráfico GS
+const ctx = document.getElementById('graficoGS').getContext('2d');
+const chartGS = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Adequada', 'Alerta', 'Atenção', 'Crítica'],
+        datasets: [{
+            label: 'Número de escolas',
+            data: [12, 8, 5, 3],
+            backgroundColor: ['#4caf50','#fbc02d','#ff7043','#f44336']
+        }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}} }
+});
 </script>
 
 </body>
