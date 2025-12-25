@@ -1,102 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<title>Painel Gerencial – CheckInfra</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<title>Painel Gerencial — CheckInfra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1f4fd8">
 
-<!-- Chart.js (CDN correto – NÃO ES MODULE) -->
+<!-- Chart.js UMD (CORRETO) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
 body{
-  font-family:Arial,sans-serif;
-  background:#f4f6f8;
   margin:0;
-  min-height:100vh;
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
 }
 
 /* HEADER */
 header{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
   background:#1f4fd8;
   color:#fff;
-  padding:14px;
+  display:flex;
+  align-items:center;
+  padding:12px;
+  position:relative;
 }
-header h2{margin:0;font-size:18px}
+header h1{
+  flex:1;
+  text-align:center;
+  margin:0;
+  font-size:18px;
+}
 header button{
-  position:absolute;
   background:none;
   border:none;
   color:#fff;
-  font-size:18px;
+  font-size:20px;
   cursor:pointer;
-}
-#btnVoltar{left:12px}
-#btnMenu{right:12px}
-
-/* SIDEBAR */
-#sidebar{
-  position:fixed;
-  top:0; right:-260px;
-  width:260px;
-  height:100%;
-  background:#fff;
-  box-shadow:-2px 0 10px rgba(0,0,0,.2);
-  padding:20px;
-  transition:.3s;
-  z-index:1000;
-}
-#sidebar.open{right:0}
-#sidebar h3{margin-top:0}
-#sidebar a{
-  display:block;
-  padding:10px 0;
-  color:#1f4fd8;
-  text-decoration:none;
 }
 
 /* CARDS */
 .card{
   background:#fff;
   max-width:1100px;
-  margin:20px auto;
+  margin:16px auto;
   padding:20px;
   border-radius:10px;
 }
 
+/* KPI */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
   gap:16px;
 }
-
 .kpi{
   background:#f9fafb;
   border-radius:10px;
   padding:16px;
   text-align:center;
 }
-.kpi h4{margin:0;font-size:14px;color:#555}
-.kpi strong{font-size:28px;display:block;margin-top:6px}
+.kpi strong{font-size:28px;}
 
-/* BADGES */
+/* STATUS */
 .badge{
-  padding:4px 8px;
+  padding:4px 10px;
   border-radius:12px;
   color:#fff;
   font-size:12px;
 }
 .adequada{background:#4caf50}
-.alerta{background:yellow;color:#000}
+.alerta{background:#fbc02d;color:#000}
 .atencao{background:#ff7043}
 .critica{background:#f44336}
 
@@ -104,34 +79,45 @@ header button{
 table{
   width:100%;
   border-collapse:collapse;
-  font-size:14px;
 }
 th,td{
   padding:8px;
   border-bottom:1px solid #eee;
   text-align:center;
 }
-th{background:#f4f6f8}
-
-/* BOTÕES */
-button{
-  padding:10px 14px;
-  background:#1f4fd8;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  margin-right:8px;
-}
 
 /* GRÁFICOS */
 .graficos{
   display:grid;
   grid-template-columns:1fr;
-  gap:32px;
+  gap:30px;
 }
-@media(min-width:900px){
-  .graficos{grid-template-columns:1fr 1fr 1fr}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  top:0;
+  right:-100%;
+  width:85%;
+  max-width:360px;
+  height:100%;
+  background:#fff;
+  box-shadow:-4px 0 10px rgba(0,0,0,.2);
+  transition:.3s;
+  z-index:999;
+}
+.sidebar.open{ right:0; }
+.sidebar header{
+  background:#1f4fd8;
+  color:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.sidebar iframe{
+  width:100%;
+  height:calc(100% - 50px);
+  border:none;
 }
 
 /* FOOTER */
@@ -139,141 +125,170 @@ footer{
   background:#1f4fd8;
   color:#fff;
   text-align:center;
-  padding:16px 10px;
+  padding:14px;
   font-size:12px;
 }
-footer a{color:#fff;text-decoration:underline}
+footer a{color:#fff;text-decoration:underline;}
 </style>
 </head>
 
 <body>
 
 <header>
-  <button id="btnVoltar" onclick="history.back()">←</button>
-  <h2>Painel Gerencial – CheckInfra</h2>
-  <button id="btnMenu" onclick="toggleSidebar()">☰</button>
+  <button onclick="history.back()">←</button>
+  <h1>Painel Gerencial — CheckInfra</h1>
+  <button onclick="abrirSidebar()">☰</button>
 </header>
 
-<div id="sidebar">
-  <h3>Menu</h3>
-  <a href="metodo.html">📘 Metodologia</a>
-</div>
-
 <div class="card grid">
-  <div class="kpi"><h4>Unidades Críticas</h4><strong id="kpiCritica">–</strong></div>
-  <div class="kpi"><h4>Unidades em Atenção</h4><strong id="kpiAtencao">–</strong></div>
+  <div class="kpi"><h4>Críticas</h4><strong id="kpiCritica">–</strong></div>
+  <div class="kpi"><h4>Atenção</h4><strong id="kpiAtencao">–</strong></div>
   <div class="kpi"><h4>IPT Médio</h4><strong id="kpiMedio">–</strong></div>
-  <div class="kpi"><h4>Problemas Frequentes</h4><strong id="kpiProblemas">–</strong></div>
+  <div class="kpi"><h4>Problemas</h4><strong id="kpiProblemas">–</strong></div>
 </div>
 
 <div class="card graficos">
-  <div><h3>Status das Unidades</h3><canvas id="graficoStatus"></canvas></div>
-  <div><h3>Top Prioridades (IPT)</h3><canvas id="graficoIndice"></canvas></div>
-  <div><h3>Frequência de Problemas</h3><canvas id="graficoProblemas"></canvas></div>
+  <canvas id="graficoStatus" height="300"></canvas>
+  <canvas id="graficoIndice" height="300"></canvas>
+  <canvas id="graficoProblemas" height="300"></canvas>
 </div>
 
 <div class="card">
-  <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button>
-  <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
-  <br><br>
+  <button onclick="exportarRanking()">⬇️ Ranking</button>
+  <button onclick="exportarHistorico()">⬇️ Histórico</button>
   <table>
     <thead>
-      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Dias</th></tr>
+      <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr>
     </thead>
     <tbody id="tabelaRanking"></tbody>
   </table>
 </div>
 
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <header>
+    <strong>Metodologia</strong>
+    <button onclick="fecharSidebar()">✕</button>
+  </header>
+  <iframe src="metodo.html"></iframe>
+</div>
+
 <footer>
-  <p>© 2025 CheckInfra — Projeto acadêmico</p>
-  <p>
-    <a href="/pages/sobre.html">Sobre</a> |
-    <a href="/pages/contato.html">Contato</a> |
-    <a href="/pages/politica-privacidade.html">Política</a>
-  </p>
+  <a href="/pages/sobre.html">Sobre</a> |
+  <a href="/pages/contato.html">Contato</a> |
+  <a href="/pages/politica-privacidade.html">Privacidade</a>
 </footer>
 
-<!-- FIREBASE + SCRIPT -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<script>
-const firebaseConfig={
+const app = initializeApp({
   apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain:"checkinfra-adf3c.firebaseapp.com",
   projectId:"checkinfra-adf3c"
-};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
+});
+const db = getFirestore(app);
 
-let dadosRanking=[],dadosHistorico=[];
+let chartStatus, chartIndice, chartProblemas;
+let rankingGlobal=[], rankingHistorico=[];
 
-async function carregarAvaliacoes(){
-  const snap=await db.collection("avaliacoes").get();
-  const mapa={},problemas={};
-  dadosHistorico=[];
-  snap.forEach(doc=>{
-    const d=doc.data();
-    dadosHistorico.push(d);
-    (d.problemas||[]).forEach(p=>problemas[p]=(problemas[p]||0)+1);
-    const data=d.createdAt?.toDate?.()||new Date(0);
-    if(!mapa[d.escola]||data>mapa[d.escola]._data){
-      mapa[d.escola]={...d,_data:data};
-    }
-  });
-  dadosRanking=Object.values(mapa);
-  montar(dadosRanking,problemas);
+function calcularIPT(status,pont,qtd){
+  const GS = {adequada:1,alerta:2,atencao:3,critica:4}[status]||1;
+  return (
+    (GS/4)*0.4 +
+    Math.min(pont/20,1)*0.4 +
+    Math.min(qtd/5,1)*0.2
+  );
 }
 
-function montar(dados,problemas){
-  const tabela=document.getElementById("tabelaRanking");
-  tabela.innerHTML="";
-  let critica=0,atencao=0,soma=0;
-  dados.sort((a,b)=>b.pontuacao-a.pontuacao);
-  dados.forEach((d,i)=>{
-    soma+=d.pontuacao||0;
-    if((d.status||"").includes("Crít"))critica++;
-    if((d.status||"").includes("Aten"))atencao++;
-    tabela.innerHTML+=`
-      <tr>
-        <td>${i+1}</td>
-        <td>${d.escola}</td>
-        <td><span class="badge alerta">${d.status}</span></td>
-        <td>${d.pontuacao||0}</td>
-        <td>${d.dias_criticos||0}</td>
-      </tr>`;
+async function carregar(){
+  const snap = await getDocs(collection(db,"avaliacoes"));
+  const dados = snap.docs.map(d=>d.data());
+  montar(dados);
+}
+
+function montar(dados){
+  const porEscola={}, problemas={};
+  let critica=0, atencao=0, soma=0;
+
+  dados.forEach(d=>{
+    const escola=d.escola||"—";
+    porEscola[escola]=(porEscola[escola]||[]);
+    porEscola[escola].push(d);
+    (d.problemas||[]).forEach(p=>problemas[p]=(problemas[p]||0)+1);
   });
+
+  rankingGlobal=[];
+  Object.entries(porEscola).forEach(([escola,av])=>{
+    av.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    const r=av[0];
+    const status=r.status.toLowerCase();
+    const IPT=calcularIPT(status,r.pontuacao,av.length);
+    soma+=IPT;
+    if(status==="critica")critica++;
+    if(status==="atencao")atencao++;
+    rankingGlobal.push({escola,status,IPT});
+  });
+
   document.getElementById("kpiCritica").innerText=critica;
   document.getElementById("kpiAtencao").innerText=atencao;
-  document.getElementById("kpiMedio").innerText=(soma/dados.length||0).toFixed(2);
+  document.getElementById("kpiMedio").innerText=(soma/rankingGlobal.length).toFixed(2);
   document.getElementById("kpiProblemas").innerText=Object.keys(problemas).length;
 
-  new Chart(document.getElementById("graficoIndice"),{
+  const tbody=document.getElementById("tabelaRanking");
+  tbody.innerHTML="";
+  rankingGlobal.sort((a,b)=>b.IPT-a.IPT).forEach((r,i)=>{
+    tbody.innerHTML+=`
+      <tr>
+        <td>${i+1}</td>
+        <td>${r.escola}</td>
+        <td><span class="badge ${r.status}">${r.status}</span></td>
+        <td>${r.IPT.toFixed(2)}</td>
+      </tr>`;
+  });
+
+  if(chartStatus)chartStatus.destroy();
+  chartStatus=new Chart(graficoStatus,{
+    type:"pie",
+    data:{
+      labels:["Adequada","Alerta","Atenção","Crítica"],
+      datasets:[{data:[
+        rankingGlobal.filter(r=>r.status==="adequada").length,
+        rankingGlobal.filter(r=>r.status==="alerta").length,
+        rankingGlobal.filter(r=>r.status==="atencao").length,
+        rankingGlobal.filter(r=>r.status==="critica").length
+      ]}]
+    }
+  });
+
+  if(chartIndice)chartIndice.destroy();
+  chartIndice=new Chart(graficoIndice,{
     type:"bar",
-    data:{labels:dados.map(d=>d.escola),datasets:[{data:dados.map(d=>d.pontuacao),backgroundColor:"#1f4fd8"}]},
-    options:{indexAxis:"y",plugins:{legend:{display:false}}}
+    data:{
+      labels:rankingGlobal.map(r=>r.escola),
+      datasets:[{data:rankingGlobal.map(r=>r.IPT)}]
+    },
+    options:{indexAxis:"y"}
+  });
+
+  if(chartProblemas)chartProblemas.destroy();
+  chartProblemas=new Chart(graficoProblemas,{
+    type:"bar",
+    data:{
+      labels:Object.keys(problemas),
+      datasets:[{data:Object.values(problemas)}]
+    },
+    options:{indexAxis:"y"}
   });
 }
 
-function exportarXLSX(){
-  const ws=XLSX.utils.json_to_sheet(dadosRanking);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Ranking");
-  XLSX.writeFile(wb,"ranking_checkinfra.xlsx");
-}
+window.abrirSidebar=()=>sidebar.classList.add("open");
+window.fecharSidebar=()=>sidebar.classList.remove("open");
+window.exportarRanking=()=>XLSX.writeFile(XLSX.utils.book_new(),"ranking.xlsx");
+window.exportarHistorico=()=>XLSX.writeFile(XLSX.utils.book_new(),"historico.xlsx");
 
-function exportarHistorico(){
-  const ws=XLSX.utils.json_to_sheet(dadosHistorico);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Historico");
-  XLSX.writeFile(wb,"historico_checkinfra.xlsx");
-}
-
-function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("open");
-}
-
-carregarAvaliacoes();
+carregar();
 </script>
 
 </body>
