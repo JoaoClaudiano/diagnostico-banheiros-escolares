@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Painel Gerencial – CheckInfra</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1f4fd8">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,16 +14,24 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; margin:0; min-height:100vh; }
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  overflow-x:hidden; /* REMOVE FAIXA BRANCA */
+  font-family:Arial, sans-serif;
+  background:#f4f6f8;
+}
+
+/* HEADER */
 header{
   background:#1f4fd8;
   color:#fff;
-  padding:12px;
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  padding:12px;
 }
-header h2{ margin:0; font-size:18px; text-align:center; flex:1; }
 header button{
   background:none;
   border:none;
@@ -31,25 +39,14 @@ header button{
   font-size:20px;
   cursor:pointer;
 }
-.card { background:#fff; max-width:1100px; margin:20px auto; padding:20px; border-radius:10px; }
-.grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
-.kpi { background:#f9fafb; border-radius:10px; padding:16px; text-align:center; }
-.kpi h4 { margin:0; font-size:14px; color:#555; }
-.kpi strong { font-size:28px; display:block; margin-top:6px; }
-.badge { padding:4px 8px; border-radius:12px; color:#fff; font-size:12px; }
-.adequada{background:#4caf50}
-.alerta{background:#fbc02d;color:#000}
-.atencao{background:#ff7043}
-.critica{background:#f44336}
+header h2{
+  flex:1;
+  margin:0;
+  text-align:center;
+  font-size:18px;
+}
 
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:8px;border-bottom:1px solid #eee;text-align:center}
-th{text-align:left;background:#f4f6f8}
-
-.tabs{display:flex;gap:10px;margin-bottom:12px}
-.tab{padding:8px 16px;background:#e0e0e0;border-radius:6px;cursor:pointer}
-.tab.active{background:#1f4fd8;color:#fff}
-
+/* SIDEBAR */
 .sidebar{
   position:fixed;
   top:0;
@@ -59,13 +56,73 @@ th{text-align:left;background:#f4f6f8}
   background:#fff;
   box-shadow:-2px 0 10px rgba(0,0,0,.2);
   padding:20px;
-  transition:.3s;
-  z-index:1000;
+  transition:right .3s ease;
+  z-index:999;
 }
 .sidebar.open{right:0}
 .sidebar h3{margin-top:0}
-.sidebar a{display:block;margin:12px 0;color:#1f4fd8;text-decoration:none}
+.sidebar a{
+  display:block;
+  margin:12px 0;
+  color:#1f4fd8;
+  text-decoration:none;
+  font-weight:bold;
+}
 
+/* CARDS */
+.card{
+  background:#fff;
+  max-width:1100px;
+  margin:20px auto;
+  padding:20px;
+  border-radius:10px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:16px;
+}
+.kpi{
+  background:#f9fafb;
+  padding:16px;
+  border-radius:10px;
+  text-align:center;
+}
+.kpi h4{margin:0;font-size:14px;color:#555}
+.kpi strong{font-size:28px;display:block;margin-top:6px}
+
+/* STATUS */
+.badge{
+  padding:4px 8px;
+  border-radius:12px;
+  font-size:12px;
+  color:#fff;
+}
+.adequada{background:#4caf50}
+.alerta{background:#fbc02d;color:#000}
+.atencao{background:#ff7043}
+.critica{background:#f44336}
+
+/* TABELAS */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
+th{text-align:left;background:#f4f6f8}
+
+/* TABS */
+.tabs{display:flex;gap:10px;margin-bottom:12px}
+.tab{
+  padding:8px 16px;
+  background:#e0e0e0;
+  border-radius:6px;
+  cursor:pointer;
+}
+.tab.active{background:#1f4fd8;color:#fff}
+
+/* FOOTER */
 footer{
   background:#1f4fd8;
   color:#fff;
@@ -110,7 +167,6 @@ footer{
   </div>
 
   <div id="aba-ranking">
-    <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button><br><br>
     <table>
       <thead>
         <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>RT</th></tr>
@@ -120,7 +176,6 @@ footer{
   </div>
 
   <div id="aba-historico" style="display:none">
-    <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button><br><br>
     <table>
       <thead>
         <tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr>
@@ -136,32 +191,32 @@ firebase.initializeApp({
   authDomain:"checkinfra-adf3c.firebaseapp.com",
   projectId:"checkinfra-adf3c"
 });
-const db = firebase.firestore();
+const db=firebase.firestore();
 
-const tabelaRanking = document.getElementById("tabelaRanking");
-const tabelaHistorico = document.getElementById("tabelaHistorico");
-
-let rankingGlobal=[], rankingHistorico=[];
+const tabelaRanking=document.getElementById("tabelaRanking");
+const tabelaHistorico=document.getElementById("tabelaHistorico");
 
 function montar(dados){
-  const escolas = {};
+  if(dados.length===0) return;
+
+  const escolas={};
   const statusCount={adequada:0,alerta:0,atencao:0,critica:0};
   const problemasCount={};
 
   dados.forEach(d=>{
-    const escola=d.escola||"Sem nome";
-    if(!escolas[escola]) escolas[escola]=[];
-    escolas[escola].push(d);
+    if(!escolas[d.escola]) escolas[d.escola]=[];
+    escolas[d.escola].push(d);
   });
 
-  rankingGlobal=[]; rankingHistorico=[];
+  const rankingGlobal=[];
+  const rankingHistorico=[];
 
   Object.keys(escolas).forEach(escola=>{
     const avals=escolas[escola].sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
     const atual=avals[0];
     const RT=Math.min(avals.length,5);
 
-    let GS=1, classe="adequada";
+    let GS=1,classe="adequada";
     const s=(atual.status||"").toLowerCase();
     if(s.includes("crít")){GS=4;classe="critica";statusCount.critica++}
     else if(s.includes("aten")){GS=3;classe="atencao";statusCount.atencao++}
@@ -169,11 +224,17 @@ function montar(dados){
     else statusCount.adequada++;
 
     const IT=Number(atual.pontuacao||0);
-
     const IPT=(GS*4)+(IT*4)+(RT*2);
 
-    rankingGlobal.push({escola,classe,GS,IT,RT,IPT,data:atual.createdAt.seconds});
-    avals.forEach(a=>rankingHistorico.push({...rankingGlobal.at(-1)}));
+    rankingGlobal.push({escola,classe,IPT,RT});
+    avals.forEach(a=>{
+      rankingHistorico.push({
+        escola,
+        classe,
+        IPT,
+        data:new Date(a.createdAt.seconds*1000).toLocaleDateString()
+      });
+    });
 
     (atual.problemas||[]).forEach(p=>problemasCount[p]=(problemasCount[p]||0)+1);
   });
@@ -195,27 +256,35 @@ function montar(dados){
       <td>${r.escola}</td>
       <td><span class="badge ${r.classe}">${r.classe}</span></td>
       <td>${r.IPT}</td>
-      <td>${new Date(r.data*1000).toLocaleDateString()}</td>
+      <td>${r.data}</td>
     </tr>`).join("");
 
-  new Chart(graficoStatus,{type:"pie",
+  new Chart(graficoStatus,{
+    type:"pie",
     data:{labels:["Adequada","Alerta","Atenção","Crítica"],
     datasets:[{data:Object.values(statusCount),
-    backgroundColor:["#4caf50","#fbc02d","#ff7043","#f44336"]}]}});
+    backgroundColor:["#4caf50","#fbc02d","#ff7043","#f44336"]}]}
+  });
 
-  new Chart(graficoIndice,{type:"bar",
+  new Chart(graficoIndice,{
+    type:"bar",
     data:{labels:rankingGlobal.slice(0,10).map(r=>r.escola),
     datasets:[{data:rankingGlobal.slice(0,10).map(r=>r.IPT),backgroundColor:"#1f4fd8"}]},
-    options:{indexAxis:"y",plugins:{legend:{display:false}}}});
+    options:{indexAxis:"y",plugins:{legend:{display:false}}}
+  });
 
-  new Chart(graficoProblemas,{type:"bar",
+  new Chart(graficoProblemas,{
+    type:"bar",
     data:{labels:Object.keys(problemasCount),
     datasets:[{data:Object.values(problemasCount),backgroundColor:"#ff9800"}]},
-    options:{indexAxis:"y",plugins:{legend:{display:false}}}});
+    options:{indexAxis:"y",plugins:{legend:{display:false}}}
+  });
 }
 
-db.collection("avaliacoes").get().then(snap=>{
-  const dados=[]; snap.forEach(d=>dados.push(d.data())); montar(dados);
+db.collection("avaliacoes").get().then(s=>{
+  const dados=[];
+  s.forEach(d=>dados.push(d.data()));
+  montar(dados);
 });
 
 function mostrarAba(a){
@@ -224,7 +293,7 @@ function mostrarAba(a){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   event.target.classList.add("active");
 }
-function toggleSidebar(){sidebar.classList.toggle("open")}
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open")}
 </script>
 
 <footer>
