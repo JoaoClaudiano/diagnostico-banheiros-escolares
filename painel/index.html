@@ -6,10 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#1f4fd8">
 
+<link rel="stylesheet" href="estilos.css"> <!-- opcional, caso queira separar CSS -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -22,10 +22,14 @@ header h1 { margin:0; font-size:22px; text-align:center; }
 header button { background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; position:absolute; left:20px; }
 
 /* SIDEBAR */
-.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:0; top:0; bottom:0; overflow-y:auto; display:none; }
+.sidebar { width:240px; background:#1f4fd8; color:#fff; padding:20px; position:fixed; right:-240px; top:0; bottom:0; overflow-y:auto; transition:0.3s; z-index:1000; }
+.sidebar.active { right:0; }
 .sidebar h3 { margin-top:0; font-size:18px; display:flex; justify-content:space-between; align-items:center; }
 .sidebar h3 span { cursor:pointer; font-weight:bold; }
 .sidebar a { display:block; color:#fff; text-decoration:none; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.2); }
+
+/* BOTÃO MENU */
+#btnMenu { position:absolute; right:20px; top:14px; background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
 
 /* CONTEÚDO PRINCIPAL */
 .main { margin:20px auto; padding:0 20px; max-width:1100px; }
@@ -67,11 +71,11 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 <header>
   <button onclick="history.back()">← Voltar</button>
   <h1>Painel Gerencial – CheckInfra</h1>
+  <button id="btnMenu" onclick="abrirSidebar()">☰ Menu</button>
 </header>
 
 <div class="main">
 
-  <!-- KPIs -->
   <div class="card grid">
     <div class="kpi">
       <h4>Unidades Críticas</h4>
@@ -91,7 +95,6 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
     </div>
   </div>
 
-  <!-- GRÁFICOS -->
   <div class="card grid">
     <div>
       <h3>Status das Unidades</h3>
@@ -107,7 +110,6 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
     </div>
   </div>
 
-  <!-- RANKING E HISTÓRICO -->
   <div class="card">
     <div class="tabs">
       <div class="tab active" onclick="mostrarAba('ranking')">Ranking</div>
@@ -135,9 +137,9 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
         <tbody id="tabelaHistorico"></tbody>
       </table>
     </div>
+
   </div>
 
-  <!-- MODAL IPT -->
   <div class="modal" id="modalIPT" onclick="fecharModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
       <h3>O que é o IPT médio?</h3>
@@ -151,11 +153,12 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
 
 </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebarMenu">
+<div class="sidebar" id="sidebar">
   <h3>☰ Menu <span onclick="fecharSidebar()">×</span></h3>
   <a href="metodo.html">📘 Metodologia</a>
 </div>
+
+<script src="painel.js"></script>
 
 <footer>
   <div style="max-width:600px; margin:0 auto;">
@@ -166,6 +169,11 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; f
     </p>
   </div>
 </footer>
+
+<script>
+function abrirSidebar(){ document.getElementById("sidebar").classList.add("active"); }
+function fecharSidebar(){ document.getElementById("sidebar").classList.remove("active"); }
+</script>
 
 </body>
 </html>
