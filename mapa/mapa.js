@@ -1,8 +1,6 @@
-// mapa.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Config Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
@@ -12,12 +10,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Inicializa mapa
-const map = L.map("map").setView([-3.7319,-38.5267],12);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution:"© OpenStreetMap" }).addTo(map);
+export const map = L.map("map").setView([-3.7319,-38.5267],12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap"}).addTo(map);
 
-let avaliacoes = [];
-let camadaPontos = L.layerGroup().addTo(map);
+export let avaliacoes = [];
+export let camadaPontos = L.layerGroup().addTo(map);
 
 const statusCores = {
   "adequado":"#4CAF50",
@@ -27,31 +24,17 @@ const statusCores = {
   "crítico":"#F44336"
 };
 
-const bola = {
-  adequado: "🟢",
-  alerta: "🟡",
-  atenção: "🟠",
-  crítico: "🔴"
-};
-
-// Frequências de pulso por status (em ms)
-const pulseFreq = {
+const statusFrequencia = { // frequência do pulso em ms
   "critico": 1200,
+  "crítico": 1200,
   "atenção": 2400,
   "alerta": 3600,
   "adequado": 4800
 };
 
-async function carregarAvaliacoes() {
-  const snap = await getDocs(collection(db, "avaliacoes"));
-  avaliacoes = [];
-  snap.forEach(doc=>{
-    const d = doc.data();
-    if(d.lat && d.lng && d.status) avaliacoes.push(d);
-  });
-}
+const bola = { adequado: "🟢", alerta: "🟡", atenção: "🟠", crítico: "🔴" };
 
-function criarPonto(d){
+export function criarPonto(d){
   const status = (d.status||"").toLowerCase();
 
   let observacao = "";
@@ -64,7 +47,8 @@ function criarPonto(d){
     radius:8,
     color:statusCores[status],
     fillColor:statusCores[status],
-    fillOpacity:0.8
+    fillOpacity:.8,
+    className:"pulse"
   }).bindPopup(`
     <strong>${d.escola}</strong><br>
     Status: ${d.status}<br>
@@ -73,33 +57,31 @@ function criarPonto(d){
     Observação: ${observacao}
   `);
 
-  // Pulso (apenas se togglePulso estiver ativo)
-  if(document.getElementById("togglePulso").checked) {
-    let growing = true;
-    let r = 8;
-    const freq = pulseFreq[status] || 2000;
-
-    const interval = setInterval(()=>{
-      if(!document.getElementById("togglePulso").checked) {
-        circle.setRadius(8);
-        clearInterval(interval);
-        return;
-      }
-      r = growing ? r + 0.5 : r - 0.5;
-      if(r>=16) growing = false;
-      if(r<=8) growing = true;
-      circle.setRadius(r);
-    }, freq/16);
-  }
+  // Pulso animado por frequência
+  const freq = statusFrequencia[status] || 2400;
+  let growing = true, r=8;
+  setInterval(()=>{
+    if(growing){ r+=0.5; if(r>=18) growing=false; }
+    else { r-=0.5; if(r<=8) growing=true; }
+    circle.setRadius(r);
+  }, freq/20);
 
   return circle;
 }
 
-function atualizarPontos(){
-  camadaPontos.clearLayers();
+export async function carregarAvaliacoes(){
+  const snap = await getDocs(collection(db,"avaliacoes"));
+  avaliacoes=[];
+  snap.forEach(doc=>{
+    const d = doc.data();
+    if(d.lat && d.lng && d.status) avaliacoes.push(d);
+  });
+}
 
+export function atualizarPontos(){
+  camadaPontos.clearLayers();
   avaliacoes.forEach(d=>{
-    const s = (d.status||"").toLowerCase();
+    const s = d.status.toLowerCase();
     if(
       (s.includes("adequado") && !fAdequado.checked) ||
       (s.includes("alerta") && !fAlerta.checked) ||
@@ -110,12 +92,3 @@ function atualizarPontos(){
     criarPonto(d).addTo(camadaPontos);
   });
 }
-
-// Event listeners para checkboxes
-document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
-  atualizarPontos();
-}));
-
-// Inicialização
-await carregarAvaliacoes();
-atualizarPontos();
