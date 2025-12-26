@@ -130,27 +130,34 @@ let avaliacoes = [];
 let camadaPontos = L.layerGroup().addTo(map);
 let camadaBairros = L.geoJSON(null);
 
+// Bolinhas para tooltips e popups
 const bola = { adequado:"🟢", alerta:"🟡", atenção:"🟠", crítico:"🔴" };
 
 // Função para cores confiáveis (apenas para visual)
 function corPorStatus(status){
   status = (status||"").toLowerCase();
-  if(status.includes("crítica") || status.includes("critico")) return "#F44336";
+  if(status.includes("crit") || status.includes("crítica")) return "#F44336";
   if(status.includes("atenção")) return "#FF9800";
   if(status.includes("alerta")) return "#FFD700";
   return "#4CAF50";
 }
 
-// Criar ponto no mapa
+// Criar ponto no mapa com popup colorido
 function criarPonto(d){
   const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
+  let emoji = "🟢";
+  const s = (d.status||"").toLowerCase();
+  if(s.includes("crit") || s.includes("crítica")) emoji = "🔴";
+  else if(s.includes("atenção")) emoji = "🟠";
+  else if(s.includes("alerta")) emoji = "🟡";
+
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
     color: corPorStatus(d.status),
     fillColor: corPorStatus(d.status),
     fillOpacity:.8,
     className: pulso
-  }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.status}`);
+  }).bindPopup(`<strong>${d.escola}</strong><br>${emoji} ${d.status}`);
 }
 
 // Carregar avaliações do Firebase
