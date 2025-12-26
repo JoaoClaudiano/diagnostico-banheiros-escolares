@@ -130,37 +130,32 @@ let avaliacoes = [];
 let camadaPontos = L.layerGroup().addTo(map);
 let camadaBairros = L.geoJSON(null);
 
-// Bolinhas para tooltips e popups
-const bola = { adequado:"🟢", alerta:"🟡", atenção:"🟠", crítico:"🔴" };
+const statusCores = {
+  "adequado":"#4CAF50",
+  "alerta":"#FFD700",
+  "atenção":"#FF9800",
+  "critico":"#F44336",
+  "crítico":"#F44336"
+};
 
-// Função para cores confiáveis (apenas para visual)
-function corPorStatus(status){
-  status = (status||"").toLowerCase();
-  if(status.includes("crit") || status.includes("crítica")) return "#F44336";
-  if(status.includes("atenção")) return "#FF9800";
-  if(status.includes("alerta")) return "#FFD700";
-  return "#4CAF50";
-}
+const bola = {
+  adequado: "🟢",
+  alerta: "🟡",
+  atenção: "🟠",
+  crítico: "🔴"
+};
 
-// Criar ponto no mapa com popup colorido
 function criarPonto(d){
   const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
-  let emoji = "🟢";
-  const s = (d.status||"").toLowerCase();
-  if(s.includes("crit") || s.includes("crítica")) emoji = "🔴";
-  else if(s.includes("atenção")) emoji = "🟠";
-  else if(s.includes("alerta")) emoji = "🟡";
-
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
-    color: corPorStatus(d.status),
-    fillColor: corPorStatus(d.status),
+    color:statusCores[d.status.toLowerCase()],
+    fillColor:statusCores[d.status.toLowerCase()],
     fillOpacity:.8,
-    className: pulso
-  }).bindPopup(`<strong>${d.escola}</strong><br>${emoji} ${d.status}`);
+    className:pulso
+  }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.status}`);
 }
 
-// Carregar avaliações do Firebase
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
   avaliacoes=[];
@@ -170,7 +165,6 @@ async function carregarAvaliacoes(){
   });
 }
 
-// Atualizar pontos com filtros
 function atualizarPontos(){
   camadaPontos.clearLayers();
 
@@ -187,7 +181,6 @@ function atualizarPontos(){
   });
 }
 
-// Funções para bairros
 function estiloBairro(feature){
   const escolas = avaliacoes.filter(a =>
     feature.geometry &&
@@ -197,9 +190,9 @@ function estiloBairro(feature){
 
   if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
 
-  const cont = { adequado:0, alerta:0, atenção:0, crítico:0 };
+  const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
-    const s=e.status.toLowerCase();
+    const s=(e.status||"").toLowerCase();
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
     else if(s.includes("atenção")) cont.atenção++;
@@ -208,11 +201,13 @@ function estiloBairro(feature){
 
   const total = escolas.length;
   const pCrit = cont.crítico/total;
+  const pAtencao = cont.atenção/total;
+  const pAlerta = cont.alerta/total;
 
-  let cor = "#4CAF50";
-  if(pCrit>=0.5) cor="#F44336";
-  else if(cont.atenção>0) cor="#FF9800";
-  else if(cont.alerta>0) cor="#FFD700";
+  let cor = "#4CAF50"; // verde
+  if(pCrit >= 0.5) cor="#F44336";          // 🔴 ≥50% crítico
+  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; // 🟠 atenção ≥50%
+  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; // 🟡 alerta ≥50%
 
   return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
 }
@@ -224,19 +219,18 @@ function tooltipBairro(feature){
       .contains([a.lat,a.lng])
   );
 
-  if(escolas.length===0)
-    return `<strong>${feature.properties.nome}</strong><br>Sem avaliações`;
+  if(escolas.length===0) return `<strong>${feature.properties.nome}</strong><br>Sem avaliações`;
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
-    const s=e.status.toLowerCase();
+    const s=(e.status||"").toLowerCase();
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
     else if(s.includes("atenção")) cont.atenção++;
     else cont.crítico++;
   });
 
-  const t=escolas.length;
+  const t = escolas.length;
   const p = k => Math.round((cont[k]/t)*100);
 
   return `
@@ -248,7 +242,6 @@ function tooltipBairro(feature){
   `;
 }
 
-// Carregar bairros GeoJSON
 async function carregarBairros(){
   const res = await fetch("./POLIGONAIS.geojson");
   const geo = await res.json();
@@ -259,7 +252,6 @@ async function carregarBairros(){
   });
 }
 
-// Eventos de filtros
 document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
   atualizarPontos();
   if(toggleBairros.checked){
@@ -269,7 +261,6 @@ document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
   }
 }));
 
-// Inicialização
 await carregarAvaliacoes();
 await carregarBairros();
 atualizarPontos();
