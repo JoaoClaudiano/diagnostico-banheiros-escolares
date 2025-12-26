@@ -110,4 +110,5 @@ document.getElementById("fAtencao").checked = true;
 document.getElementById("fCritico").checked = true;
 
 await carregarAvaliacoes();
+
 atualizarPontos();
