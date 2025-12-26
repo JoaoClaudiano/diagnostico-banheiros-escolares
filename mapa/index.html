@@ -15,14 +15,16 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <style>
-body { margin:0; font-family: Arial, sans-serif; }
-.nav-global { position: fixed; top: 0; left:0; right:0; display:flex; gap:8px; justify-content:flex-start; padding:8px; z-index:9999; background: rgba(31,79,216,0.95); box-shadow:0 2px 6px rgba(0,0,0,0.25);}
-.nav-global button, .nav-global a { background:#1f4fd8; color:#fff; border:none; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; font-size:18px; text-decoration:none; cursor:pointer; }
+body { margin:0; font-family: Arial, sans-serif; background:#f4f6f8; }
+header { background:#1f4fd8; color:#fff; text-align:center; padding:14px 10px; font-size:16px; font-weight:bold; }
+.nav-global { position:fixed; top:0; left:0; right:0; display:flex; gap:8px; justify-content:flex-start; padding:8px; z-index:9999; background: rgba(31,79,216,0.95); }
+.nav-global button, .nav-global a { background:#1f4fd8; color:#fff; border:none; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; }
 .nav-global button:hover, .nav-global a:hover { background:#163aa9; }
-header { background:#1f4fd8; color:#fff; padding:50px 12px 12px; text-align:center; font-weight:bold; font-size:16px;}
-#map { height: calc(100vh - 170px); }
+
+#map { height: calc(100vh - 160px); margin-top:58px; }
+
 .painel { padding:10px; background:#f4f6f8; display:flex; gap:10px; justify-content:center; font-size:14px; flex-wrap:wrap; position:sticky; top:58px; z-index:999; }
-.painel label { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px;}
+.painel label { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px; }
 .bola { width:12px; height:12px; border-radius:50%; display:inline-block; }
 .verde { background:#4CAF50; }      /* Adequado */
 .laranja { background:#FFD700; }    /* Alerta */
@@ -44,10 +46,20 @@ header { background:#1f4fd8; color:#fff; padding:50px 12px 12px; text-align:cent
 .legenda { background:#fff; padding:10px; font-size:13px; border-radius:6px; box-shadow:0 1px 5px rgba(0,0,0,.3); }
 .legenda h4 { margin:0 0 6px; font-size:14px; }
 .legenda div { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+
+/* Footer */
+footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; width:100%; box-sizing:border-box; }
+footer div { max-width:600px; margin:0 auto; }
+footer a { color:#fff; text-decoration:underline; }
+
+@media (max-width:480px){
+  footer p { font-size:10px; }
+  footer img { width:60%; }
+}
 </style>
 </head>
-
 <body>
+
 <div class="nav-global">
   <button onclick="history.back()" title="Voltar">⬅️</button>
   <a href="./index.html" title="Início">🏠</a>
@@ -67,7 +79,7 @@ header { background:#1f4fd8; color:#fff; padding:50px 12px 12px; text-align:cent
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
@@ -87,18 +99,12 @@ document.getElementById("togglePulso").addEventListener("change", e=>{
   atualizarMapa();
 });
 
-// Layers por status
-const camadaAdequado = L.layerGroup().addTo(map);
-const camadaAlerta = L.layerGroup().addTo(map);
-const camadaAtencao = L.layerGroup().addTo(map);
-const camadaCritico = L.layerGroup().addTo(map);
-
 function corPorStatus(status){
   status = status.toLowerCase();
   if(status.includes("crítica")) return "#F44336";
-  if(status.includes("atenção")) return "#FF9800"; /* Atenção laranja escuro */
-  if(status.includes("alerta")) return "#FFD700";  /* Alerta amarelo */
-  return "#4CAF50"; /* Adequado verde */
+  if(status.includes("atenção")) return "#FF9800";
+  if(status.includes("alerta")) return "#FFD700";
+  return "#4CAF50";
 }
 
 function classePulso(status){
@@ -120,12 +126,15 @@ function criarMarker(d){
 let avaliacoes = [];
 
 async function carregarAvaliacoes(){
-  const snapshot = await getDocs(collection(db,"avaliacoes"));
-  avaliacoes = [];
+  const snapshot = await getDocs(query(collection(db,"avaliacoes"), orderBy("createdAt","desc")));
+  const escolasMap = new Map();
   snapshot.forEach(doc=>{
     const d = doc.data();
-    if(d.lat && d.lng) avaliacoes.push(d);
+    if(d.lat && d.lng && !escolasMap.has(d.escola)){
+      escolasMap.set(d.escola,d);
+    }
   });
+  avaliacoes = Array.from(escolasMap.values());
 }
 
 function atualizarMapa(){
@@ -133,7 +142,7 @@ function atualizarMapa(){
     if(l instanceof L.MarkerClusterGroup || l instanceof L.LayerGroup) l.clearLayers();
   });
 
-  const filtrar = (d)=>{
+  const filtrar = d=>{
     if(d.status.toLowerCase().includes("crítica") && !document.getElementById("filtroCritico").checked) return false;
     if(d.status.toLowerCase().includes("atenção") && !document.getElementById("filtroAtencao").checked) return false;
     if(d.status.toLowerCase().includes("alerta") && !document.getElementById("filtroAlerta").checked) return false;
@@ -149,10 +158,7 @@ function atualizarMapa(){
     map.addLayer(cluster);
   } else {
     avaliFiltradas.forEach(d=>{
-      const layer = d.status.toLowerCase().includes("crítica") ? camadaCritico :
-                    d.status.toLowerCase().includes("atenção") ? camadaAtencao :
-                    d.status.toLowerCase().includes("alerta") ? camadaAlerta : camadaAdequado;
-      criarMarker(d).addTo(layer);
+      criarMarker(d).addTo(map);
     });
   }
 }
@@ -185,60 +191,26 @@ legenda.onAdd = function(){
 };
 legenda.addTo(map);
 </script>
-<!-- ===== FOOTER FIXO NO FINAL DA PÁGINA ===== -->
-<footer style="
-  background:#1f4fd8;
-  color:#fff;
-  text-align:center;
-  padding:16px 10px;
-  font-size:12px;
-  line-height:1.4;
-  box-sizing:border-box;
-  width:100%;
-">
-  <div style="max-width:600px; margin:0 auto;">
-    
-    <!-- Copyright -->
-    <p style="margin:0 0 6px;">
-      © 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License
-    </p>
 
-    <!-- Links institucionais -->
-    <p style="margin:0 0 6px;">
-      <a href="./pages/sobre.html" style="color:#fff; text-decoration:underline;">Sobre</a> | 
-      <a href="./pages/contato.html" style="color:#fff; text-decoration:underline;">Contato</a> | 
-      <a href="./pages/politica-privacidade.html" style="color:#fff; text-decoration:underline;">Política de Privacidade</a> | 
-      <a href="./pages/termos-de-uso.html" style="color:#fff; text-decoration:underline;">Termos de Uso</a>
+<footer>
+  <div>
+    <p>© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
+    <p>
+      <a href="./pages/sobre.html">Sobre</a> | 
+      <a href="./pages/contato.html">Contato</a> | 
+      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
+      <a href="./pages/termos-de-uso.html">Termos de Uso</a>
     </p>
-
-    <!-- Badge MIT License menor -->
-    <p style="margin:0 0 6px;">
+    <p>
       <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
         <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:90px; width:40%;">
       </a>
     </p>
-
-    <!-- Aviso LGPD -->
-    <p style="margin:0; font-size:11px;">
-      🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), exclusivamente para fins técnicos, institucionais e de prestação do serviço licenciado.
+    <p style="font-size:11px;">
+      🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, exclusivamente para fins técnicos e institucionais.
     </p>
   </div>
 </footer>
 
-<!-- ===== MEDIA QUERY PARA MOBILE ===== -->
-<style>
-  @media (max-width: 480px) {
-    footer div {
-      padding: 0 8px;
-    }
-    footer p {
-      font-size: 10px;
-    }
-    footer img {
-      width: 60%;
-    }
-  }
-</style>
-  
 </body>
 </html>
