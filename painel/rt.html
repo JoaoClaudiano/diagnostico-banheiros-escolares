@@ -11,6 +11,8 @@
 html, body {
   margin:0; padding:0; width:100%; font-family: Arial, sans-serif; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column;
 }
+
+/* Header */
 header {
   background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%;
 }
@@ -27,22 +29,21 @@ header button.menu { right:10px; }
 #sidebar.active { right:0; }
 #sidebar h2 { margin-top:0; font-size:18px; }
 #sidebar button.closeSidebar { background:#fff; color:#1f4fd8; border:none; border-radius:6px; padding:4px 10px; cursor:pointer; position:absolute; top:10px; left:10px; }
-
 #sidebar a { color:#fff; text-decoration:none; display:block; margin:10px 0; }
 #sidebar a:hover { text-decoration:underline; }
 
 /* Main content */
-.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; }
-.card { background:#fff; margin:20px auto; padding:24px; border-radius:10px; line-height:1.7; box-sizing:border-box; }
+.main { margin:20px auto; padding:0 20px; max-width:1000px; flex:1; box-sizing:border-box; }
+.card { background:#fff; margin:20px auto; padding:24px; border-radius:10px; line-height:1.7; box-sizing:border-box; width:100%; max-width:900px; }
 h2,h3{color:#1f4fd8;}
-p,li{line-height:1.6;font-size:14px; text-align:justify;}
-ul{padding-left:20px; margin-bottom:10px;}
+p,li{line-height:1.7;font-size:14px; text-align:justify;}
+ul{padding-left:20px;}
 .badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;color:#fff;margin:2px;}
 .baixo{background:#4caf50}
 .medio{background:#fbc02d;color:#000}
 .alto{background:#f44336}
 
-/* Footer responsivo */
+/* Footer responsivo ocupando toda a largura */
 footer {
   background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; width:100%;
 }
@@ -51,6 +52,13 @@ footer a { color:#fff; text-decoration:underline; }
 
 /* Gráfico */
 canvas { max-width:100%; height:auto; }
+
+/* Responsividade */
+@media(max-width:600px){
+  .main { padding:0 10px; }
+  header h1 { font-size:18px; }
+  .card { padding:16px; }
+}
 </style>
 </head>
 <body>
@@ -77,46 +85,42 @@ canvas { max-width:100%; height:auto; }
 
   <div class="card">
     <h2>1. Definição do Índice de Recorrência Temporal</h2>
-    <p>O <strong>Índice de Recorrência Temporal (RT)</strong> mede a persistência dos problemas de infraestrutura sanitária escolar ao longo do tempo.</p>
-    <p>Ele indica se um problema identificado em avaliações anteriores continua presente, servindo como proxy para problemas crônicos e necessidade de intervenção urgente.</p>
+    <p>O <strong>Índice de Recorrência Temporal (RT)</strong> mede a frequência com que a infraestrutura sanitária escolar permanece em determinado status de manutenção ou não conformidade ao longo do tempo. Ele identifica escolas que sofrem problemas recorrentes, mesmo após intervenções, permitindo priorizar acompanhamento e reavaliações.</p>
   </div>
 
   <div class="card">
     <h2>2. O que o índice RT considera e por quê?</h2>
-    <p>O RT contabiliza quantas vezes uma escola apresentou não conformidades em avaliações anteriores.</p>
-    <p>Essa informação é crucial para identificar escolas que, mesmo com intervenções pontuais, continuam apresentando problemas, garantindo que reformas ou obras sejam priorizadas para casos recorrentes.</p>
+    <p>O RT considera a recorrência de problemas críticos ou de atenção detectados no GS e IT. Por exemplo, banheiros que apresentam infiltrações, esgoto exposto ou limpeza inadequada em avaliações consecutivas terão RT mais alto. O objetivo é alertar gestores sobre escolas com problemas persistentes que podem indicar falhas estruturais ou de manutenção.</p>
   </div>
 
   <div class="card">
     <h2>3. Normas e referências bibliográficas</h2>
-    <p>O RT se inspira em metodologias de gestão de ativos e manutenção preventiva, como ISO 55000 e recomendações de inspeção predial periódica. Avaliações recorrentes permitem monitorar a evolução da infraestrutura e adequar recursos.</p>
-    <p>Referências:</p>
+    <p>O RT é baseado em metodologias de monitoramento contínuo e manutenção preventiva, considerando recomendações da OMS/UNICEF para saneamento escolar, além de diretrizes de gestão de ativos públicos e planos de manutenção predial (ABNT NBR 5674 – Manutenção de edificações, 2012).</p>
     <ul>
-      <li>ISO 55000: Asset Management. 2014.</li>
-      <li>ABNT NBR 5674: Manutenção de edificações – Procedimentos. 2012.</li>
-      <li>Saaty, T. L. Decision Making with the Analytic Hierarchy Process. 2008.</li>
+      <li>ABNT NBR 5674: Manutenção de edificações. 2012.</li>
+      <li>WHO/UNICEF: Water, Sanitation and Hygiene in Schools. 2018.</li>
+      <li>Saaty, T.L. Decision Making with the Analytic Hierarchy Process. 2008.</li>
     </ul>
   </div>
 
   <div class="card">
     <h2>4. Interpretação das faixas de Recorrência Temporal</h2>
     <ul>
-      <li><span class="badge baixo">Baixo</span> (RT = 1-2): Problemas pouco recorrentes, situação isolada ou já corrigida.</li>
-      <li><span class="badge medio">Médio</span> (RT = 3-4): Problemas moderadamente recorrentes, atenção necessária para evitar agravamento.</li>
-      <li><span class="badge alto">Alto</span> (RT = 5+): Problemas recorrentes ou crônicos, alta prioridade de intervenção.</li>
+      <li><span class="badge baixo">Baixo</span> (RT = 1-2): Problemas pouco frequentes, infraestrutura apresenta estabilidade.</li>
+      <li><span class="badge medio">Médio</span> (RT = 3-4): Problemas moderadamente recorrentes, requer monitoramento regular.</li>
+      <li><span class="badge alto">Alto</span> (RT = 5-6): Problemas muito frequentes, indica falhas estruturais ou de manutenção e prioridade de intervenção.</li>
     </ul>
   </div>
 
   <div class="card">
     <h2>5. Impacto do RT no IPT</h2>
-    <p>O RT é multiplicado por 0,2 na fórmula do IPT (<strong>IPT = GS*0,4 + IT*0,4 + RT*0,2</strong>).</p>
-    <p>Escolas com RT alto indicam problemas persistentes, elevando o IPT médio e sinalizando necessidade de acompanhamento contínuo ou intervenção estrutural.</p>
+    <p>O RT contribui com 0,2 na fórmula do IPT (<strong>IPT = GS*0,4 + IT*0,4 + RT*0,2</strong>). Escolas com RT alto influenciam o IPT médio da rede, mostrando necessidade de acompanhamento contínuo e priorização em planos de manutenção.</p>
   </div>
 
   <div class="card">
     <h2>6. Gráfico ilustrativo do RT</h2>
     <canvas id="graficoRT"></canvas>
-    <p>O gráfico mostra a recorrência de problemas nas escolas avaliadas. A linha azul indica o <strong>RT médio</strong>. Quanto mais escolas estiverem na faixa alta, maior a prioridade de intervenção na rede escolar.</p>
+    <p>O gráfico mostra a distribuição do RT das escolas avaliadas. A linha azul representa o <strong>RT médio</strong> da rede. Quanto mais escolas apresentarem RT alto, maior é a recorrência de problemas e necessidade de monitoramento e ações corretivas.</p>
   </div>
 
 </div>
@@ -130,20 +134,19 @@ canvas { max-width:100%; height:auto; }
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
 // Sidebar toggle
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('active');
 }
 
-// Dados RT fictícios
-const rtValores = [1,2,3,1,5,4,2,3]; // RT de cada escola
+// Dados fictícios RT
+const rtValores = [1,2,3,4,2,3,5,4]; // cada valor = RT de uma escola
 const rtMedio = rtValores.reduce((a,b)=>a+b,0)/rtValores.length;
 
-// Criação do gráfico
-const ctxRT = document.getElementById('graficoRT').getContext('2d');
-new Chart(ctxRT, {
+// Gráfico
+const ctx = document.getElementById('graficoRT').getContext('2d');
+new Chart(ctx, {
   type: 'bar',
   data: {
     labels: rtValores.map((v,i)=>`Escola ${i+1}`),
@@ -168,7 +171,7 @@ new Chart(ctxRT, {
   options:{
     responsive:true,
     plugins:{ legend:{display:true}, tooltip:{enabled:true} },
-    scales:{ y:{beginAtZero:true, max:6, title:{display:true,text:'RT'}}, x:{title:{display:true,text:'Escolas'}} }
+    scales:{ y:{beginAtZero:true, max:6.5, title:{display:true, text:'RT'}}, x:{title:{display:true, text:'Escolas'}} }
   }
 });
 </script>
