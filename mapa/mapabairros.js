@@ -1,16 +1,37 @@
-// mapabairros.js
+import { map, avaliacoes } from "./mapa.js";
+import booleanPointInPolygon from "https://cdn.jsdelivr.net/npm/@turf/boolean-point-in-polygon@6.0.1/dist/es/index.js";
 
 let camadaBairros = L.geoJSON(null);
 
-function estiloBairro(feature, avaliacoes){
-  const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    turf.booleanPointInPolygon([a.lng, a.lat], feature)
-  );
+const statusCores = {
+  "adequado":"#4CAF50",
+  "alerta":"#FFD700",
+  "atenção":"#FF9800",
+  "critico":"#F44336",
+  "crítico":"#F44336"
+};
 
-  if(escolas.length === 0) return { fillOpacity:0, color:"#999", weight:1 };
+const bola = { adequado: "🟢", alerta: "🟡", atenção: "🟠", crítico: "🔴" };
 
-  const cont = { adequado:0, alerta:0, atenção:0, crítico:0 };
+export async function carregarBairros(){
+  const res = await fetch("./POLIGONAIS.geojson");
+  const geo = await res.json();
+
+  camadaBairros = L.geoJSON(geo,{
+    style: estiloBairro,
+    onEachFeature: (f,l)=> l.bindTooltip(tooltipBairro(f))
+  });
+}
+
+function estiloBairro(feature){
+  const escolas = avaliacoes.filter(a=>{
+    const pt = { type:"Point", coordinates:[a.lng,a.lat] };
+    return booleanPointInPolygon(pt, feature);
+  });
+
+  if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
+
+  const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
     const s = (e.status||"").toLowerCase();
     if(s.includes("adequado")) cont.adequado++;
@@ -24,21 +45,21 @@ function estiloBairro(feature, avaliacoes){
   const pAtencao = cont.atenção/total;
   const pAlerta = cont.alerta/total;
 
-  let cor = "#4CAF50"; // verde
-  if(pCrit >= 0.5) cor="#F44336";          // 🔴 ≥50% crítico
-  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; // 🟠 atenção ≥50%
-  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; // 🟡 alerta ≥50%
+  let cor = "#4CAF50";
+  if(pCrit>=0.5) cor="#F44336";
+  else if(pCrit<0.5 && pAtencao>=0.5) cor="#FF9800";
+  else if(pCrit===0 && pAtencao<0.5 && pAlerta>=0.5) cor="#FFD700";
 
-  return { fillColor: cor, fillOpacity: 0.45, color:"#555", weight:1 };
+  return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
 }
 
-function tooltipBairro(feature, avaliacoes){
-  const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    turf.booleanPointInPolygon([a.lng, a.lat], feature)
-  );
+function tooltipBairro(feature){
+  const escolas = avaliacoes.filter(a=>{
+    const pt = { type:"Point", coordinates:[a.lng,a.lat] };
+    return booleanPointInPolygon(pt, feature);
+  });
 
-  if(escolas.length === 0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
+  if(escolas.length===0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
@@ -52,7 +73,7 @@ function tooltipBairro(feature, avaliacoes){
   const t = escolas.length;
   const p = k => Math.round((cont[k]/t)*100);
 
-  let observacao = "";
+  let observacao="";
   if(p("crítico")>=50) observacao = "🔴 Problema generalizado – alto risco de impacto.";
   else if(p("atenção")>=50) observacao = "🟠 Problema localizado, tendência de piora.";
   else if(p("alerta")>=50) observacao = "🟡 Problema pontual, monitoramento recomendado.";
@@ -60,30 +81,15 @@ function tooltipBairro(feature, avaliacoes){
 
   return `
     <strong>${feature.properties.nome}</strong><br>
-    🔴 ${p("crítico")}% crítico (${cont.crítico})<br>
-    🟠 ${p("atenção")}% atenção (${cont.atenção})<br>
-    🟡 ${p("alerta")}% alerta (${cont.alerta})<br>
-    🟢 ${p("adequado")}% adequado (${cont.adequado})<br>
+    ${bola.crítico} ${p("crítico")}% crítico (${cont.crítico})<br>
+    ${bola.atenção} ${p("atenção")}% atenção (${cont.atenção})<br>
+    ${bola.alerta} ${p("alerta")}% alerta (${cont.alerta})<br>
+    ${bola.adequado} ${p("adequado")}% adequado (${cont.adequado})<br>
     Observação: ${observacao}
   `;
 }
 
-async function carregarBairros(avalicoes){
-  const res = await fetch("./POLIGONAIS.geojson");
-  const geo = await res.json();
-
-  camadaBairros = L.geoJSON(geo,{
-    style: f => estiloBairro(f, avaliacoes),
-    onEachFeature: (f,l) => l.bindTooltip(tooltipBairro(f, avaliacoes))
-  });
+export function toggleBairros(show){
+  if(show) camadaBairros.addTo(map);
+  else map.removeLayer(camadaBairros);
 }
-
-// Checkbox de leitura por bairro
-document.getElementById("toggleBairros").addEventListener("change", async ()=>{
-  if(toggleBairros.checked){
-    await carregarBairros(avaliacoes);
-    camadaBairros.addTo(map);
-  } else {
-    map.removeLayer(camadaBairros);
-  }
-});
