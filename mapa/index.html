@@ -6,91 +6,36 @@
 <title>Mapa Sanitário – CheckInfra</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
+<link rel="stylesheet" href="estilo.css"> <!-- Se quiser externalizar o CSS -->
 
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
-
 header {
-  background:#1f4fd8;
-  color:#fff;
-  padding:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  position:sticky;
-  top:0;
-  z-index:1000;
+  background:#1f4fd8; color:#fff; padding:14px;
+  display:flex; align-items:center; gap:8px;
+  font-weight:bold; position:sticky; top:0; z-index:1000;
+  justify-content: center; /* centraliza o título */
 }
-
-header .voltar {
-  cursor:pointer;
-  font-size:18px;
-  user-select:none;
-  position:absolute;
-  left:10px;
-}
-
-footer {
-  background:#f4f6f8;
-  font-size:11px;
-  color:#555;
-  padding:8px;
-  text-align:center;
-  border-top:1px solid #ddd;
-}
-
+header .voltar { cursor:pointer; font-size:18px; user-select:none; position:absolute; left:10px; }
+footer { background:#f4f6f8; font-size:11px; color:#555; padding:8px; text-align:center; border-top:1px solid #ddd; }
 .painel {
-  background:#fff;
-  padding:8px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-  border-bottom:1px solid #ddd;
-  position:sticky;
-  top:52px;
-  z-index:999;
+  background:#fff; padding:8px; display:flex; flex-wrap:wrap; gap:10px;
+  justify-content:center; border-bottom:1px solid #ddd; position:sticky; top:52px; z-index:999;
   font-size:13px;
 }
-
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
-
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-}
-
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+.bola { width:12px; height:12px; border-radius:50%; }
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
 .vermelho { background:#F44336; }
-
-#map {
-  height: calc(100vh - 160px);
-}
-
+#map { height: calc(100vh - 160px); }
 /* Pulso */
-.pulse {
-  animation:pulse 2.4s ease-out infinite;
-}
-
-@keyframes pulse {
-  0% { r:8; opacity:.8; }
-  70% { r:18; opacity:0; }
-  100% { opacity:0; }
-}
+.pulse { animation:pulse 2.4s ease-out infinite; }
+@keyframes pulse { 0% { r:8; opacity:.8; } 70% { r:18; opacity:0; } 100% { opacity:0; } }
 </style>
-</head>
 
+</head>
 <body>
 
 <header>
@@ -113,181 +58,7 @@ footer {
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const map = L.map("map").setView([-3.7319,-38.5267],12);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap"}).addTo(map);
-
-let avaliacoes = [];
-let camadaPontos = L.layerGroup().addTo(map);
-let camadaBairros = L.geoJSON(null);
-
-const statusCores = {
-  "adequado":"#4CAF50",
-  "alerta":"#FFD700",
-  "atenção":"#FF9800",
-  "critico":"#F44336",
-  "crítico":"#F44336"
-};
-
-const bola = {
-  adequado: "🟢",
-  alerta: "🟡",
-  atenção: "🟠",
-  crítico: "🔴"
-};
-
-function criarPonto(d){
-  const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
-
-  const status = (d.status||"").toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,"");
-  let observacao = "";
-  if(status.includes("crit")) observacao = "🔴 Problema grave – intervenção imediata recomendada.";
-  else if(status.includes("atencao")) observacao = "🟠 Problema localizado, tendência de evoluir a crítico.";
-  else if(status.includes("alerta")) observacao = "🟡 Problema pontual, monitoramento recomendado.";
-  else if(status.includes("adequado")) observacao = "🟢 Situação satisfatória – manutenção do acompanhamento.";
-
-  return L.circleMarker([d.lat,d.lng],{
-    radius:8,
-    color:statusCores[status],
-    fillColor:statusCores[status],
-    fillOpacity:.8,
-    className:pulso
-  }).bindPopup(`
-    <strong>${d.escola}</strong><br>
-    Status: ${d.status}<br>
-    Pontuação: ${d.pontuacao || "-"}<br>
-    Última avaliação: ${d.data || "-"}<br>
-    Observação: ${observacao}
-  `);
-}
-
-async function carregarAvaliacoes(){
-  const snap = await getDocs(collection(db,"avaliacoes"));
-  avaliacoes=[];
-  snap.forEach(doc=>{
-    const d = doc.data();
-    if(d.lat && d.lng && d.status) avaliacoes.push(d);
-  });
-}
-
-function atualizarPontos(){
-  camadaPontos.clearLayers();
-  avaliacoes.forEach(d=>{
-    const s = (d.status||"").toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,"");
-    if(
-      (s.includes("adequado") && !fAdequado.checked) ||
-      (s.includes("alerta") && !fAlerta.checked) ||
-      (s.includes("atencao") && !fAtencao.checked) ||
-      (s.includes("crit") && !fCritico.checked)
-    ) return;
-
-    criarPonto(d).addTo(camadaPontos);
-  });
-}
-
-function estiloBairro(feature){
-  const escolas = avaliacoes.filter(a => {
-    if(!feature.geometry) return false;
-    const ponto = turf.point([a.lng,a.lat]);
-    return turf.booleanPointInPolygon(ponto, feature);
-  });
-
-  if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
-
-  const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolas.forEach(e=>{
-    const s=(e.status||"").toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,"");
-    if(s.includes("adequado")) cont.adequado++;
-    else if(s.includes("alerta")) cont.alerta++;
-    else if(s.includes("atenção") || s.includes("atencao")) cont.atenção++;
-    else cont.crítico++;
-  });
-
-  const total = escolas.length;
-  const pCrit = cont.crítico/total;
-  const pAtencao = cont.atenção/total;
-  const pAlerta = cont.alerta/total;
-
-  let cor = "#4CAF50"; // verde
-  if(pCrit >= 0.5) cor="#F44336";          // 🔴 ≥50% crítico
-  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; // 🟠 atenção ≥50%
-  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; // 🟡 alerta ≥50%
-
-  return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
-}
-
-function tooltipBairro(feature){
-  const escolas = avaliacoes.filter(a => {
-    if(!feature.geometry) return false;
-    const ponto = turf.point([a.lng,a.lat]);
-    return turf.booleanPointInPolygon(ponto, feature);
-  });
-
-  if(escolas.length===0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
-
-  const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolas.forEach(e=>{
-    const s=(e.status||"").toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,"");
-    if(s.includes("adequado")) cont.adequado++;
-    else if(s.includes("alerta")) cont.alerta++;
-    else if(s.includes("atenção") || s.includes("atencao")) cont.atenção++;
-    else cont.crítico++;
-  });
-
-  const t = escolas.length;
-  const p = k => Math.round((cont[k]/t)*100);
-
-  let observacao = "";
-  if(p("crítico")>=50) observacao = "🔴 Problema generalizado – alto risco de impacto.";
-  else if(p("atenção")>=50) observacao = "🟠 Problema localizado, tendência de piora.";
-  else if(p("alerta")>=50) observacao = "🟡 Problema pontual, monitoramento recomendado.";
-  else observacao = "🟢 Situação controlada – continuar acompanhamento rotineiro.";
-
-  return `
-    <strong>${feature.properties.nome}</strong><br>
-    ${bola.crítico} ${p("crítico")}% crítico (${cont.crítico})<br>
-    ${bola.atenção} ${p("atenção")}% atenção (${cont.atenção})<br>
-    ${bola.alerta} ${p("alerta")}% alerta (${cont.alerta})<br>
-    ${bola.adequado} ${p("adequado")}% adequado (${cont.adequado})<br>
-    Observação: ${observacao}
-  `;
-}
-
-async function carregarBairros(){
-  const res = await fetch("./POLIGONAIS.geojson");
-  const geo = await res.json();
-
-  camadaBairros = L.geoJSON(geo,{
-    style:estiloBairro,
-    onEachFeature:(f,l)=> l.bindTooltip(tooltipBairro(f))
-  });
-}
-
-document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
-  atualizarPontos();
-  if(toggleBairros.checked){
-    camadaBairros.addTo(map);
-  } else {
-    map.removeLayer(camadaBairros);
-  }
-}));
-
-await carregarAvaliacoes();
-await carregarBairros();
-atualizarPontos();
-</script>
+<script type="module" src="mapa.js"></script>
 
 </body>
 </html>
