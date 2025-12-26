@@ -20,6 +20,15 @@ header {
   position:sticky;
   top:0;
   z-index:1000;
+  display:flex;
+  align-items:center;
+}
+
+.header-back {
+  position:absolute;
+  left:14px;
+  font-size:18px;
+  cursor:pointer;
 }
 
 footer {
@@ -82,7 +91,10 @@ footer {
 
 <body>
 
-<header>Mapa Sanitário das Escolas – CheckInfra</header>
+<header>
+  <div class="header-back" onclick="history.back()">←</div>
+  Mapa Sanitário das Escolas – CheckInfra
+</header>
 
 <div class="painel">
   <label><input type="checkbox" id="fAdequado" checked><span class="bola verde"></span>Adequado</label>
@@ -129,27 +141,39 @@ const statusCores = {
 
 function criarPonto(d){
   const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
+  const color = statusCores[d.status.toLowerCase()] || "#000";
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
-    color:statusCores[d.status.toLowerCase()],
-    fillColor:statusCores[d.status.toLowerCase()],
+    color:color,
+    fillColor:color,
     fillOpacity:.8,
     className:pulso
-  }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.status}`);
+  }).bindPopup(`
+    <div style="display:flex; align-items:center; gap:6px;">
+      <span class="bola" style="background:${color};"></span>
+      <strong>${d.escola}</strong>
+    </div>
+    Status: ${d.status}
+  `);
 }
 
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
-  avaliacoes=[];
+  let temp = {};
   snap.forEach(doc=>{
     const d = doc.data();
-    if(d.lat && d.lng && d.status) avaliacoes.push(d);
+    if(d.lat && d.lng && d.status){
+      // Apenas a avaliação mais recente por escola
+      if(!temp[d.escola] || temp[d.escola].createdAt?.seconds < d.createdAt?.seconds){
+        temp[d.escola] = d;
+      }
+    }
   });
+  avaliacoes = Object.values(temp);
 }
 
 function atualizarPontos(){
   camadaPontos.clearLayers();
-
   avaliacoes.forEach(d=>{
     const s = d.status.toLowerCase();
     if(
@@ -158,7 +182,6 @@ function atualizarPontos(){
       (s.includes("atenção") && !fAtencao.checked) ||
       (s.includes("crit") && !fCritico.checked)
     ) return;
-
     criarPonto(d).addTo(camadaPontos);
   });
 }
@@ -169,7 +192,6 @@ function estiloBairro(feature){
     L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]])).getBounds()
       .contains([a.lat,a.lng])
   );
-
   if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
 
   const cont = { adequado:0, alerta:0, atenção:0, crítico:0 };
@@ -183,7 +205,6 @@ function estiloBairro(feature){
 
   const total = escolas.length;
   const pCrit = cont.crítico/total;
-
   let cor = "#4CAF50";
   if(pCrit>=0.5) cor="#F44336";
   else if(cont.atenção>0) cor="#FF9800";
@@ -226,7 +247,6 @@ function tooltipBairro(feature){
 async function carregarBairros(){
   const res = await fetch("./POLIGONAIS.geojson");
   const geo = await res.json();
-
   camadaBairros = L.geoJSON(geo,{
     style:estiloBairro,
     onEachFeature:(f,l)=> l.bindTooltip(tooltipBairro(f))
