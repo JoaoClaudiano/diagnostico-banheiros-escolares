@@ -10,7 +10,6 @@
 
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
-
 header {
   background:#1f4fd8;
   color:#fff;
@@ -24,7 +23,7 @@ header {
   z-index:1000;
   justify-content:center;
 }
-
+header .voltar { cursor:pointer; font-size:18px; user-select:none; }
 footer {
   background:#f4f6f8;
   font-size:11px;
@@ -33,7 +32,6 @@ footer {
   text-align:center;
   border-top:1px solid #ddd;
 }
-
 .painel {
   background:#fff;
   padding:8px;
@@ -47,35 +45,21 @@ footer {
   z-index:999;
   font-size:13px;
 }
-
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
-
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-}
-
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+.bola { width:12px; height:12px; border-radius:50%; }
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
 .vermelho { background:#F44336; }
-
-#map {
-  height: calc(100vh - 160px);
-}
+#map { height: calc(100vh - 160px); }
 </style>
 </head>
 
 <body>
 
 <header>
-  Mapa Sanitário das Escolas – CheckInfra
+  <span class="voltar" onclick="history.back()">←</span>
+  <span>Mapa Sanitário das Escolas – CheckInfra</span>
 </header>
 
 <div class="painel">
@@ -93,9 +77,10 @@ footer {
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
 
-<!-- JS separados -->
-<script type="module" src="./mapa.js"></script>
-<script type="module" src="./mapabairros.js"></script>
+<script type="module">
+import "./mapa.js";
+import "./mapabairros.js";
+</script>
 
 </body>
 </html>
