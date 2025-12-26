@@ -1,206 +1,249 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>CheckInfra | Mapa do Gestor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa Sanitário – Escolas Municipais</title>
 
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Firebase v8 compat -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <!-- Firebase v8 compat -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<style>
+body { margin:0; font-family: Arial, sans-serif; }
 
-  <!-- Escolas -->
-  <script src="escolas.js"></script>
+header {
+  background:#1f4fd8;
+  color:#fff;
+  padding:14px 12px;
+  text-align:center;
+  font-weight:bold;
+  font-size:16px;
+  position:sticky;
+  top:0;
+  z-index:999;
+}
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
+.nav-global {
+  position: fixed;
+  top:14px;
+  left:10px;
+  display:flex;
+  gap:8px;
+  z-index:9999;
+}
 
-    header {
-      background: #0b3c5d;
-      color: #fff;
-      padding: 14px 20px;
-      font-size: 18px;
-    }
+.nav-global button,
+.nav-global a {
+  background:#1f4fd8;
+  color:#fff;
+  border:none;
+  border-radius:50%;
+  width:36px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  text-decoration:none;
+  cursor:pointer;
+}
 
-    #filtros {
-      background: #f2f2f2;
-      padding: 8px 14px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
+.nav-global button:hover,
+.nav-global a:hover {
+  background:#163aa9;
+}
 
-    #map {
-      height: calc(100vh - 140px);
-      width: 100%;
-    }
+/* Painel */
+.painel {
+  padding:6px 10px;
+  background:#f4f6f8;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  font-size:13px;
+  flex-wrap:wrap;
+  position:sticky;
+  top:52px;
+  z-index:998;
+  border-bottom:1px solid #ddd;
+}
 
-    footer {
-      background: #eee;
-      padding: 10px;
-      font-size: 12px;
-      text-align: center;
-    }
+.painel label {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+}
 
-    .pulse {
-      animation: pulse 1.5s infinite;
-    }
+.bola {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  display:inline-block;
+}
 
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.4); opacity: 0.5; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-  </style>
+.verde { background:#4CAF50; }
+.laranja { background:#FFD700; }
+.amarela { background:#FF9800; }
+.vermelho { background:#F44336; }
+
+/* Pulso */
+.pulse-critico { animation: pulse-red 2.4s ease-out infinite; }
+.pulse-alerta { animation: pulse-yellow 2.4s ease-out infinite; }
+.pulse-atencao { animation: pulse-orange 2.4s ease-out infinite; }
+.pulse-adequado { animation: pulse-green 2.4s ease-out infinite; }
+
+@keyframes pulse-red {
+  0% { r:8; opacity:.9; }
+  70% { r:18; opacity:0; }
+}
+
+@keyframes pulse-yellow {
+  0% { r:8; opacity:.8; }
+  70% { r:16; opacity:0; }
+}
+
+@keyframes pulse-orange {
+  0% { r:8; opacity:.8; }
+  70% { r:16; opacity:0; }
+}
+
+@keyframes pulse-green {
+  0% { r:8; opacity:.7; }
+  70% { r:14; opacity:0; }
+}
+
+#map {
+  height: calc(100vh - 110px);
+}
+
+/* Legenda */
+.legenda {
+  background:#fff;
+  padding:8px;
+  font-size:12px;
+  border-radius:6px;
+  box-shadow:0 1px 5px rgba(0,0,0,.3);
+}
+</style>
 </head>
 
 <body>
 
-<header>
-  <strong>CheckInfra</strong> — Mapa do Gestor
-</header>
+<header>Mapa Sanitário das Escolas – Secretaria de Educação</header>
 
-<div id="filtros">
-  <label><input type="checkbox" checked value="critico"> Crítico</label>
-  <label><input type="checkbox" checked value="alerta"> Alerta</label>
-  <label><input type="checkbox" checked value="regular"> Regular</label>
-  <label><input type="checkbox" checked value="adequado"> Adequado</label>
-  <label><input type="checkbox" id="mapaVivo" checked> Mapa vivo</label>
+<div class="nav-global">
+  <button onclick="history.back()">⬅️</button>
+  <a href="../index.html">🏠</a>
+</div>
+
+<div class="painel">
+  <label><input type="checkbox" id="filtroAdequado" checked><span class="bola verde"></span> Adequado</label>
+  <label><input type="checkbox" id="filtroAlerta" checked><span class="bola laranja"></span> Alerta</label>
+  <label><input type="checkbox" id="filtroAtencao" checked><span class="bola amarela"></span> Atenção</label>
+  <label><input type="checkbox" id="filtroCritico" checked><span class="bola vermelho"></span> Crítico</label>
+  <label><input type="checkbox" id="togglePulso" checked> Mapa vivo</label>
 </div>
 
 <div id="map"></div>
 
-<footer>
-  CheckInfra • Ferramenta de apoio à decisão • Não substitui inspeção técnica
-</footer>
-
 <script>
-/* ===============================
-   FIREBASE
-================================ */
-const firebaseConfig = {
+/* ================= FIREBASE ================= */
+firebase.initializeApp({
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
   projectId: "checkinfra-adf3c"
-};
-
-firebase.initializeApp(firebaseConfig);
+});
 const db = firebase.firestore();
 
-/* ===============================
-   MAPA
-================================ */
+/* ================= MAPA ================= */
 const map = L.map("map").setView([-3.7319, -38.5267], 12);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-/* ===============================
-   CORES POR STATUS (IPT)
-================================ */
-function corPorStatus(status) {
-  switch (status) {
-    case "critico": return "#d73027";
-    case "alerta": return "#fc8d59";
-    case "regular": return "#fee08b";
-    case "adequado": return "#1a9850";
-    default: return "#999";
-  }
+let pulsoAtivo = true;
+
+document.getElementById("togglePulso").addEventListener("change", e => {
+  pulsoAtivo = e.target.checked;
+  atualizarMapa();
+});
+
+const camadaAdequado = L.layerGroup().addTo(map);
+const camadaAlerta = L.layerGroup().addTo(map);
+const camadaAtencao = L.layerGroup().addTo(map);
+const camadaCritico = L.layerGroup().addTo(map);
+
+function corPorStatus(s) {
+  s = s.toLowerCase();
+  if (s.includes("crítica")) return "#F44336";
+  if (s.includes("atenção")) return "#FF9800";
+  if (s.includes("alerta")) return "#FFD700";
+  return "#4CAF50";
 }
 
-/* ===============================
-   BAIRROS (POLIGONAIS)
-================================ */
-fetch("POLIGONAIS.geojson")
-  .then(r => r.json())
-  .then(geo => {
-    L.geoJSON(geo, {
-      style: {
-        color: "#555",
-        weight: 1,
-        fillOpacity: 0.05
-      }
-    }).addTo(map);
-  });
+function classePulso(s) {
+  if (!pulsoAtivo) return "";
+  s = s.toLowerCase();
+  if (s.includes("crítica")) return "pulse-critico";
+  if (s.includes("atenção")) return "pulse-atencao";
+  if (s.includes("alerta")) return "pulse-alerta";
+  return "pulse-adequado";
+}
 
-/* ===============================
-   PONTOS DAS ESCOLAS
-================================ */
-let markers = [];
+let avaliacoes = [];
 
 async function carregarAvaliacoes() {
   const snap = await db.collection("avaliacoes").get();
-  const dados = [];
-
+  avaliacoes = [];
   snap.forEach(doc => {
     const d = doc.data();
-    if (d.lat && d.lng) dados.push(d);
-  });
-
-  return dados;
-}
-
-function atualizarMapa(avaliacoes) {
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-
-  const ativos = Array.from(
-    document.querySelectorAll("#filtros input[type=checkbox]:checked")
-  ).map(c => c.value);
-
-  avaliacoes.forEach(a => {
-    if (!ativos.includes(a.status)) return;
-
-    const marker = L.circleMarker([a.lat, a.lng], {
-      radius: 7,
-      color: corPorStatus(a.status),
-      fillColor: corPorStatus(a.status),
-      fillOpacity: 0.9
-    });
-
-    if (document.getElementById("mapaVivo").checked) {
-      marker.getElement().classList.add("pulse");
-    }
-
-    marker.bindPopup(`
-      <strong>${a.escola}</strong><br>
-      Status: ${a.status}<br>
-      IPT: ${a.ipt}
-    `);
-
-    marker.addTo(map);
-    markers.push(marker);
+    if (d.lat && d.lng) avaliacoes.push(d);
   });
 }
 
-/* ===============================
-   INICIALIZAÇÃO
-================================ */
-let avaliacoes = [];
+function atualizarMapa() {
+  [camadaAdequado, camadaAlerta, camadaAtencao, camadaCritico].forEach(l => l.clearLayers());
 
-async function init() {
-  avaliacoes = await carregarAvaliacoes();
-  atualizarMapa(avaliacoes);
+  avaliacoes.forEach(d => {
+    const status = d.status.toLowerCase();
+
+    if (status.includes("crítica") && !filtroCritico.checked) return;
+    if (status.includes("atenção") && !filtroAtencao.checked) return;
+    if (status.includes("alerta") && !filtroAlerta.checked) return;
+    if (status.includes("adequado") && !filtroAdequado.checked) return;
+
+    const marker = L.circleMarker([d.lat, d.lng], {
+      radius: 8,
+      color: corPorStatus(d.status),
+      fillColor: corPorStatus(d.status),
+      fillOpacity: .85,
+      className: classePulso(d.status)
+    }).bindPopup(
+      `<strong>${d.escola}</strong><br>Status: ${d.status}<br>Pontuação: ${d.pontuacao}`
+    );
+
+    if (status.includes("crítica")) marker.addTo(camadaCritico);
+    else if (status.includes("atenção")) marker.addTo(camadaAtencao);
+    else if (status.includes("alerta")) marker.addTo(camadaAlerta);
+    else marker.addTo(camadaAdequado);
+  });
 }
 
-init();
+document.querySelectorAll(".painel input").forEach(el =>
+  el.addEventListener("change", atualizarMapa)
+);
 
-document.querySelectorAll("#filtros input").forEach(el => {
-  el.addEventListener("change", () => atualizarMapa(avaliacoes));
-});
+(async function init() {
+  await carregarAvaliacoes();
+  atualizarMapa();
+})();
 </script>
 
 </body>
