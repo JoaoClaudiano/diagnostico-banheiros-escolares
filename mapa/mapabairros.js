@@ -1,5 +1,4 @@
 import { avaliacoes, map } from "./mapa.js";
-
 export let camadaBairros;
 
 const statusCores = { "adequado":"#4CAF50", "alerta":"#FFD700", "atenção":"#FF9800", "critico":"#F44336", "crítico":"#F44336" };
@@ -9,7 +8,7 @@ export async function carregarBairros(){
   const res = await fetch("./POLIGONAIS.geojson");
   const geo = await res.json();
 
-  camadaBairros = L.geoJSON(geo, {
+  camadaBairros = L.geoJSON(geo,{
     style: estiloBairro,
     onEachFeature: (feature, layer) => layer.bindTooltip(tooltipBairro(feature))
   });
@@ -17,7 +16,6 @@ export async function carregarBairros(){
 
 function estiloBairro(feature){
   const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
     turf.booleanPointInPolygon([a.lng,a.lat], feature)
   );
 
@@ -37,17 +35,16 @@ function estiloBairro(feature){
   const pAtencao = cont.atenção/total;
   const pAlerta = cont.alerta/total;
 
-  let cor = "#4CAF50"; // verde
-  if(pCrit >= 0.5) cor="#F44336";          // 🔴 ≥50% crítico
-  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; // 🟠 atenção ≥50%
-  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; // 🟡 alerta ≥50%
+  let cor = "#4CAF50";
+  if(pCrit >= 0.5) cor="#F44336";
+  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800";
+  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700";
 
-  return { fillColor: cor, fillOpacity:.45, color:"#555", weight:1 };
+  return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
 }
 
 function tooltipBairro(feature){
   const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
     turf.booleanPointInPolygon([a.lng,a.lat], feature)
   );
 
@@ -81,7 +78,6 @@ function tooltipBairro(feature){
   `;
 }
 
-// Checkbox de ativação/desativação
 document.getElementById("toggleBairros").addEventListener("change", async ()=>{
   if(document.getElementById("toggleBairros").checked){
     if(!camadaBairros) await carregarBairros();
