@@ -135,7 +135,7 @@ const statusCores = {
   "alerta":"#FFD700",
   "atenção":"#FF9800",
   "critico":"#F44336",
-  "crítico":"#F44336"
+  "critico":"#F44336"
 };
 
 const bola = {
@@ -145,14 +145,20 @@ const bola = {
   crítico: "🔴"
 };
 
+// Função para normalizar status
+function limparStatus(s){
+  return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+}
+
 function criarPonto(d){
   const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
+  const s = limparStatus(d.status);
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
-    color:statusCores[d.status.toLowerCase()],
-    fillColor:statusCores[d.status.toLowerCase()],
+    color: statusCores[s],
+    fillColor: statusCores[s],
     fillOpacity:.8,
-    className:pulso
+    className: pulso
   }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.status}`);
 }
 
@@ -169,7 +175,7 @@ function atualizarPontos(){
   camadaPontos.clearLayers();
 
   avaliacoes.forEach(d=>{
-    const s = d.status.toLowerCase();
+    const s = limparStatus(d.status);
     if(
       (s.includes("adequado") && !fAdequado.checked) ||
       (s.includes("alerta") && !fAlerta.checked) ||
@@ -192,7 +198,7 @@ function estiloBairro(feature){
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
-    const s=(e.status||"").toLowerCase();
+    const s=limparStatus(e.status);
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
     else if(s.includes("atenção")) cont.atenção++;
@@ -205,9 +211,9 @@ function estiloBairro(feature){
   const pAlerta = cont.alerta/total;
 
   let cor = "#4CAF50"; // verde
-  if(pCrit >= 0.5) cor="#F44336";          // 🔴 ≥50% crítico
-  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; // 🟠 atenção ≥50%
-  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; // 🟡 alerta ≥50%
+  if(pCrit >= 0.5) cor="#F44336";          
+  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; 
+  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; 
 
   return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
 }
@@ -223,7 +229,7 @@ function tooltipBairro(feature){
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
-    const s=(e.status||"").toLowerCase();
+    const s=limparStatus(e.status);
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
     else if(s.includes("atenção")) cont.atenção++;
