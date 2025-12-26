@@ -17,21 +17,11 @@ header {
   color:#fff;
   padding:14px;
   display:flex;
-  align-items:center;
-  gap:8px;
+  justify-content:center;
   font-weight:bold;
   position:sticky;
   top:0;
   z-index:1000;
-  justify-content:center;
-}
-
-header .voltar {
-  cursor:pointer;
-  font-size:18px;
-  user-select:none;
-  position:absolute;
-  left:14px;
 }
 
 footer {
@@ -78,19 +68,12 @@ footer {
 #map {
   height: calc(100vh - 160px);
 }
-
-/* Pulso */
-.pulse { animation:pulse 2.4s ease-out infinite; }
-@keyframes pulse { 0% { r:8; opacity:.8; } 70% { r:18; opacity:0; } 100% { opacity:0; } }
 </style>
 </head>
 
 <body>
 
-<header>
-  <span class="voltar" onclick="history.back()">←</span>
-  <span>Mapa Sanitário das Escolas – CheckInfra</span>
-</header>
+<header>Mapa Sanitário das Escolas – CheckInfra</header>
 
 <div class="painel">
   <label><input type="checkbox" id="fAdequado" checked><span class="bola verde"></span>Adequado</label>
@@ -107,7 +90,7 @@ footer {
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
 
-<script type="module" src="./mapa.js"></script>
+<script type="module" src="mapa.js"></script>
 
 </body>
 </html>
