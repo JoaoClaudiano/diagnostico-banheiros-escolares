@@ -15,16 +15,15 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <style>
-body { margin:0; font-family: Arial, sans-serif; background:#f4f6f8; }
-header { background:#1f4fd8; color:#fff; text-align:center; padding:14px 10px; font-size:16px; font-weight:bold; }
-.nav-global { position:fixed; top:0; left:0; right:0; display:flex; gap:8px; justify-content:flex-start; padding:8px; z-index:9999; background: rgba(31,79,216,0.95); }
-.nav-global button, .nav-global a { background:#1f4fd8; color:#fff; border:none; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; }
+body { margin:0; font-family: Arial, sans-serif; }
+header { background:#1f4fd8; color:#fff; padding:14px 12px; text-align:center; font-weight:bold; font-size:16px; position:sticky; top:0; z-index:999; }
+.nav-global { position: fixed; top:14px; left:10px; display:flex; gap:8px; z-index:9999; }
+.nav-global button, .nav-global a { background:#1f4fd8; color:#fff; border:none; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:18px; text-decoration:none; cursor:pointer; }
 .nav-global button:hover, .nav-global a:hover { background:#163aa9; }
 
-#map { height: calc(100vh - 160px); margin-top:58px; }
-
-.painel { padding:10px; background:#f4f6f8; display:flex; gap:10px; justify-content:center; font-size:14px; flex-wrap:wrap; position:sticky; top:58px; z-index:999; }
-.painel label { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:13px; }
+/* Painel de filtros */
+.painel { padding:6px 10px; background:#f4f6f8; display:flex; gap:10px; justify-content:center; font-size:13px; flex-wrap:wrap; position:sticky; top:52px; z-index:998; border-bottom:1px solid #ddd; }
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
 .bola { width:12px; height:12px; border-radius:50%; display:inline-block; }
 .verde { background:#4CAF50; }      /* Adequado */
 .laranja { background:#FFD700; }    /* Alerta */
@@ -42,30 +41,24 @@ header { background:#1f4fd8; color:#fff; text-align:center; padding:14px 10px; f
 @keyframes pulse-orange { 0% { r:8; opacity:.8; } 70% { r:16; opacity:0; } 100% { opacity:0; } }
 @keyframes pulse-green { 0% { r:8; opacity:.7; } 70% { r:14; opacity:0; } 100% { opacity:0; } }
 
+/* Mapa */
+#map { height: calc(100vh - 110px); }
+
 /* Legenda */
-.legenda { background:#fff; padding:10px; font-size:13px; border-radius:6px; box-shadow:0 1px 5px rgba(0,0,0,.3); }
-.legenda h4 { margin:0 0 6px; font-size:14px; }
+.legenda { background:#fff; padding:8px; font-size:12px; border-radius:6px; box-shadow:0 1px 5px rgba(0,0,0,.3); }
+.legenda h4 { margin:0 0 6px; font-size:13px; }
 .legenda div { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
-
-/* Footer */
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:16px 10px; font-size:12px; line-height:1.4; width:100%; box-sizing:border-box; }
-footer div { max-width:600px; margin:0 auto; }
-footer a { color:#fff; text-decoration:underline; }
-
-@media (max-width:480px){
-  footer p { font-size:10px; }
-  footer img { width:60%; }
-}
 </style>
 </head>
+
 <body>
+
+<header>Mapa Sanitário das Escolas – Secretaria de Educação</header>
 
 <div class="nav-global">
   <button onclick="history.back()" title="Voltar">⬅️</button>
   <a href="./index.html" title="Início">🏠</a>
 </div>
-
-<header>Mapa Sanitário das Escolas – Secretaria de Educação</header>
 
 <div class="painel">
   <label><input type="checkbox" id="filtroAdequado" checked><span class="bola verde"></span> Adequado</label>
@@ -73,20 +66,20 @@ footer a { color:#fff; text-decoration:underline; }
   <label><input type="checkbox" id="filtroAtencao" checked><span class="bola amarela"></span> Atenção</label>
   <label><input type="checkbox" id="filtroCritico" checked><span class="bola vermelho"></span> Crítico</label>
   <label><input type="checkbox" id="togglePulso" checked> Mapa vivo</label>
+  <label><input type="checkbox" id="toggleCluster" checked> Agrupar marcadores</label>
 </div>
 
 <div id="map"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
   projectId: "checkinfra-adf3c"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -94,10 +87,16 @@ const map = L.map("map").setView([-3.7319, -38.5267], 12);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "©️ OpenStreetMap" }).addTo(map);
 
 let pulsoAtivo = true;
-document.getElementById("togglePulso").addEventListener("change", e=>{
-  pulsoAtivo = e.target.checked;
-  atualizarMapa();
-});
+let clusterAtivo = true;
+
+document.getElementById("togglePulso").addEventListener("change", e=>{ pulsoAtivo = e.target.checked; atualizarMapa(); });
+document.getElementById("toggleCluster").addEventListener("change", e=>{ clusterAtivo = e.target.checked; atualizarMapa(); });
+
+// Layers por status
+const camadaAdequado = L.layerGroup().addTo(map);
+const camadaAlerta = L.layerGroup().addTo(map);
+const camadaAtencao = L.layerGroup().addTo(map);
+const camadaCritico = L.layerGroup().addTo(map);
 
 function corPorStatus(status){
   status = status.toLowerCase();
@@ -126,23 +125,19 @@ function criarMarker(d){
 let avaliacoes = [];
 
 async function carregarAvaliacoes(){
-  const snapshot = await getDocs(query(collection(db,"avaliacoes"), orderBy("createdAt","desc")));
-  const escolasMap = new Map();
+  const snapshot = await getDocs(collection(db,"avaliacoes"));
+  avaliacoes = [];
   snapshot.forEach(doc=>{
     const d = doc.data();
-    if(d.lat && d.lng && !escolasMap.has(d.escola)){
-      escolasMap.set(d.escola,d);
-    }
+    if(d.lat && d.lng) avaliacoes.push(d);
   });
-  avaliacoes = Array.from(escolasMap.values());
 }
 
 function atualizarMapa(){
-  map.eachLayer(l=>{
-    if(l instanceof L.MarkerClusterGroup || l instanceof L.LayerGroup) l.clearLayers();
-  });
+  // Limpa layers
+  [camadaAdequado, camadaAlerta, camadaAtencao, camadaCritico].forEach(l=>l.clearLayers());
 
-  const filtrar = d=>{
+  const filtrar = (d)=>{
     if(d.status.toLowerCase().includes("crítica") && !document.getElementById("filtroCritico").checked) return false;
     if(d.status.toLowerCase().includes("atenção") && !document.getElementById("filtroAtencao").checked) return false;
     if(d.status.toLowerCase().includes("alerta") && !document.getElementById("filtroAlerta").checked) return false;
@@ -152,13 +147,16 @@ function atualizarMapa(){
 
   const avaliFiltradas = avaliacoes.filter(filtrar);
 
-  if(pulsoAtivo){
+  if(clusterAtivo){
     const cluster = L.markerClusterGroup({ chunkedLoading:true });
     avaliFiltradas.forEach(d=> cluster.addLayer(criarMarker(d)) );
     map.addLayer(cluster);
   } else {
     avaliFiltradas.forEach(d=>{
-      criarMarker(d).addTo(map);
+      const layer = d.status.toLowerCase().includes("crítica") ? camadaCritico :
+                    d.status.toLowerCase().includes("atenção") ? camadaAtencao :
+                    d.status.toLowerCase().includes("alerta") ? camadaAlerta : camadaAdequado;
+      criarMarker(d).addTo(layer);
     });
   }
 }
@@ -191,26 +189,5 @@ legenda.onAdd = function(){
 };
 legenda.addTo(map);
 </script>
-
-<footer>
-  <div>
-    <p>© 2025 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
-    <p>
-      <a href="./pages/sobre.html">Sobre</a> | 
-      <a href="./pages/contato.html">Contato</a> | 
-      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
-      <a href="./pages/termos-de-uso.html">Termos de Uso</a>
-    </p>
-    <p>
-      <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="max-width:90px; width:40%;">
-      </a>
-    </p>
-    <p style="font-size:11px;">
-      🔒 O CheckInfra realiza tratamento mínimo de dados pessoais, exclusivamente para fins técnicos e institucionais.
-    </p>
-  </div>
-</footer>
-
 </body>
 </html>
