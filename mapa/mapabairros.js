@@ -1,68 +1,73 @@
-let camadaBairros = L.geoJSON(null).addTo(map);
+// mapabairros.js
+import * as turf from "https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js";
 
-async function carregarBairros(){
-  const res = await fetch("./POLIGONAIS.geojson");
-  const geo = await res.json();
+let camadaBairros = null;
 
-  camadaBairros = L.geoJSON(geo,{
-    style: estiloBairro,
-    onEachFeature: (f,l)=> l.bindTooltip(tooltipBairro(f))
-  });
+// Substitua este GeoJSON pelos seus bairros
+const bairrosGeoJSON = await fetch("./data/bairros.geojson").then(r=>r.json());
+
+function corPorStatus(status) {
+  status = (status || "ok").toLowerCase();
+  if(status === "critico") return "#F44336";
+  if(status === "atenção") return "#FF9800";
+  if(status === "alerta") return "#FFD700";
+  return "#4CAF50";
 }
 
-function estiloBairro(feature){
-  const escolas = avaliacoes.filter(a => {
-    const poly = L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]]));
-    return poly.getBounds().contains([a.lat,a.lng]);
-  });
-  if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
+// Função para ativar a camada de bairros
+window.ativarBairros = function() {
+  if(camadaBairros) map.removeLayer(camadaBairros);
 
-  const cont={ ok:0, alerta:0, atencao:0, critico:0 };
-  escolas.forEach(e=>{
-    const s=e.classe;
-    cont[s] = (cont[s]||0)+1;
-  });
+  camadaBairros = L.geoJSON(bairrosGeoJSON, {
+    style: function(feature) {
+      // Pegamos os pontos dentro do polígono
+      const pontosNoBairro = avaliacoes.filter(d => {
+        if(!d.lat || !d.lng) return false;
+        const pt = turf.point([d.lng, d.lat]);
+        return turf.booleanPointInPolygon(pt, feature);
+      });
 
-  const total = escolas.length;
-  let cor="#4CAF50"; 
-  if(cont.critico/total>=0.5) cor="#F44336";
-  else if(cont.atencao/total>=0.5) cor="#FF9800";
-  else if(cont.alerta/total>=0.5) cor="#FFD700";
+      if(pontosNoBairro.length === 0) return { color: "transparent", fillOpacity:0 };
 
-  return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
+      // Definimos a cor pelo pior status presente
+      let pior = "ok";
+      pontosNoBairro.forEach(p=>{
+        const s = (p.classe || "ok").toLowerCase();
+        if(s === "critico") pior = "critico";
+        else if(s === "atenção" && pior !== "critico") pior = "atenção";
+        else if(s === "alerta" && !["critico","atenção"].includes(pior)) pior = "alerta";
+      });
+
+      return { color: corPorStatus(pior), weight:2, fillOpacity:0.3, fillColor: corPorStatus(pior) };
+    },
+    onEachFeature: function(feature, layer) {
+      // Tooltip com contagem de escolas por status
+      const pontosNoBairro = avaliacoes.filter(d => {
+        if(!d.lat || !d.lng) return false;
+        const pt = turf.point([d.lng, d.lat]);
+        return turf.booleanPointInPolygon(pt, feature);
+      });
+
+      const contagem = { ok:0, alerta:0, "atenção":0, critico:0 };
+      pontosNoBairro.forEach(d=>{
+        const s = (d.classe || "ok").toLowerCase();
+        if(contagem[s] !== undefined) contagem[s]++;
+      });
+
+      let html = `<strong>${feature.properties.nome}</strong><br>`;
+      html += `Adequado: ${contagem.ok} <br>`;
+      html += `Alerta: ${contagem.alerta} <br>`;
+      html += `Atenção: ${contagem["atenção"]} <br>`;
+      html += `Crítico: ${contagem.critico} <br>`;
+      layer.bindTooltip(html);
+    }
+  }).addTo(map);
 }
 
-function tooltipBairro(feature){
-  const escolas = avaliacoes.filter(a=>{
-    const poly = L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]]));
-    return poly.getBounds().contains([a.lat,a.lng]);
-  });
-  if(escolas.length===0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
-
-  const cont={ ok:0, alerta:0, atencao:0, critico:0 };
-  escolas.forEach(e=>{ const s=e.classe; cont[s]=(cont[s]||0)+1; });
-  const t = escolas.length;
-  const p = k=>Math.round((cont[k]/t)*100);
-
-  let obs="";
-  if(p("critico")>=50) obs="🔴 Problema generalizado – alto risco de impacto.";
-  else if(p("atencao")>=50) obs="🟠 Problema localizado, tendência de piora.";
-  else if(p("alerta")>=50) obs="🟡 Problema pontual, monitoramento recomendado.";
-  else obs="🟢 Situação controlada – continuar acompanhamento rotineiro.";
-
-  return `
-    <strong>${feature.properties.nome}</strong><br>
-    🔴 ${p("critico")}% crítico (${cont.critico})<br>
-    🟠 ${p("atencao")}% atenção (${cont.atencao})<br>
-    🟡 ${p("alerta")}% alerta (${cont.alerta})<br>
-    🟢 ${p("ok")}% adequado (${cont.ok})<br>
-    Observação: ${obs}
-  `;
+// Função para desativar camada
+window.desativarBairros = function() {
+  if(camadaBairros) {
+    map.removeLayer(camadaBairros);
+    camadaBairros = null;
+  }
 }
-
-document.getElementById("toggleBairros").addEventListener("change",e=>{
-  if(e.target.checked) camadaBairros.addTo(map);
-  else map.removeLayer(camadaBairros);
-});
-
-await carregarBairros();
