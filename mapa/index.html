@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
@@ -17,19 +18,20 @@ header {
   padding:14px;
   display:flex;
   align-items:center;
-  justify-content:center;
+  gap:8px;
   font-weight:bold;
   position:sticky;
   top:0;
   z-index:1000;
+  justify-content:center;
 }
 
 header .voltar {
-  position:absolute;
-  left:10px;
   cursor:pointer;
   font-size:18px;
   user-select:none;
+  position:absolute;
+  left:14px;
 }
 
 footer {
@@ -77,23 +79,14 @@ footer {
   height: calc(100vh - 160px);
 }
 
-/* Pulsos distintos por status */
-.pulse-critico { animation:pulseCritico 1.2s ease-out infinite; }
-@keyframes pulseCritico { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
-
-.pulse-atencao { animation:pulseAtencao 2.4s ease-out infinite; }
-@keyframes pulseAtencao { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
-
-.pulse-alerta { animation:pulseAlerta 3.6s ease-out infinite; }
-@keyframes pulseAlerta { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
-
-.pulse-adequado { animation:pulseAdequado 4.8s ease-out infinite; }
-@keyframes pulseAdequado { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
-
+/* Pulso */
+.pulse { animation:pulse 2.4s ease-out infinite; }
+@keyframes pulse { 0% { r:8; opacity:.8; } 70% { r:18; opacity:0; } 100% { opacity:0; } }
 </style>
 </head>
 
 <body>
+
 <header>
   <span class="voltar" onclick="history.back()">←</span>
   <span>Mapa Sanitário das Escolas – CheckInfra</span>
@@ -115,5 +108,6 @@ footer {
 </footer>
 
 <script type="module" src="./mapa.js"></script>
+
 </body>
 </html>
