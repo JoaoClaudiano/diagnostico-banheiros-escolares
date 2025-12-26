@@ -17,21 +17,22 @@ header {
   color:#fff;
   padding:14px;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   gap:8px;
   font-weight:bold;
   position:sticky;
   top:0;
   z-index:1000;
+  text-align:center;
 }
 
 header .voltar {
-  position:absolute;
-  left:14px;
   cursor:pointer;
   font-size:18px;
   user-select:none;
+  position:absolute;
+  left:14px;
 }
 
 footer {
@@ -149,10 +150,12 @@ const bola = {
   crítico: "🔴"
 };
 
+// Cria ponto da escola com cor correta e tooltip
 function criarPonto(d){
   const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
+  const status = (d.status||"").trim().toLowerCase();
+  const cor = statusCores[status] || "#000"; // fallback preto
 
-  const status = (d.status||"").toLowerCase();
   let observacao = "";
   if(status.includes("crit")) observacao = "🔴 Problema grave – intervenção imediata recomendada.";
   else if(status.includes("atenção")) observacao = "🟠 Problema localizado, tendência de evoluir a crítico.";
@@ -161,8 +164,8 @@ function criarPonto(d){
 
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
-    color:statusCores[status] || "#000",
-    fillColor:statusCores[status] || "#000",
+    color:cor,
+    fillColor:cor,
     fillOpacity:.8,
     className:pulso
   }).bindPopup(`
@@ -174,6 +177,7 @@ function criarPonto(d){
   `);
 }
 
+// Carrega avaliações do Firebase
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
   avaliacoes=[];
@@ -183,10 +187,11 @@ async function carregarAvaliacoes(){
   });
 }
 
+// Atualiza pontos visíveis conforme filtros
 function atualizarPontos(){
   camadaPontos.clearLayers();
   avaliacoes.forEach(d=>{
-    const s = d.status.toLowerCase();
+    const s = (d.status||"").trim().toLowerCase();
     if(
       (s.includes("adequado") && !fAdequado.checked) ||
       (s.includes("alerta") && !fAlerta.checked) ||
@@ -198,56 +203,60 @@ function atualizarPontos(){
   });
 }
 
+// Calcula cor do bairro
 function estiloBairro(feature){
-  const escolasNoPoligono = avaliacoes.filter(a=>{
-    if(!a.lat || !a.lng) return false;
+  if(!feature.geometry) return { fillOpacity:0, color:"#999", weight:1 };
+
+  const escolas = avaliacoes.filter(a=>{
     const pt = turf.point([a.lng,a.lat]);
     return turf.booleanPointInPolygon(pt, feature);
   });
 
-  if(escolasNoPoligono.length===0) return { fillOpacity:0, color:"#999", weight:1 };
+  if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolasNoPoligono.forEach(e=>{
-    const s=(e.status||"").toLowerCase();
+  escolas.forEach(e=>{
+    const s=(e.status||"").trim().toLowerCase();
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
     else if(s.includes("atenção")) cont.atenção++;
     else cont.crítico++;
   });
 
-  const total = escolasNoPoligono.length;
+  const total = escolas.length;
   const pCrit = cont.crítico/total;
   const pAtencao = cont.atenção/total;
   const pAlerta = cont.alerta/total;
 
   let cor = "#4CAF50"; // verde
-  if(pCrit >= 0.5) cor="#F44336";          // 🔴 ≥50% crítico
-  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; // 🟠 atenção ≥50%
-  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; // 🟡 alerta ≥50%
+  if(pCrit >= 0.5) cor="#F44336";
+  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800";
+  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700";
 
   return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
 }
 
+// Tooltip bairro
 function tooltipBairro(feature){
-  const escolasNoPoligono = avaliacoes.filter(a=>{
-    if(!a.lat || !a.lng) return false;
+  if(!feature.geometry) return "";
+
+  const escolas = avaliacoes.filter(a=>{
     const pt = turf.point([a.lng,a.lat]);
     return turf.booleanPointInPolygon(pt, feature);
   });
 
-  if(escolasNoPoligono.length===0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
+  if(escolas.length===0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolasNoPoligono.forEach(e=>{
-    const s=(e.status||"").toLowerCase();
+  escolas.forEach(e=>{
+    const s=(e.status||"").trim().toLowerCase();
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
     else if(s.includes("atenção")) cont.atenção++;
     else cont.crítico++;
   });
 
-  const t = escolasNoPoligono.length;
+  const t = escolas.length;
   const p = k => Math.round((cont[k]/t)*100);
 
   let observacao = "";
@@ -266,6 +275,7 @@ function tooltipBairro(feature){
   `;
 }
 
+// Carrega bairros
 async function carregarBairros(){
   const res = await fetch("./POLIGONAIS.geojson");
   const geo = await res.json();
@@ -276,6 +286,7 @@ async function carregarBairros(){
   });
 }
 
+// Eventos checkbox
 document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
   atualizarPontos();
   if(toggleBairros.checked){
