@@ -6,38 +6,94 @@
 <title>Mapa Sanitário – CheckInfra</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="estilo.css"> <!-- Se quiser externalizar o CSS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
+
 header {
-  background:#1f4fd8; color:#fff; padding:14px;
-  display:flex; align-items:center; gap:8px;
-  font-weight:bold; position:sticky; top:0; z-index:1000;
-  justify-content: center; /* centraliza o título */
+  background:#1f4fd8;
+  color:#fff;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  position:sticky;
+  top:0;
+  z-index:1000;
 }
-header .voltar { cursor:pointer; font-size:18px; user-select:none; position:absolute; left:10px; }
-footer { background:#f4f6f8; font-size:11px; color:#555; padding:8px; text-align:center; border-top:1px solid #ddd; }
+
+header .voltar {
+  position:absolute;
+  left:10px;
+  cursor:pointer;
+  font-size:18px;
+  user-select:none;
+}
+
+footer {
+  background:#f4f6f8;
+  font-size:11px;
+  color:#555;
+  padding:8px;
+  text-align:center;
+  border-top:1px solid #ddd;
+}
+
 .painel {
-  background:#fff; padding:8px; display:flex; flex-wrap:wrap; gap:10px;
-  justify-content:center; border-bottom:1px solid #ddd; position:sticky; top:52px; z-index:999;
+  background:#fff;
+  padding:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  border-bottom:1px solid #ddd;
+  position:sticky;
+  top:52px;
+  z-index:999;
   font-size:13px;
 }
-.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
-.bola { width:12px; height:12px; border-radius:50%; }
+
+.painel label {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+}
+
+.bola {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+}
+
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
 .vermelho { background:#F44336; }
-#map { height: calc(100vh - 160px); }
-/* Pulso */
-.pulse { animation:pulse 2.4s ease-out infinite; }
-@keyframes pulse { 0% { r:8; opacity:.8; } 70% { r:18; opacity:0; } 100% { opacity:0; } }
+
+#map {
+  height: calc(100vh - 160px);
+}
+
+/* Pulsos distintos por status */
+.pulse-critico { animation:pulseCritico 1.2s ease-out infinite; }
+@keyframes pulseCritico { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
+
+.pulse-atencao { animation:pulseAtencao 2.4s ease-out infinite; }
+@keyframes pulseAtencao { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
+
+.pulse-alerta { animation:pulseAlerta 3.6s ease-out infinite; }
+@keyframes pulseAlerta { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
+
+.pulse-adequado { animation:pulseAdequado 4.8s ease-out infinite; }
+@keyframes pulseAdequado { 0%{r:8;opacity:.8} 70%{r:18;opacity:0} 100%{opacity:0} }
+
 </style>
-
 </head>
-<body>
 
+<body>
 <header>
   <span class="voltar" onclick="history.back()">←</span>
   <span>Mapa Sanitário das Escolas – CheckInfra</span>
@@ -58,7 +114,6 @@ footer { background:#f4f6f8; font-size:11px; color:#555; padding:8px; text-align
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
 
-<script type="module" src="mapa.js"></script>
-
+<script type="module" src="./mapa.js"></script>
 </body>
 </html>
