@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mapa Sanitário – CheckInfra</title>
 
-<!-- Leaflet CSS/JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -72,23 +71,20 @@ footer {
 .laranja { background:#FF9800; }
 .vermelho { background:#F44336; }
 
-#map { height: calc(100vh - 160px); }
+#map {
+  height: calc(100vh - 160px);
+}
 
 /* Pulso */
-.pulse-adequado { animation:pulse-green 2.4s ease-out infinite; }
-.pulse-alerta   { animation:pulse-yellow 2.4s ease-out infinite; }
-.pulse-atencao  { animation:pulse-orange 2.4s ease-out infinite; }
-.pulse-critico  { animation:pulse-red 2.4s ease-out infinite; }
+.pulse {
+  animation:pulse 2.4s ease-out infinite;
+}
 
-@keyframes pulse-green  {0%{r:8;opacity:.7;} 70%{r:14;opacity:0;} 100%{opacity:0;}}
-@keyframes pulse-yellow {0%{r:8;opacity:.8;} 70%{r:16;opacity:0;} 100%{opacity:0;}}
-@keyframes pulse-orange {0%{r:8;opacity:.8;} 70%{r:16;opacity:0;} 100%{opacity:0;}}
-@keyframes pulse-red    {0%{r:8;opacity:.9;} 70%{r:18;opacity:0;} 100%{opacity:0;}}
-
-/* Legenda */
-.legenda { background:#fff; padding:10px; font-size:13px; border-radius:6px; box-shadow:0 1px 5px rgba(0,0,0,.3); }
-.legenda h4 { margin:0 0 6px; font-size:14px; }
-.legenda div { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+@keyframes pulse {
+  0% { r:8; opacity:.8; }
+  70% { r:18; opacity:0; }
+  100% { opacity:0; }
+}
 </style>
 </head>
 
@@ -105,6 +101,7 @@ footer {
   <label><input type="checkbox" id="fAtencao" checked><span class="bola laranja"></span>Atenção</label>
   <label><input type="checkbox" id="fCritico" checked><span class="bola vermelho"></span>Crítico</label>
   <label><input type="checkbox" id="togglePulso" checked>Mapa vivo</label>
+  <label><input type="checkbox" id="toggleBairros">Leitura por bairro</label>
 </div>
 
 <div id="map"></div>
@@ -130,97 +127,142 @@ const map = L.map("map").setView([-3.7319,-38.5267],12);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap"}).addTo(map);
 
 let avaliacoes = [];
-let pulsoAtivo = true;
+let camadaPontos = L.layerGroup().addTo(map);
+let camadaBairros = L.geoJSON(null);
 
-document.getElementById("togglePulso").addEventListener("change", e => {
-  pulsoAtivo = e.target.checked;
-  atualizarPontos();
-});
+const statusCores = {
+  "adequado":"#4CAF50",
+  "alerta":"#FFD700",
+  "atenção":"#FF9800",
+  "critico":"#F44336",
+  "crítico":"#F44336"
+};
 
-const bola = { adequado:"🟢", alerta:"🟡", atenção:"🟠", crítico:"🔴" };
+const bola = {
+  adequado: "🟢",
+  alerta: "🟡",
+  atenção: "🟠",
+  crítico: "🔴"
+};
 
-// Função para cores confiáveis
-function corPorStatus(status){
-  status = (status||"").toLowerCase();
-  if(status.includes("crítica") || status.includes("critico")) return "#F44336";
-  if(status.includes("atenção")) return "#FF9800";
-  if(status.includes("alerta")) return "#FFD700";
-  return "#4CAF50";
-}
-
-// Função para classe de pulso
-function classePulso(status){
-  if(!pulsoAtivo) return "";
-  status = (status||"").toLowerCase();
-  if(status.includes("crítica") || status.includes("critico")) return "pulse-critico";
-  if(status.includes("atenção")) return "pulse-atencao";
-  if(status.includes("alerta")) return "pulse-alerta";
-  return "pulse-adequado";
-}
-
-// Criar ponto no mapa
 function criarPonto(d){
+  const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
-    color: corPorStatus(d.status),
-    fillColor: corPorStatus(d.status),
-    fillOpacity:0.8,
-    className: classePulso(d.status)
+    color:statusCores[d.status.toLowerCase()],
+    fillColor:statusCores[d.status.toLowerCase()],
+    fillOpacity:.8,
+    className:pulso
   }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.status}`);
 }
 
-// Carregar dados do Firebase
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
-  avaliacoes = [];
+  avaliacoes=[];
   snap.forEach(doc=>{
     const d = doc.data();
-    if(d.lat && d.lng) avaliacoes.push(d);
+    if(d.lat && d.lng && d.status) avaliacoes.push(d);
   });
 }
 
-// Atualizar pontos com filtros
 function atualizarPontos(){
-  map.eachLayer(l=>{
-    if(l instanceof L.LayerGroup && !(l instanceof L.TileLayer)) l.clearLayers();
-  });
+  camadaPontos.clearLayers();
 
   avaliacoes.forEach(d=>{
-    const s = (d.status||"").toLowerCase();
-    if( (s.includes("adequado") && !fAdequado.checked) ||
-        (s.includes("alerta") && !fAlerta.checked) ||
-        (s.includes("atenção") && !fAtencao.checked) ||
-        (s.includes("crit") && !fCritico.checked)
-      ) return;
+    const s = d.status.toLowerCase();
+    if(
+      (s.includes("adequado") && !fAdequado.checked) ||
+      (s.includes("alerta") && !fAlerta.checked) ||
+      (s.includes("atenção") && !fAtencao.checked) ||
+      (s.includes("crit") && !fCritico.checked)
+    ) return;
 
-    criarPonto(d).addTo(map);
+    criarPonto(d).addTo(camadaPontos);
   });
 }
 
-// Eventos dos filtros
-document.getElementById("fAdequado").addEventListener("change", atualizarPontos);
-document.getElementById("fAlerta").addEventListener("change", atualizarPontos);
-document.getElementById("fAtencao").addEventListener("change", atualizarPontos);
-document.getElementById("fCritico").addEventListener("change", atualizarPontos);
+function estiloBairro(feature){
+  const escolas = avaliacoes.filter(a =>
+    feature.geometry &&
+    L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]])).getBounds()
+      .contains([a.lat,a.lng])
+  );
 
-// Inicialização
-await carregarAvaliacoes();
-atualizarPontos();
+  if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
 
-// Legenda
-const legenda = L.control({position:"bottomright"});
-legenda.onAdd = function(){
-  const div = L.DomUtil.create("div","legenda");
-  div.innerHTML = `
-    <h4>Leitura do mapa</h4>
-    <div><span class="bola verde"></span> Adequado</div>
-    <div><span class="bola amarelo"></span> Alerta</div>
-    <div><span class="bola laranja"></span> Atenção</div>
-    <div><span class="bola vermelho"></span> Crítico</div>
+  const cont = { adequado:0, alerta:0, atenção:0, crítico:0 };
+  escolas.forEach(e=>{
+    const s=e.status.toLowerCase();
+    if(s.includes("adequado")) cont.adequado++;
+    else if(s.includes("alerta")) cont.alerta++;
+    else if(s.includes("atenção")) cont.atenção++;
+    else cont.crítico++;
+  });
+
+  const total = escolas.length;
+  const pCrit = cont.crítico/total;
+
+  let cor = "#4CAF50";
+  if(pCrit>=0.5) cor="#F44336";
+  else if(cont.atenção>0) cor="#FF9800";
+  else if(cont.alerta>0) cor="#FFD700";
+
+  return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
+}
+
+function tooltipBairro(feature){
+  const escolas = avaliacoes.filter(a =>
+    feature.geometry &&
+    L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]])).getBounds()
+      .contains([a.lat,a.lng])
+  );
+
+  if(escolas.length===0)
+    return `<strong>${feature.properties.nome}</strong><br>Sem avaliações`;
+
+  const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
+  escolas.forEach(e=>{
+    const s=e.status.toLowerCase();
+    if(s.includes("adequado")) cont.adequado++;
+    else if(s.includes("alerta")) cont.alerta++;
+    else if(s.includes("atenção")) cont.atenção++;
+    else cont.crítico++;
+  });
+
+  const t=escolas.length;
+  const p = k => Math.round((cont[k]/t)*100);
+
+  return `
+    <strong>${feature.properties.nome}</strong><br>
+    ${bola.crítico} ${p("crítico")}% crítico (${cont.crítico})<br>
+    ${bola.atenção} ${p("atenção")}% atenção (${cont.atenção})<br>
+    ${bola.alerta} ${p("alerta")}% alerta (${cont.alerta})<br>
+    ${bola.adequado} ${p("adequado")}% adequado (${cont.adequado})
   `;
-  return div;
-};
-legenda.addTo(map);
+}
+
+async function carregarBairros(){
+  const res = await fetch("./POLIGONAIS.geojson");
+  const geo = await res.json();
+
+  camadaBairros = L.geoJSON(geo,{
+    style:estiloBairro,
+    onEachFeature:(f,l)=> l.bindTooltip(tooltipBairro(f))
+  });
+}
+
+document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
+  atualizarPontos();
+  if(toggleBairros.checked){
+    camadaBairros.addTo(map);
+  } else {
+    map.removeLayer(camadaBairros);
+  }
+}));
+
+await carregarAvaliacoes();
+await carregarBairros();
+atualizarPontos();
 </script>
 
 </body>
