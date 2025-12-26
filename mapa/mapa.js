@@ -24,7 +24,14 @@ const statusCores = {
   "crítico":"#F44336"
 };
 
-const statusFrequencia = { // frequência do pulso em ms
+const bola = {
+  adequado: "🟢",
+  alerta: "🟡",
+  atenção: "🟠",
+  crítico: "🔴"
+};
+
+const pulseFreq = {
   "critico": 1200,
   "crítico": 1200,
   "atenção": 2400,
@@ -32,56 +39,27 @@ const statusFrequencia = { // frequência do pulso em ms
   "adequado": 4800
 };
 
-const bola = { adequado: "🟢", alerta: "🟡", atenção: "🟠", crítico: "🔴" };
-
-export function criarPonto(d){
-  const status = (d.status||"").toLowerCase();
-
-  let observacao = "";
-  if(status.includes("crit")) observacao = "🔴 Problema grave – intervenção imediata recomendada.";
-  else if(status.includes("atenção")) observacao = "🟠 Problema localizado, tendência de evoluir a crítico.";
-  else if(status.includes("alerta")) observacao = "🟡 Problema pontual, monitoramento recomendado.";
-  else if(status.includes("adequado")) observacao = "🟢 Situação satisfatória – manutenção do acompanhamento.";
-
-  const circle = L.circleMarker([d.lat,d.lng],{
-    radius:8,
-    color:statusCores[status],
-    fillColor:statusCores[status],
-    fillOpacity:.8,
-    className:"pulse"
-  }).bindPopup(`
-    <strong>${d.escola}</strong><br>
-    Status: ${d.status}<br>
-    Pontuação: ${d.pontuacao || "-"}<br>
-    Última avaliação: ${d.data || "-"}<br>
-    Observação: ${observacao}
-  `);
-
-  // Pulso animado por frequência
-  const freq = statusFrequencia[status] || 2400;
-  let growing = true, r=8;
-  setInterval(()=>{
-    if(growing){ r+=0.5; if(r>=18) growing=false; }
-    else { r-=0.5; if(r<=8) growing=true; }
-    circle.setRadius(r);
-  }, freq/20);
-
-  return circle;
-}
-
 export async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
-  avaliacoes=[];
+  avaliacoes = [];
   snap.forEach(doc=>{
     const d = doc.data();
     if(d.lat && d.lng && d.status) avaliacoes.push(d);
   });
 }
 
+let pulseIntervals = [];
+
 export function atualizarPontos(){
+  // Limpa os pulsos antigos
+  pulseIntervals.forEach(i=>clearInterval(i));
+  pulseIntervals = [];
+
   camadaPontos.clearLayers();
+
   avaliacoes.forEach(d=>{
-    const s = d.status.toLowerCase();
+    const s = (d.status||"").toLowerCase();
+
     if(
       (s.includes("adequado") && !fAdequado.checked) ||
       (s.includes("alerta") && !fAlerta.checked) ||
@@ -89,6 +67,33 @@ export function atualizarPontos(){
       (s.includes("crit") && !fCritico.checked)
     ) return;
 
-    criarPonto(d).addTo(camadaPontos);
+    let observacao = "";
+    if(s.includes("crit")) observacao = "🔴 Problema grave – intervenção imediata recomendada.";
+    else if(s.includes("atenção")) observacao = "🟠 Problema localizado, tendência de evoluir a crítico.";
+    else if(s.includes("alerta")) observacao = "🟡 Problema pontual, monitoramento recomendado.";
+    else if(s.includes("adequado")) observacao = "🟢 Situação satisfatória – manutenção do acompanhamento.";
+
+    const marker = L.circleMarker([d.lat,d.lng],{
+      radius:8,
+      color:statusCores[s],
+      fillColor:statusCores[s],
+      fillOpacity:.8
+    }).bindPopup(`
+      <strong>${d.escola}</strong><br>
+      Status: ${d.status}<br>
+      Pontuação: ${d.pontuacao || "-"}<br>
+      Última avaliação: ${d.data || "-"}<br>
+      Observação: ${observacao}
+    `);
+
+    marker.addTo(camadaPontos);
+
+    if(togglePulso.checked){
+      const interval = setInterval(()=>{
+        const current = marker.options.fillOpacity;
+        marker.setStyle({ fillOpacity: current===0.8 ? 0.2 : 0.8 });
+      }, pulseFreq[s] || 2000);
+      pulseIntervals.push(interval);
+    }
   });
 }
