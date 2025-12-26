@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
@@ -17,6 +18,7 @@ header {
   padding:14px;
   display:flex;
   align-items:center;
+  justify-content:center;
   gap:8px;
   font-weight:bold;
   position:sticky;
@@ -25,6 +27,8 @@ header {
 }
 
 header .voltar {
+  position:absolute;
+  left:14px;
   cursor:pointer;
   font-size:18px;
   user-select:none;
@@ -157,8 +161,8 @@ function criarPonto(d){
 
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
-    color:statusCores[status],
-    fillColor:statusCores[status],
+    color:statusCores[status] || "#000",
+    fillColor:statusCores[status] || "#000",
     fillOpacity:.8,
     className:pulso
   }).bindPopup(`
@@ -195,16 +199,16 @@ function atualizarPontos(){
 }
 
 function estiloBairro(feature){
-  const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]])).getBounds()
-      .contains([a.lat,a.lng])
-  );
+  const escolasNoPoligono = avaliacoes.filter(a=>{
+    if(!a.lat || !a.lng) return false;
+    const pt = turf.point([a.lng,a.lat]);
+    return turf.booleanPointInPolygon(pt, feature);
+  });
 
-  if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
+  if(escolasNoPoligono.length===0) return { fillOpacity:0, color:"#999", weight:1 };
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolas.forEach(e=>{
+  escolasNoPoligono.forEach(e=>{
     const s=(e.status||"").toLowerCase();
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
@@ -212,7 +216,7 @@ function estiloBairro(feature){
     else cont.crítico++;
   });
 
-  const total = escolas.length;
+  const total = escolasNoPoligono.length;
   const pCrit = cont.crítico/total;
   const pAtencao = cont.atenção/total;
   const pAlerta = cont.alerta/total;
@@ -226,16 +230,16 @@ function estiloBairro(feature){
 }
 
 function tooltipBairro(feature){
-  const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]])).getBounds()
-      .contains([a.lat,a.lng])
-  );
+  const escolasNoPoligono = avaliacoes.filter(a=>{
+    if(!a.lat || !a.lng) return false;
+    const pt = turf.point([a.lng,a.lat]);
+    return turf.booleanPointInPolygon(pt, feature);
+  });
 
-  if(escolas.length===0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
+  if(escolasNoPoligono.length===0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolas.forEach(e=>{
+  escolasNoPoligono.forEach(e=>{
     const s=(e.status||"").toLowerCase();
     if(s.includes("adequado")) cont.adequado++;
     else if(s.includes("alerta")) cont.alerta++;
@@ -243,7 +247,7 @@ function tooltipBairro(feature){
     else cont.crítico++;
   });
 
-  const t = escolas.length;
+  const t = escolasNoPoligono.length;
   const p = k => Math.round((cont[k]/t)*100);
 
   let observacao = "";
