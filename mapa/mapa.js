@@ -10,11 +10,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-export const map = L.map("map").setView([-3.7319,-38.5267],12);
+const map = L.map("map").setView([-3.7319,-38.5267],12);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap"}).addTo(map);
 
-export let avaliacoes = [];
-export let camadaPontos = L.layerGroup().addTo(map);
+let avaliacoes = [];
+let camadaPontos = L.layerGroup().addTo(map);
 
 const statusCores = {
   "adequado":"#4CAF50",
@@ -31,35 +31,61 @@ const bola = {
   crítico: "🔴"
 };
 
-const pulseFreq = {
-  "critico": 1200,
-  "crítico": 1200,
-  "atenção": 2400,
-  "alerta": 3600,
-  "adequado": 4800
-};
+const pulsosFreq = { "critico":1200, "atenção":2400, "alerta":3600, "adequado":4800 };
+const pulsosCor = { "critico":"#F44336", "atenção":"#FF9800", "alerta":"#FFD700", "adequado":"#4CAF50" };
 
-export async function carregarAvaliacoes(){
+async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
-  avaliacoes = [];
+  avaliacoes=[];
   snap.forEach(doc=>{
     const d = doc.data();
     if(d.lat && d.lng && d.status) avaliacoes.push(d);
   });
 }
 
-let pulseIntervals = [];
+function criarPonto(d){
+  const status = (d.status||"").toLowerCase();
+  let observacao = "";
+  if(status.includes("crit")) observacao = "🔴 Problema grave – intervenção imediata recomendada.";
+  else if(status.includes("atenção")) observacao = "🟠 Problema localizado, tendência de evoluir a crítico.";
+  else if(status.includes("alerta")) observacao = "🟡 Problema pontual, monitoramento recomendado.";
+  else if(status.includes("adequado")) observacao = "🟢 Situação satisfatória – manutenção do acompanhamento.";
 
-export function atualizarPontos(){
-  // Limpa os pulsos antigos
-  pulseIntervals.forEach(i=>clearInterval(i));
-  pulseIntervals = [];
+  const marker = L.circleMarker([d.lat,d.lng],{
+    radius:8,
+    color: statusCores[status],
+    fillColor: statusCores[status],
+    fillOpacity:.8
+  }).bindPopup(`
+    <strong>${d.escola}</strong><br>
+    Status: ${d.status}<br>
+    Pontuação: ${d.pontuacao || "-"}<br>
+    Última avaliação: ${d.data || "-"}<br>
+    Observação: ${observacao}
+  `);
 
+  // Pulsos ativos
+  if(document.getElementById("togglePulso").checked) pulso(marker,status);
+
+  return marker;
+}
+
+function pulso(marker,status){
+  const freq = pulsosFreq[status] || 2400;
+  const cor = pulsosCor[status] || "#000";
+  let growing = true;
+  let r = 8;
+  setInterval(()=>{
+    r = growing ? 18 : 8;
+    marker.setStyle({ radius: r, color: cor, fillColor: cor });
+    growing = !growing;
+  }, freq);
+}
+
+function atualizarPontos(){
   camadaPontos.clearLayers();
-
   avaliacoes.forEach(d=>{
-    const s = (d.status||"").toLowerCase();
-
+    const s = d.status.toLowerCase();
     if(
       (s.includes("adequado") && !fAdequado.checked) ||
       (s.includes("alerta") && !fAlerta.checked) ||
@@ -67,33 +93,21 @@ export function atualizarPontos(){
       (s.includes("crit") && !fCritico.checked)
     ) return;
 
-    let observacao = "";
-    if(s.includes("crit")) observacao = "🔴 Problema grave – intervenção imediata recomendada.";
-    else if(s.includes("atenção")) observacao = "🟠 Problema localizado, tendência de evoluir a crítico.";
-    else if(s.includes("alerta")) observacao = "🟡 Problema pontual, monitoramento recomendado.";
-    else if(s.includes("adequado")) observacao = "🟢 Situação satisfatória – manutenção do acompanhamento.";
-
-    const marker = L.circleMarker([d.lat,d.lng],{
-      radius:8,
-      color:statusCores[s],
-      fillColor:statusCores[s],
-      fillOpacity:.8
-    }).bindPopup(`
-      <strong>${d.escola}</strong><br>
-      Status: ${d.status}<br>
-      Pontuação: ${d.pontuacao || "-"}<br>
-      Última avaliação: ${d.data || "-"}<br>
-      Observação: ${observacao}
-    `);
-
+    const marker = criarPonto(d);
     marker.addTo(camadaPontos);
-
-    if(togglePulso.checked){
-      const interval = setInterval(()=>{
-        const current = marker.options.fillOpacity;
-        marker.setStyle({ fillOpacity: current===0.8 ? 0.2 : 0.8 });
-      }, pulseFreq[s] || 2000);
-      pulseIntervals.push(interval);
-    }
   });
 }
+
+document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
+  atualizarPontos();
+}));
+
+// Ativar mapa vivo e checkbox por padrão
+document.getElementById("togglePulso").checked = true;
+document.getElementById("fAdequado").checked = true;
+document.getElementById("fAlerta").checked = true;
+document.getElementById("fAtencao").checked = true;
+document.getElementById("fCritico").checked = true;
+
+await carregarAvaliacoes();
+atualizarPontos();
