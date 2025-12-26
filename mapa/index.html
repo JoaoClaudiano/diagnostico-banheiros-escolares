@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
@@ -145,40 +146,15 @@ const bola = {
   crítico: "🔴"
 };
 
-function limparStatus(status){
-  if(!status) return "adequado";
-  status = status.toLowerCase();
-  if(status.includes("crit")) return "crítico";
-  if(status.includes("aten")) return "atenção";
-  if(status.includes("aler")) return "alerta";
-  return "adequado";
-}
-
 function criarPonto(d){
   const pulso = document.getElementById("togglePulso").checked ? "pulse" : "";
-  const s = limparStatus(d.status);
-  const emoji = bola[s] || "";
-  const pontuacao = d.pontuacao !== undefined ? d.pontuacao : "-";
-  let dataStr = "-";
-  if(d.data){
-    const dt = new Date(d.data.seconds ? d.data.seconds*1000 : d.data);
-    dataStr = dt.toLocaleDateString("pt-BR");
-  }
-
-  const popupHtml = `
-    <strong>${d.escola}</strong><br>
-    Status: ${emoji} ${d.status}<br>
-    Pontuação: ${pontuacao}<br>
-    Última avaliação: ${dataStr}
-  `;
-
   return L.circleMarker([d.lat,d.lng],{
     radius:8,
-    color: statusCores[s],
-    fillColor: statusCores[s],
+    color:statusCores[d.status.toLowerCase()],
+    fillColor:statusCores[d.status.toLowerCase()],
     fillOpacity:.8,
-    className: pulso
-  }).bindPopup(popupHtml);
+    className:pulso
+  }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.status}<br>Pontuação: ${d.pontuacao || '-'}<br>Última avaliação: ${d.data || '-'}`);
 }
 
 async function carregarAvaliacoes(){
@@ -194,12 +170,12 @@ function atualizarPontos(){
   camadaPontos.clearLayers();
 
   avaliacoes.forEach(d=>{
-    const s = limparStatus(d.status);
+    const s = d.status.toLowerCase();
     if(
-      (s === "adequado" && !fAdequado.checked) ||
-      (s === "alerta" && !fAlerta.checked) ||
-      (s === "atenção" && !fAtencao.checked) ||
-      (s === "crítico" && !fCritico.checked)
+      (s.includes("adequado") && !fAdequado.checked) ||
+      (s.includes("alerta") && !fAlerta.checked) ||
+      (s.includes("atenção") && !fAtencao.checked) ||
+      (s.includes("crit") && !fCritico.checked)
     ) return;
 
     criarPonto(d).addTo(camadaPontos);
@@ -208,17 +184,18 @@ function atualizarPontos(){
 
 function estiloBairro(feature){
   const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]])).getBounds()
-      .contains([a.lat,a.lng])
+    turf.booleanPointInPolygon(turf.point([a.lng, a.lat]), feature)
   );
 
   if(escolas.length===0) return { fillOpacity:0, color:"#999", weight:1 };
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
-    const s = limparStatus(e.status);
-    cont[s]++;
+    const s=(e.status||"").toLowerCase();
+    if(s.includes("adequado")) cont.adequado++;
+    else if(s.includes("alerta")) cont.alerta++;
+    else if(s.includes("atenção")) cont.atenção++;
+    else cont.crítico++;
   });
 
   const total = escolas.length;
@@ -227,26 +204,27 @@ function estiloBairro(feature){
   const pAlerta = cont.alerta/total;
 
   let cor = "#4CAF50"; // verde
-  if(pCrit >= 0.5) cor="#F44336";          
-  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; 
-  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; 
+  if(pCrit >= 0.5) cor="#F44336";          // 🔴 ≥50% crítico
+  else if(pCrit < 0.5 && pAtencao >= 0.5) cor="#FF9800"; // 🟠 atenção ≥50%
+  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor="#FFD700"; // 🟡 alerta ≥50%
 
   return { fillColor:cor, fillOpacity:.45, color:"#555", weight:1 };
 }
 
 function tooltipBairro(feature){
   const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    L.polygon(feature.geometry.coordinates[0].map(c=>[c[1],c[0]])).getBounds()
-      .contains([a.lat,a.lng])
+    turf.booleanPointInPolygon(turf.point([a.lng, a.lat]), feature)
   );
 
   if(escolas.length===0) return `<strong>${feature.properties.nome}</strong><br>Sem avaliações`;
 
   const cont={ adequado:0, alerta:0, atenção:0, crítico:0 };
   escolas.forEach(e=>{
-    const s = limparStatus(e.status);
-    cont[s]++;
+    const s=(e.status||"").toLowerCase();
+    if(s.includes("adequado")) cont.adequado++;
+    else if(s.includes("alerta")) cont.alerta++;
+    else if(s.includes("atenção")) cont.atenção++;
+    else cont.crítico++;
   });
 
   const t = escolas.length;
