@@ -15,11 +15,19 @@ header {
   background:#1f4fd8;
   color:#fff;
   padding:14px;
-  text-align:center;
+  display:flex;
+  align-items:center;
+  gap:8px;
   font-weight:bold;
   position:sticky;
   top:0;
   z-index:1000;
+}
+
+header .voltar {
+  cursor:pointer;
+  font-size:18px;
+  user-select:none;
 }
 
 footer {
@@ -82,7 +90,10 @@ footer {
 
 <body>
 
-<header>Mapa Sanitário das Escolas – CheckInfra</header>
+<header>
+  <span class="voltar" onclick="history.back()">←</span>
+  <span>Mapa Sanitário das Escolas – CheckInfra</span>
+</header>
 
 <div class="painel">
   <label><input type="checkbox" id="fAdequado" checked><span class="bola verde"></span>Adequado</label>
@@ -125,6 +136,13 @@ const statusCores = {
   "atenção":"#FF9800",
   "critico":"#F44336",
   "crítico":"#F44336"
+};
+
+const bola = {
+  adequado: "🟢",
+  alerta: "🟡",
+  atenção: "🟠",
+  crítico: "🔴"
 };
 
 function criarPonto(d){
@@ -216,10 +234,10 @@ function tooltipBairro(feature){
 
   return `
     <strong>${feature.properties.nome}</strong><br>
-    ${p("crítico")}% crítico (${cont.crítico}) – ${p("crítico")>0 ? "atenção localizada":"sem criticidade"}<br>
-    ${p("atenção")}% atenção (${cont.atenção})<br>
-    ${p("alerta")}% alerta (${cont.alerta})<br>
-    ${p("adequado")}% adequado (${cont.adequado})
+    ${bola.crítico} ${p("crítico")}% crítico (${cont.crítico})<br>
+    ${bola.atenção} ${p("atenção")}% atenção (${cont.atenção})<br>
+    ${bola.alerta} ${p("alerta")}% alerta (${cont.alerta})<br>
+    ${bola.adequado} ${p("adequado")}% adequado (${cont.adequado})
   `;
 }
 
