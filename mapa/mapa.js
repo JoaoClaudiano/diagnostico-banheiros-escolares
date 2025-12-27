@@ -16,115 +16,98 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"
 let avaliacoes = [];
 let camadaPontos = L.layerGroup().addTo(map);
 
-// Cores por status
 const statusCores = {
-  ok:"#4CAF50",       // verde
-  critico:"#F44336",  // vermelho
-  alerta:"#FFD700",    // amarelo
-  atencao:"#FF9800"   // laranja
+  "adequado":"#4CAF50",
+  "alerta":"#FFD700",
+  "atenção":"#FF9800",
+  "critico":"#F44336",
+  "crítico":"#F44336"
 };
-const statusCores = { "ok":"#4CAF50", "critico":"#F44336", "atencao":"#FF9800", "alerta":"#FFD700" };
-const pulsosClasse = { "ok":"pulse-green", "critico":"pulse-red", "atencao":"pulse-orange", "alerta":"pulse-yellow" };
 
-// Frequência dos pulsos por status (ms)
-const pulsosFreq = { critico:1200, atencao:2400, alerta:3600, ok:4800 };
+const bola = {
+  adequado: "🟢",
+  alerta: "🟡",
+  atenção: "🟠",
+  crítico: "🔴"
+};
+
+const pulsosFreq = { "critico":1200, "atenção":2400, "alerta":3600, "adequado":4800 };
+const pulsosCor = { "critico":"#F44336", "atenção":"#FF9800", "alerta":"#FFD700", "adequado":"#4CAF50" };
+
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
   avaliacoes=[];
-  const mapId = new Map();
   snap.forEach(doc=>{
     const d = doc.data();
-    if(d.lat && d.lng && d.classe){
-      const key = `${d.lat}-${d.lng}`;
-      if(!mapId.has(key) || new Date(d.data) > new Date(mapId.get(key).data)){
-        mapId.set(key,d);
-      }
-    }
+    if(d.lat && d.lng && d.status) avaliacoes.push(d);
   });
-  avaliacoes = Array.from(mapId.values());
 }
 
-// Cria marcador com pulso que desaparece
 function criarPonto(d){
-  const classe = (d.classe || "ok").toLowerCase();
-  const cor = statusCores[classe] || "#000";
+  const status = (d.status||"").toLowerCase();
+  let observacao = "";
+  if(status.includes("crit")) observacao = "🔴 Problema grave – intervenção imediata recomendada.";
+  else if(status.includes("atenção")) observacao = "🟠 Problema localizado, tendência de evoluir a crítico.";
+  else if(status.includes("alerta")) observacao = "🟡 Problema pontual, monitoramento recomendado.";
+  else if(status.includes("adequado")) observacao = "🟢 Situação satisfatória – manutenção do acompanhamento.";
 
   const marker = L.circleMarker([d.lat,d.lng],{
-    radius: 4,
-    color: cor,
-    fillColor: cor,
-    fillOpacity: 0.7,
-    className: `pulse-${classe}`
-  const cor = statusCores[d.classe] || "#000";
-  const pulso = document.getElementById("togglePulso").checked ? pulsosClasse[d.classe] || "" : "";
-  let observacao = "";
-  switch(d.classe){
-    case "critico": observacao="🔴 Problema grave – intervenção imediata recomendada."; break;
-    case "atencao": observacao="🟠 Problema localizado, tendência de evoluir a crítico."; break;
-    case "alerta": observacao="🟡 Problema pontual, monitoramento recomendado."; break;
-    case "ok": observacao="🟢 Situação satisfatória – manutenção do acompanhamento."; break;
-  }
-  return L.circleMarker([d.lat,d.lng],{
-    radius:8, color:cor, fillColor:cor, fillOpacity:.8, className:pulso
+    radius:8,
+    color: statusCores[status],
+    fillColor: statusCores[status],
+    fillOpacity:.8
   }).bindPopup(`
     <strong>${d.escola}</strong><br>
     Status: ${d.status}<br>
     Pontuação: ${d.pontuacao || "-"}<br>
-    Última avaliação: ${d.data || "-"}
     Última avaliação: ${d.data || "-"}<br>
     Observação: ${observacao}
   `);
 
+  // Pulsos ativos
+  if(document.getElementById("togglePulso").checked) pulso(marker,status);
+
   return marker;
 }
 
-// Atualiza os pontos filtrando por checkbox
+function pulso(marker,status){
+  const freq = pulsosFreq[status] || 2400;
+  const cor = pulsosCor[status] || "#000";
+  let growing = true;
+  let r = 8;
+  setInterval(()=>{
+    r = growing ? 18 : 8;
+    marker.setStyle({ radius: r, color: cor, fillColor: cor });
+    growing = !growing;
+  }, freq);
+}
+
 function atualizarPontos(){
   camadaPontos.clearLayers();
   avaliacoes.forEach(d=>{
-    const classe = (d.classe || "ok").toLowerCase();
+    const s = d.status.toLowerCase();
     if(
-      (classe === "ok" && !document.getElementById("fAdequado").checked) ||
-      (classe === "alerta" && !document.getElementById("fAlerta").checked) ||
-      (classe === "atencao" && !document.getElementById("fAtencao").checked) ||
-      (classe === "critico" && !document.getElementById("fCritico").checked)
+      (s.includes("adequado") && !fAdequado.checked) ||
+      (s.includes("alerta") && !fAlerta.checked) ||
+      (s.includes("atenção") && !fAtencao.checked) ||
+      (s.includes("crit") && !fCritico.checked)
     ) return;
 
     const marker = criarPonto(d);
-    camadaPontos.addLayer(marker);
-  });
-}
-
-// Carrega avaliações do Firebase
-async function carregarAvaliacoes(){
-  const snap = await getDocs(collection(db,"avaliacoes"));
-  avaliacoes = [];
-  snap.forEach(doc=>{
-    const d = doc.data();
-    if(d.lat && d.lng) avaliacoes.push(d);
-    const s = d.classe;
-    if((s=="ok" && !fAdequado.checked) || (s=="alerta" && !fAlerta.checked) ||
-       (s=="atencao" && !fAtencao.checked) || (s=="critico" && !fCritico.checked)) return;
-    criarPonto(d).addTo(camadaPontos);
+    marker.addTo(camadaPontos);
   });
 }
 
 document.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{
   atualizarPontos();
 }));
-document.querySelectorAll("input").forEach(i=>i.addEventListener("change", atualizarPontos));
 
-// Checkbox ativado por padrão
+// Ativar mapa vivo e checkbox por padrão
+document.getElementById("togglePulso").checked = true;
 document.getElementById("fAdequado").checked = true;
 document.getElementById("fAlerta").checked = true;
 document.getElementById("fAtencao").checked = true;
 document.getElementById("fCritico").checked = true;
-document.getElementById("togglePulso").checked=true;
-document.getElementById("fAdequado").checked=true;
-document.getElementById("fAlerta").checked=true;
-document.getElementById("fAtencao").checked=true;
-document.getElementById("fCritico").checked=true;
 
-// Inicializa mapa
 await carregarAvaliacoes();
 atualizarPontos();
