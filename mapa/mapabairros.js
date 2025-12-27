@@ -14,7 +14,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /* =========================
-   Variáveis globais
+   Variáveis
 ========================= */
 let camadaBairros = null;
 let bairrosGeoJSON = null;
@@ -46,17 +46,22 @@ toggleBairros.addEventListener("change", async (e) => {
    Ativar leitura por bairros
 ========================= */
 async function ativarLeituraPorBairros() {
+  // 🔴 GARANTIA ABSOLUTA
+  if (!window.avaliacoesGlobais || window.avaliacoesGlobais.length === 0) {
+    console.warn("Leitura por bairros: avaliações ainda não carregadas.");
+    toggleBairros.checked = false;
+    return;
+  }
+
   if (!bairrosGeoJSON) {
     const res = await fetch("./bairros.geojson");
     bairrosGeoJSON = await res.json();
   }
 
-  const avaliacoes = window.avaliacoesGlobais || [];
-
   camadaBairros = L.geoJSON(bairrosGeoJSON, {
-    style: feature => estiloBairro(feature, avaliacoes),
+    style: feature => estiloBairro(feature),
     onEachFeature: (feature, layer) => {
-      const dados = calcularLeituraBairro(feature, avaliacoes);
+      const dados = calcularLeituraBairro(feature);
 
       if (dados.total > 0) {
         layer.bindTooltip(
@@ -73,7 +78,7 @@ async function ativarLeituraPorBairros() {
 }
 
 /* =========================
-   Remover leitura por bairros
+   Remover camada
 ========================= */
 function removerLeituraPorBairros() {
   if (camadaBairros) {
@@ -85,8 +90,8 @@ function removerLeituraPorBairros() {
 /* =========================
    Estilo do bairro
 ========================= */
-function estiloBairro(feature, avaliacoes) {
-  const dados = calcularLeituraBairro(feature, avaliacoes);
+function estiloBairro(feature) {
+  const dados = calcularLeituraBairro(feature);
 
   if (dados.total === 0) {
     return {
@@ -105,9 +110,9 @@ function estiloBairro(feature, avaliacoes) {
 }
 
 /* =========================
-   Cálculo por bairro
+   Cálculo espacial correto
 ========================= */
-function calcularLeituraBairro(feature, avaliacoes) {
+function calcularLeituraBairro(feature) {
   const poligono = feature.geometry;
 
   const contagem = {
@@ -117,7 +122,7 @@ function calcularLeituraBairro(feature, avaliacoes) {
     critico: 0
   };
 
-  avaliacoes.forEach(d => {
+  window.avaliacoesGlobais.forEach(d => {
     const ponto = turf.point([d.lng, d.lat]);
     if (turf.booleanPointInPolygon(ponto, poligono)) {
       contagem[d.classe]++;
