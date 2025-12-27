@@ -1,87 +1,143 @@
-let camadaBairros = L.geoJSON(null);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-async function carregarBairros(){
-  const res = await fetch("./POLIGONAIS.geojson");
-  const geo = await res.json();
+/* =========================
+   Firebase
+========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain: "checkinfra-adf3c.firebaseapp.com",
+  projectId: "checkinfra-adf3c"
+};
 
-  camadaBairros = L.geoJSON(geo,{
-    style: estiloBairro,
-    onEachFeature: (f, layer) => layer.bindTooltip(tooltipBairro(f))
-  });
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-function estiloBairro(feature){
-  const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    turf.booleanPointInPolygon([a.lng, a.lat], feature)
-  );
+/* =========================
+   Variáveis globais
+========================= */
+let camadaBairros = null;
+let bairrosGeoJSON = null;
 
-  if(escolas.length === 0) return { fillOpacity: 0, color:"#999", weight:1 };
+/* =========================
+   Cores por classe
+========================= */
+const coresClasse = {
+  ok: "#4CAF50",
+  alerta: "#FFD700",
+  atenção: "#FF9800",
+  critico: "#F44336"
+};
 
-  const cont = { adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolas.forEach(e=>{
-    const s = (e.status||"").toLowerCase();
-    if(s.includes("adequado")) cont.adequado++;
-    else if(s.includes("alerta")) cont.alerta++;
-    else if(s.includes("atenção")) cont.atenção++;
-    else cont.crítico++;
-  });
+/* =========================
+   Checkbox
+========================= */
+const toggleBairros = document.getElementById("toggleBairros");
 
-  const total = escolas.length;
-  const pCrit = cont.crítico/total;
-  const pAtencao = cont.atenção/total;
-  const pAlerta = cont.alerta/total;
-
-  let cor = "#4CAF50"; // verde
-  if(pCrit >= 0.5) cor = "#F44336";          // 🔴 ≥50% crítico
-  else if(pCrit < 0.5 && pAtencao >= 0.5) cor = "#FF9800"; // 🟠 atenção ≥50%
-  else if(pCrit === 0 && pAtencao < 0.5 && pAlerta >= 0.5) cor = "#FFD700"; // 🟡 alerta ≥50%
-
-  return { fillColor: cor, fillOpacity:.45, color:"#555", weight:1 };
-}
-
-function tooltipBairro(feature){
-  const escolas = avaliacoes.filter(a =>
-    feature.geometry &&
-    turf.booleanPointInPolygon([a.lng, a.lat], feature)
-  );
-
-  if(escolas.length === 0) return `<strong>${feature.properties.nome}</strong><br>⚪ Sem dados – avaliação necessária.`;
-
-  const cont = { adequado:0, alerta:0, atenção:0, crítico:0 };
-  escolas.forEach(e=>{
-    const s = (e.status||"").toLowerCase();
-    if(s.includes("adequado")) cont.adequado++;
-    else if(s.includes("alerta")) cont.alerta++;
-    else if(s.includes("atenção")) cont.atenção++;
-    else cont.crítico++;
-  });
-
-  const t = escolas.length;
-  const p = k => Math.round((cont[k]/t)*100);
-
-  let observacao = "";
-  if(p("crítico")>=50) observacao = "🔴 Problema generalizado – alto risco de impacto.";
-  else if(p("atenção")>=50) observacao = "🟠 Problema localizado, tendência de piora.";
-  else if(p("alerta")>=50) observacao = "🟡 Problema pontual, monitoramento recomendado.";
-  else observacao = "🟢 Situação controlada – continuar acompanhamento rotineiro.";
-
-  return `
-    <strong>${feature.properties.nome}</strong><br>
-    🔴 ${p("crítico")}% crítico (${cont.crítico})<br>
-    🟠 ${p("atenção")}% atenção (${cont.atenção})<br>
-    🟡 ${p("alerta")}% alerta (${cont.alerta})<br>
-    🟢 ${p("adequado")}% adequado (${cont.adequado})<br>
-    Observação: ${observacao}
-  `;
-}
-
-// Ativar a camada quando o checkbox for clicado
-document.getElementById("toggleBairros").addEventListener("change", async function(){
-  if(this.checked){
-    if(!camadaBairros) await carregarBairros();
-    camadaBairros.addTo(map);
+toggleBairros.addEventListener("change", async (e) => {
+  if (e.target.checked) {
+    await ativarLeituraPorBairros();
   } else {
-    if(camadaBairros) map.removeLayer(camadaBairros);
+    removerLeituraPorBairros();
   }
 });
+
+/* =========================
+   Ativar leitura por bairros
+========================= */
+async function ativarLeituraPorBairros() {
+  if (!bairrosGeoJSON) {
+    const res = await fetch("./bairros.geojson");
+    bairrosGeoJSON = await res.json();
+  }
+
+  const avaliacoes = window.avaliacoesGlobais || [];
+
+  camadaBairros = L.geoJSON(bairrosGeoJSON, {
+    style: feature => estiloBairro(feature, avaliacoes),
+    onEachFeature: (feature, layer) => {
+      const dados = calcularLeituraBairro(feature, avaliacoes);
+
+      if (dados.total > 0) {
+        layer.bindTooltip(
+          `<strong>${feature.properties.nome}</strong><br>
+           Avaliações: ${dados.total}<br>
+           Classe dominante: <strong>${dados.classe}</strong>`,
+          { sticky: true }
+        );
+      }
+    }
+  });
+
+  camadaBairros.addTo(window.map);
+}
+
+/* =========================
+   Remover leitura por bairros
+========================= */
+function removerLeituraPorBairros() {
+  if (camadaBairros) {
+    window.map.removeLayer(camadaBairros);
+    camadaBairros = null;
+  }
+}
+
+/* =========================
+   Estilo do bairro
+========================= */
+function estiloBairro(feature, avaliacoes) {
+  const dados = calcularLeituraBairro(feature, avaliacoes);
+
+  if (dados.total === 0) {
+    return {
+      color: "#999",
+      weight: 1,
+      fillOpacity: 0
+    };
+  }
+
+  return {
+    color: "#666",
+    weight: 1,
+    fillColor: coresClasse[dados.classe],
+    fillOpacity: 0.55
+  };
+}
+
+/* =========================
+   Cálculo por bairro
+========================= */
+function calcularLeituraBairro(feature, avaliacoes) {
+  const poligono = feature.geometry;
+
+  const contagem = {
+    ok: 0,
+    alerta: 0,
+    atenção: 0,
+    critico: 0
+  };
+
+  avaliacoes.forEach(d => {
+    const ponto = turf.point([d.lng, d.lat]);
+    if (turf.booleanPointInPolygon(ponto, poligono)) {
+      contagem[d.classe]++;
+    }
+  });
+
+  let classeDominante = null;
+  let maior = 0;
+  let total = 0;
+
+  for (const c in contagem) {
+    total += contagem[c];
+    if (contagem[c] > maior) {
+      maior = contagem[c];
+      classeDominante = c;
+    }
+  }
+
+  return {
+    total,
+    classe: classeDominante
+  };
+}
