@@ -24,8 +24,8 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-let avaliacoes = [];
-let camadaPontos = L.layerGroup().addTo(map);
+window.camadaPontos = L.layerGroup().addTo(map);
+window.avaliacoes = []; // 🔑 GLOBAL
 
 /* ================= CORES ================= */
 
@@ -38,8 +38,6 @@ const cores = {
   crítico: "#F44336"
 };
 
-/* ================= FREQUÊNCIA DO MAPA VIVO ================= */
-
 const pulsoTempo = {
   critico: 1200,
   atenção: 2400,
@@ -47,25 +45,6 @@ const pulsoTempo = {
   alerta: 2400,
   ok: 4800
 };
-
-/* ================= CARREGAR AVALIAÇÕES ================= */
-
-async function carregarAvaliacoes() {
-  const snap = await getDocs(collection(db, "avaliacoes"));
-  const mapaEscolas = {};
-
-  snap.forEach(doc => {
-    const d = doc.data();
-    if (!d.lat || !d.lng || !d.classe || !d.timestamp) return;
-
-    const id = d.escola;
-    if (!mapaEscolas[id] || d.timestamp > mapaEscolas[id].timestamp) {
-      mapaEscolas[id] = d;
-    }
-  });
-
-  avaliacoes = Object.values(mapaEscolas);
-}
 
 /* ================= MAPA VIVO ================= */
 
@@ -80,6 +59,27 @@ function aplicarPulso(marker, classe) {
       fillOpacity: visivel ? 0.8 : 0
     });
   }, tempo);
+}
+
+/* ================= CARREGAR AVALIAÇÕES ================= */
+
+async function carregarAvaliacoes() {
+  const snap = await getDocs(collection(db, "avaliacoes"));
+  const mapaEscolas = {};
+
+  snap.forEach(doc => {
+    const d = doc.data();
+    if (!d.lat || !d.lng || !d.classe || !d.timestamp) return;
+
+    if (!mapaEscolas[d.escola] || d.timestamp > mapaEscolas[d.escola].timestamp) {
+      mapaEscolas[d.escola] = d;
+    }
+  });
+
+  window.avaliacoes = Object.values(mapaEscolas);
+
+  // 🔔 AVISA QUE OS DADOS ESTÃO PRONTOS
+  window.dispatchEvent(new Event("avaliacoesCarregadas"));
 }
 
 /* ================= CRIAR PONTO ================= */
@@ -112,10 +112,10 @@ function criarPonto(d) {
 
 /* ================= ATUALIZAR MAPA ================= */
 
-function atualizarPontos() {
+window.atualizarPontos = function () {
   camadaPontos.clearLayers();
 
-  avaliacoes.forEach(d => {
+  window.avaliacoes.forEach(d => {
     const c = d.classe.toLowerCase();
 
     if (
@@ -127,15 +127,15 @@ function atualizarPontos() {
 
     criarPonto(d).addTo(camadaPontos);
   });
-}
+};
 
 /* ================= EVENTOS ================= */
 
 document.querySelectorAll(".painel input").forEach(i =>
-  i.addEventListener("change", atualizarPontos)
+  i.addEventListener("change", window.atualizarPontos)
 );
 
 /* ================= INIT ================= */
 
 await carregarAvaliacoes();
-atualizarPontos();
+window.atualizarPontos();
