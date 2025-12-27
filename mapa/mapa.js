@@ -6,7 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ===============================
-   FIREBASE
+   Firebase
 ================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
@@ -18,7 +18,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /* ===============================
-   MAPA
+   Mapa
 ================================ */
 const map = L.map("map").setView([-3.7319, -38.5267], 12);
 
@@ -26,141 +26,131 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-let avaliacoes = [];
 let camadaPontos = L.layerGroup().addTo(map);
+let avaliacoes = [];
 
 /* ===============================
-   CORES E FREQUÊNCIAS (CLASSE)
+   Cores e pulso
 ================================ */
-const coresClasse = {
-  ok: "#4CAF50",
+const cores = {
+  adequado: "#4CAF50",
   alerta: "#FFD700",
   atenção: "#FF9800",
+  atencao: "#FF9800",
+  crítico: "#F44336",
   critico: "#F44336"
 };
 
-const pulsoFreq = {
-  critico: 1200,
+const pulsosFreq = {
+  adequado: 4800,
+  alerta: 3600,
   atenção: 2400,
-  alerta: 2400,
-  ok: 4800
+  atencao: 2400,
+  crítico: 1200,
+  critico: 1200
 };
 
 /* ===============================
-   CARREGAR AVALIAÇÕES
-   → mantém apenas a MAIS RECENTE
+   Carregar avaliações (mais recente por escola)
 ================================ */
 async function carregarAvaliacoes() {
   const snap = await getDocs(collection(db, "avaliacoes"));
-  const ultimas = {};
+  const mapaEscolas = {};
 
   snap.forEach(doc => {
     const d = doc.data();
-    if (!d.lat || !d.lng || !d.classe || !d.escola) return;
+    if (!d.lat || !d.lng || !d.classe || !d.timestamp) return;
 
-    const ts = d.timestamp?.seconds || 0;
+    const id = d.escolaId || d.escola || doc.id;
 
-    if (!ultimas[d.escola] || ts > ultimas[d.escola].timestamp) {
-      ultimas[d.escola] = {
-        ...d,
-        timestamp: ts
-      };
+    if (
+      !mapaEscolas[id] ||
+      d.timestamp > mapaEscolas[id].timestamp
+    ) {
+      mapaEscolas[id] = d;
     }
   });
 
-  avaliacoes = Object.values(ultimas);
+  avaliacoes = Object.values(mapaEscolas);
+
+  // 🔴 expõe globalmente
+  window.avaliacoesGlobais = avaliacoes;
+
+  // 🔔 avisa que os dados estão prontos
+  window.dispatchEvent(new Event("avaliacoesCarregadas"));
 }
 
 /* ===============================
-   PULSO (APARECE / DESAPARECE)
-================================ */
-function aplicarPulso(latlng, classe) {
-  const freq = pulsoFreq[classe] || 2400;
-  const cor = coresClasse[classe];
-
-  setInterval(() => {
-    const pulso = L.circleMarker(latlng, {
-      radius: 8,
-      color: cor,
-      fillColor: cor,
-      fillOpacity: 0.85
-    }).addTo(camadaPontos);
-
-    setTimeout(() => {
-      camadaPontos.removeLayer(pulso);
-    }, 700);
-  }, freq);
-}
-
-/* ===============================
-   CRIAR PONTO
+   Criar ponto
 ================================ */
 function criarPonto(d) {
-  const classe = d.classe;
-  const cor = coresClasse[classe];
-  if (!cor) return null;
+  const classe = d.classe.toLowerCase();
+  const cor = cores[classe] || "#999";
 
-  const latlng = [d.lat, d.lng];
-
-  const popup = `
-    <strong>${d.escola}</strong><br>
-    Classe: ${classe}<br>
-    Status: ${d.status || "-"}<br>
-    Pontuação: ${d.pontuacao || "-"}<br>
-    Última avaliação: ${d.data || "-"}
-  `;
-
-  // MAPA VIVO
-  if (togglePulso.checked) {
-    aplicarPulso(latlng, classe);
-    return null;
-  }
-
-  // MAPA ESTÁTICO
-  return L.circleMarker(latlng, {
+  const marker = L.circleMarker([d.lat, d.lng], {
     radius: 8,
     color: cor,
     fillColor: cor,
     fillOpacity: 0.85
-  }).bindPopup(popup);
+  }).bindPopup(`
+    <strong>${d.escola || "-"}</strong><br>
+    Classe: ${d.classe}<br>
+    Pontuação: ${d.pontuacao ?? "-"}<br>
+    Data: ${d.data ?? "-"}
+  `);
+
+  if (document.getElementById("togglePulso").checked) {
+    aplicarPulso(marker, classe);
+  }
+
+  return marker;
 }
 
 /* ===============================
-   ATUALIZAR PONTOS
+   Pulso: aparece / desaparece
+================================ */
+function aplicarPulso(marker, classe) {
+  const freq = pulsosFreq[classe] || 3000;
+  let visivel = true;
+
+  setInterval(() => {
+    visivel = !visivel;
+    marker.setStyle({
+      opacity: visivel ? 1 : 0,
+      fillOpacity: visivel ? 0.85 : 0
+    });
+  }, freq);
+}
+
+/* ===============================
+   Atualizar pontos
 ================================ */
 function atualizarPontos() {
   camadaPontos.clearLayers();
 
   avaliacoes.forEach(d => {
-    const c = d.classe;
+    const c = d.classe.toLowerCase();
 
     if (
-      (c === "ok" && !fAdequado.checked) ||
-      (c === "alerta" && !fAlerta.checked) ||
-      (c === "atenção" && !fAtencao.checked) ||
-      (c === "critico" && !fCritico.checked)
+      (c.includes("adequado") && !fAdequado.checked) ||
+      (c.includes("alerta") && !fAlerta.checked) ||
+      ((c.includes("atenção") || c.includes("atencao")) && !fAtencao.checked) ||
+      (c.includes("crit") && !fCritico.checked)
     ) return;
 
-    const marker = criarPonto(d);
-    if (marker) marker.addTo(camadaPontos);
+    criarPonto(d).addTo(camadaPontos);
   });
 }
 
 /* ===============================
-   EVENTOS
+   Eventos
 ================================ */
-[
-  fAdequado,
-  fAlerta,
-  fAtencao,
-  fCritico,
-  togglePulso
-].forEach(el => {
-  el.addEventListener("change", atualizarPontos);
-});
+document.querySelectorAll("input").forEach(i =>
+  i.addEventListener("change", atualizarPontos)
+);
 
 /* ===============================
-   INIT
+   Inicialização
 ================================ */
 await carregarAvaliacoes();
 atualizarPontos();
