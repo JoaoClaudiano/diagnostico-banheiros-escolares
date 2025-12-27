@@ -1,148 +1,115 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* =========================
-   Firebase
-========================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* =========================
-   Variáveis
-========================= */
 let camadaBairros = null;
-let bairrosGeoJSON = null;
 
-/* =========================
-   Cores por classe
-========================= */
-const coresClasse = {
-  ok: "#4CAF50",
-  alerta: "#FFD700",
-  atenção: "#FF9800",
-  critico: "#F44336"
-};
-
-/* =========================
-   Checkbox
-========================= */
 const toggleBairros = document.getElementById("toggleBairros");
 
-toggleBairros.addEventListener("change", async (e) => {
+/* ===============================
+   Checkbox
+================================ */
+toggleBairros.addEventListener("change", e => {
   if (e.target.checked) {
-    await ativarLeituraPorBairros();
+    tentarAtivarBairros();
   } else {
     removerLeituraPorBairros();
   }
 });
 
-/* =========================
-   Ativar leitura por bairros
-========================= */
-async function ativarLeituraPorBairros() {
-  // 🔴 GARANTIA ABSOLUTA
+/* ===============================
+   Espera avaliações
+================================ */
+function tentarAtivarBairros() {
   if (!window.avaliacoesGlobais || window.avaliacoesGlobais.length === 0) {
-    console.warn("Leitura por bairros: avaliações ainda não carregadas.");
+    console.warn("Avaliações ainda não carregadas. Aguardando…");
     toggleBairros.checked = false;
+
+    window.addEventListener(
+      "avaliacoesCarregadas",
+      () => {
+        toggleBairros.checked = true;
+        ativarLeituraPorBairros();
+      },
+      { once: true }
+    );
     return;
   }
 
-  if (!bairrosGeoJSON) {
-    const res = await fetch("./bairros.geojson");
-    bairrosGeoJSON = await res.json();
-  }
-
-  camadaBairros = L.geoJSON(bairrosGeoJSON, {
-    style: feature => estiloBairro(feature),
-    onEachFeature: (feature, layer) => {
-      const dados = calcularLeituraBairro(feature);
-
-      if (dados.total > 0) {
-        layer.bindTooltip(
-          `<strong>${feature.properties.nome}</strong><br>
-           Avaliações: ${dados.total}<br>
-           Classe dominante: <strong>${dados.classe}</strong>`,
-          { sticky: true }
-        );
-      }
-    }
-  });
-
-  camadaBairros.addTo(window.map);
+  ativarLeituraPorBairros();
 }
 
-/* =========================
-   Remover camada
-========================= */
+/* ===============================
+   Ativar leitura por bairros
+================================ */
+async function ativarLeituraPorBairros() {
+  if (camadaBairros) return;
+
+  const res = await fetch("./dados/bairros.geojson");
+  const geojson = await res.json();
+
+  camadaBairros = L.geoJSON(geojson, {
+    style: feature => {
+      const dados = calcularIndicadores(feature);
+      return {
+        color: "#333",
+        weight: 1,
+        fillOpacity: dados.total === 0 ? 0 : 0.6,
+        fillColor: dados.cor
+      };
+    },
+    onEachFeature: (feature, layer) => {
+      const d = calcularIndicadores(feature);
+      layer.bindTooltip(`
+        <strong>${feature.properties.nome}</strong><br>
+        Avaliações: ${d.total}<br>
+        Crítico: ${d.critico}<br>
+        Atenção: ${d.atencao}<br>
+        Alerta: ${d.alerta}<br>
+        Adequado: ${d.adequado}
+      `);
+    }
+  }).addTo(map);
+}
+
+/* ===============================
+   Remover
+================================ */
 function removerLeituraPorBairros() {
   if (camadaBairros) {
-    window.map.removeLayer(camadaBairros);
+    map.removeLayer(camadaBairros);
     camadaBairros = null;
   }
 }
 
-/* =========================
-   Estilo do bairro
-========================= */
-function estiloBairro(feature) {
-  const dados = calcularLeituraBairro(feature);
+/* ===============================
+   Cálculo por bairro
+================================ */
+function calcularIndicadores(feature) {
+  const pts = window.avaliacoesGlobais.filter(a =>
+    turf.booleanPointInPolygon(
+      turf.point([a.lng, a.lat]),
+      feature
+    )
+  );
 
-  if (dados.total === 0) {
-    return {
-      color: "#999",
-      weight: 1,
-      fillOpacity: 0
-    };
-  }
-
-  return {
-    color: "#666",
-    weight: 1,
-    fillColor: coresClasse[dados.classe],
-    fillOpacity: 0.55
-  };
-}
-
-/* =========================
-   Cálculo espacial correto
-========================= */
-function calcularLeituraBairro(feature) {
-  const poligono = feature.geometry;
-
-  const contagem = {
-    ok: 0,
+  let dados = {
+    total: pts.length,
+    adequado: 0,
     alerta: 0,
-    atenção: 0,
-    critico: 0
+    atencao: 0,
+    critico: 0,
+    cor: "transparent"
   };
 
-  window.avaliacoesGlobais.forEach(d => {
-    const ponto = turf.point([d.lng, d.lat]);
-    if (turf.booleanPointInPolygon(ponto, poligono)) {
-      contagem[d.classe]++;
-    }
+  pts.forEach(p => {
+    const c = p.classe.toLowerCase();
+    if (c.includes("adequado")) dados.adequado++;
+    else if (c.includes("alerta")) dados.alerta++;
+    else if (c.includes("atenção") || c.includes("atencao")) dados.atencao++;
+    else if (c.includes("crit")) dados.critico++;
   });
 
-  let classeDominante = null;
-  let maior = 0;
-  let total = 0;
+  if (dados.critico > 0) dados.cor = "#F44336";
+  else if (dados.atencao > 0) dados.cor = "#FF9800";
+  else if (dados.alerta > 0) dados.cor = "#FFD700";
+  else if (dados.adequado > 0) dados.cor = "#4CAF50";
 
-  for (const c in contagem) {
-    total += contagem[c];
-    if (contagem[c] > maior) {
-      maior = contagem[c];
-      classeDominante = c;
-    }
-  }
-
-  return {
-    total,
-    classe: classeDominante
-  };
+  return dados;
 }
