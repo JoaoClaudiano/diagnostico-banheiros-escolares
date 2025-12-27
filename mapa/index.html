@@ -78,15 +78,38 @@ footer {
   height: calc(100vh - 160px);
 }
 
-/* Pulso */
-.pulse {
-  animation:pulse 2.4s ease-out infinite;
+/* =================================================
+   PULSO — AJUSTADO PARA DIVICON (MAPA VIVO)
+   NÃO altera lógica, apenas visual
+================================================= */
+
+.pulse-wrapper {
+  width: 14px;
+  height: 14px;
 }
 
-@keyframes pulse {
-  0% { r:8; opacity:.8; }
-  70% { r:18; opacity:0; }
-  100% { opacity:0; }
+.pulse {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  opacity: 0.7;
+  animation-name: pulseFade;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes pulseFade {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 </style>
 </head>
