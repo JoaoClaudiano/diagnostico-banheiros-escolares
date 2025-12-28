@@ -65,7 +65,7 @@ footer {
 .laranja { background:#FF9800; }
 .vermelho { background:#F44336; }
 
-#map { height: calc(100vh - 180px); }
+#map { height: calc(100vh - 160px); }
 
 /* Pulsar suave */
 .pulse-ok { animation: pulse-ok 4s infinite; }
@@ -80,10 +80,10 @@ footer {
 .legenda-mapa {
   display:none;
   position:absolute;
-  top:15%;
-  right:-260px;
-  width:270px;
-  max-height:75vh;
+  top:100px;
+  right:10px;
+  width:250px;
+  max-height:70%;
   overflow-y:auto;
   background: rgba(255,255,255,0.95);
   padding:10px 12px 12px 12px;
@@ -96,13 +96,22 @@ footer {
   z-index:1000;
   transition: all 0.4s ease;
 }
-.legenda-mapa.open { right:10px; }
-.legenda-mapa h4 { margin:0 0 6px 0; font-size:14px; }
+.legenda-mapa.open {
+  right:10px;
+}
+.legenda-mapa h4 {
+  margin:0 0 6px 0;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:8px;
+}
 
 /* Aba/orelha lateral */
 .legenda-handle {
   position:absolute;
-  top:0;
+  top:10px;
   left:-36px;
   width:32px;
   height:32px;
@@ -116,13 +125,14 @@ footer {
   cursor:pointer;
   z-index:1001;
   transition: transform 0.3s ease;
+  font-size:18px;
 }
-.legenda-handle.open { transform: rotate(180deg); }
 
-/* Ajustes mobile */
+/* Mobile adjustments */
 @media (max-width:600px){
-  .legenda-mapa { top:70px; font-size:12px; line-height:16px; width:220px; }
-  .legenda-handle { width:28px; height:28px; left:-32px; font-size:14px; }
+  .legenda-mapa { top:80px; font-size:12px; line-height:16px; width:200px; max-height:60%; }
+  .legenda-mapa h4 { font-size:13px; }
+  .legenda-handle { font-size:16px; width:28px; height:28px; left:-32px; }
 }
 </style>
 </head>
@@ -160,6 +170,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Inicializar mapa
 let map;
 if (!window._checkinfraMap) {
   map = L.map("map").setView([-3.7319,-38.5267],12);
@@ -167,6 +178,7 @@ if (!window._checkinfraMap) {
   window._checkinfraMap = map;
 } else map = window._checkinfraMap;
 
+// Avaliações
 let avaliacoes = [];
 window.avaliacoes = avaliacoes;
 const cores = { ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336" };
@@ -231,7 +243,7 @@ document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso"
 await carregarAvaliacoes();
 atualizarPontos();
 
-// Legenda dinâmica
+// Legenda bairros
 const legenda = L.control({ position:'topright' });
 legenda.onAdd = function(map){
   const div = L.DomUtil.create('div','legenda-mapa');
@@ -244,52 +256,36 @@ legenda.onAdd = function(map){
       🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
       🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
       <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em><br>
-      <strong>Total de escolas monitoradas:</strong> ${avaliacoes.length}<br>
-      <strong>Última avaliação:</strong> ${avaliacoes.map(a=>a.createdAt?.toDate()).filter(Boolean).sort((a,b)=>b-a)[0]?.toLocaleDateString('pt-BR') || "-"}
+      <small>Total de escolas monitoradas: ${avaliacoes.length}</small><br>
+      <small>Última avaliação: ${avaliacoes.length ? avaliacoes.reduce((a,b)=>(a.createdAt?.toMillis()||0) > (b.createdAt?.toMillis()||0)? a:b).createdAt.toDate().toLocaleDateString('pt-BR') : '-'}</small>
     </div>
+    <div class="legenda-handle">◀</div>
   `;
-  // Cria a aba externa
-  const handle = L.DomUtil.create('div','legenda-handle');
-  handle.innerHTML='▶';
-  div.appendChild(handle);
-  handle.addEventListener('click', ()=>{
-    if(div.classList.contains('open')){
-      div.classList.remove('open');
-      handle.innerHTML='▶';
-      handle.classList.remove('open');
-    } else {
-      div.classList.add('open');
-      handle.innerHTML='◀';
-      handle.classList.add('open');
-    }
-  });
-  div.style.display='none';
   return div;
 };
 legenda.addTo(map);
 
-document.getElementById("toggleBairros").addEventListener("change",function(){
-  const div = document.getElementById('legendaBairros');
-  const handle = div.querySelector('.legenda-handle');
-  if(this.checked){
-    div.style.display='block';
-    setTimeout(()=>div.classList.add('open'),10);
-    handle.innerHTML='◀';
-    handle.classList.add('open');
-  }else{
+const div = document.getElementById('legendaBairros');
+const handle = div.querySelector('.legenda-handle');
+
+handle.addEventListener('click', ()=>{
+  if(div.classList.contains('open')){
     div.classList.remove('open');
-    setTimeout(()=>div.style.display='none',400);
-    handle.innerHTML='▶';
-    handle.classList.remove('open');
+    handle.textContent='▶';
+  }else{
+    div.classList.add('open');
+    handle.textContent='◀';
   }
 });
 
-// Ajusta a altura da legenda conforme zoom
-map.on('zoomend', ()=>{
-  const div = document.getElementById('legendaBairros');
-  if(div){
-    const altura = Math.min(window.innerHeight*0.75, window.innerHeight - 180);
-    div.style.maxHeight = altura + "px";
+document.getElementById("toggleBairros").addEventListener("change",function(){
+  if(this.checked){
+    div.style.display='block';
+    setTimeout(()=>div.classList.add('open'),10);
+    handle.textContent='◀';
+  }else{
+    div.classList.remove('open');
+    setTimeout(()=>div.style.display='none',400);
   }
 });
 </script>
