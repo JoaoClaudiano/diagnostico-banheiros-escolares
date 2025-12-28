@@ -4,6 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manual Técnico-Institucional - CheckInfra</title>
+    
+    <!-- Meta tags de SEO -->
+    <meta name="description" content="Sistema Integrado de Diagnóstico Sanitário Escolar - Memorial Descritivo, Metodologia Completa e Guia Institucional de Uso">
+    <meta name="keywords" content="infraestrutura escolar, saneamento, diagnóstico técnico, engenharia civil, gestão pública, manutenção predial, ABNT, normas técnicas">
+    <meta name="author" content="CheckInfra">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="Manual Técnico-Institucional CheckInfra">
+    <meta property="og:description" content="Sistema Integrado de Diagnóstico Sanitário Escolar - Memorial Descritivo Completo">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://checkinfra.example.com/manual">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Manual Técnico-Institucional CheckInfra">
+    <meta name="twitter:description" content="Sistema Integrado de Diagnóstico Sanitário Escolar">
+    
+    <!-- Preload para performance -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
     <style>
         :root {
             --primary: #1f4fd8;
@@ -73,12 +95,47 @@
             to { transform: rotate(360deg); }
         }
         
+        .header-container {
+            position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            text-decoration: none;
+            z-index: 100;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
         header h1 {
             font-size: 2.8rem;
             margin-bottom: 0.5rem;
             font-weight: 800;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
             position: relative;
+            padding: 0 60px;
         }
         
         header .subtitle {
@@ -98,6 +155,78 @@
             font-size: 0.9rem;
             margin-top: 10px;
             backdrop-filter: blur(5px);
+        }
+        
+        /* BARRA DE BUSCA */
+        .search-container {
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            padding-left: 50px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            box-shadow: 0 4px 15px rgba(31, 79, 216, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 6px 20px rgba(31, 79, 216, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .search-results {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .search-result-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .search-result-item h4 {
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .search-result-item p {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin: 0;
         }
         
         /* NAVEGAÇÃO */
@@ -157,6 +286,7 @@
             margin-bottom: 3rem;
             animation: fadeIn 0.5s ease;
             border: 1px solid rgba(31, 79, 216, 0.1);
+            position: relative;
         }
         
         .tab-content.active {
@@ -177,6 +307,31 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
+        }
+        
+        /* BOTÃO DE FAVORITO */
+        .bookmark-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            padding: 5px;
+            margin-left: auto;
+        }
+        
+        .bookmark-btn:hover {
+            color: var(--warning);
+        }
+        
+        .bookmark-btn.active {
+            color: var(--warning);
+        }
+        
+        .bookmark-btn i {
+            pointer-events: none;
         }
         
         /* ESTILOS DA METODOLOGIA INTEGRADA */
@@ -392,6 +547,76 @@
             display: none;
         }
         
+        /* MODAL DE VERSÕES */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: color 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: var(--danger);
+        }
+        
+        /* OPÇÕES DE EXPORTAÇÃO */
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .export-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--dark);
+        }
+        
+        .export-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
         /* FOOTER */
         footer {
             text-align: center;
@@ -434,6 +659,12 @@
             
             header h1 {
                 font-size: 2.2rem;
+                padding: 0 50px;
+            }
+            
+            .back-button {
+                width: 45px;
+                height: 45px;
             }
             
             .nav-tabs {
@@ -451,9 +682,29 @@
             }
         }
         
-        @media (max-width: 576px) {
+        @media (max-width: 768px) {
             header h1 {
                 font-size: 1.8rem;
+                padding: 0 40px;
+            }
+            
+            .back-button {
+                width: 40px;
+                height: 40px;
+                left: 15px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            header h1 {
+                font-size: 1.6rem;
+                padding: 0 35px;
+            }
+            
+            .back-button {
+                width: 35px;
+                height: 35px;
+                left: 10px;
             }
             
             .tab-content {
@@ -467,6 +718,15 @@
             .footer-links {
                 flex-direction: column;
                 gap: 1rem;
+            }
+            
+            .export-options {
+                flex-direction: column;
+            }
+            
+            .export-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
         
@@ -545,6 +805,32 @@
             color: white;
         }
         
+        /* BOTÃO VOLTAR AO TOPO */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(31, 79, 216, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .back-to-top:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(31, 79, 216, 0.6);
+        }
+        
         /* SCROLLBAR PERSONALIZADA */
         ::-webkit-scrollbar {
             width: 10px;
@@ -564,13 +850,53 @@
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, var(--primary-dark) 0%, #102a7a 100%);
         }
+        
+        /* ESTILOS DE IMPRESSÃO */
+        @media print {
+            .nav-tabs,
+            footer,
+            .back-button,
+            .search-container,
+            .export-options,
+            .back-to-top,
+            .bookmark-btn {
+                display: none !important;
+            }
+            
+            .tab-content {
+                display: block !important;
+                box-shadow: none;
+                border: 1px solid #ddd;
+                margin: 0;
+                page-break-inside: avoid;
+            }
+            
+            header {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            body {
+                background: white;
+                font-size: 12pt;
+            }
+            
+            .methodology-card {
+                box-shadow: none;
+                border: 1px solid #eee;
+                page-break-inside: avoid;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- HEADER -->
+    <!-- HEADER COM SETA VOLTAR -->
     <header>
-        <div class="container">
+        <div class="header-container">
+            <a href="./index.html" class="back-button" aria-label="Voltar para a página inicial">
+                <i class="fas fa-arrow-left"></i>
+            </a>
             <h1><i class="fas fa-book-open"></i> Manual Técnico-Institucional CheckInfra</h1>
             <p class="subtitle">
                 Sistema Integrado de Diagnóstico Sanitário Escolar - Memorial Descritivo, 
@@ -584,33 +910,62 @@
 
     <!-- CONTAINER PRINCIPAL -->
     <div class="container">
+        <!-- BARRA DE BUSCA -->
+        <div class="search-container">
+            <div class="search-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <input type="text" 
+                   class="search-box" 
+                   id="manual-search" 
+                   placeholder="Buscar no manual (digite pelo menos 3 caracteres)..."
+                   aria-label="Campo de busca no manual">
+            <div class="search-results" id="search-results"></div>
+        </div>
+
+        <!-- OPÇÕES DE EXPORTAÇÃO -->
+        <div class="export-options">
+            <button class="export-btn" onclick="exportAsPDF()">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </button>
+            <button class="export-btn" onclick="showVersionHistory()">
+                <i class="fas fa-history"></i> Histórico de Versões
+            </button>
+            <button class="export-btn" onclick="toggleBookmarksView()">
+                <i class="fas fa-bookmark"></i> Meus Favoritos
+            </button>
+            <button class="export-btn" onclick="printManual()">
+                <i class="fas fa-print"></i> Imprimir Manual
+            </button>
+        </div>
+
         <!-- NAVEGAÇÃO POR ABAS -->
-        <div class="nav-tabs">
-            <button class="tab-btn active" data-tab="apresentacao">
+        <div class="nav-tabs" role="tablist" aria-label="Navegação do manual">
+            <button class="tab-btn active" data-tab="apresentacao" role="tab" aria-selected="true" aria-controls="apresentacao">
                 <i class="fas fa-home"></i> Apresentação
             </button>
-            <button class="tab-btn" data-tab="aspectos-gerais">
+            <button class="tab-btn" data-tab="aspectos-gerais" role="tab" aria-selected="false" aria-controls="aspectos-gerais">
                 <i class="fas fa-clipboard-list"></i> Aspectos Gerais
             </button>
-            <button class="tab-btn" data-tab="metodologia">
+            <button class="tab-btn" data-tab="metodologia" role="tab" aria-selected="false" aria-controls="metodologia">
                 <i class="fas fa-ruler-combined"></i> Metodologia Técnica
             </button>
-            <button class="tab-btn" data-tab="sistema">
+            <button class="tab-btn" data-tab="sistema" role="tab" aria-selected="false" aria-controls="sistema">
                 <i class="fas fa-sitemap"></i> Sistema CheckInfra
             </button>
-            <button class="tab-btn" data-tab="impacto">
+            <button class="tab-btn" data-tab="impacto" role="tab" aria-selected="false" aria-controls="impacto">
                 <i class="fas fa-chart-network"></i> Impacto Institucional
             </button>
-            <button class="tab-btn" data-tab="referencias">
+            <button class="tab-btn" data-tab="referencias" role="tab" aria-selected="false" aria-controls="referencias">
                 <i class="fas fa-graduation-cap"></i> Referências
             </button>
-            <button class="tab-btn" data-tab="manual-usuario">
+            <button class="tab-btn" data-tab="manual-usuario" role="tab" aria-selected="false" aria-controls="manual-usuario">
                 <i class="fas fa-users"></i> Manual do Usuário
             </button>
-            <button class="tab-btn" data-tab="arquitetura-tecnica">
+            <button class="tab-btn" data-tab="arquitetura-tecnica" role="tab" aria-selected="false" aria-controls="arquitetura-tecnica">
                 <i class="fas fa-code"></i> Arquitetura Técnica
             </button>
-            <button class="tab-btn" data-tab="recomendacoes">
+            <button class="tab-btn" data-tab="recomendacoes" role="tab" aria-selected="false" aria-controls="recomendacoes">
                 <i class="fas fa-tools"></i> Recomendações Técnicas
             </button>
         </div>
@@ -618,8 +973,12 @@
         <!-- CONTEÚDO DAS ABAS -->
         
         <!-- ABA 1: APRESENTAÇÃO -->
-        <div id="apresentacao" class="tab-content active">
-            <h2><i class="fas fa-bullseye"></i> Apresentação Institucional</h2>
+        <div id="apresentacao" class="tab-content active" role="tabpanel" aria-labelledby="apresentacao-tab">
+            <h2><i class="fas fa-bullseye"></i> Apresentação Institucional
+                <button class="bookmark-btn" data-section="apresentacao" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-university"></i> O que é o CheckInfra</h3>
@@ -692,8 +1051,12 @@
         </div>
 
         <!-- ABA 2: ASPECTOS GERAIS (INTEGRADA) -->
-        <div id="aspectos-gerais" class="tab-content">
-            <h2><i class="fas fa-clipboard-check"></i> Aspectos Gerais da Metodologia</h2>
+        <div id="aspectos-gerais" class="tab-content" role="tabpanel" aria-labelledby="aspectos-gerais-tab">
+            <h2><i class="fas fa-clipboard-check"></i> Aspectos Gerais da Metodologia
+                <button class="bookmark-btn" data-section="aspectos-gerais" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-bullseye"></i> 1. Objetivo da Metodologia</h3>
@@ -959,8 +1322,12 @@
         </div>
 
         <!-- ABA 3: METODOLOGIA TÉCNICA DETALHADA -->
-        <div id="metodologia" class="tab-content">
-            <h2><i class="fas fa-microscope"></i> Metodologia Técnica Detalhada</h2>
+        <div id="metodologia" class="tab-content" role="tabpanel" aria-labelledby="metodologia-tab">
+            <h2><i class="fas fa-microscope"></i> Metodologia Técnica Detalhada
+                <button class="bookmark-btn" data-section="metodologia" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-cogs"></i> 1. Fundamentação Normativa do Checklist</h3>
@@ -1111,8 +1478,12 @@
         </div>
 
         <!-- ABA 4: SISTEMA CHECKINFRA -->
-        <div id="sistema" class="tab-content">
-            <h2><i class="fas fa-sitemap"></i> Sistema CheckInfra - Componentes Integrados</h2>
+        <div id="sistema" class="tab-content" role="tabpanel" aria-labelledby="sistema-tab">
+            <h2><i class="fas fa-sitemap"></i> Sistema CheckInfra - Componentes Integrados
+                <button class="bookmark-btn" data-section="sistema" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-layer-group"></i> Arquitetura Modular</h3>
@@ -1194,8 +1565,12 @@
         </div>
 
         <!-- ABA 5: IMPACTO INSTITUCIONAL -->
-        <div id="impacto" class="tab-content">
-            <h2><i class="fas fa-chart-network"></i> Impacto Institucional e Gestão Pública</h2>
+        <div id="impacto" class="tab-content" role="tabpanel" aria-labelledby="impacto-tab">
+            <h2><i class="fas fa-chart-network"></i> Impacto Institucional e Gestão Pública
+                <button class="bookmark-btn" data-section="impacto" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-balance-scale"></i> 1. Impacto no Microsistema (Escola)</h3>
@@ -1318,8 +1693,12 @@
         </div>
 
         <!-- ABA 6: REFERÊNCIAS -->
-        <div id="referencias" class="tab-content">
-            <h2><i class="fas fa-graduation-cap"></i> Referências Técnicas e Bibliográficas</h2>
+        <div id="referencias" class="tab-content" role="tabpanel" aria-labelledby="referencias-tab">
+            <h2><i class="fas fa-graduation-cap"></i> Referências Técnicas e Bibliográficas
+                <button class="bookmark-btn" data-section="referencias" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-file-contract"></i> Normas Técnicas Brasileiras</h3>
@@ -1445,8 +1824,12 @@
         </div>
 
         <!-- ABA 7: MANUAL DO USUÁRIO -->
-        <div id="manual-usuario" class="tab-content">
-            <h2><i class="fas fa-users"></i> Manual do Usuário - Guia Institucional</h2>
+        <div id="manual-usuario" class="tab-content" role="tabpanel" aria-labelledby="manual-usuario-tab">
+            <h2><i class="fas fa-users"></i> Manual do Usuário - Guia Institucional
+                <button class="bookmark-btn" data-section="manual-usuario" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-user-tie"></i> 1. Perfis de Usuário Institucionais</h3>
@@ -1582,8 +1965,12 @@
         </div>
 
         <!-- ABA 8: ARQUITETURA TÉCNICA -->
-        <div id="arquitetura-tecnica" class="tab-content">
-            <h2><i class="fas fa-code"></i> Arquitetura Técnica do Sistema</h2>
+        <div id="arquitetura-tecnica" class="tab-content" role="tabpanel" aria-labelledby="arquitetura-tecnica-tab">
+            <h2><i class="fas fa-code"></i> Arquitetura Técnica do Sistema
+                <button class="bookmark-btn" data-section="arquitetura-tecnica" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-layer-group"></i> 1. Stack Tecnológico</h3>
@@ -1625,8 +2012,12 @@
         </div>
 
         <!-- ABA 9: RECOMENDAÇÕES TÉCNICAS -->
-        <div id="recomendacoes" class="tab-content">
-            <h2><i class="fas fa-tools"></i> Recomendações Técnicas e Manutenção</h2>
+        <div id="recomendacoes" class="tab-content" role="tabpanel" aria-labelledby="recomendacoes-tab">
+            <h2><i class="fas fa-tools"></i> Recomendações Técnicas e Manutenção
+                <button class="bookmark-btn" data-section="recomendacoes" aria-label="Marcar esta seção como favorita">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </h2>
             
             <div class="methodology-card">
                 <h3><i class="fas fa-exclamation-triangle"></i> 1. Vulnerabilidades Identificadas</h3>
@@ -1764,15 +2155,68 @@
         </div>
     </div>
 
+    <!-- BOTÃO VOLTAR AO TOPO -->
+    <button class="back-to-top" aria-label="Voltar ao topo da página">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- MODAL DE VERSÕES -->
+    <div class="modal" id="versionModal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Fechar modal">&times;</button>
+            <h3><i class="fas fa-history"></i> Histórico de Versões</h3>
+            
+            <div style="margin: 1.5rem 0;">
+                <div class="reference-item" style="background: #e8f5e9; border-left-color: #4CAF50;">
+                    <div class="authors"><strong>Versão 3.0</strong> - Janeiro 2025</div>
+                    <div class="title">Manual Técnico-Institucional Completo</div>
+                    <p>• Adicionado sistema de busca integrado<br>
+                       • Implementado sistema de favoritos/marcadores<br>
+                       • Melhorias de acessibilidade (ARIA)<br>
+                       • Modal de histórico de versões<br>
+                       • Opções de exportação aprimoradas</p>
+                </div>
+                
+                <div class="reference-item">
+                    <div class="authors"><strong>Versão 2.5</strong> - Setembro 2024</div>
+                    <div class="title">Atualização Metodológica</div>
+                    <p>• Revisão completa das referências técnicas<br>
+                       • Adicionada análise de Pareto detalhada<br>
+                       • Melhorias no cálculo do IPT</p>
+                </div>
+                
+                <div class="reference-item">
+                    <div class="authors"><strong>Versão 2.0</strong> - Maio 2024</div>
+                    <div class="title">Expansão Institucional</div>
+                    <p>• Adicionado módulo de impacto institucional<br>
+                       • Manual do usuário completo<br>
+                       • Recomendações técnicas detalhadas</p>
+                </div>
+                
+                <div class="reference-item">
+                    <div class="authors"><strong>Versão 1.0</strong> - Janeiro 2024</div>
+                    <div class="title">Lançamento Inicial</div>
+                    <p>• Sistema básico de checklist técnico<br>
+                       • Cálculo do IPT inicial<br>
+                       • Mapa sanitário básico</p>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong><i class="fas fa-info-circle"></i> Nota:</strong> Este manual é atualizado regularmente com base em novas normas técnicas e feedback dos usuários.
+            </div>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer>
         <div class="container">
             <div class="footer-links">
-                <a href="./index.html"><i class="fas fa-home"></i> Voltar ao Sistema</a>
-                <a href="./avaliacao.html"><i class="fas fa-clipboard-check"></i> Nova Avaliação</a>
-                <a href="./painel/index.html"><i class="fas fa-chart-bar"></i> Painel Técnico</a>
-                <a href="./sobre.html"><i class="fas fa-info-circle"></i> Sobre o Projeto</a>
-                <a href="./contato.html"><i class="fas fa-envelope"></i> Contato Institucional</a>
+                <a href="./index.html" aria-label="Voltar para a página inicial do sistema"><i class="fas fa-home"></i> Voltar ao Sistema</a>
+                <a href="./avaliacao.html" aria-label="Ir para página de nova avaliação"><i class="fas fa-clipboard-check"></i> Nova Avaliação</a>
+                <a href="./painel/index.html" aria-label="Acessar o painel técnico"><i class="fas fa-chart-bar"></i> Painel Técnico</a>
+                <a href="./sobre.html" aria-label="Sobre o projeto CheckInfra"><i class="fas fa-info-circle"></i> Sobre o Projeto</a>
+                <a href="./contato.html" aria-label="Entre em contato"><i class="fas fa-envelope"></i> Contato Institucional</a>
             </div>
             <p>© 2025 CheckInfra - Sistema de Diagnóstico Sanitário Escolar</p>
             <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 0.5rem;">
@@ -1795,25 +2239,29 @@
             // Função para ativar uma aba específica
             function activateTab(tabId) {
                 // Remove classe active de todos os botões e conteúdos
-                tabBtns.forEach(b => b.classList.remove('active'));
+                tabBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
                 tabContents.forEach(c => c.classList.remove('active'));
                 
                 // Ativa a aba clicada
                 const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
                 const activeContent = document.getElementById(tabId);
                 
-                if (activeBtn) activeBtn.classList.add('active');
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                    activeBtn.setAttribute('aria-selected', 'true');
+                }
                 if (activeContent) activeContent.classList.add('active');
                 
                 // Salva a aba ativa no localStorage
                 localStorage.setItem('activeTab', tabId);
                 
-                // Rolagem suave para o topo do conteúdo
-                if (activeContent) {
-                    setTimeout(() => {
-                        activeContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                }
+                // Dispara evento personalizado
+                document.dispatchEvent(new CustomEvent('tabChanged', { 
+                    detail: { tabId: tabId } 
+                }));
             }
             
             // Adiciona eventos aos botões
@@ -1855,115 +2303,12 @@
                 // Ctrl+P para imprimir a aba atual
                 if (e.ctrlKey && e.key === 'p') {
                     e.preventDefault();
-                    const activeTab = document.querySelector('.tab-content.active');
-                    const printWindow = window.open('', '_blank');
-                    printWindow.document.write(`
-                        <html>
-                            <head>
-                                <title>CheckInfra - ${activeTab.querySelector('h2').textContent}</title>
-                                <style>
-                                    body { 
-                                        font-family: 'Segoe UI', Arial, sans-serif; 
-                                        padding: 30px; 
-                                        line-height: 1.6;
-                                        color: #333;
-                                    }
-                                    h1 { 
-                                        color: #1f4fd8; 
-                                        border-bottom: 3px solid #1f4fd8;
-                                        padding-bottom: 10px;
-                                        margin-bottom: 25px;
-                                    }
-                                    h2 { color: #163ca6; margin-top: 25px; }
-                                    h3 { color: #1f4fd8; }
-                                    .methodology-card {
-                                        background: #f8f9fa;
-                                        border-left: 4px solid #1f4fd8;
-                                        padding: 15px;
-                                        margin: 20px 0;
-                                        border-radius: 5px;
-                                    }
-                                    .equacao {
-                                        background: #f0f4ff;
-                                        border: 2px solid #d1dbff;
-                                        padding: 15px;
-                                        border-radius: 8px;
-                                        margin: 20px 0;
-                                        font-family: 'Courier New', monospace;
-                                        font-size: 1.2rem;
-                                        text-align: center;
-                                        color: #163ca6;
-                                    }
-                                    @media print {
-                                        body { padding: 15px; }
-                                        .no-print { display: none; }
-                                    }
-                                    .footer {
-                                        margin-top: 40px;
-                                        padding-top: 20px;
-                                        border-top: 1px solid #ddd;
-                                        font-size: 12px;
-                                        color: #666;
-                                        text-align: center;
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <h1>CheckInfra - Manual Técnico-Institucional</h1>
-                                <div style="color: #666; margin-bottom: 25px;">
-                                    <strong>Seção:</strong> ${activeTab.querySelector('h2').textContent}<br>
-                                    <strong>Gerado em:</strong> ${new Date().toLocaleDateString()} às ${new Date().toLocaleTimeString()}
-                                </div>
-                                ${activeTab.innerHTML}
-                                <div class="footer">
-                                    © 2025 CheckInfra - Sistema de Diagnóstico Sanitário Escolar<br>
-                                    Documento técnico institucional - Uso interno
-                                </div>
-                            </body>
-                        </html>
-                    `);
-                    printWindow.document.close();
-                    setTimeout(() => {
-                        printWindow.print();
-                        printWindow.close();
-                    }, 500);
+                    printManual();
                 }
             });
             
-            // Adicionar botão "Voltar ao topo"
-            const backToTopBtn = document.createElement('button');
-            backToTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-            backToTopBtn.style.cssText = `
-                position: fixed;
-                bottom: 30px;
-                right: 30px;
-                width: 50px;
-                height: 50px;
-                background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-                color: white;
-                border: none;
-                border-radius: 50%;
-                cursor: pointer;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.2rem;
-                box-shadow: 0 4px 15px rgba(31, 79, 216, 0.4);
-                z-index: 1000;
-                transition: all 0.3s;
-            `;
-            backToTopBtn.addEventListener('mouseenter', () => {
-                backToTopBtn.style.transform = 'scale(1.1)';
-                backToTopBtn.style.boxShadow = '0 6px 20px rgba(31, 79, 216, 0.6)';
-            });
-            backToTopBtn.addEventListener('mouseleave', () => {
-                backToTopBtn.style.transform = 'scale(1)';
-                backToTopBtn.style.boxShadow = '0 4px 15px rgba(31, 79, 216, 0.4)';
-            });
-            backToTopBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-            document.body.appendChild(backToTopBtn);
+            // Botão voltar ao topo
+            const backToTopBtn = document.querySelector('.back-to-top');
             
             // Mostrar/ocultar botão baseado na rolagem
             window.addEventListener('scroll', () => {
@@ -1974,6 +2319,10 @@
                 }
             });
             
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
             // Inicializar accordions abertos na primeira aba
             setTimeout(() => {
                 const firstAccordion = document.querySelector('.accordion-header');
@@ -1981,9 +2330,524 @@
                     firstAccordion.click();
                 }
             }, 1000);
+            
+            // Inicializar sistemas adicionais
+            initSearchSystem();
+            initBookmarkSystem();
+            initVersionModal();
+            trackManualUsage();
         });
+        
+        // SISTEMA DE BUSCA
+        function initSearchSystem() {
+            const searchInput = document.getElementById('manual-search');
+            const searchResults = document.getElementById('search-results');
+            
+            if (!searchInput || !searchResults) return;
+            
+            // Índice de busca
+            let searchIndex = [];
+            
+            // Construir índice de busca
+            function buildSearchIndex() {
+                searchIndex = [];
+                
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    const tabId = tab.id;
+                    const tabTitle = tab.querySelector('h2').textContent.replace('★', '').trim();
+                    
+                    // Adicionar título da aba
+                    searchIndex.push({
+                        id: tabId,
+                        type: 'tab',
+                        title: tabTitle,
+                        content: tabTitle,
+                        element: tab
+                    });
+                    
+                    // Adicionar subtítulos (h3)
+                    tab.querySelectorAll('h3').forEach(h3 => {
+                        const content = h3.textContent.replace('★', '').trim();
+                        searchIndex.push({
+                            id: tabId,
+                            type: 'section',
+                            title: content,
+                            content: content,
+                            element: h3.closest('.methodology-card') || h3
+                        });
+                    });
+                    
+                    // Adicionar parágrafos importantes
+                    tab.querySelectorAll('.methodology-card p').forEach((p, index) => {
+                        const text = p.textContent.trim();
+                        if (text.length > 50) { // Só adicionar parágrafos significativos
+                            searchIndex.push({
+                                id: tabId,
+                                type: 'content',
+                                title: `Conteúdo - ${tabTitle.substring(0, 30)}...`,
+                                content: text.substring(0, 200),
+                                element: p
+                            });
+                        }
+                    });
+                });
+            }
+            
+            // Realizar busca
+            function performSearch(query) {
+                if (query.length < 3) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                const results = searchIndex.filter(item => {
+                    return item.content.toLowerCase().includes(query.toLowerCase()) ||
+                           item.title.toLowerCase().includes(query.toLowerCase());
+                });
+                
+                displaySearchResults(results);
+            }
+            
+            // Mostrar resultados
+            function displaySearchResults(results) {
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div class="search-result-item"><p>Nenhum resultado encontrado.</p></div>';
+                    searchResults.style.display = 'block';
+                    return;
+                }
+                
+                searchResults.innerHTML = results.slice(0, 10).map(item => `
+                    <div class="search-result-item" data-tab="${item.id}">
+                        <h4>${item.title}</h4>
+                        <p>${highlightText(item.content, searchInput.value)}...</p>
+                        <small style="color: var(--primary);">Aba: ${getTabName(item.id)}</small>
+                    </div>
+                `).join('');
+                
+                searchResults.style.display = 'block';
+                
+                // Adicionar eventos aos resultados
+                document.querySelectorAll('.search-result-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const tabId = this.getAttribute('data-tab');
+                        activateTab(tabId);
+                        searchResults.style.display = 'none';
+                        searchInput.value = '';
+                    });
+                });
+            }
+            
+            // Destacar texto nos resultados
+            function highlightText(text, query) {
+                const regex = new RegExp(`(${query})`, 'gi');
+                return text.replace(regex, '<mark>$1</mark>');
+            }
+            
+            // Obter nome da aba
+            function getTabName(tabId) {
+                const tabNames = {
+                    'apresentacao': 'Apresentação',
+                    'aspectos-gerais': 'Aspectos Gerais',
+                    'metodologia': 'Metodologia Técnica',
+                    'sistema': 'Sistema CheckInfra',
+                    'impacto': 'Impacto Institucional',
+                    'referencias': 'Referências',
+                    'manual-usuario': 'Manual do Usuário',
+                    'arquitetura-tecnica': 'Arquitetura Técnica',
+                    'recomendacoes': 'Recomendações Técnicas'
+                };
+                return tabNames[tabId] || tabId;
+            }
+            
+            // Event listeners
+            searchInput.addEventListener('input', function(e) {
+                performSearch(e.target.value);
+            });
+            
+            searchInput.addEventListener('focus', function() {
+                if (this.value.length >= 3) {
+                    performSearch(this.value);
+                }
+            });
+            
+            // Fechar resultados ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+            
+            // Construir índice inicial
+            buildSearchIndex();
+        }
+        
+        // SISTEMA DE FAVORITOS
+        function initBookmarkSystem() {
+            // Carregar favoritos do localStorage
+            let bookmarks = JSON.parse(localStorage.getItem('checkinfra_bookmarks') || '[]');
+            
+            // Atualizar botões de favorito
+            function updateBookmarkButtons() {
+                document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                    const section = btn.getAttribute('data-section');
+                    const isBookmarked = bookmarks.includes(section);
+                    
+                    if (isBookmarked) {
+                        btn.classList.add('active');
+                        btn.innerHTML = '<i class="fas fa-bookmark"></i>';
+                    } else {
+                        btn.classList.remove('active');
+                        btn.innerHTML = '<i class="far fa-bookmark"></i>';
+                    }
+                });
+            }
+            
+            // Alternar favorito
+            function toggleBookmark(section) {
+                const index = bookmarks.indexOf(section);
+                
+                if (index === -1) {
+                    bookmarks.push(section);
+                } else {
+                    bookmarks.splice(index, 1);
+                }
+                
+                localStorage.setItem('checkinfra_bookmarks', JSON.stringify(bookmarks));
+                updateBookmarkButtons();
+                
+                // Feedback visual
+                const btn = document.querySelector(`.bookmark-btn[data-section="${section}"]`);
+                if (btn) {
+                    btn.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                    }, 300);
+                }
+            }
+            
+            // Adicionar eventos aos botões
+            document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    toggleBookmark(section);
+                });
+            });
+            
+            // Atualizar inicialmente
+            updateBookmarkButtons();
+        }
+        
+        // Alternar visualização de favoritos
+        function toggleBookmarksView() {
+            const bookmarks = JSON.parse(localStorage.getItem('checkinfra_bookmarks') || '[]');
+            
+            if (bookmarks.length === 0) {
+                alert('Você ainda não tem seções favoritas!');
+                return;
+            }
+            
+            // Criar modal de favoritos
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="modal-close" onclick="this.closest('.modal').style.display='none'">&times;</button>
+                    <h3><i class="fas fa-bookmark"></i> Minhas Seções Favoritas</h3>
+                    <div style="margin: 1.5rem 0;">
+                        ${bookmarks.map(section => `
+                            <div class="search-result-item" style="cursor: pointer;" onclick="activateTab('${section}'); this.closest('.modal').style.display='none'">
+                                <h4>${getTabName(section)}</h4>
+                                <p>Clique para ir para esta seção</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="export-btn" style="width: 100%; margin-top: 1rem;" onclick="clearAllBookmarks()">
+                        <i class="fas fa-trash"></i> Limpar Todos os Favoritos
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Fechar ao clicar fora
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        }
+        
+        // Limpar todos os favoritos
+        function clearAllBookmarks() {
+            if (confirm('Tem certeza que deseja remover todos os favoritos?')) {
+                localStorage.removeItem('checkinfra_bookmarks');
+                document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.innerHTML = '<i class="far fa-bookmark"></i>';
+                });
+                
+                const modal = document.querySelector('.modal:last-child');
+                if (modal) modal.style.display = 'none';
+                
+                alert('Todos os favoritos foram removidos!');
+            }
+        }
+        
+        // MODAL DE VERSÕES
+        function initVersionModal() {
+            const modal = document.getElementById('versionModal');
+            const closeBtn = modal.querySelector('.modal-close');
+            
+            // Fechar modal
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            
+            // Fechar ao clicar fora
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Fechar com ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.style.display === 'flex') {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        // Mostrar histórico de versões
+        function showVersionHistory() {
+            const modal = document.getElementById('versionModal');
+            modal.style.display = 'flex';
+        }
+        
+        // EXPORTAÇÃO PDF
+        function exportAsPDF() {
+            const activeTab = document.querySelector('.tab-content.active');
+            const tabTitle = activeTab.querySelector('h2').textContent.replace('★', '').trim();
+            
+            // Criar janela de impressão personalizada
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>CheckInfra - ${tabTitle}</title>
+                        <style>
+                            body { 
+                                font-family: 'Segoe UI', Arial, sans-serif; 
+                                padding: 30px; 
+                                line-height: 1.6;
+                                color: #333;
+                                max-width: 1200px;
+                                margin: 0 auto;
+                            }
+                            h1 { 
+                                color: #1f4fd8; 
+                                border-bottom: 3px solid #1f4fd8;
+                                padding-bottom: 10px;
+                                margin-bottom: 25px;
+                                text-align: center;
+                            }
+                            h2 { 
+                                color: #163ca6; 
+                                margin-top: 25px;
+                                border-left: 4px solid #1f4fd8;
+                                padding-left: 15px;
+                            }
+                            h3 { color: #1f4fd8; margin-top: 20px; }
+                            .methodology-card {
+                                background: #f8f9fa;
+                                border-left: 5px solid #1f4fd8;
+                                padding: 20px;
+                                margin: 20px 0;
+                                border-radius: 8px;
+                                page-break-inside: avoid;
+                            }
+                            .equacao {
+                                background: #f0f4ff;
+                                border: 2px solid #d1dbff;
+                                padding: 15px;
+                                border-radius: 8px;
+                                margin: 20px 0;
+                                font-family: 'Courier New', monospace;
+                                font-size: 1.2rem;
+                                text-align: center;
+                                color: #163ca6;
+                            }
+                            .info-box, .warning-box, .success-box, .danger-box {
+                                padding: 15px;
+                                margin: 20px 0;
+                                border-radius: 6px;
+                                border-left-width: 5px;
+                                border-left-style: solid;
+                            }
+                            .info-box { background: #e3f2fd; border-left-color: #2196f3; }
+                            .warning-box { background: #fff3e0; border-left-color: #ff9800; }
+                            .success-box { background: #e8f5e9; border-left-color: #4caf50; }
+                            .danger-box { background: #ffebee; border-left-color: #f44336; }
+                            table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin: 20px 0;
+                                page-break-inside: avoid;
+                            }
+                            th {
+                                background: #1f4fd8;
+                                color: white;
+                                padding: 12px;
+                                text-align: left;
+                            }
+                            td {
+                                padding: 12px;
+                                border-bottom: 1px solid #ddd;
+                            }
+                            @media print {
+                                body { padding: 15px; }
+                                .no-print { display: none; }
+                            }
+                            .footer {
+                                margin-top: 40px;
+                                padding-top: 20px;
+                                border-top: 1px solid #ddd;
+                                font-size: 12px;
+                                color: #666;
+                                text-align: center;
+                            }
+                            .highlight {
+                                background: rgba(31, 79, 216, 0.1);
+                                padding: 2px 5px;
+                                border-radius: 3px;
+                                font-weight: bold;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #1f4fd8; margin-bottom: 10px;">CheckInfra</h1>
+                            <h2 style="color: #333; font-weight: normal; margin-bottom: 20px;">Manual Técnico-Institucional</h2>
+                            <div style="color: #666; margin-bottom: 20px;">
+                                <strong>Seção:</strong> ${tabTitle}<br>
+                                <strong>Gerado em:</strong> ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+                            </div>
+                        </div>
+                        ${activeTab.innerHTML.replace(/<button[^>]*>.*?<\/button>/g, '')}
+                        <div class="footer">
+                            © 2025 CheckInfra - Sistema de Diagnóstico Sanitário Escolar<br>
+                            Documento técnico institucional v3.0 - Uso interno<br>
+                            Gerado automaticamente pelo sistema CheckInfra
+                        </div>
+                        <script>
+                            window.onload = function() {
+                                setTimeout(() => {
+                                    window.print();
+                                    setTimeout(() => {
+                                        window.close();
+                                    }, 500);
+                                }, 1000);
+                            };
+                        <\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+        
+        // IMPRIMIR MANUAL
+        function printManual() {
+            window.print();
+        }
+        
+        // ANALYTICS BÁSICO
+        function trackManualUsage() {
+            // Carregar estatísticas existentes
+            let stats = JSON.parse(localStorage.getItem('checkinfra_stats') || '{}');
+            
+            // Inicializar se necessário
+            if (!stats.tabViews) stats.tabViews = {};
+            if (!stats.firstVisit) stats.firstVisit = new Date().toISOString();
+            if (!stats.lastVisit) stats.lastVisit = new Date().toISOString();
+            if (!stats.visitCount) stats.visitCount = 0;
+            
+            // Incrementar contagem de visitas
+            stats.visitCount++;
+            stats.lastVisit = new Date().toISOString();
+            
+            // Salvar estatísticas
+            localStorage.setItem('checkinfra_stats', JSON.stringify(stats));
+            
+            // Monitorar visualização de abas
+            document.addEventListener('tabChanged', function(e) {
+                const tabId = e.detail.tabId;
+                
+                // Atualizar estatísticas
+                stats.tabViews[tabId] = (stats.tabViews[tabId] || 0) + 1;
+                localStorage.setItem('checkinfra_stats', JSON.stringify(stats));
+            });
+            
+            // Monitorar tempo de permanência
+            let startTime = Date.now();
+            let currentTab = localStorage.getItem('activeTab') || 'apresentacao';
+            
+            setInterval(() => {
+                if (!stats.timeSpent) stats.timeSpent = {};
+                
+                const timeSpent = Math.round((Date.now() - startTime) / 1000);
+                stats.timeSpent[currentTab] = (stats.timeSpent[currentTab] || 0) + timeSpent;
+                
+                startTime = Date.now();
+                currentTab = localStorage.getItem('activeTab') || 'apresentacao';
+                
+                localStorage.setItem('checkinfra_stats', JSON.stringify(stats));
+            }, 30000); // Atualizar a cada 30 segundos
+        }
+        
+        // Função auxiliar para obter nome da aba
+        function getTabName(tabId) {
+            const tabNames = {
+                'apresentacao': 'Apresentação',
+                'aspectos-gerais': 'Aspectos Gerais',
+                'metodologia': 'Metodologia Técnica',
+                'sistema': 'Sistema CheckInfra',
+                'impacto': 'Impacto Institucional',
+                'referencias': 'Referências',
+                'manual-usuario': 'Manual do Usuário',
+                'arquitetura-tecnica': 'Arquitetura Técnica',
+                'recomendacoes': 'Recomendações Técnicas'
+            };
+            return tabNames[tabId] || tabId;
+        }
+        
+        // Função para ativar aba (disponível globalmente)
+        window.activateTab = function(tabId) {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+            const activeContent = document.getElementById(tabId);
+            
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-selected', 'true');
+            }
+            if (activeContent) activeContent.classList.add('active');
+            
+            localStorage.setItem('activeTab', tabId);
+            
+            document.dispatchEvent(new CustomEvent('tabChanged', { 
+                detail: { tabId: tabId } 
+            }));
+        };
     </script>
 </body>
 </html>
-
-
