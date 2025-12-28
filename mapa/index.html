@@ -48,18 +48,9 @@ footer {
   z-index:999;
   font-size:13px;
 }
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
 
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-}
+.bola { width:12px; height:12px; border-radius:50%; }
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
@@ -89,23 +80,34 @@ footer {
   font-size: 13px;
   border: 1px solid #ddd;
   position: absolute;
-  bottom: 30px; 
-  right: 10px;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1000;
   pointer-events: auto;
 }
-.legenda-mapa i {
-  width: 12px;
-  height: 12px;
-  float: left;
-  margin-right: 8px;
-  margin-top: 4px;
-  border-radius: 50%;
-  display: inline-block;
+.legenda-mapa i { width: 12px; height: 12px; float: left; margin-right: 8px; margin-top: 4px; border-radius: 50%; display: inline-block; }
+.legenda-toggle {
+  position: absolute;
+  top: 0;
+  right: -25px;
+  width: 20px;
+  height: 20px;
+  background: #1f4fd8;
+  color: #fff;
+  text-align: center;
+  line-height: 20px;
+  border-radius: 4px 0 0 4px;
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
 }
-@media (max-width: 600px) {
-  .legenda-mapa { font-size: 11px; padding: 8px; line-height: 16px; max-width: 140px; bottom: 15px !important; right: 5px !important; }
+.legenda-mapa.fechada { width: 20px; height: 20px; padding: 0; overflow: hidden; }
+
+@media (max-width:600px){
+  .legenda-mapa { font-size: 11px; padding: 8px; line-height: 16px; max-width: 180px; top: 40px; }
   .legenda-mapa i { width: 10px; height: 10px; margin-top: 3px; }
+  .legenda-toggle { right: -22px; width: 18px; height: 18px; line-height: 18px; }
 }
 </style>
 </head>
@@ -138,34 +140,26 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Config Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
-};
+const firebaseConfig = { apiKey:"...", authDomain:"...", projectId:"..." };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Inicializar mapa
 let map;
-if (!window._checkinfraMap) {
-  map = L.map("map").setView([-3.7319,-38.5267],12);
+if(!window._checkinfraMap){
+  map=L.map("map").setView([-3.7319,-38.5267],12);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap" }).addTo(map);
   window._checkinfraMap = map;
-} else {
-  map = window._checkinfraMap;
-}
+}else map = window._checkinfraMap;
 
-// Expor avaliacoes globalmente
+// Avaliações
 let avaliacoes = [];
 window.avaliacoes = avaliacoes;
 
 // Cores e classes
-const cores = { ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336" };
-const classesPulse = { ok:"pulse-ok", alerta:"pulse-alerta", atencao:"pulse-atencao", critico:"pulse-critico" };
-const classeMap = { ok:"ok", alerta:"alerta", atencao:"atencao", critico:"critico" };
-
-// Layer
+const cores={ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336"};
+const classesPulse={ok:"pulse-ok", alerta:"pulse-alerta", atencao:"pulse-atencao", critico:"pulse-critico"};
+const classeMap={ok:"ok", alerta:"alerta", atencao:"atencao", critico:"critico"};
 let camadaPontos = L.layerGroup().addTo(map);
 
 // Carregar avaliações
@@ -185,14 +179,14 @@ async function carregarAvaliacoes(){
   window.avaliacoes = avaliacoes;
 }
 
-// Criar ponto da escola
+// Criar ponto
 function criarPonto(d){
   const s = classeMap[d.classe] || d.classe;
   const cor = cores[s] || "#000";
-  const nomeStatus = s === "ok" ? "Adequado" : s.charAt(0).toUpperCase() + s.slice(1);
+  const nomeStatus = s==="ok" ? "Adequado" : s.charAt(0).toUpperCase() + s.slice(1);
   const ultimaData = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString('pt-BR') : "-";
 
-  const marker = L.circleMarker([d.lat,d.lng],{
+  return L.circleMarker([d.lat,d.lng],{
     radius:8, color:cor, fillColor:cor, fillOpacity:0.8
   }).bindPopup(`
     <strong>${d.escola}</strong><br>
@@ -200,7 +194,6 @@ function criarPonto(d){
     Pontuação: ${d.pontuacao || "-"}<br>
     Última avaliação: ${ultimaData}
   `);
-  return marker;
 }
 
 // Atualizar pontos
@@ -225,21 +218,20 @@ function atualizarPontos(){
   });
 }
 
-// Eventos checkbox
 document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso").forEach(el=>{
   el.addEventListener("change", atualizarPontos);
 });
 
-// Inicialização
 await carregarAvaliacoes();
 atualizarPontos();
 
 // Legenda bairros
-const legenda = L.control({ position: 'bottomright' });
-legenda.onAdd = function(map) {
-  const div = L.DomUtil.create('div', 'legenda-mapa');
-  div.id = 'legendaBairros';
+const legenda = L.control({position:'bottomright'});
+legenda.onAdd = function(map){
+  const div=L.DomUtil.create('div','legenda-mapa');
+  div.id='legendaBairros';
   div.innerHTML = `
+    <div class="legenda-toggle" id="toggleLegenda">&lt;</div>
     <div style="margin-bottom:5px;"><strong>Status das escolas</strong></div>
     <i style="background:#4CAF50"></i> Adequado<br>
     <i style="background:#FFD700"></i> Alerta<br>
@@ -249,6 +241,20 @@ legenda.onAdd = function(map) {
   return div;
 };
 legenda.addTo(map);
+
+// Toggle da legenda
+const toggleLegenda = document.getElementById("toggleLegenda");
+const legendaEl = document.getElementById("legendaBairros");
+
+toggleLegenda.addEventListener("click", ()=>{
+  if(legendaEl.classList.contains("fechada")){
+    legendaEl.classList.remove("fechada");
+    toggleLegenda.innerHTML="&lt;";
+  } else {
+    legendaEl.classList.add("fechada");
+    toggleLegenda.innerHTML="&gt;";
+  }
+});
 
 </script>
 
