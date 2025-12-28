@@ -76,70 +76,60 @@ footer {
 @keyframes pulse-atencao {0%,100%{opacity:0;}50%{opacity:0.8;}}
 @keyframes pulse-critico {0%,100%{opacity:0;}50%{opacity:0.8;}}
 
-/* Legenda lateral - Estilo Drawer com Aba */
+/* LEGENDA OVERHANGING TAB */
 .legenda-wrapper {
   position: fixed;
   top: 50%;
-  right: -250px; /* Escondida por padrão */
+  right: -260px; /* Escondido para a direita */
   transform: translateY(-50%);
-  width: 240px;
+  width: 250px;
   max-height: 70vh;
-  background: rgba(255, 255, 255, 0.98);
+  background: white;
   padding: 15px;
-  color: #333;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.15);
-  border-radius: 12px 0 0 12px;
-  font-size: 13px;
-  border: 1px solid #ddd;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+  border-radius: 15px 0 0 15px;
+  z-index: 2000;
+  transition: right 0.5s ease;
+  visibility: hidden; /* Invisível até ativar o checkbox */
+  border: 1px solid #ccc;
   border-right: none;
-  z-index: 1100;
-  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  display: none; /* Controlado pelo checkbox leitura por bairro */
-  overflow-y: auto;
 }
 
-.legenda-wrapper.open { right: 0; }
+/* Quando o checkbox ativa, a estrutura fica visível (mas ainda recolhida à direita) */
+.legenda-wrapper.visible {
+  visibility: visible;
+  right: -250px; 
+}
+
+/* Quando clicado na aba, ele desliza para a esquerda (mostra conteúdo) */
+.legenda-wrapper.open {
+  right: 0 !important;
+}
 
 .legenda-tab {
   position: absolute;
-  left: -35px;
+  left: -40px; /* Fica pendurado para fora */
   top: 20px;
-  width: 35px;
-  height: 45px;
+  width: 40px;
+  height: 50px;
   background: #1f4fd8;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px 0 0 8px;
+  border-radius: 10px 0 0 10px;
   cursor: pointer;
+  font-size: 20px;
   box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-  font-size: 18px;
-  font-weight: bold;
   user-select: none;
 }
 
-.legenda-title { 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  font-weight: bold; 
-  margin-bottom: 10px; 
-  color: #1f4fd8;
-}
+.legenda-title { font-weight: bold; margin-bottom: 10px; color: #1f4fd8; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.legenda-content { font-size: 13px; line-height: 1.5; color: #444; }
 
-.legenda-content i {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  display:inline-block;
-  margin-right:6px;
-  vertical-align:middle;
-}
-
-@media (max-width:600px){
-  .legenda-wrapper { width: 200px; font-size: 11px; right: -210px; }
-  .legenda-wrapper.open { right: 0; }
+@media (max-width: 600px) {
+  .legenda-wrapper { width: 220px; right: -230px; }
+  .legenda-wrapper.visible { right: -220px; }
 }
 </style>
 </head>
@@ -162,16 +152,14 @@ footer {
 <div id="map"></div>
 
 <div id="legendaWrapper" class="legenda-wrapper">
-  <div class="legenda-tab" id="toggleLegenda">‹</div>
-  <div class="legenda-title">
-    <span>Status dos bairros</span>
-  </div>
+  <div class="legenda-tab" id="toggleLegenda">«</div>
+  <div class="legenda-title">Status dos bairros</div>
   <div class="legenda-content">
     🔴 Crítico: Predomínio de falhas graves.<br>
     🟠 Atenção: Tendência de degradação.<br>
     🟡 Alerta: Manutenção preventiva.<br>
     🟢 Adequado: Dentro das normas.<br><br>
-    <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em><br><br>
+    <small><em>Criticidade dominante >=50% das escolas por bairro.</em></small><hr>
     <small id="totalEscolas">Total escolas monitoradas: 0</small><br>
     <small id="ultimaAvaliacao">Última avaliação: -</small>
   </div>
@@ -193,7 +181,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Inicializar mapa
 let map;
 if (!window._checkinfraMap) {
   map = L.map("map").setView([-3.7319,-38.5267],12);
@@ -223,7 +210,6 @@ async function carregarAvaliacoes(){
   avaliacoes = Object.values(ultimos);
   window.avaliacoes = avaliacoes;
 
-  // Atualizar indicadores da legenda
   document.getElementById("totalEscolas").textContent = "Total escolas monitoradas: " + avaliacoes.length;
   let datas = avaliacoes.map(a => a.createdAt?.toDate ? a.createdAt.toDate() : null).filter(d => d!=null);
   if(datas.length>0){
@@ -273,31 +259,22 @@ document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso"
 await carregarAvaliacoes();
 atualizarPontos();
 
-// Lógica da Legenda com Aba Lateral
+// LOGICA DA LEGENDA RETRÁTIL
 const legendaWrapper = document.getElementById("legendaWrapper");
 const toggleLegenda = document.getElementById("toggleLegenda");
 const checkBairros = document.getElementById("toggleBairros");
 
 toggleLegenda.addEventListener("click", () => {
   const isOpen = legendaWrapper.classList.toggle("open");
-  toggleLegenda.textContent = isOpen ? "›" : "‹";
+  toggleLegenda.textContent = isOpen ? "»" : "«";
 });
 
-checkBairros.addEventListener("change", function(){
-  if(this.checked){
-    legendaWrapper.style.display = 'block';
-    // Abre automaticamente ao ativar para mostrar ao usuário que a legenda surgiu
-    setTimeout(() => {
-        legendaWrapper.classList.add('open');
-        toggleLegenda.textContent = "›";
-    }, 10);
+checkBairros.addEventListener("change", function() {
+  if(this.checked) {
+    legendaWrapper.classList.add("visible");
   } else {
-    legendaWrapper.classList.remove('open');
-    toggleLegenda.textContent = "‹";
-    // Espera a transição acabar para dar display:none
-    setTimeout(() => {
-        if(!checkBairros.checked) legendaWrapper.style.display = 'none';
-    }, 400);
+    legendaWrapper.classList.remove("visible", "open");
+    toggleLegenda.textContent = "«";
   }
 });
 </script>
