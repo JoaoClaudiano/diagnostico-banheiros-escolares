@@ -107,7 +107,7 @@ function iniciarModuloBairros() {
           ${total > 0 ? ["critico","atencao","alerta","ok"].map(c => `
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
               <span style="width:10px; height:10px; border-radius:50%; background:${cores[c]}; display:inline-block;"></span>
-              <span>${c.charAt(0).toUpperCase()+c.slice(1)}: ${perc(c)}% (${cont[c]})</span>
+              <span>${c === "ok" ? "Adequado" : c.charAt(0).toUpperCase()+c.slice(1)}: ${perc(c)}% (${cont[c]})</span>
             </div>`).join("") : "Nenhuma escola ativa neste setor."}
           <div style="margin-top:6px; font-size:11px; border-top:1px solid #eee; padding-top:4px;"><em>${obs}</em></div>
         </div>`;
