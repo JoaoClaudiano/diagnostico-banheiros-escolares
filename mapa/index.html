@@ -76,49 +76,54 @@ footer {
 @keyframes pulse-atencao {0%,100%{opacity:0;}50%{opacity:0.8;}}
 @keyframes pulse-critico {0%,100%{opacity:0;}50%{opacity:0.8;}}
 
-/* Legenda tipo aba/orelha */
-.legenda-container {
-  position:fixed;
-  top:120px;
-  right:-250px; /* fora da tela inicialmente */
-  width:250px;
-  max-height:70vh;
-  z-index:1001;
-  font-size:13px;
-  transition: right 0.4s ease;
-}
-.legenda-container.open { right:10px; }
-
-.legenda-mapa {
+/* Legenda lateral */
+.legenda-wrapper {
+  position:absolute;
+  top:20%;
+  right:-240px;
+  width:230px;
+  max-height:60vh;
   background: rgba(255,255,255,0.95);
-  padding:12px;
-  border-radius:8px;
+  padding:10px 12px;
+  color:#333;
   box-shadow:0 0 15px rgba(0,0,0,0.2);
+  border-radius:8px;
+  font-size:13px;
   border:1px solid #ddd;
+  z-index:1000;
+  transition: all 0.4s ease;
   overflow-y:auto;
-  max-height:70vh;
 }
+.legenda-wrapper.open { right:10px; }
+
+.legenda-title { display:flex; align-items:center; gap:8px; font-weight:bold; margin-bottom:6px; }
 
 .legenda-tab {
-  position:absolute;
-  left:-32px;
-  top:10px;
-  width:32px;
-  height:32px;
+  cursor:pointer;
+  font-size:16px;
+  font-weight:bold;
+  user-select:none;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
-  cursor:pointer;
-  user-select:none;
+  padding:4px 6px;
   transition: transform 0.3s ease;
 }
 .legenda-tab.open { transform: rotate(180deg); }
 
-/* Mobile adjustments */
+.legenda-content i {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:6px;
+  vertical-align:middle;
+}
+
 @media (max-width:600px){
-  .legenda-container { top:80px; width:200px; font-size:12px; max-height:60vh; }
-  .legenda-tab { font-size:20px; width:28px; height:28px; }
+  .legenda-wrapper { width:180px; max-height:55vh; top:15%; font-size:12px; }
+  .legenda-title { font-size:13px; }
+  .legenda-tab { font-size:18px; padding:4px 6px; }
 }
 </style>
 </head>
@@ -140,27 +145,26 @@ footer {
 
 <div id="map"></div>
 
+<!-- Legenda -->
+<div id="legendaWrapper" class="legenda-wrapper">
+  <div class="legenda-title">
+    <div class="legenda-tab" id="toggleLegenda">◀</div>
+    <span>Status dos bairros</span>
+  </div>
+  <div class="legenda-content">
+    🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
+    🟠 Atenção: Unidade com tendência de degradação.<br>
+    🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
+    🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
+    <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em><br><br>
+    <small id="totalEscolas">Total escolas monitoradas: 0</small><br>
+    <small id="ultimaAvaliacao">Última avaliação: -</small>
+  </div>
+</div>
+
 <footer>
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
-
-<!-- Legenda tipo aba/orelha -->
-<div class="legenda-container" id="legendaContainer" style="display:none;">
-  <div class="legenda-mapa">
-    <h4>Status dos bairros</h4>
-    <div style="margin-bottom:6px;">
-      🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
-      🟠 Atenção: Unidade com tendência de degradação.<br>
-      🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
-      🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
-      <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em>
-      <br><br>
-      <small id="totalEscolas">Total escolas monitoradas: 0</small><br>
-      <small id="ultimaAvaliacao">Última avaliação: -</small>
-    </div>
-  </div>
-  <div class="legenda-tab" id="legendaTab">◀</div>
-</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -174,6 +178,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Inicializar mapa
 let map;
 if (!window._checkinfraMap) {
   map = L.map("map").setView([-3.7319,-38.5267],12);
@@ -181,7 +186,6 @@ if (!window._checkinfraMap) {
   window._checkinfraMap = map;
 } else map = window._checkinfraMap;
 
-// Avaliações
 let avaliacoes = [];
 window.avaliacoes = avaliacoes;
 const cores = { ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336" };
@@ -204,11 +208,13 @@ async function carregarAvaliacoes(){
   avaliacoes = Object.values(ultimos);
   window.avaliacoes = avaliacoes;
 
-  // Atualiza totais da legenda
-  document.getElementById("totalEscolas").textContent = `Total escolas monitoradas: ${avaliacoes.length}`;
-  const datas = avaliacoes.map(a => a.createdAt?.toDate ? a.createdAt.toDate() : null).filter(d => d != null);
-  const ultima = datas.length ? new Date(Math.max.apply(null,datas)).toLocaleDateString('pt-BR') : "-";
-  document.getElementById("ultimaAvaliacao").textContent = `Última avaliação: ${ultima}`;
+  // Atualizar indicadores da legenda
+  document.getElementById("totalEscolas").textContent = "Total escolas monitoradas: " + avaliacoes.length;
+  let datas = avaliacoes.map(a => a.createdAt?.toDate ? a.createdAt.toDate() : null).filter(d => d!=null);
+  if(datas.length>0){
+    const maisRecente = new Date(Math.max.apply(null,datas));
+    document.getElementById("ultimaAvaliacao").textContent = "Última avaliação: " + maisRecente.toLocaleDateString('pt-BR');
+  }
 }
 
 function criarPonto(d){
@@ -252,28 +258,21 @@ document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso"
 await carregarAvaliacoes();
 atualizarPontos();
 
-// Legenda toggle
-const legendaContainer = document.getElementById("legendaContainer");
-const legendaTab = document.getElementById("legendaTab");
+// Toggle da legenda
+const legendaWrapper = document.getElementById("legendaWrapper");
+const toggleLegenda = document.getElementById("toggleLegenda");
 
-legendaTab.addEventListener("click", ()=>{
-  if(legendaContainer.classList.contains("open")){
-    legendaContainer.classList.remove("open");
-    legendaTab.classList.remove("open");
-  } else {
-    legendaContainer.classList.add("open");
-    legendaTab.classList.add("open");
-  }
+toggleLegenda.addEventListener("click", ()=>{
+  legendaWrapper.classList.toggle("open");
+  toggleLegenda.classList.toggle("open");
 });
-
 document.getElementById("toggleBairros").addEventListener("change", function(){
   if(this.checked){
-    legendaContainer.style.display='block';
-    setTimeout(()=>legendaContainer.classList.add("open"), 10);
+    legendaWrapper.style.display='block';
   } else {
-    legendaContainer.classList.remove("open");
-    legendaTab.classList.remove("open");
-    setTimeout(()=>legendaContainer.style.display='none', 400);
+    legendaWrapper.style.display='none';
+    legendaWrapper.classList.remove('open');
+    toggleLegenda.classList.remove('open');
   }
 });
 </script>
