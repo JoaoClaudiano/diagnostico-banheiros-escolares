@@ -24,22 +24,9 @@ header {
   top:0;
   z-index:1000;
 }
-header .voltar {
-  position:absolute;
-  left:14px;
-  cursor:pointer;
-  font-size:18px;
-  user-select:none;
-}
+header .voltar { position:absolute; left:14px; cursor:pointer; font-size:18px; user-select:none; }
 
-footer {
-  background:#f4f6f8;
-  font-size:11px;
-  color:#555;
-  padding:8px;
-  text-align:center;
-  border-top:1px solid #ddd;
-}
+footer { background:#f4f6f8; font-size:11px; color:#555; padding:8px; text-align:center; border-top:1px solid #ddd; }
 
 .painel {
   background:#fff;
@@ -54,18 +41,8 @@ footer {
   z-index:999;
   font-size:13px;
 }
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
-
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-}
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+.bola { width:12px; height:12px; border-radius:50%; }
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
@@ -73,34 +50,17 @@ footer {
 
 #map { height: calc(100vh - 160px); }
 
-/* Pulsar suave com fade in/out */
-.pulse-ok {
-  animation: pulse-ok 4s infinite;
-}
-.pulse-alerta, .pulse-atencao {
-  animation: pulse-alerta 3s infinite;
-}
-.pulse-critico {
-  animation: pulse-critico 2s infinite;
-}
-
-@keyframes pulse-ok {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 0.8; }
-}
-@keyframes pulse-alerta {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 0.8; }
-}
-@keyframes pulse-critico {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 0.8; }
+/* Pulso com piscar */
+.pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  opacity: 1;
 }
 </style>
 </head>
 
 <body>
-
 <header>
   <span class="voltar" onclick="history.back()">←</span>
   <span>Mapa Sanitário das Escolas – CheckInfra</span>
@@ -122,10 +82,11 @@ footer {
 </footer>
 
 <script type="module">
+// --- Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { ativarLeituraPorBairros } from "./mapabairros.js";
 
-// Config Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
@@ -134,25 +95,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Inicializar mapa
-let map;
-if (!window._checkinfraMap) {
-  map = L.map("map").setView([-3.7319,-38.5267],12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap" }).addTo(map);
-  window._checkinfraMap = map;
-} else {
-  map = window._checkinfraMap;
-}
+// --- Mapa ---
+const map = L.map("map").setView([-3.7319,-38.5267],12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap" }).addTo(map);
 
-// Cores e frequências
 const cores = { ok:"#4CAF50", alerta:"#FFD700", atenção:"#FF9800", critico:"#F44336" };
-const classesPulse = { ok:"pulse-ok", alerta:"pulse-alerta", atenção:"pulse-atencao", critico:"pulse-critico" };
-
-// Layer e dados
-let camadaPontos = L.layerGroup().addTo(map);
+const frequencias = { ok:4000, alerta:3000, atenção:3000, critico:2000 };
 let avaliacoes = [];
+let camadaPontos = L.layerGroup().addTo(map);
+let pulsosAtivos = [];
 
-// Carregar avaliações recentes
+// --- Carregar avaliações recentes ---
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
   const ultimos = {};
@@ -168,49 +121,73 @@ async function carregarAvaliacoes(){
   avaliacoes = Object.values(ultimos);
 }
 
-// Criar ponto
+// --- Criar marcador ---
 function criarPonto(d){
   const cor = cores[d.classe] || "#000";
-  const marker = L.circleMarker([d.lat,d.lng],{
+  return L.circleMarker([d.lat,d.lng],{
     radius:8, color:cor, fillColor:cor, fillOpacity:0.8
   }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.classe}<br>Pontuação: ${d.pontuacao||"-"}<br>Última avaliação: ${d.data||"-"}`);
-  return marker;
 }
 
-// Atualizar pontos
-function atualizarPontos(){
-  camadaPontos.clearLayers();
-
-  const mapaVivo = document.getElementById("togglePulso").checked;
+// --- Ativar mapa vivo ---
+function ativarPulso(){
+  pulsosAtivos.forEach(i => clearInterval(i));
+  pulsosAtivos = [];
 
   avaliacoes.forEach(d=>{
-    const s = d.classe;
-    if((s==="ok" && !fAdequado.checked) ||
-       (s==="alerta" && !fAlerta.checked) ||
-       (s==="atenção" && !fAtencao.checked) ||
-       (s==="critico" && !fCritico.checked)) return;
-
-    const marker = criarPonto(d);
+    const cor = cores[d.classe] || "#000";
+    const freq = frequencias[d.classe] || 3000;
+    const marker = L.circleMarker([d.lat,d.lng],{
+      radius:8, color:cor, fillColor:cor, fillOpacity:0.8
+    }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.classe}`);
     marker.addTo(camadaPontos);
 
-    if(mapaVivo){
-      // Aplicar classe CSS para piscar
-      const el = marker.getElement();
-      if(el) el.classList.add(classesPulse[s]);
-    }
+    let visivel = true;
+    const interval = setInterval(()=>{
+      if(visivel){
+        marker.setStyle({ fillOpacity:0, opacity:0 });
+      } else {
+        marker.setStyle({ fillOpacity:0.8, opacity:1 });
+      }
+      visivel = !visivel;
+    }, freq);
+    pulsosAtivos.push(interval);
   });
 }
 
-// Eventos checkbox
+// --- Atualizar pontos ---
+function atualizarPontos(){
+  camadaPontos.clearLayers();
+  pulsosAtivos.forEach(i => clearInterval(i));
+  pulsosAtivos = [];
+
+  if(document.getElementById("togglePulso").checked){
+    ativarPulso();
+  } else {
+    avaliacoes.forEach(d=>{
+      const s = d.classe;
+      if((s==="ok" && !fAdequado.checked) ||
+         (s==="alerta" && !fAlerta.checked) ||
+         (s==="atenção" && !fAtencao.checked) ||
+         (s==="critico" && !fCritico.checked)) return;
+      criarPonto(d).addTo(camadaPontos);
+    });
+  }
+}
+
+// --- Eventos checkbox ---
 document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso").forEach(el=>{
   el.addEventListener("change", atualizarPontos);
 });
+document.getElementById("toggleBairros").addEventListener("change", () => {
+  ativarLeituraPorBairros(avaliacoes);
+});
 
-// Inicialização
+// --- Inicialização ---
 await carregarAvaliacoes();
 atualizarPontos();
+
 </script>
 
-<script type="module" src="./mapabairros.js"></script>
 </body>
 </html>
