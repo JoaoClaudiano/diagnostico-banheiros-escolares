@@ -102,6 +102,11 @@ footer {
 </footer>
 
 <script type="module">
+  <!-- Colocar **após** o script que carrega os pontos das escolas e o mapa -->
+<script>
+// Expor avaliacoes globalmente para o módulo de bairros
+window.avaliacoes = avaliacoes; // avaliacoes já carregadas do Firebase no seu index
+</script>
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
