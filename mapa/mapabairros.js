@@ -88,7 +88,7 @@ function iniciarModuloBairros() {
   }
 
   // Carregamento do GeoJSON
-  fetch('./mapa/POLIGONAIS.geojson')
+  fetch('POLIGONAIS.geojson')
     .then(res => { if(!res.ok) throw new Error("Erro ao carregar GeoJSON"); return res.json(); })
     .then(geojson => {
       camadaGeoBairros = L.geoJSON(geojson, {
