@@ -25,7 +25,7 @@ function iniciarModuloBairros() {
       let escolasNoBairro = cacheEscolasBairro.get(feature.properties.nome);
       if(!escolasNoBairro) {
         escolasNoBairro = avaliacoes.filter(a => {
-          const pt = turf.point([a.lng, a.lat]); // Firebase: lat,lng
+          const pt = turf.point([a.lng, a.lat]); // Firebase: lat,lng invertido
           return turf.booleanPointInPolygon(pt, feature.geometry);
         });
         cacheEscolasBairro.set(feature.properties.nome, escolasNoBairro);
@@ -57,21 +57,22 @@ function iniciarModuloBairros() {
       else if(perc("atencao") >= 50) classeDominante = "atencao";
       else if(perc("alerta") >= 50) classeDominante = "alerta";
       else if(perc("ok") >= 50) classeDominante = "ok";
-      // Fallback: se nenhuma atingiu 50%, pega a classe máxima presente
-      else {
+      else { // fallback: pega a classe máxima presente
         if(cont["critico"]>0) classeDominante="critico";
         else if(cont["atencao"]>0) classeDominante="atencao";
         else if(cont["alerta"]>0) classeDominante="alerta";
         else classeDominante="ok";
       }
 
-      // Última avaliação do bairro
-      let ultimaDataBairro = null;
-      if(escolasNoBairro.length > 0){
-        const timestamps = escolasNoBairro.map(e => e.createdAt?.toDate ? e.createdAt.toDate() : null).filter(d => d);
-        if(timestamps.length > 0){
-          const ult = new Date(Math.max.apply(null, timestamps));
-          ultimaDataBairro = ult.toLocaleDateString('pt-BR') + " " + ult.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      // Última data de avaliação do bairro
+      let ultimaDataBairro = "-";
+      if(total > 0){
+        const datas = escolasNoBairro
+          .map(e => e.createdAt?.toDate ? e.createdAt.toDate() : null)
+          .filter(d => d != null);
+        if(datas.length > 0){
+          const maisRecente = new Date(Math.max.apply(null, datas));
+          ultimaDataBairro = maisRecente.toLocaleDateString('pt-BR');
         }
       }
 
@@ -82,7 +83,7 @@ function iniciarModuloBairros() {
                 classeDominante === "alerta" ? "🟡 Atenção pontual." :
                 "🟢 Situação sob controle.";
 
-      // Aviso de situação crítica pontual (mesmo que menor que 50%)
+      // Aviso de situação crítica pontual
       if(existeCritico && classeDominante !== "critico") {
         obs += " ⚠️ Existe ao menos uma escola crítica neste bairro.";
       }
@@ -101,7 +102,7 @@ function iniciarModuloBairros() {
         <div style="font-size:13px; line-height:1.4; min-width:180px; position:relative;">
           <strong>${feature.properties.nome || "Bairro"}</strong><br>
           <small>${total} escolas monitoradas</small><br>
-          ${ultimaDataBairro ? `<small>Última avaliação: ${ultimaDataBairro}</small>` : ""}
+          <small>Última avaliação: ${ultimaDataBairro}</small>
           <hr style="margin:4px 0">
           ${total > 0 ? ["critico","atencao","alerta","ok"].map(c => `
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
