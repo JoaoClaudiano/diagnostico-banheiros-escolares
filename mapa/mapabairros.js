@@ -25,7 +25,8 @@ function iniciarModuloBairros() {
       let escolasNoBairro = cacheEscolasBairro.get(feature.properties.nome);
       if(!escolasNoBairro) {
         escolasNoBairro = avaliacoes.filter(a => {
-          const pt = turf.point([a.lng, a.lat]); // Ordem lng, lat para Turf.js
+          // Inverte lat/lng para Turf.js
+          const pt = turf.point([a.lng, a.lat]);
           return turf.booleanPointInPolygon(pt, feature.geometry);
         });
         cacheEscolasBairro.set(feature.properties.nome, escolasNoBairro);
@@ -67,11 +68,9 @@ function iniciarModuloBairros() {
         color: "#666"
       });
 
-      // Popup com botão X funcional
+      // Popup usando X nativo do Leaflet
       const html = `
-        <div style="font-size:13px; line-height:1.4; min-width:180px; position:relative;">
-          <button style="position:absolute; top:2px; right:2px; border:none; background:none; cursor:pointer; font-weight:bold;"
-            onclick="this.closest('.leaflet-popup-content')._popup._close()">✖</button>
+        <div style="font-size:13px; line-height:1.4; min-width:180px;">
           <strong>${feature.properties.nome || "Bairro"}</strong><br>
           <small>${total} escolas monitoradas</small>
           <hr style="margin:4px 0">
@@ -82,8 +81,8 @@ function iniciarModuloBairros() {
             </div>`).join("") : "Nenhuma escola ativa neste setor."}
           <div style="margin-top:6px; font-size:11px; border-top:1px solid #eee; padding-top:4px;"><em>${obs}</em></div>
         </div>`;
-
-      layer.bindPopup(html, { maxWidth: 250 });
+      
+      layer.bindPopup(html, { maxWidth: 250 }); // closeButton true por padrão
     });
   }
 
