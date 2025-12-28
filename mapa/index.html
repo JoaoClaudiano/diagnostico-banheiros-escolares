@@ -47,18 +47,9 @@ footer {
   z-index:999;
   font-size:13px;
 }
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
 
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-}
+.bola { width:12px; height:12px; border-radius:50%; }
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
@@ -78,8 +69,8 @@ footer {
 /* Overhanging tab legenda */
 .legenda-tab {
   position:absolute;
-  top:30%;
-  right:-240px; /* escondida inicialmente */
+  top:25%;
+  right:-260px;
   display:flex;
   align-items:flex-start;
   transition: right 0.4s ease;
@@ -93,16 +84,18 @@ footer {
   border-radius:8px;
   box-shadow:0 0 15px rgba(0,0,0,0.2);
   width:230px;
+  max-height: calc(100vh - 160px);
+  overflow-y:auto;
   font-size:13px;
   line-height:1.4;
   border:1px solid #ddd;
 }
 
-.legenda-mapa h4 { margin:0 0 6px 0; font-size:14px; }
+.legenda-mapa h4 { margin:0 0 6px 0; font-size:14px; display:flex; align-items:center; gap:6px; }
 
 .legenda-handle {
-  width:28px;
-  height:60px;
+  width:32px;
+  height:50px;
   background:#1f4fd8;
   color:#fff;
   font-size:18px;
@@ -116,12 +109,11 @@ footer {
   transition: transform 0.3s ease;
   user-select:none;
 }
-
 .legenda-handle.open { transform: rotate(180deg); }
 
 /* Mobile adjustments */
 @media (max-width:600px){
-  .legenda-tab { top:25%; }
+  .legenda-tab { top:20%; }
   .legenda-mapa { width:200px; font-size:12px; }
   .legenda-handle { width:28px; height:50px; font-size:16px; }
 }
@@ -208,7 +200,7 @@ async function carregarAvaliacoes(){
   });
   avaliacoes = Object.values(ultimos);
   window.avaliacoes = avaliacoes;
-  // Atualizar total de escolas e última avaliação
+
   const total = avaliacoes.length;
   const ultima = avaliacoes.map(a=>a.createdAt?.toDate? a.createdAt.toDate() : null)
                           .filter(d=>d).sort((a,b)=>b-a)[0];
