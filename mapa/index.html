@@ -71,70 +71,74 @@ footer {
 .pulse-ok { animation: pulse-ok 4s infinite; }
 .pulse-alerta, .pulse-atencao { animation: pulse-alerta 3s infinite; }
 .pulse-critico { animation: pulse-critico 2s infinite; }
+@keyframes pulse-ok {0%,100%{opacity:0;}50%{opacity:0.8;}}
+@keyframes pulse-alerta {0%,100%{opacity:0;}50%{opacity:0.8;}}
+@keyframes pulse-atencao {0%,100%{opacity:0;}50%{opacity:0.8;}}
+@keyframes pulse-critico {0%,100%{opacity:0;}50%{opacity:0.8;}}
 
-@keyframes pulse-ok { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-@keyframes pulse-alerta { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-@keyframes pulse-atencao { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-@keyframes pulse-critico { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-
-/* Legenda lateral com botão à esquerda do título */
+/* Legenda lateral com slide animado */
 .legenda-mapa {
+  display:none;
+  position:absolute;
+  top:80px;
+  right:-240px; /* fora da tela inicialmente */
+  width:230px;
+  overflow:hidden;
   background: rgba(255,255,255,0.95);
-  padding: 12px;
-  line-height: 20px;
-  color: #333;
-  box-shadow: 0 0 15px rgba(0,0,0,0.2);
-  border-radius: 8px;
-  font-size: 13px;
-  border: 1px solid #ddd;
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  z-index: 1000;
-  max-width: 260px;
-  transition: right 0.4s ease;
+  padding:10px 12px 12px 12px;
+  line-height:20px;
+  color:#333;
+  box-shadow:0 0 15px rgba(0,0,0,0.2);
+  border-radius:8px;
+  font-size:13px;
+  border:1px solid #ddd;
+  z-index:1000;
+  transition: all 0.4s ease;
 }
-.legenda-mapa.fechada { right: -240px; }
-
-.legenda-mapa .titulo {
+.legenda-mapa.open {
+  right:10px; /* entra na tela */
+}
+.legenda-mapa h4 {
+  margin:0 0 6px 0;
+  font-size:14px;
   display:flex;
   align-items:center;
-  justify-content: flex-start;
-  font-weight:bold;
-  margin-bottom: 8px;
-}
-.legenda-mapa button.toggle-legend {
-  margin-right: 6px;
-  cursor:pointer;
-  border:none;
-  background:#1f4fd8;
-  color:#fff;
-  font-size:16px;
-  border-radius:4px;
-  width:28px;
-  height:28px;
+  justify-content:flex-start;
+  gap:8px;
 }
 .legenda-mapa i {
-  width: 12px;
-  height: 12px;
-  float: left;
-  margin-right: 8px;
-  margin-top: 4px;
-  border-radius: 50%;
-  display: inline-block;
+  width:12px;
+  height:12px;
+  float:left;
+  margin-right:8px;
+  margin-top:4px;
+  border-radius:50%;
+  display:inline-block;
+  flex-shrink:0;
+}
+.legenda-toggle {
+  cursor:pointer;
+  font-weight:bold;
+  font-size:16px;
+  user-select:none;
+  padding:4px 8px;
+  border-radius:4px;
+  background:#ddd;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-@media (max-width: 600px) {
-  .legenda-mapa { font-size: 11px; padding: 8px; max-width: 200px; top: 40%; }
-  .legenda-mapa button.toggle-legend { width:32px; height:32px; font-size:18px; }
-  .legenda-mapa i { width:10px; height:10px; margin-top:3px; }
+/* Mobile adjustments */
+@media (max-width:600px){
+  .legenda-mapa { top:60px; font-size:12px; line-height:16px; width:200px; }
+  .legenda-mapa h4 { font-size:13px; }
+  .legenda-toggle { font-size:18px; padding:4px 8px; }
 }
 </style>
 </head>
 
 <body>
-
 <header>
   <span class="voltar" onclick="history.back()">←</span>
   <span>Mapa Sanitário das Escolas – CheckInfra</span>
@@ -155,28 +159,15 @@ footer {
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
 
-<!-- Legenda lateral -->
-<div id="legendaBairros" class="legenda-mapa fechada">
-  <div class="titulo">
-    <button class="toggle-legend">＞</button>
-    Status dos bairros
-  </div>
-  <div>
-    🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
-    🟠 Atenção: Unidade com tendência de degradação.<br>
-    🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
-    🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
-    <em>Observação metodológica: A classe dominante é definida quando ≥50% das escolas do bairro possuem a mesma criticidade. Caso contrário, prevalece a classe mais grave presente.</em>
-  </div>
-</div>
-
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Config Firebase
-const firebaseConfig = { apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0", authDomain: "checkinfra-adf3c.firebaseapp.com", projectId: "checkinfra-adf3c" };
+const firebaseConfig = {
+  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain: "checkinfra-adf3c.firebaseapp.com",
+  projectId: "checkinfra-adf3c"
+};
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -186,21 +177,16 @@ if (!window._checkinfraMap) {
   map = L.map("map").setView([-3.7319,-38.5267],12);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap" }).addTo(map);
   window._checkinfraMap = map;
-} else { map = window._checkinfraMap; }
+} else map = window._checkinfraMap;
 
-// Expor avaliacoes globalmente
+// Avaliações
 let avaliacoes = [];
 window.avaliacoes = avaliacoes;
-
-// Cores e classes
 const cores = { ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336" };
 const classesPulse = { ok:"pulse-ok", alerta:"pulse-alerta", atencao:"pulse-atencao", critico:"pulse-critico" };
 const classeMap = { ok:"ok", alerta:"alerta", atencao:"atencao", critico:"critico" };
-
-// Layer
 let camadaPontos = L.layerGroup().addTo(map);
 
-// Carregar avaliações
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
   const ultimos = {};
@@ -217,14 +203,12 @@ async function carregarAvaliacoes(){
   window.avaliacoes = avaliacoes;
 }
 
-// Criar ponto da escola
 function criarPonto(d){
   const s = classeMap[d.classe] || d.classe;
   const cor = cores[s] || "#000";
-  const nomeStatus = s === "ok" ? "Adequado" : s.charAt(0).toUpperCase() + s.slice(1);
-  const ultimaData = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString('pt-BR') : "-";
-
-  return L.circleMarker([d.lat,d.lng],{
+  const nomeStatus = s==="ok"?"Adequado":s.charAt(0).toUpperCase()+s.slice(1);
+  const ultimaData = d.createdAt?.toDate? d.createdAt.toDate().toLocaleDateString('pt-BR'):"-";
+  const marker = L.circleMarker([d.lat,d.lng],{
     radius:8, color:cor, fillColor:cor, fillOpacity:0.8
   }).bindPopup(`
     <strong>${d.escola}</strong><br>
@@ -232,23 +216,20 @@ function criarPonto(d){
     Pontuação: ${d.pontuacao || "-"}<br>
     Última avaliação: ${ultimaData}
   `);
+  return marker;
 }
 
-// Atualizar pontos
 function atualizarPontos(){
   camadaPontos.clearLayers();
   const mapaVivo = document.getElementById("togglePulso").checked;
-
   avaliacoes.forEach(d=>{
     const s = classeMap[d.classe] || d.classe;
     if((s==="ok" && !fAdequado.checked) ||
        (s==="alerta" && !fAlerta.checked) ||
        (s==="atencao" && !fAtencao.checked) ||
        (s==="critico" && !fCritico.checked)) return;
-
     const marker = criarPonto(d);
     marker.addTo(camadaPontos);
-
     if(mapaVivo){
       const el = marker.getElement();
       if(el) el.classList.add(classesPulse[s]);
@@ -256,28 +237,55 @@ function atualizarPontos(){
   });
 }
 
-// Eventos checkbox
 document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso").forEach(el=>{
   el.addEventListener("change", atualizarPontos);
 });
 
-// Inicialização
 await carregarAvaliacoes();
 atualizarPontos();
 
-// Toggle da legenda
-const legendaEl = document.getElementById("legendaBairros");
-const btnToggle = legendaEl.querySelector("button.toggle-legend");
-btnToggle.addEventListener("click", ()=>{
-  if(legendaEl.classList.contains("fechada")){
-    legendaEl.classList.remove("fechada");
-    btnToggle.textContent = "＜";
-  } else {
-    legendaEl.classList.add("fechada");
-    btnToggle.textContent = "＞";
+// Legenda bairros
+const legenda = L.control({ position:'topright' });
+legenda.onAdd = function(map){
+  const div = L.DomUtil.create('div','legenda-mapa');
+  div.id='legendaBairros';
+  div.innerHTML=`
+    <h4><span class="legenda-toggle">&lt;</span>Status dos bairros</h4>
+    <div style="margin-bottom:6px;">
+      🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
+      🟠 Atenção: Unidade com tendência de degradação.<br>
+      🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
+      🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
+      <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em>
+    </div>
+  `;
+  return div;
+};
+legenda.addTo(map);
+
+const toggleEl = document.querySelector('.legenda-toggle');
+toggleEl.addEventListener('click', ()=>{
+  const div = document.getElementById('legendaBairros');
+  if(div.classList.contains('open')){
+    div.classList.remove('open');
+    toggleEl.textContent='>';
+  }else{
+    div.classList.add('open');
+    toggleEl.textContent='<';
   }
 });
 
+document.getElementById("toggleBairros").addEventListener("change",function(){
+  const div = document.getElementById('legendaBairros');
+  if(this.checked){
+    div.style.display='block';
+    setTimeout(()=>div.classList.add('open'),10); // efeito slide
+    toggleEl.textContent='<';
+  }else{
+    div.classList.remove('open');
+    setTimeout(()=>div.style.display='none',400);
+  }
+});
 </script>
 
 <script src="./mapabairros.js"></script>
