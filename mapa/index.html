@@ -13,60 +13,60 @@
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
 
 header {
-  background:#1f4fd8;
-  color:#fff;
-  padding:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  position:sticky;
-  top:0;
-  z-index:1000;
+background:#1f4fd8;
+color:#fff;
+padding:14px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+position:sticky;
+top:0;
+z-index:1000;
 }
 
 header .voltar {
-  position:absolute;
-  left:14px;
-  cursor:pointer;
-  font-size:18px;
-  user-select:none;
+position:absolute;
+left:14px;
+cursor:pointer;
+font-size:18px;
+user-select:none;
 }
 
 footer {
-  background:#f4f6f8;
-  font-size:11px;
-  color:#555;
-  padding:8px;
-  text-align:center;
-  border-top:1px solid #ddd;
+background:#f4f6f8;
+font-size:11px;
+color:#555;
+padding:8px;
+text-align:center;
+border-top:1px solid #ddd;
 }
 
 .painel {
-  background:#fff;
-  padding:8px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-  border-bottom:1px solid #ddd;
-  position:sticky;
-  top:52px;
-  z-index:999;
-  font-size:13px;
+background:#fff;
+padding:8px;
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+justify-content:center;
+border-bottom:1px solid #ddd;
+position:sticky;
+top:52px;
+z-index:999;
+font-size:13px;
 }
 
 .painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
+display:flex;
+align-items:center;
+gap:4px;
+cursor:pointer;
 }
 
 .bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
+width:12px;
+height:12px;
+border-radius:50%;
 }
 
 .verde { background:#4CAF50; }
@@ -75,24 +75,39 @@ footer {
 .vermelho { background:#F44336; }
 
 #map {
-  height: calc(100vh - 160px);
+height: calc(100vh - 160px);
 }
 
-/* Pulso de aparecimento/desaparecimento */
+/* =================================================
+PULSO — DIVICON
+================================================= */
+.pulse-wrapper {
+width: 14px;
+height: 14px;
+}
+
 .pulse {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  opacity: 0;
-  animation-name: pulseFade;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+width: 14px;
+height: 14px;
+border-radius: 50%;
+opacity: 0.7;
+animation-name: pulseFade;
+animation-timing-function: ease-out;
+animation-iteration-count: infinite;
 }
 
 @keyframes pulseFade {
-  0% { opacity:0; transform: scale(1); }
-  50% { opacity:0.8; transform: scale(1.5); }
-  100% { opacity:0; transform: scale(1); }
+0% {
+transform: scale(1);
+opacity: 0.8;
+}
+70% {
+transform: scale(2.2);
+opacity: 0;
+}
+100% {
+opacity: 0;
+}
 }
 </style>
 </head>
@@ -100,123 +115,144 @@ footer {
 <body>
 
 <header>
-  <span class="voltar" onclick="history.back()">←</span>
-  <span>Mapa Sanitário das Escolas – CheckInfra</span>
+<span class="voltar" onclick="history.back()">←</span>
+<span>Mapa Sanitário das Escolas – CheckInfra</span>
 </header>
 
 <div class="painel">
-  <label><input type="checkbox" id="fAdequado" checked><span class="bola verde"></span>Adequado</label>
-  <label><input type="checkbox" id="fAlerta" checked><span class="bola amarelo"></span>Alerta</label>
-  <label><input type="checkbox" id="fAtencao" checked><span class="bola laranja"></span>Atenção</label>
-  <label><input type="checkbox" id="fCritico" checked><span class="bola vermelho"></span>Crítico</label>
-  <label><input type="checkbox" id="togglePulso" checked>Mapa vivo</label>
-  <label><input type="checkbox" id="toggleBairros">Leitura por bairro</label>
+<label><input type="checkbox" id="fAdequado" checked><span class="bola verde"></span>Adequado</label>
+<label><input type="checkbox" id="fAlerta" checked><span class="bola amarelo"></span>Alerta</label>
+<label><input type="checkbox" id="fAtencao" checked><span class="bola laranja"></span>Atenção</label>
+<label><input type="checkbox" id="fCritico" checked><span class="bola vermelho"></span>Crítico</label>
+<label><input type="checkbox" id="togglePulso" checked>Mapa vivo</label>
+<label><input type="checkbox" id="toggleBairros">Leitura por bairro</label>
 </div>
 
 <div id="map"></div>
 
 <footer>
-  Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
+Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
 
 <script type="module">
+// ========================================
+// CONFIGURAÇÕES MAPA E FIREBASE
+// ========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
+apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+authDomain: "checkinfra-adf3c.firebaseapp.com",
+projectId: "checkinfra-adf3c"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Mapa
+// Inicializa mapa
 const map = L.map("map").setView([-3.7319,-38.5267],12);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap"}).addTo(map);
 
-// Variáveis
-let avaliacoes = [];
+// Camadas
 let camadaPontos = L.layerGroup().addTo(map);
 let camadaPulsos = L.layerGroup().addTo(map);
 
-// Cores por classe
+// Configurações
 const cores = { ok:"#4CAF50", alerta:"#FFD700", atenção:"#FF9800", critico:"#F44336" };
+const freq = { critico:1200, atenção:2400, alerta:3600, ok:4800 };
 
-// Carregar avaliações mais recentes por escola
+// Dados
+let avaliacoes = [];
+
+// ========================================
+// CARREGAR AVALIAÇÕES DO FIREBASE
+// ========================================
 async function carregarAvaliacoes(){
-  const snap = await getDocs(collection(db,"avaliacoes"));
-  const ultimos = {};
-  snap.forEach(doc=>{
-    const d = doc.data();
-    if(d.lat && d.lng && d.classe){
-      const escola = d.escola;
-      const ts = d.timestamp || 0;
-      if(!ultimos[escola] || ts > ultimos[escola].timestamp) ultimos[escola] = d;
-    }
-  });
-  avaliacoes = Object.values(ultimos);
+const snap = await getDocs(collection(db,"avaliacoes"));
+const ultimos = {};
+snap.forEach(doc=>{
+const d = doc.data();
+if(d.lat && d.lng && d.classe && d.timestamp){
+// manter apenas o mais recente por escola
+if(!ultimos[d.escola] || d.timestamp.seconds > ultimos[d.escola].timestamp.seconds){
+ultimos[d.escola] = d;
+}
+}
+});
+avaliacoes = Object.values(ultimos);
 }
 
-// Criar marcador estático
+// ========================================
+// FUNÇÕES DE PONTOS
+// ========================================
 function criarPonto(d){
-  const cor = cores[d.classe] || "#000";
-  return L.circleMarker([d.lat,d.lng],{
-    radius:8,
-    color: cor,
-    fillColor: cor,
-    fillOpacity:0.8
-  }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.classe}`);
+const cor = cores[d.classe] || "#000";
+const marker = L.circleMarker([d.lat,d.lng], {
+radius:8, color:cor, fillColor:cor, fillOpacity:0.8
+}).bindPopup(`<strong>${d.escola}</strong><br>Classe: ${d.classe}`);
+return marker;
 }
 
-// Criar marcador pulso
 function criarPulso(d){
-  const divIcon = L.divIcon({
-    className: "pulse",
-    iconSize: [14,14],
-    html:`<div style="background:${cores[d.classe]};width:14px;height:14px;border-radius:50%"></div>`
-  });
-  return L.marker([d.lat,d.lng],{icon:divIcon});
+const cor = cores[d.classe] || "#000";
+const pulseIcon = L.divIcon({
+className:"pulse",
+iconSize:[14,14],
+html:`<div style="background:${cor};width:14px;height:14px;border-radius:50%;"></div>`
+});
+return L.marker([d.lat,d.lng], {icon:pulseIcon});
 }
 
-// Atualizar pontos e pulsos
+// ========================================
+// ATUALIZAR PONTOS
+// ========================================
 function atualizarPontos(){
-  camadaPontos.clearLayers();
-  camadaPulsos.clearLayers();
+camadaPontos.clearLayers();
+camadaPulsos.clearLayers();
 
-  avaliacoes.forEach(d=>{
-    const s = d.classe;
-    if(
-      (s==="ok" && !fAdequado.checked) ||
-      (s==="alerta" && !fAlerta.checked) ||
-      (s==="atenção" && !fAtencao.checked) ||
-      (s==="critico" && !fCritico.checked)
-    ) return;
+avaliacoes.forEach(d=>{
+const s = d.classe;
+// checagem checkbox
+if(
+(s==="ok" && !fAdequado.checked) ||
+(s==="alerta" && !fAlerta.checked) ||
+(s==="atenção" && !fAtencao.checked) ||
+(s==="critico" && !fCritico.checked)
+) return;
 
-    // ponto estático
-    const marker = criarPonto(d);
-    marker.addTo(camadaPontos);
+// ponto estático
+criarPonto(d).addTo(camadaPontos);
 
-    // pulso
-    if(togglePulso.checked){
-      const pulseMarker = criarPulso(d);
-      pulseMarker.addTo(camadaPulsos);
-    }
-  });
+// pulse
+if(togglePulso.checked){
+criarPulso(d).addTo(camadaPulsos);
+}
+});
 }
 
-// Eventos
-[fAdequado,fAlerta,fAtencao,fCritico,togglePulso].forEach(el=>{
-  el.addEventListener("change", atualizarPontos);
+// ========================================
+// EVENTOS DE CHECKBOX
+// ========================================
+document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso").forEach(el=>{
+el.addEventListener("change", atualizarPontos);
 });
 
-// Inicialização
+// ========================================
+// INICIALIZAÇÃO
+// ========================================
 await carregarAvaliacoes();
+togglePulso.checked = true; // mapa vivo por padrão
+fAdequado.checked = true;
+fAlerta.checked = true;
+fAtencao.checked = true;
+fCritico.checked = true;
+
 atualizarPontos();
+
 </script>
 
-<script type="module" src="./mapabairros.js"></script>
+<script src="./mapabairros.js"></script>
 
 </body>
 </html>
