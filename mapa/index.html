@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mapa Sanitário – CheckInfra</title>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
@@ -48,18 +47,9 @@ footer {
   z-index:999;
   font-size:13px;
 }
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
 
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-}
+.bola { width:12px; height:12px; border-radius:50%; }
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
@@ -67,44 +57,85 @@ footer {
 
 #map { height: calc(100vh - 160px); }
 
-/* Pulsar suave com fade in/out */
-.pulse-ok { animation: pulse-ok 4s infinite; }
-.pulse-alerta, .pulse-atencao { animation: pulse-alerta 3s infinite; }
-.pulse-critico { animation: pulse-critico 2s infinite; }
-
-@keyframes pulse-ok { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-@keyframes pulse-alerta { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-@keyframes pulse-atencao { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-@keyframes pulse-critico { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
-
-/* Legenda flutuante */
-#legendaFlutuante {
-  position: absolute;
-  top: 50%; right: 20px;
+/* Legenda estilo base */
+.legenda-mapa {
+  position: fixed;
+  top: 50%;
+  right: 10px;
   transform: translateY(-50%);
-  width: 240px;
   background: rgba(255,255,255,0.95);
-  padding: 10px;
+  padding: 14px 16px 12px 16px;
   border-radius: 8px;
-  border: 1px solid #ddd;
   box-shadow: 0 0 15px rgba(0,0,0,0.2);
   font-size: 13px;
+  color: #333;
   z-index: 1000;
-  cursor: grab;
+  max-width: 240px;
+  transition: transform 0.3s ease, right 0.3s ease;
 }
-.legenda-mapa.fechada { height: 30px; overflow: hidden; width: 40px; border-radius: 20px; }
-.legenda-cabecalho { display: flex; align-items: center; gap:6px; user-select:none; }
-#toggleSeta { font-size:20px; cursor:pointer; display:inline-block; width:24px; text-align:center; }
-.legenda-conteudo { margin-top:6px; }
-.legenda-mapa.fechada .legenda-conteudo { display:none; }
+
+.legenda-mapa h3 {
+  margin:0;
+  font-size:14px;
+  font-weight:bold;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+}
+
+.legenda-mapa i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+#toggleLegenda {
+  cursor:pointer;
+  font-weight:bold;
+  background:#ddd;
+  border:none;
+  border-radius:4px;
+  width:28px;
+  height:28px;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-right:6px;
+}
+
+.legenda-oculta { display:none; }
+
+.legenda-btn-abrir {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  background: #1f4fd8;
+  color: #fff;
+  border-radius: 0 4px 4px 0;
+  width: 36px;
+  height: 36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  cursor:pointer;
+  z-index:1001;
+}
+
+/* Media query para celular */
 @media (max-width:600px){
-  #legendaFlutuante { top:40%; right:10px; width:200px; transform:translateY(-40%); }
+  .legenda-mapa { max-width: 180px; padding: 10px 12px; font-size:12px; }
+  #toggleLegenda { width:32px; height:32px; font-size:16px; }
+  .legenda-btn-abrir { width:32px; height:32px; font-size:16px; }
 }
 </style>
 </head>
 
 <body>
-
 <header>
   <span class="voltar" onclick="history.back()">←</span>
   <span>Mapa Sanitário das Escolas – CheckInfra</span>
@@ -115,196 +146,49 @@ footer {
   <label><input type="checkbox" id="fAlerta" checked><span class="bola amarelo"></span>Alerta</label>
   <label><input type="checkbox" id="fAtencao" checked><span class="bola laranja"></span>Atenção</label>
   <label><input type="checkbox" id="fCritico" checked><span class="bola vermelho"></span>Crítico</label>
-  <label><input type="checkbox" id="togglePulso" checked>Mapa vivo</label>
-  <label><input type="checkbox" id="toggleBairros">Leitura por bairro</label>
 </div>
 
 <div id="map"></div>
+
+<!-- Legenda -->
+<div class="legenda-mapa" id="legendaBairros">
+  <h3>
+    <button id="toggleLegenda">×</button>
+    Status dos bairros
+  </h3>
+  <div style="margin-top:8px; font-size:13px; line-height:1.4;">
+    <div>🔴 Crítico: Predomínio de falhas graves ou risco iminente.</div>
+    <div>🟠 Atenção: Unidade com tendência de degradação.</div>
+    <div>🟡 Alerta: Necessidade de manutenção preventiva e pontual.</div>
+    <div>🟢 Adequado: Padrão dentro das normas vigentes.</div>
+    <hr style="margin:6px 0">
+    <div style="font-size:12px; color:#555;">*Se ≥50% das escolas no bairro estão em determinada classe, essa será predominante.</div>
+  </div>
+</div>
+
+<!-- Botão de abrir legenda -->
+<div class="legenda-btn-abrir legenda-oculta" id="btnAbrirLegenda">▶</div>
 
 <footer>
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
 </footer>
 
-<!-- Legenda flutuante -->
-<div id="legendaFlutuante" class="legenda-mapa">
-  <div class="legenda-cabecalho" id="toggleLegenda">
-    <span id="toggleSeta">></span>
-    <strong>Status dos bairros</strong>
-  </div>
-  <div class="legenda-conteudo">
-    <div>
-      🔴 <strong>Crítico</strong>: Predomínio de falhas graves ou risco iminente.<br>
-      🟠 <strong>Atenção</strong>: Unidade com tendência de degradação.<br>
-      🟡 <strong>Alerta</strong>: Necessidade de manutenção preventiva e pontual.<br>
-      🟢 <strong>Adequado</strong>: Padrão dentro das normas vigentes.
-    </div>
-    <hr>
-    <div>
-      <strong>Metodologia resumida:</strong><br>
-      - Status dominante é definido pelo percentual de escolas no bairro.<br>
-      - Se ≥50% das escolas estão em uma classe, essa classe define o bairro.<br>
-      - Se nenhuma classe atingir 50%, o bairro assume a classe mais grave presente.<br>
-      - Presença de pelo menos uma escola crítica sinaliza alerta adicional.
-    </div>
-    <hr>
-    <div id="infoExtra">
-      <small>Total de escolas monitoradas: 0</small><br>
-      <small>Última avaliação geral: -</small>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// Config Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Inicializar mapa
-let map;
-if (!window._checkinfraMap) {
-  map = L.map("map").setView([-3.7319,-38.5267],12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap" }).addTo(map);
-  window._checkinfraMap = map;
-} else {
-  map = window._checkinfraMap;
-}
-
-// Expor avaliacoes globalmente
-let avaliacoes = [];
-window.avaliacoes = avaliacoes;
-
-// Cores e classes
-const cores = { ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336" };
-const classesPulse = { ok:"pulse-ok", alerta:"pulse-alerta", atencao:"pulse-atencao", critico:"pulse-critico" };
-const classeMap = { ok:"ok", alerta:"alerta", atencao:"atencao", critico:"critico" };
-
-// Layer
-let camadaPontos = L.layerGroup().addTo(map);
-
-// Carregar avaliações
-async function carregarAvaliacoes(){
-  const snap = await getDocs(collection(db,"avaliacoes"));
-  const ultimos = {};
-  snap.forEach(doc=>{
-    const d = doc.data();
-    if(d.lat && d.lng && d.classe){
-      const key = d.escola;
-      if(!ultimos[key] || (d.createdAt && d.createdAt.toMillis() > ultimos[key].createdAt?.toMillis())){
-        ultimos[key] = d;
-      }
-    }
-  });
-  avaliacoes = Object.values(ultimos);
-  window.avaliacoes = avaliacoes;
-}
-
-// Criar ponto da escola
-function criarPonto(d){
-  const s = classeMap[d.classe] || d.classe;
-  const cor = cores[s] || "#000";
-  const nomeStatus = s === "ok" ? "Adequado" : s.charAt(0).toUpperCase() + s.slice(1);
-  const ultimaData = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString('pt-BR') : "-";
-
-  const marker = L.circleMarker([d.lat,d.lng],{
-    radius:8, color:cor, fillColor:cor, fillOpacity:0.8
-  }).bindPopup(`
-    <strong>${d.escola}</strong><br>
-    Status: ${nomeStatus}<br>
-    Pontuação: ${d.pontuacao || "-"}<br>
-    Última avaliação: ${ultimaData}
-  `);
-  return marker;
-}
-
-// Atualizar pontos
-function atualizarPontos(){
-  camadaPontos.clearLayers();
-  const mapaVivo = document.getElementById("togglePulso").checked;
-
-  avaliacoes.forEach(d=>{
-    const s = classeMap[d.classe] || d.classe;
-    if((s==="ok" && !fAdequado.checked) ||
-       (s==="alerta" && !fAlerta.checked) ||
-       (s==="atencao" && !fAtencao.checked) ||
-       (s==="critico" && !fCritico.checked)) return;
-
-    const marker = criarPonto(d);
-    marker.addTo(camadaPontos);
-
-    if(mapaVivo){
-      const el = marker.getElement();
-      if(el) el.classList.add(classesPulse[s]);
-    }
-  });
-}
-
-// Eventos checkbox
-document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso").forEach(el=>{
-  el.addEventListener("change", atualizarPontos);
-});
-
-// Inicialização
-await carregarAvaliacoes();
-atualizarPontos();
-</script>
-
-<script src="./mapabairros.js"></script>
-
 <script>
-// Controle da legenda flutuante
-const legendaFlutuante = document.getElementById('legendaFlutuante');
-const toggleSeta = document.getElementById('toggleSeta');
-document.getElementById('toggleLegenda').addEventListener('click', () => {
-  legendaFlutuante.classList.toggle('fechada');
-  toggleSeta.innerHTML = legendaFlutuante.classList.contains('fechada') ? '>' : '<';
+const legenda = document.getElementById("legendaBairros");
+const btnAbrir = document.getElementById("btnAbrirLegenda");
+const toggleBtn = document.getElementById("toggleLegenda");
+
+// Fechar legenda
+toggleBtn.addEventListener("click", ()=>{
+  legenda.style.display = "none";
+  btnAbrir.classList.remove("legenda-oculta");
 });
 
-// Drag & drop touch + mouse
-let isDragging = false, offsetX=0, offsetY=0;
-function startDrag(e){
-  isDragging=true;
-  const rect = legendaFlutuante.getBoundingClientRect();
-  if(e.touches){
-    offsetX = e.touches[0].clientX - rect.left;
-    offsetY = e.touches[0].clientY - rect.top;
-  } else {
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-  }
-  legendaFlutuante.style.cursor='grabbing';
-}
-function onDrag(e){
-  if(!isDragging) return;
-  let x=0, y=0;
-  if(e.touches){
-    x = e.touches[0].clientX - offsetX;
-    y = e.touches[0].clientY - offsetY;
-  } else {
-    x = e.clientX - offsetX;
-    y = e.clientY - offsetY;
-  }
-  x = Math.max(0, Math.min(window.innerWidth - legendaFlutuante.offsetWidth, x));
-  y = Math.max(0, Math.min(window.innerHeight - legendaFlutuante.offsetHeight, y));
-  legendaFlutuante.style.left = x+'px';
-  legendaFlutuante.style.top = y+'px';
-}
-function endDrag(){ isDragging=false; legendaFlutuante.style.cursor='grab'; }
-
-legendaFlutuante.addEventListener('mousedown', startDrag);
-document.addEventListener('mousemove', onDrag);
-document.addEventListener('mouseup', endDrag);
-legendaFlutuante.addEventListener('touchstart', startDrag);
-document.addEventListener('touchmove', onDrag);
-document.addEventListener('touchend', endDrag);
+// Abrir legenda
+btnAbrir.addEventListener("click", ()=>{
+  legenda.style.display = "block";
+  btnAbrir.classList.add("legenda-oculta");
+});
 </script>
-
 </body>
 </html>
