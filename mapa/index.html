@@ -11,7 +11,6 @@
 
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
-
 header {
   background:#1f4fd8;
   color:#fff;
@@ -25,7 +24,6 @@ header {
   z-index:1000;
 }
 header .voltar { position:absolute; left:14px; cursor:pointer; font-size:18px; user-select:none; }
-
 footer {
   background:#f4f6f8;
   font-size:11px;
@@ -34,7 +32,6 @@ footer {
   text-align:center;
   border-top:1px solid #ddd;
 }
-
 .painel {
   background:#fff;
   padding:8px;
@@ -48,23 +45,12 @@ footer {
   z-index:999;
   font-size:13px;
 }
-.painel label {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
-
-.bola {
-  width:12px;
-  height:12px;
-  border-radius:50%;
-}
+.painel label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+.bola { width:12px; height:12px; border-radius:50%; }
 .verde { background:#4CAF50; }
 .amarelo { background:#FFD700; }
 .laranja { background:#FF9800; }
 .vermelho { background:#F44336; }
-
 #map { height: calc(100vh - 160px); }
 
 /* Pulsar suave */
@@ -81,11 +67,12 @@ footer {
   display:none;
   position:absolute;
   top:80px;
-  right:-260px;
-  width:240px;
-  overflow:hidden;
+  right:-250px; /* fora da tela inicialmente */
+  width:230px;
+  max-height:50%;
+  overflow-y:auto;
   background: rgba(255,255,255,0.95);
-  padding:12px;
+  padding:10px 12px 12px 12px;
   line-height:20px;
   color:#333;
   box-shadow:0 0 15px rgba(0,0,0,0.2);
@@ -95,21 +82,12 @@ footer {
   z-index:1000;
   transition: all 0.4s ease;
 }
-.legenda-mapa.open {
-  right:10px;
-}
-.legenda-mapa h4 {
-  margin:0 0 6px 0;
-  font-size:14px;
-  font-weight:bold;
-}
-
-/* Aba/orelha lateral esquerda */
+.legenda-mapa.open { right:10px; }
 .legenda-toggle-orelha {
   position:absolute;
-  left:-28px;
+  left:-30px;
   top:50%;
-  transform:translateY(-50%) rotate(0deg);
+  transform:translateY(-50%);
   width:28px;
   height:28px;
   background:#1f4fd8;
@@ -121,22 +99,20 @@ footer {
   cursor:pointer;
   font-weight:bold;
   user-select:none;
-  transition: transform 0.4s ease, left 0.4s ease;
+  transition: transform 0.4s ease;
 }
-.legenda-toggle-orelha.rotated {
-  transform:translateY(-50%) rotate(90deg);
-  left:-5px;
-}
+.legenda-toggle-orelha.rotating { transform:translateY(-50%) rotate(90deg); }
 
-/* Mobile adjustments */
+.legenda-mapa h4 { margin:0 0 6px 0; font-size:14px; font-weight:bold; }
+.legenda-mapa div { margin-bottom:6px; }
+
 @media (max-width:600px){
-  .legenda-mapa { top:70px; font-size:12px; line-height:16px; width:200px; }
+  .legenda-mapa { top:60px; font-size:12px; line-height:16px; width:200px; }
   .legenda-mapa h4 { font-size:13px; }
   .legenda-toggle-orelha { width:26px; height:26px; font-size:14px; }
 }
 </style>
 </head>
-
 <body>
 <header>
   <span class="voltar" onclick="history.back()">←</span>
@@ -162,11 +138,7 @@ footer {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
-  authDomain: "checkinfra-adf3c.firebaseapp.com",
-  projectId: "checkinfra-adf3c"
-};
+const firebaseConfig = { apiKey:"AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0", authDomain:"checkinfra-adf3c.firebaseapp.com", projectId:"checkinfra-adf3c" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -207,14 +179,8 @@ function criarPonto(d){
   const cor = cores[s] || "#000";
   const nomeStatus = s==="ok"?"Adequado":s.charAt(0).toUpperCase()+s.slice(1);
   const ultimaData = d.createdAt?.toDate? d.createdAt.toDate().toLocaleDateString('pt-BR'):"-";
-  const marker = L.circleMarker([d.lat,d.lng],{
-    radius:8, color:cor, fillColor:cor, fillOpacity:0.8
-  }).bindPopup(`
-    <strong>${d.escola}</strong><br>
-    Status: ${nomeStatus}<br>
-    Pontuação: ${d.pontuacao || "-"}<br>
-    Última avaliação: ${ultimaData}
-  `);
+  const marker = L.circleMarker([d.lat,d.lng],{ radius:8, color:cor, fillColor:cor, fillOpacity:0.8 })
+    .bindPopup(`<strong>${d.escola}</strong><br>Status: ${nomeStatus}<br>Pontuação: ${d.pontuacao || "-"}<br>Última avaliação: ${ultimaData}`);
   return marker;
 }
 
@@ -243,77 +209,68 @@ document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso"
 await carregarAvaliacoes();
 atualizarPontos();
 
-// --- Legenda bairros ---
-let legendaBairros = null;
-let orelha = null;
-
-function criarLegendaBairros(){
+// Legenda bairros
+let legendaBairros, orelha;
+function criarLegendaBairros() {
   if(legendaBairros) return;
-
   legendaBairros = L.DomUtil.create('div','legenda-mapa');
-  legendaBairros.id = 'legendaBairros';
+  legendaBairros.id='legendaBairros';
   legendaBairros.innerHTML=`
     <h4>Status dos bairros</h4>
-    <div style="margin-bottom:6px;">
+    <div>
       🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
       🟠 Atenção: Unidade com tendência de degradação.<br>
       🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
       🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
       <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em><br>
-      <hr>
-      <small>Total escolas monitoradas: <span id="totalEscolas">-</span></small><br>
-      <small>Última avaliação: <span id="ultimaAvaliacao">-</span></small>
+      <strong>Total escolas monitoradas:</strong> ${avaliacoes.length}<br>
+      <strong>Última avaliação:</strong> ${avaliacoes.map(a=>a.createdAt?.toDate?.()||0).sort((a,b)=>b-a)[0] ? avaliacoes.map(a=>a.createdAt?.toDate?.()).sort((a,b)=>b-a)[0].toLocaleDateString('pt-BR') : "-"}
     </div>
   `;
   map.getContainer().appendChild(legendaBairros);
   legendaBairros.style.display='none';
 
-  // Aba/orelha
+  // Orelha/aba
   orelha = document.createElement('div');
   orelha.className='legenda-toggle-orelha';
-  orelha.textContent='☰';
-  map.getContainer().appendChild(orelha);
+  orelha.innerHTML='&#9776;'; // ícone ≡
   orelha.style.display='none';
+  map.getContainer().appendChild(orelha);
 
-  orelha.addEventListener('click', ()=>{
+  orelha.addEventListener('click', ()=> {
     legendaBairros.classList.add('open');
-    orelha.classList.add('rotated');
-    setTimeout(()=>orelha.style.display='none',400);
+    orelha.style.display='none';
   });
 }
 
-function fecharLegenda(){
-  legendaBairros.classList.remove('open');
-  legendaBairros.style.display='block';
-  orelha.style.display='flex';
-  orelha.classList.remove('rotated');
+function ajustarAlturaLegenda() {
+  if(!legendaBairros || legendaBairros.style.display==='none') return;
+  const mapHeight = map.getSize().y;
+  let altura = mapHeight*0.5;
+  const zoom = map.getZoom();
+  altura = altura*(12/zoom);
+  altura = Math.max(Math.min(altura,mapHeight*0.7), mapHeight*0.3);
+  legendaBairros.style.maxHeight = altura+'px';
 }
 
-// Atualizar total geral e última avaliação
-function atualizarResumoBairros(){
-  if(!legendaBairros) return;
-  const total = avaliacoes.length;
-  document.getElementById('totalEscolas').textContent = total;
-  const datas = avaliacoes.map(a=>a.createdAt?.toDate?.()||null).filter(d=>d);
-  const ultima = datas.length? new Date(Math.max(...datas)).toLocaleDateString('pt-BR'):'-';
-  document.getElementById('ultimaAvaliacao').textContent = ultima;
-}
-
-// Toggle leitura por bairros
-document.getElementById("toggleBairros").addEventListener("change", function(){
+document.getElementById("toggleBairros").addEventListener("change",function(){
   if(this.checked){
     criarLegendaBairros();
     legendaBairros.style.display='block';
     legendaBairros.classList.add('open');
     orelha.style.display='none';
-    atualizarResumoBairros();
+    ajustarAlturaLegenda();
   } else {
-    if(legendaBairros) legendaBairros.style.display='none';
-    if(orelha) orelha.style.display='none';
+    if(legendaBairros){
+      legendaBairros.classList.remove('open');
+      setTimeout(()=>{ legendaBairros.style.display='none'; orelha.style.display='none'; },400);
+    }
   }
 });
-</script>
 
+map.on('zoomend', ajustarAlturaLegenda);
+
+</script>
 <script src="./mapabairros.js"></script>
 </body>
 </html>
