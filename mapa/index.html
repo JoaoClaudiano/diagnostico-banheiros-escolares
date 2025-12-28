@@ -76,39 +76,40 @@ footer {
 @keyframes pulse-atencao {0%,100%{opacity:0;}50%{opacity:0.8;}}
 @keyframes pulse-critico {0%,100%{opacity:0;}50%{opacity:0.8;}}
 
-/* LEGENDA OVERHANGING TAB */
+/* LEGENDA OVERHANGING TAB - AJUSTADA PARA ESCONDER TOTALMENTE */
 .legenda-wrapper {
   position: fixed;
   top: 50%;
-  right: -260px; /* Escondido para a direita */
+  right: -310px; /* Aumentado para garantir que suma totalmente */
   transform: translateY(-50%);
-  width: 250px;
+  width: 260px;
   max-height: 70vh;
   background: white;
   padding: 15px;
-  box-shadow: -4px 0 15px rgba(0,0,0,0.2);
   border-radius: 15px 0 0 15px;
   z-index: 2000;
-  transition: right 0.5s ease;
-  visibility: hidden; /* Invisível até ativar o checkbox */
+  transition: right 0.5s ease, box-shadow 0.5s ease;
+  visibility: hidden;
   border: 1px solid #ccc;
   border-right: none;
+  box-shadow: none;
 }
 
-/* Quando o checkbox ativa, a estrutura fica visível (mas ainda recolhida à direita) */
+/* Quando visível mas recolhida */
 .legenda-wrapper.visible {
   visibility: visible;
-  right: -250px; 
+  right: -261px; /* Deixa apenas a largura da borda/aba para fora */
 }
 
-/* Quando clicado na aba, ele desliza para a esquerda (mostra conteúdo) */
+/* Quando aberta (desliza para a tela) */
 .legenda-wrapper.open {
   right: 0 !important;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.2);
 }
 
 .legenda-tab {
   position: absolute;
-  left: -40px; /* Fica pendurado para fora */
+  left: -40px; 
   top: 20px;
   width: 40px;
   height: 50px;
@@ -120,16 +121,16 @@ footer {
   border-radius: 10px 0 0 10px;
   cursor: pointer;
   font-size: 20px;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
   user-select: none;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
 }
 
 .legenda-title { font-weight: bold; margin-bottom: 10px; color: #1f4fd8; border-bottom: 1px solid #eee; padding-bottom: 5px; }
 .legenda-content { font-size: 13px; line-height: 1.5; color: #444; }
 
 @media (max-width: 600px) {
-  .legenda-wrapper { width: 220px; right: -230px; }
-  .legenda-wrapper.visible { right: -220px; }
+  .legenda-wrapper { width: 230px; right: -280px; }
+  .legenda-wrapper.visible { right: -231px; }
 }
 </style>
 </head>
@@ -259,7 +260,6 @@ document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso"
 await carregarAvaliacoes();
 atualizarPontos();
 
-// LOGICA DA LEGENDA RETRÁTIL
 const legendaWrapper = document.getElementById("legendaWrapper");
 const toggleLegenda = document.getElementById("toggleLegenda");
 const checkBairros = document.getElementById("toggleBairros");
