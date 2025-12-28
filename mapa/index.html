@@ -76,6 +76,37 @@ footer {
 @keyframes pulse-alerta { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
 @keyframes pulse-atencao { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
 @keyframes pulse-critico { 0%,100% { opacity:0; } 50% { opacity:0.8; } }
+
+/* Estilo da legenda */
+.legenda-mapa {
+  display: none;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  line-height: 20px;
+  color: #333;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  position: absolute;
+  bottom: 30px; 
+  right: 10px;
+  z-index: 1000;
+  pointer-events: auto;
+}
+.legenda-mapa i {
+  width: 12px;
+  height: 12px;
+  float: left;
+  margin-right: 8px;
+  margin-top: 4px;
+  border-radius: 50%;
+  display: inline-block;
+}
+@media (max-width: 600px) {
+  .legenda-mapa { font-size: 11px; padding: 8px; line-height: 16px; max-width: 140px; bottom: 15px !important; right: 5px !important; }
+  .legenda-mapa i { width: 10px; height: 10px; margin-top: 3px; }
+}
 </style>
 </head>
 
@@ -125,18 +156,19 @@ if (!window._checkinfraMap) {
   map = window._checkinfraMap;
 }
 
+// Expor avaliacoes globalmente
+let avaliacoes = [];
+window.avaliacoes = avaliacoes;
+
 // Cores e classes
 const cores = { ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336" };
 const classesPulse = { ok:"pulse-ok", alerta:"pulse-alerta", atencao:"pulse-atencao", critico:"pulse-critico" };
-
-// Mapear classes do Firebase para CSS/cores
 const classeMap = { ok:"ok", alerta:"alerta", atencao:"atencao", critico:"critico" };
 
-// Layer e dados
+// Layer
 let camadaPontos = L.layerGroup().addTo(map);
-let avaliacoes = [];
 
-// Carregar avaliações recentes
+// Carregar avaliações
 async function carregarAvaliacoes(){
   const snap = await getDocs(collection(db,"avaliacoes"));
   const ultimos = {};
@@ -145,22 +177,29 @@ async function carregarAvaliacoes(){
     if(d.lat && d.lng && d.classe){
       const key = d.escola;
       if(!ultimos[key] || (d.createdAt && d.createdAt.toMillis() > ultimos[key].createdAt?.toMillis())){
-        // Adicionar data formatada
-        if(d.createdAt) d.data = d.createdAt.toDate().toLocaleDateString();
         ultimos[key] = d;
       }
     }
   });
   avaliacoes = Object.values(ultimos);
+  window.avaliacoes = avaliacoes;
 }
 
-// Criar ponto
+// Criar ponto da escola
 function criarPonto(d){
   const s = classeMap[d.classe] || d.classe;
   const cor = cores[s] || "#000";
+  const nomeStatus = s === "ok" ? "Adequado" : s.charAt(0).toUpperCase() + s.slice(1);
+  const ultimaData = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString('pt-BR') : "-";
+
   const marker = L.circleMarker([d.lat,d.lng],{
     radius:8, color:cor, fillColor:cor, fillOpacity:0.8
-  }).bindPopup(`<strong>${d.escola}</strong><br>Status: ${d.classe}<br>Pontuação: ${d.pontuacao||"-"}<br>Última avaliação: ${d.data||"-"}`);
+  }).bindPopup(`
+    <strong>${d.escola}</strong><br>
+    Status: ${nomeStatus}<br>
+    Pontuação: ${d.pontuacao || "-"}<br>
+    Última avaliação: ${ultimaData}
+  `);
   return marker;
 }
 
@@ -195,8 +234,21 @@ document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso"
 await carregarAvaliacoes();
 atualizarPontos();
 
-// Expor avaliacoes globalmente para o módulo de bairros
-window.avaliacoes = avaliacoes;
+// Legenda bairros
+const legenda = L.control({ position: 'bottomright' });
+legenda.onAdd = function(map) {
+  const div = L.DomUtil.create('div', 'legenda-mapa');
+  div.id = 'legendaBairros';
+  div.innerHTML = `
+    <div style="margin-bottom:5px;"><strong>Status das escolas</strong></div>
+    <i style="background:#4CAF50"></i> Adequado<br>
+    <i style="background:#FFD700"></i> Alerta<br>
+    <i style="background:#FF9800"></i> Atenção<br>
+    <i style="background:#F44336"></i> Crítico
+  `;
+  return div;
+};
+legenda.addTo(map);
 
 </script>
 
