@@ -10,7 +10,7 @@ const classeMap = { ok:"ok", alerta:"alerta", atencao:"atenção", critico:"crit
 let camadaGeoBairros = null;
 
 // Carregar GeoJSON dos bairros uma única vez
-fetch('./mapa/POLIGONAIS.geojson')
+fetch('POLIGONAIS.geojson')
   .then(res => res.json())
   .then(geojson => {
     camadaGeoBairros = L.geoJSON(geojson, {
