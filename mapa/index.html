@@ -12,99 +12,134 @@
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; }
 
-/* HEADER */
-header{
-  background:#1f4fd8;color:#fff;padding:14px;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;position:sticky;top:0;z-index:1000;
-}
-header .voltar{position:absolute;left:14px;cursor:pointer;font-size:18px}
-
-/* FOOTER */
-footer{
-  background:#f4f6f8;font-size:11px;color:#555;
-  padding:8px;text-align:center;border-top:1px solid #ddd;
-}
-
-/* PAINEL */
-.painel{
-  background:#fff;padding:8px;display:flex;flex-wrap:wrap;
-  gap:10px;justify-content:center;border-bottom:1px solid #ddd;
-  position:sticky;top:52px;z-index:999;font-size:13px;
-}
-.painel label{display:flex;align-items:center;gap:4px;cursor:pointer}
-
-/* BOLAS */
-.bola{width:12px;height:12px;border-radius:50%}
-.verde{background:#4CAF50}
-.amarelo{background:#FFD700}
-.laranja{background:#FF9800}
-.vermelho{background:#F44336}
-
-#map{height:calc(100vh - 160px)}
-
-/* PULSO */
-.pulse-ok{animation:pulse 4s infinite}
-.pulse-alerta,.pulse-atencao{animation:pulse 3s infinite}
-.pulse-critico{animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:0}50%{opacity:.8}}
-
-/* ========================= */
-/* LEGENDA – OPÇÃO A FINAL  */
-/* ========================= */
-
-.legenda-container{
-  position:fixed;
-  top:22%;
-  right:0;
-  z-index:1000;
-  display:none; /* controlado pelo checkbox */
-}
-
-/* ABA / ORELHA (sempre visível) */
-.legenda-handle{
-  position:absolute;
-  left:-26px;
-  top:16px;
-  width:26px;
-  height:40px;
+header {
+  background:#1f4fd8;
+  color:#fff;
+  padding:14px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:18px;
   font-weight:bold;
-  cursor:pointer;
-  user-select:none;
-  background:transparent;
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+header .voltar { position:absolute; left:14px; cursor:pointer; font-size:18px; user-select:none; }
+
+footer {
+  background:#f4f6f8;
+  font-size:11px;
+  color:#555;
+  padding:8px;
+  text-align:center;
+  border-top:1px solid #ddd;
 }
 
-/* CARD DA LEGENDA */
-.legenda-wrapper{
-  width:230px;
-  max-height:60vh;
-  background:rgba(255,255,255,.95);
-  padding:12px;
-  border-radius:8px;
-  border:1px solid #ddd;
-  box-shadow:0 0 15px rgba(0,0,0,.2);
+.painel {
+  background:#fff;
+  padding:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  border-bottom:1px solid #ddd;
+  position:sticky;
+  top:52px;
+  z-index:999;
   font-size:13px;
-  transform:translateX(100%);
-  transition:transform .4s ease;
-  overflow-y:auto;
+}
+.painel label {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
 }
 
-/* ABERTA */
-.legenda-container.open .legenda-wrapper{
-  transform:translateX(0);
+.bola {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+}
+.verde { background:#4CAF50; }
+.amarelo { background:#FFD700; }
+.laranja { background:#FF9800; }
+.vermelho { background:#F44336; }
+
+#map { height: calc(100vh - 160px); }
+
+/* Pulsar suave */
+.pulse-ok { animation: pulse-ok 4s infinite; }
+.pulse-alerta, .pulse-atencao { animation: pulse-alerta 3s infinite; }
+.pulse-critico { animation: pulse-critico 2s infinite; }
+@keyframes pulse-ok {0%,100%{opacity:0;}50%{opacity:0.8;}}
+@keyframes pulse-alerta {0%,100%{opacity:0;}50%{opacity:0.8;}}
+@keyframes pulse-atencao {0%,100%{opacity:0;}50%{opacity:0.8;}}
+@keyframes pulse-critico {0%,100%{opacity:0;}50%{opacity:0.8;}}
+
+/* Legenda lateral - Estilo Drawer com Aba */
+.legenda-wrapper {
+  position: fixed;
+  top: 50%;
+  right: -250px; /* Escondida por padrão */
+  transform: translateY(-50%);
+  width: 240px;
+  max-height: 70vh;
+  background: rgba(255, 255, 255, 0.98);
+  padding: 15px;
+  color: #333;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.15);
+  border-radius: 12px 0 0 12px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  border-right: none;
+  z-index: 1100;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: none; /* Controlado pelo checkbox leitura por bairro */
+  overflow-y: auto;
 }
 
-.legenda-title{
-  font-weight:bold;
-  margin-bottom:8px;
+.legenda-wrapper.open { right: 0; }
+
+.legenda-tab {
+  position: absolute;
+  left: -35px;
+  top: 20px;
+  width: 35px;
+  height: 45px;
+  background: #1f4fd8;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px 0 0 8px;
+  cursor: pointer;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  font-size: 18px;
+  font-weight: bold;
+  user-select: none;
 }
 
-@media(max-width:600px){
-  .legenda-wrapper{width:190px}
+.legenda-title { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  font-weight: bold; 
+  margin-bottom: 10px; 
+  color: #1f4fd8;
+}
+
+.legenda-content i {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:6px;
+  vertical-align:middle;
+}
+
+@media (max-width:600px){
+  .legenda-wrapper { width: 200px; font-size: 11px; right: -210px; }
+  .legenda-wrapper.open { right: 0; }
 }
 </style>
 </head>
@@ -126,17 +161,17 @@ footer{
 
 <div id="map"></div>
 
-<!-- LEGENDA -->
-<div id="legendaContainer" class="legenda-container">
-  <div class="legenda-handle" id="toggleLegenda">◀</div>
-
-  <div class="legenda-wrapper">
-    <div class="legenda-title">Status dos bairros</div>
-    🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
-    🟠 Atenção: Unidade com tendência de degradação.<br>
-    🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
-    🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
-    <em>Criticidade dominante ≥50% das escolas por bairro.</em><br><br>
+<div id="legendaWrapper" class="legenda-wrapper">
+  <div class="legenda-tab" id="toggleLegenda">‹</div>
+  <div class="legenda-title">
+    <span>Status dos bairros</span>
+  </div>
+  <div class="legenda-content">
+    🔴 Crítico: Predomínio de falhas graves.<br>
+    🟠 Atenção: Tendência de degradação.<br>
+    🟡 Alerta: Manutenção preventiva.<br>
+    🟢 Adequado: Dentro das normas.<br><br>
+    <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em><br><br>
     <small id="totalEscolas">Total escolas monitoradas: 0</small><br>
     <small id="ultimaAvaliacao">Última avaliação: -</small>
   </div>
@@ -158,30 +193,113 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ===== SEU SCRIPT ORIGINAL PERMANECE ===== */
-/* (pontos, mapa vivo, filtros, tudo intacto) */
+// Inicializar mapa
+let map;
+if (!window._checkinfraMap) {
+  map = L.map("map").setView([-3.7319,-38.5267],12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap" }).addTo(map);
+  window._checkinfraMap = map;
+} else map = window._checkinfraMap;
 
-/* CONTROLE DA LEGENDA */
-const legendaContainer = document.getElementById("legendaContainer");
-const toggleLegenda = document.getElementById("toggleLegenda");
-const toggleBairros = document.getElementById("toggleBairros");
+let avaliacoes = [];
+window.avaliacoes = avaliacoes;
+const cores = { ok:"#4CAF50", alerta:"#FFD700", atencao:"#FF9800", critico:"#F44336" };
+const classesPulse = { ok:"pulse-ok", alerta:"pulse-alerta", atencao:"pulse-atencao", critico:"pulse-critico" };
+const classeMap = { ok:"ok", alerta:"alerta", atencao:"atencao", critico:"critico" };
+let camadaPontos = L.layerGroup().addTo(map);
 
-toggleLegenda.onclick = ()=>{
-  legendaContainer.classList.toggle("open");
-  toggleLegenda.textContent =
-    legendaContainer.classList.contains("open") ? "◀" : "▶";
-};
+async function carregarAvaliacoes(){
+  const snap = await getDocs(collection(db,"avaliacoes"));
+  const ultimos = {};
+  snap.forEach(doc=>{
+    const d = doc.data();
+    if(d.lat && d.lng && d.classe){
+      const key = d.escola;
+      if(!ultimos[key] || (d.createdAt && d.createdAt.toMillis() > ultimos[key].createdAt?.toMillis())){
+        ultimos[key] = d;
+      }
+    }
+  });
+  avaliacoes = Object.values(ultimos);
+  window.avaliacoes = avaliacoes;
 
-toggleBairros.onchange = function(){
-  if(this.checked){
-    legendaContainer.style.display = "block";
-    legendaContainer.classList.remove("open");
-    toggleLegenda.textContent = "▶";
-  }else{
-    legendaContainer.style.display = "none";
-    legendaContainer.classList.remove("open");
+  // Atualizar indicadores da legenda
+  document.getElementById("totalEscolas").textContent = "Total escolas monitoradas: " + avaliacoes.length;
+  let datas = avaliacoes.map(a => a.createdAt?.toDate ? a.createdAt.toDate() : null).filter(d => d!=null);
+  if(datas.length>0){
+    const maisRecente = new Date(Math.max.apply(null,datas));
+    document.getElementById("ultimaAvaliacao").textContent = "Última avaliação: " + maisRecente.toLocaleDateString('pt-BR');
   }
-};
+}
+
+function criarPonto(d){
+  const s = classeMap[d.classe] || d.classe;
+  const cor = cores[s] || "#000";
+  const nomeStatus = s==="ok"?"Adequado":s.charAt(0).toUpperCase()+s.slice(1);
+  const ultimaData = d.createdAt?.toDate? d.createdAt.toDate().toLocaleDateString('pt-BR'):"-";
+  const marker = L.circleMarker([d.lat,d.lng],{
+    radius:8, color:cor, fillColor:cor, fillOpacity:0.8
+  }).bindPopup(`
+    <strong>${d.escola}</strong><br>
+    Status: ${nomeStatus}<br>
+    Pontuação: ${d.pontuacao || "-"}<br>
+    Última avaliação: ${ultimaData}
+  `);
+  return marker;
+}
+
+function atualizarPontos(){
+  camadaPontos.clearLayers();
+  const mapaVivo = document.getElementById("togglePulso").checked;
+  avaliacoes.forEach(d=>{
+    const s = classeMap[d.classe] || d.classe;
+    if((s==="ok" && !fAdequado.checked) ||
+       (s==="alerta" && !fAlerta.checked) ||
+       (s==="atencao" && !fAtencao.checked) ||
+       (s==="critico" && !fCritico.checked)) return;
+    const marker = criarPonto(d);
+    marker.addTo(camadaPontos);
+    if(mapaVivo){
+      const el = marker.getElement();
+      if(el) el.classList.add(classesPulse[s]);
+    }
+  });
+}
+
+document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso").forEach(el=>{
+  el.addEventListener("change", atualizarPontos);
+});
+
+await carregarAvaliacoes();
+atualizarPontos();
+
+// Lógica da Legenda com Aba Lateral
+const legendaWrapper = document.getElementById("legendaWrapper");
+const toggleLegenda = document.getElementById("toggleLegenda");
+const checkBairros = document.getElementById("toggleBairros");
+
+toggleLegenda.addEventListener("click", () => {
+  const isOpen = legendaWrapper.classList.toggle("open");
+  toggleLegenda.textContent = isOpen ? "›" : "‹";
+});
+
+checkBairros.addEventListener("change", function(){
+  if(this.checked){
+    legendaWrapper.style.display = 'block';
+    // Abre automaticamente ao ativar para mostrar ao usuário que a legenda surgiu
+    setTimeout(() => {
+        legendaWrapper.classList.add('open');
+        toggleLegenda.textContent = "›";
+    }, 10);
+  } else {
+    legendaWrapper.classList.remove('open');
+    toggleLegenda.textContent = "‹";
+    // Espera a transição acabar para dar display:none
+    setTimeout(() => {
+        if(!checkBairros.checked) legendaWrapper.style.display = 'none';
+    }, 400);
+  }
+});
 </script>
 
 <script src="./mapabairros.js"></script>
