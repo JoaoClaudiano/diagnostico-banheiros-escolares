@@ -78,14 +78,12 @@ footer {
 
 /* Legenda lateral com slide animado */
 .legenda-mapa {
-  display:none;
   position:absolute;
   top:80px;
-  right:-260px; /* fora da tela inicialmente */
-  width:240px;
-  overflow:hidden;
-  background: rgba(255,255,255,0.95);
-  padding:10px 12px 12px 12px;
+  right:10px;
+  width:260px;
+  background: rgba(255,255,255,0.97);
+  padding:10px 12px;
   line-height:20px;
   color:#333;
   box-shadow:0 0 15px rgba(0,0,0,0.2);
@@ -94,44 +92,48 @@ footer {
   border:1px solid #ddd;
   z-index:1000;
   transition: all 0.4s ease;
+  overflow:hidden;
 }
-.legenda-mapa.open { right:10px; }
 .legenda-mapa h4 {
   margin:0 0 6px 0;
   font-size:14px;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
   gap:8px;
-}
-.legenda-mapa i {
-  width:12px;
-  height:12px;
-  float:left;
-  margin-right:8px;
-  margin-top:4px;
-  border-radius:50%;
-  display:inline-block;
-  flex-shrink:0;
 }
 .legenda-toggle {
   cursor:pointer;
   font-weight:bold;
-  font-size:16px;
+  font-size:20px;
   user-select:none;
-  padding:4px 6px;
+  padding:6px 8px;
   border-radius:4px;
   background:#ddd;
   display:flex;
   align-items:center;
   justify-content:center;
+  flex-shrink:0;
+}
+#conteudoLegenda {
+  margin-top:6px;
+  opacity:1;
+  transition: opacity 0.3s ease;
+}
+.legenda-fechada {
+  width:50px;
+}
+.legenda-fechada #conteudoLegenda {
+  opacity:0;
+  height:0;
+  padding:0;
+  margin:0;
 }
 
 /* Mobile adjustments */
 @media (max-width:600px){
   .legenda-mapa { top:60px; font-size:12px; line-height:16px; width:200px; }
   .legenda-mapa h4 { font-size:13px; }
-  .legenda-toggle { font-size:18px; padding:4px 6px; }
+  .legenda-toggle { font-size:18px; padding:4px 8px; }
 }
 </style>
 </head>
@@ -152,6 +154,23 @@ footer {
 </div>
 
 <div id="map"></div>
+
+<!-- Legenda bairros -->
+<div id="legendaBairros" class="legenda-mapa">
+  <h4>
+    <span id="toggleLegenda" class="legenda-toggle">⯈</span>
+    Status dos bairros
+  </h4>
+  <div id="conteudoLegenda">
+    🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
+    🟠 Atenção: Unidade com tendência de degradação.<br>
+    🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
+    🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
+    <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em><br><br>
+    <small>Total de escolas monitoradas: <span id="totalEscolas">-</span></small><br>
+    <small>Última avaliação: <span id="ultimaAvaliacao">-</span></small>
+  </div>
+</div>
 
 <footer>
   Visualização territorial para apoio à decisão. Não substitui inspeção técnica presencial.
@@ -199,9 +218,16 @@ async function carregarAvaliacoes(){
   });
   avaliacoes = Object.values(ultimos);
   window.avaliacoes = avaliacoes;
+
+  // Atualiza total de escolas e última avaliação na legenda
+  document.getElementById('totalEscolas').textContent = avaliacoes.length;
+  const datas = avaliacoes.map(a=>a.createdAt?.toDate? a.createdAt.toDate() : null).filter(d=>d!=null);
+  if(datas.length>0){
+    const ultima = new Date(Math.max.apply(null,datas));
+    document.getElementById('ultimaAvaliacao').textContent = ultima.toLocaleDateString('pt-BR');
+  }
 }
 
-// Criar ponto da escola
 function criarPonto(d){
   const s = classeMap[d.classe] || d.classe;
   const cor = cores[s] || "#000";
@@ -243,55 +269,32 @@ document.querySelectorAll("#fAdequado,#fAlerta,#fAtencao,#fCritico,#togglePulso"
 await carregarAvaliacoes();
 atualizarPontos();
 
-// Legenda bairros
-const legenda = L.control({ position:'topright' });
-legenda.onAdd = function(map){
-  const div = L.DomUtil.create('div','legenda-mapa');
-  div.id='legendaBairros';
-  const totalEscolas = avaliacoes.length;
-  const ultimaDataGeral = avaliacoes
-    .map(a=>a.createdAt?.toDate?.() ?? null)
-    .filter(d=>d!=null)
-    .sort((a,b)=>b-a)[0];
-  const ultimaDataStr = ultimaDataGeral ? ultimaDataGeral.toLocaleDateString('pt-BR') : "-";
-  div.innerHTML=`
-    <h4><span class="legenda-toggle">▸</span>Status dos bairros</h4>
-    <div style="margin-bottom:6px;">
-      🔴 Crítico: Predomínio de falhas graves ou risco iminente.<br>
-      🟠 Atenção: Unidade com tendência de degradação.<br>
-      🟡 Alerta: Necessidade de manutenção preventiva e pontual.<br>
-      🟢 Adequado: Padrão dentro das normas vigentes.<br><br>
-      <em>Criticidade dominante >=50% das escolas por bairro. Caso contrário, mostra a classe máxima presente.</em><br><br>
-      <strong>Total de escolas monitoradas:</strong> ${totalEscolas}<br>
-      <strong>Última avaliação:</strong> ${ultimaDataStr}
-    </div>
-  `;
-  return div;
-};
-legenda.addTo(map);
+// Legenda toggle
+const legendaBairrosEl = document.getElementById('legendaBairros');
+const toggleBtn = document.getElementById('toggleLegenda');
 
-const toggleEl = document.querySelector('.legenda-toggle');
-toggleEl.addEventListener('click', ()=>{
-  const div = document.getElementById('legendaBairros');
-  if(div.classList.contains('open')){
-    div.classList.remove('open');
-    toggleEl.textContent='▸'; // ícone fechar
-  }else{
-    div.classList.add('open');
-    toggleEl.textContent='◂'; // ícone abrir
+function atualizarToggleIcon() {
+  if(legendaBairrosEl.classList.contains('legenda-fechada')){
+    toggleBtn.textContent = '⯈';
+  } else {
+    toggleBtn.textContent = '⯇';
   }
+}
+
+toggleBtn.addEventListener('click', ()=>{
+  legendaBairrosEl.classList.toggle('legenda-fechada');
+  atualizarToggleIcon();
 });
 
-document.getElementById("toggleBairros").addEventListener("change",function(){
-  const div = document.getElementById('legendaBairros');
+atualizarToggleIcon();
+
+document.getElementById("toggleBairros").addEventListener("change", function(){
   if(this.checked){
-    div.style.display='block';
-    setTimeout(()=>div.classList.add('open'),10);
-    toggleEl.textContent='◂';
-  }else{
-    div.classList.remove('open');
-    setTimeout(()=>div.style.display='none',400);
-    toggleEl.textContent='▸';
+    legendaBairrosEl.style.display = 'block';
+    legendaBairrosEl.classList.remove('legenda-fechada');
+    atualizarToggleIcon();
+  } else {
+    legendaBairrosEl.style.display = 'none';
   }
 });
 </script>
