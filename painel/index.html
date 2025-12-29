@@ -12,8 +12,18 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
-/* RESET & BODY - Importante: margin e padding 0 */
-html, body { margin:0; padding:0; width:100%; overflow-x:hidden; font-family: Arial; background:#f4f6f8; min-height:100vh; display:flex; flex-direction:column; }
+/* RESET & BODY */
+html, body { 
+    margin:0; 
+    padding:0; 
+    width:100%; 
+    overflow-x:hidden; 
+    font-family: Arial; 
+    background:#f4f6f8; 
+    min-height:100vh; 
+    display:flex; 
+    flex-direction:column; 
+}
 
 /* HEADER */
 header { background:#1f4fd8; color:#fff; display:flex; align-items:center; justify-content:center; padding:14px 20px; position:relative; width:100%; box-sizing:border-box; }
@@ -32,7 +42,7 @@ header button.menu { right:10px; }
 /* MAIN CONTENT */
 .main { margin:20px auto; padding:0 20px; max-width:1200px; flex:1; box-sizing:border-box; }
 
-/* CARDS, GRID, KPI (Mantidos iguais) */
+/* CARDS & GRIDS */
 .card { background:#fff; margin:20px 0; padding:20px; border-radius:10px; box-sizing:border-box; }
 .grid { display:grid; gap:16px; }
 @media(min-width:1024px){
@@ -58,51 +68,56 @@ th { background:#f4f6f8; }
 
 button { padding:10px 14px; background:#1f4fd8; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-right:8px; }
 
-/* TABS e MODAL (Mantidos iguais) */
+/* TABS */
 .tabs { display:flex; gap:10px; margin-bottom:12px; flex-wrap: wrap; }
 .tab { padding:8px 16px; background:#e0e0e0; border-radius:6px; cursor:pointer; }
 .tab.active { background:#1f4fd8; color:#fff; }
+
+/* MODAL */
 .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:2000; }
 .modal-content { background:#fff; padding:20px; border-radius:10px; max-width:500px; }
 
-/* FOOTER CORRIGIDO - LARGURA TOTAL */
+/* FOOTER REFORMULADO (Borda a borda + Estilo Original) */
 footer {
-  background: #1f4fd8;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 30px 20px;
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: auto; /* Empurra para o fim */
+    background: #1f4fd8;
+    color: #fff;
+    text-align: center;
+    padding: 25px 20px;
+    font-size: 12px;
+    line-height: 1.6;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: auto;
 }
 
-footer .footer-links {
-  margin-bottom: 15px;
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
+footer div.container-footer {
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 footer a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: bold;
+    color: #fff;
+    text-decoration: underline;
 }
 
-footer a:hover {
-  text-decoration: underline;
+footer p.links-originais {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 10px 0;
 }
 
-footer p {
-  margin: 4px 0;
-  font-size: 12px;
-  opacity: 0.8;
-  text-align: center;
+footer img {
+    max-width: 90px;
+    width: 40%;
+    margin-bottom: 10px;
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+    footer p { font-size: 10px; }
+    footer img { width: 60%; }
 }
 </style>
 </head>
@@ -135,11 +150,13 @@ footer p {
       <div class="tab" onclick="mostrarAba('historico')">Histórico</div>
     </div>
     <div id="aba-ranking">
-      <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button><br><br>
+      <button onclick="exportarXLSX()">⬇️ Baixar Ranking</button>
+      <br><br>
       <table><thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th></tr></thead><tbody id="tabelaRanking"></tbody></table>
     </div>
     <div id="aba-historico" style="display:none;">
-      <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button><br><br>
+      <button onclick="exportarHistorico()">⬇️ Baixar Histórico</button>
+      <br><br>
       <table><thead><tr><th>#</th><th>Escola</th><th>Status</th><th>IPT</th><th>Data</th></tr></thead><tbody id="tabelaHistorico"></tbody></table>
     </div>
   </div>
@@ -162,14 +179,17 @@ footer p {
 </div>
 
 <footer>
-  <div class="footer-links">
-    <a href="../pages/sobre.html">Sobre</a>
-    <a href="../pages/contato.html">Contato</a>
-    <a href="../pages/politica-privacidade.html">Privacidade</a>
-    <a href="../pages/termos-de-uso.html">Termos</a>
-  </div>
-  <p>© 2026 CheckInfra — Projeto acadêmico e tecnológico</p>
-  <p>Código licenciado sob MIT License</p>
+  <div class="container-footer">
+    <p>© 2026 CheckInfra — Projeto acadêmico e tecnológico — Código licenciado sob MIT License</p>
+    
+    <p class="links-originais">
+      <a href="../pages/sobre.html">Sobre</a> |
+      <a href="../pages/contato.html">Contato</a> |
+      <a href="../pages/politica-privacidade.html">Política de Privacidade</a> |
+      <a href="../pages/termos-de-uso.html">Termos de Uso</a>
+    </p>
+
+    </div>
 </footer>
 
 <script src="painel.js"></script>
