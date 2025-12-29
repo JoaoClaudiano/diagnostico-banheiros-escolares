@@ -13,7 +13,7 @@
       color: #333;
     }
 
-    /* Header */
+    /* Header padrão */
     .header {
       background: #1f4fd8;
       color: #fff;
@@ -62,7 +62,25 @@
       margin-bottom: 16px;
     }
 
-    /* Boxes */
+    ul {
+      padding-left: 20px;
+    }
+
+    ul li {
+      margin-bottom: 10px;
+      position: relative;
+      padding-left: 14px;
+    }
+
+    ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #1f4fd8;
+      font-weight: bold;
+    }
+
+    /* Cards / Boxes */
     .box {
       background: #ffffff;
       padding: 22px 20px;
@@ -89,59 +107,40 @@
       content: "📧";
     }
 
-    /* Footer */
+    a.internal-link {
+      color: #1f4fd8;
+      text-decoration: none;
+    }
+
+    a.internal-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer azul padrão */
     footer {
+      background: #1f4fd8;
+      color: #fff;
       text-align: center;
-      font-size: 13px;
-      color: #666;
-      margin: 50px 0;
+      padding: 20px;
       line-height: 1.5;
     }
 
     footer a {
-      color: #1f4fd8;
-      text-decoration: none;
+      color: #fff;
+      text-decoration: underline;
       margin: 0 8px;
     }
 
     footer a:hover {
-      text-decoration: underline;
+      opacity: 0.8;
     }
 
-    /* Lista de objetivos */
-    ul {
-      padding-left: 20px;
-    }
-
-    ul li {
-      margin-bottom: 10px;
-      position: relative;
-      padding-left: 14px;
-    }
-
-    ul li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      color: #1f4fd8;
-      font-weight: bold;
-    }
-
-    /* Links internos */
-    .internal-link {
-      color: #1f4fd8;
-      text-decoration: none;
-    }
-
-    .internal-link:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 
 <body>
 
-  <!-- Header -->
+  <!-- Header padrão -->
   <header class="header">
     <a href="../index.html">← Voltar</a>
     <div class="header-title">Contato Institucional</div>
@@ -189,7 +188,7 @@
 
   </main>
 
-  <!-- Footer -->
+  <!-- Footer azul padrão -->
   <footer>
     © 2026 CheckInfra — Projeto acadêmico e tecnológico<br>
     <a href="../index.html">Página inicial</a> |
