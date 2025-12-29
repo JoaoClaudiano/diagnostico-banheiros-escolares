@@ -1588,9 +1588,9 @@ body.dark-theme ::-webkit-scrollbar-track {
     }
     
     .nav-tabs {
-        position: sticky;
+        position: static;
         top: 0;
-        z-index: 998;
+        z-index: auto;
         background: white;
         margin-top: 0;
         border-radius: 0 0 16px 16px;
