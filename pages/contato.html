@@ -13,33 +13,54 @@
       color: #333;
     }
 
+    /* Header */
     .header {
       background: #1f4fd8;
       color: #fff;
       padding: 20px;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
 
+    .header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .header a:hover {
+      text-decoration: underline;
+    }
+
+    .header-title {
+      font-weight: bold;
+      font-size: 22px;
+    }
+
+    /* Container */
     .container {
       max-width: 900px;
       margin: 40px auto;
       padding: 0 20px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     h1, h2 {
       color: #1f4fd8;
+      margin-top: 0;
     }
 
     p {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
+    /* Boxes */
     .box {
       background: #ffffff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       margin-top: 20px;
     }
 
@@ -49,19 +70,51 @@
       margin-top: 10px;
     }
 
+    /* Footer */
     footer {
       text-align: center;
-      font-size: 12px;
+      font-size: 13px;
       color: #666;
       margin: 40px 0;
+      line-height: 1.5;
     }
 
-    a {
+    footer a {
+      color: #1f4fd8;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Lista de objetivos */
+    ul {
+      padding-left: 20px;
+    }
+
+    ul li {
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 12px;
+    }
+
+    ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #1f4fd8;
+      font-weight: bold;
+    }
+
+    /* Links internos */
+    .internal-link {
       color: #1f4fd8;
       text-decoration: none;
     }
 
-    a:hover {
+    .internal-link:hover {
       text-decoration: underline;
     }
   </style>
@@ -69,70 +122,59 @@
 
 <body>
 
+  <!-- Header -->
   <header class="header">
-    <strong>CheckInfra</strong><br>
-    Contato Institucional
+    <a href="./index.html">← Voltar</a>
+    <div class="header-title">Contato Institucional</div>
   </header>
 
+  <!-- Conteúdo principal -->
   <main class="container">
 
-    <h1>Contato Institucional</h1>
+    <h1>Entre em contato com o CheckInfra</h1>
 
     <p>
       O <strong>CheckInfra</strong> é uma ferramenta de diagnóstico sanitário
-      desenvolvida com foco no apoio à gestão da infraestrutura escolar,
-      voltada a instituições públicas e privadas.
+      desenvolvida para apoiar a gestão da infraestrutura escolar, voltada a instituições públicas e privadas.
     </p>
 
     <p>
-      Esta página tem caráter <strong>institucional</strong> e destina-se
-      a contatos relacionados a:
+      Esta página tem caráter <strong>institucional</strong> e é indicada para contatos relacionados a:
     </p>
 
     <ul>
       <li>Parcerias institucionais;</li>
       <li>Apresentação do projeto a prefeituras e secretarias;</li>
       <li>Uso do CheckInfra em contextos educacionais;</li>
-      <li>Esclarecimentos técnicos sobre a metodologia.</li>
+      <li>Esclarecimentos técnicos sobre metodologia e índices aplicados.</li>
     </ul>
 
     <div class="box">
       <h2>Canal de contato</h2>
-
-      <p>
-        Para assuntos institucionais, entre em contato pelo e-mail:
-      </p>
-
-      <p class="email">
-        📧 jooclaudiano@gmail.com
-      </p>
-
+      <p>Para assuntos institucionais, envie uma mensagem para o e-mail:</p>
+      <p class="email">jooclaudiano@gmail.com</p>
       <p style="font-size: 13px; color: #666;">
-        Mensagens são respondidas conforme disponibilidade da equipe responsável
-        pelo projeto.
+        Responderemos o contato conforme disponibilidade da equipe do projeto.
       </p>
     </div>
 
     <div class="box">
-      <h2>Natureza do projeto</h2>
-
+      <h2>Sobre o projeto</h2>
       <p>
-        O CheckInfra é um projeto de caráter técnico e acadêmico,
-        atualmente em fase de validação e aprimoramento.
-      </p>
-
-      <p>
-        O sistema não substitui inspeções técnicas,
-        laudos profissionais ou pareceres de engenharia,
-        atuando como ferramenta de apoio à tomada de decisão.
+        O CheckInfra é um projeto técnico e acadêmico, atualmente em fase de validação e aprimoramento.
+        A ferramenta auxilia a tomada de decisão, mas não substitui inspeções técnicas, laudos ou pareceres profissionais.
       </p>
     </div>
 
   </main>
 
+  <!-- Footer -->
   <footer>
-    © 2025 CheckInfra — Projeto acadêmico e tecnológico<br>
-    <a href="./index.html">Voltar para o site</a>
+    © 2026 CheckInfra — Projeto acadêmico e tecnológico<br>
+    <a href="../index.html">Página inicial</a> |
+    <a href="../pages/sobre.html">Sobre</a> |
+    <a href="../pages/politica-privacidade.html">Política de Privacidade</a> |
+    <a href="../pages/termos-de-uso.html">Termos de Uso</a>
   </footer>
 
 </body>
