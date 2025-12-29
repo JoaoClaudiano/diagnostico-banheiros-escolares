@@ -1047,14 +1047,16 @@ body.dark-theme .flow-step::after {
 }
 
 /* FOOTER */
+/* Substitua o footer atual por: */
 footer {
     text-align: center;
     padding: 2.5rem;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     margin-top: 4rem;
+    box-shadow: 0 -8px 25px rgba(31, 79, 216, 0.3);
 }
 
 .footer-links {
