@@ -32,6 +32,7 @@ form.addEventListener("submit", async (e) => {
   submitBtn.textContent = "Enviando…";
 
   const data = new FormData(form);
+  
 
   try {
     const res = await fetch("https://formspree.io/f/xdaobedn", {
