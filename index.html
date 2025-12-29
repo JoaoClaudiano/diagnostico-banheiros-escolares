@@ -331,94 +331,19 @@
 </footer>
 
 <!-- FEEDBACK MVP -->
-<div id="feedback-tab" title="Enviar feedback do projeto">
-  💬 Feedback
-</div>
+<link rel="stylesheet" href="./feedback/feedback.css">
 
-<div id="feedback-panel">
-  <h3>Feedback do Projeto</h3>
-
-  <p class="feedback-text">
-    O CheckInfra está em fase de testes e aprimoramento.
-    Sua avaliação contribui para a melhoria da metodologia
-    e da experiência do sistema.
-  </p>
-
-  <div class="feedback-rating">
-    <span data-value="Excelente" title="Excelente">😍</span>
-    <span data-value="Boa" title="Boa">🙂</span>
-    <span data-value="Regular" title="Regular">😐</span>
-    <span data-value="Ruim" title="Ruim">😕</span>
-    <span data-value="Muito ruim" title="Muito ruim">😞</span>
-  </div>
-
-  <textarea
-    id="feedback-textarea"
-    placeholder="Descreva sua experiência, sugestões ou observações técnicas (opcional)...">
-  </textarea>
-
-  <button onclick="enviarFeedback()">Enviar feedback</button>
-
-  <div id="feedback-status"></div>
-</div>
+<div id="feedback-container"></div>
 
 <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script src="./feedback/feedback.js"></script>
 
 <script>
-  emailjs.init("vCgPESmVfPbJdk-U7");
-
-  let avaliacaoSelecionada = "";
-
-  function toggleFeedback() {
-    const panel = document.getElementById("feedback-panel");
-    panel.style.right = panel.style.right === "0px" ? "-330px" : "0px";
-  }
-
-  document
-    .getElementById("feedback-tab")
-    .addEventListener("click", toggleFeedback);
-
-  document.querySelectorAll(".feedback-rating span").forEach(item => {
-    item.addEventListener("click", () => {
-      document.querySelectorAll(".feedback-rating span")
-        .forEach(i => i.classList.remove("selected"));
-
-      item.classList.add("selected");
-      avaliacaoSelecionada = item.dataset.value;
+  fetch("./feedback/feedback.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("feedback-container").innerHTML = html;
     });
-  });
-
-  function enviarFeedback() {
-    const mensagem =
-      document.getElementById("feedback-textarea").value ||
-      "Sem comentário adicional.";
-
-    if (!avaliacaoSelecionada) {
-      alert("Por favor, selecione uma avaliação.");
-      return;
-    }
-
-    emailjs.send(
-      "service_a519te7",
-      "template_oc2zio4",
-      {
-        rating: avaliacaoSelecionada,
-        message: mensagem
-      }
-    ).then(() => {
-      document.getElementById("feedback-status").innerText =
-        "Obrigado! Seu feedback foi enviado de forma anônima.";
-
-      document.getElementById("feedback-textarea").value = "";
-      avaliacaoSelecionada = "";
-      document.querySelectorAll(".feedback-rating span")
-        .forEach(i => i.classList.remove("selected"));
-    }).catch(err => {
-      console.error(err);
-      document.getElementById("feedback-status").innerText =
-        "Erro ao enviar. Tente novamente.";
-    });
-  }
 </script>
 
 <!-- ===== SERVICE WORKER ===== -->
