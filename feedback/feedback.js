@@ -6,32 +6,28 @@ const status = document.getElementById("feedback-status");
 const submitBtn = document.getElementById("feedback-submit");
 const ratingInput = document.getElementById("rating-value");
 
-/* abrir / fechar modal */
+/* abrir / fechar */
 fab.onclick = () => modal.classList.remove("hidden");
 closeBtn.onclick = () => modal.classList.add("hidden");
 
-/* capturar URL da página automaticamente */
+/* capturar URL automaticamente */
 document.getElementById("page-url").value = window.location.href;
 
 /* emojis clicáveis */
 document.querySelectorAll(".rating input").forEach(input => {
   input.addEventListener("change", () => {
     ratingInput.value = input.value;
-    // marcar visualmente
     document.querySelectorAll(".rating span").forEach(s => s.style.fontWeight = "normal");
     input.nextElementSibling.style.fontWeight = "bold";
   });
 });
 
-/* SUBMIT ASSÍNCRONO */
+/* submit assíncrono */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // limpar status
   status.className = "";
   status.textContent = "";
-
-  // botão em carregamento
   submitBtn.classList.add("loading");
   submitBtn.textContent = "Enviando…";
 
@@ -45,16 +41,17 @@ form.addEventListener("submit", async (e) => {
     });
 
     if (res.ok) {
-      // feedback enviado
       status.textContent = "✅ Obrigado! Seu feedback foi enviado.";
       status.classList.add("success");
       form.reset();
       ratingInput.value = "";
+      document.querySelectorAll(".rating span").forEach(s => s.style.fontWeight = "normal");
 
-      // suavemente fechar modal depois de 1,8s
       setTimeout(() => {
         modal.classList.add("hidden");
         status.textContent = "";
+        submitBtn.classList.remove("loading");
+        submitBtn.textContent = "Enviar feedback";
       }, 1800);
     } else {
       throw new Error("Erro no envio");
@@ -63,9 +60,7 @@ form.addEventListener("submit", async (e) => {
   } catch {
     status.textContent = "⚠️ Não foi possível enviar agora. Tente novamente.";
     status.classList.add("error");
+    submitBtn.classList.remove("loading");
+    submitBtn.textContent = "Enviar feedback";
   }
-
-  // remover estado de carregamento do botão
-  submitBtn.classList.remove("loading");
-  submitBtn.textContent = "Enviar feedback";
 });
