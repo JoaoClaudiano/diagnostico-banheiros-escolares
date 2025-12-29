@@ -13,32 +13,54 @@
       color: #333;
     }
 
+    /* Header padrão */
     .header {
       background: #1f4fd8;
       color: #fff;
       padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .header a:hover {
+      text-decoration: underline;
+    }
+
+    .header-title {
+      font-weight: bold;
+      font-size: 22px;
+      flex: 1;
       text-align: center;
     }
 
+    /* Container */
     .container {
       max-width: 900px;
       margin: 40px auto;
       padding: 0 20px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
-    h1 {
+    h1, h2 {
       color: #1f4fd8;
-      margin-bottom: 10px;
+      margin-top: 0;
     }
 
     h2 {
-      color: #1f4fd8;
       margin-top: 30px;
     }
 
     p {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       text-align: justify;
     }
 
@@ -48,14 +70,16 @@
     }
 
     li {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: #666;
-      margin: 40px 0;
+    /* Boxes (se necessário) */
+    .box {
+      background: #ffffff;
+      padding: 22px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-top: 25px;
     }
 
     a {
@@ -66,137 +90,127 @@
     a:hover {
       text-decoration: underline;
     }
+
+    /* Footer azul padrão */
+    footer {
+      background: #1f4fd8;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    footer a {
+      color: #fff;
+      text-decoration: underline;
+      margin: 0 8px;
+    }
+
+    footer a:hover {
+      opacity: 0.8;
+    }
+
   </style>
 </head>
 
 <body>
 
+  <!-- Header padrão -->
   <header class="header">
-    <strong>CheckInfra</strong><br>
-    Política de Privacidade
+    <a href="../index.html">← Voltar</a>
+    <div class="header-title">Política de Privacidade</div>
   </header>
 
+  <!-- Conteúdo principal -->
   <main class="container">
 
     <h1>Política de Privacidade</h1>
 
     <p>
-      Esta Política de Privacidade descreve como o <strong>CheckInfra</strong>
-      coleta, utiliza, armazena e protege informações no contexto da utilização
-      do sistema.
+      Esta Política de Privacidade descreve como o <strong>CheckInfra</strong> coleta, utiliza, armazena e protege informações no contexto da utilização da plataforma.
     </p>
 
     <p>
-      O CheckInfra é um <strong>sistema digital de diagnóstico sanitário de
-      banheiros escolares</strong>, desenvolvido em contexto acadêmico e
-      disponibilizado como <strong>serviço licenciado</strong> para instituições
-      públicas e privadas, com o objetivo de apoiar a gestão da infraestrutura
-      educacional.
+      O CheckInfra é um <strong>sistema digital de diagnóstico sanitário de banheiros escolares</strong>, desenvolvido em contexto acadêmico e disponibilizado como <strong>serviço licenciado</strong> para instituições públicas e privadas, com o objetivo de apoiar a gestão da infraestrutura educacional.
     </p>
 
-    <h2>1. Quais dados são coletados</h2>
-
-    <p>O CheckInfra pode coletar os seguintes dados:</p>
+    <h2>1. Dados coletados</h2>
 
     <ul>
-      <li>Nome informado do avaliador ou responsável técnico;</li>
+      <li>Nome do avaliador ou responsável técnico;</li>
       <li>Nome da escola ou unidade avaliada;</li>
-      <li>Respostas fornecidas no checklist técnico;</li>
-      <li>Registros fotográficos enviados pelo usuário;</li>
-      <li>Data e horário das avaliações realizadas;</li>
-      <li>Dados técnicos de navegação coletados de forma anonimizada
-          (por exemplo, por meio do Google Analytics).</li>
+      <li>Respostas do checklist técnico;</li>
+      <li>Registros fotográficos enviados;</li>
+      <li>Data e horário das avaliações;</li>
+      <li>Dados técnicos de navegação coletados de forma anonimizada (ex.: Google Analytics).</li>
     </ul>
 
     <p>
-      O CheckInfra <strong>não coleta dados sensíveis</strong>, tais como CPF,
-      RG, endereço residencial, dados biométricos, informações de saúde ou dados
-      pessoais de alunos.
+      O CheckInfra <strong>não coleta dados sensíveis</strong>, tais como CPF, RG, endereço residencial, dados biométricos, informações de saúde ou dados pessoais de alunos.
     </p>
 
     <h2>2. Finalidade do uso dos dados</h2>
 
-    <p>Os dados coletados são utilizados exclusivamente para:</p>
-
     <ul>
-      <li>Gerar diagnósticos técnicos sobre as condições sanitárias;</li>
+      <li>Gerar diagnósticos técnicos sobre condições sanitárias;</li>
       <li>Apoiar o planejamento e a priorização de intervenções em infraestrutura;</li>
       <li>Produzir relatórios técnicos, indicadores e painéis de apoio à decisão;</li>
-      <li>Viabilizar a prestação, gestão, suporte e melhoria contínua do serviço
-          licenciado;</li>
+      <li>Viabilizar a prestação, gestão, suporte e melhoria contínua do serviço;</li>
       <li>Aprimorar a experiência de uso e o desempenho do sistema.</li>
     </ul>
 
-    <h2>3. Base legal para o tratamento dos dados (LGPD)</h2>
-
-    <p>
-      O tratamento dos dados pessoais é realizado em conformidade com a
-      Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018),
-      com base nas seguintes hipóteses legais:
-    </p>
+    <h2>3. Base legal (LGPD)</h2>
 
     <ul>
-      <li><strong>Legítimo interesse</strong>, para fins de diagnóstico,
-          planejamento e gestão da infraestrutura educacional;</li>
-      <li><strong>Finalidade pública</strong>, quando utilizado por órgãos
-          da administração pública;</li>
-      <li><strong>Execução de contrato</strong> ou de procedimentos
-          preliminares relacionados à contratação do serviço, quando aplicável.</li>
+      <li><strong>Legítimo interesse:</strong> diagnóstico, planejamento e gestão da infraestrutura educacional;</li>
+      <li><strong>Finalidade pública:</strong> quando utilizado por órgãos da administração pública;</li>
+      <li><strong>Execução de contrato:</strong> ou procedimentos preliminares relacionados à contratação do serviço, quando aplicável.</li>
     </ul>
 
-    <h2>4. Armazenamento e segurança das informações</h2>
+    <h2>4. Armazenamento e segurança</h2>
 
     <p>
-      Em situações de uso offline, os dados podem ser temporariamente armazenados
-      no próprio dispositivo do usuário. A sincronização com o sistema ocorre
-      apenas quando há conexão com a internet.
+      Dados podem ser armazenados temporariamente no dispositivo do usuário em situações offline. A sincronização ocorre somente quando há conexão com a internet.
     </p>
 
     <p>
-      O CheckInfra adota boas práticas técnicas e organizacionais para reduzir
-      riscos de acesso não autorizado, perda, alteração ou uso indevido das
-      informações.
+      O CheckInfra adota boas práticas técnicas e organizacionais para reduzir riscos de acesso não autorizado, perda, alteração ou uso indevido das informações.
     </p>
 
     <h2>5. Compartilhamento de dados</h2>
 
     <p>
-      O CheckInfra <strong>não comercializa dados pessoais</strong>.
-      As informações coletadas são acessadas exclusivamente por gestores,
-      equipes técnicas ou instituições licenciadas, de acordo com a finalidade
-      do serviço.
+      O CheckInfra <strong>não comercializa dados pessoais</strong>. As informações são acessadas exclusivamente por gestores, equipes técnicas ou instituições licenciadas, de acordo com a finalidade do serviço.
     </p>
 
-    <h2>6. Direitos do titular dos dados</h2>
-
-    <p>
-      Nos termos da LGPD, o titular dos dados pode, a qualquer momento:
-    </p>
+    <h2>6. Direitos do titular</h2>
 
     <ul>
       <li>Solicitar confirmação da existência de tratamento de dados;</li>
       <li>Solicitar acesso ou correção de informações;</li>
-      <li>Solicitar a exclusão de dados, quando legalmente aplicável;</li>
-      <li>Obter informações sobre o uso e a finalidade dos dados.</li>
+      <li>Solicitar exclusão de dados, quando legalmente aplicável;</li>
+      <li>Obter informações sobre o uso e finalidade dos dados.</li>
     </ul>
 
-    <h2>7. Atualizações desta Política de Privacidade</h2>
+    <h2>7. Atualizações da Política</h2>
 
     <p>
-      Esta Política de Privacidade poderá ser atualizada periodicamente para
-      refletir melhorias no sistema, mudanças operacionais ou adequações legais.
-      Recomenda-se a consulta periódica desta página.
+      Esta Política de Privacidade poderá ser atualizada periodicamente para refletir melhorias no sistema, mudanças operacionais ou adequações legais. Recomenda-se a consulta periódica desta página.
     </p>
 
     <p>
-      Última atualização: <strong>2025</strong>.
+      Última atualização: <strong>Dezembro/2025</strong>.
     </p>
 
   </main>
 
+  <!-- Footer azul padrão -->
   <footer>
-    © 2025 CheckInfra — Sistema de diagnóstico sanitário escolar<br>
-    <a href="./index.html">Voltar para o site</a>
+    © 2026 CheckInfra — Projeto acadêmico e tecnológico<br>
+    <a href="../index.html">Página inicial</a> |
+    <a href="../pages/sobre.html">Sobre</a> |
+    <a href="../pages/politica-privacidade.html">Política de Privacidade</a> |
+    <a href="../pages/termos-de-uso.html">Termos de Uso</a>
   </footer>
 
 </body>
