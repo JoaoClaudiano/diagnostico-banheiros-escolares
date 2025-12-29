@@ -1,46 +1,82 @@
 #feedback-tab {
   position: fixed;
   right: 0;
-  top: 40%;
+  top: 45%;
   background: #1f4fd8;
   color: #fff;
   padding: 10px 14px;
   border-radius: 8px 0 0 8px;
   cursor: pointer;
-  z-index: 1000;
+  font-weight: bold;
+  z-index: 9999;
 }
 
 #feedback-panel {
   position: fixed;
-  right: -330px;
+  right: -340px;
   top: 0;
-  width: 330px;
+  width: 340px;
   height: 100%;
-  background: #fff;
-  box-shadow: -4px 0 12px rgba(0,0,0,.15);
+  background: #ffffff;
+  box-shadow: -4px 0 12px rgba(0,0,0,0.15);
   padding: 20px;
-  transition: right .3s ease;
-  z-index: 999;
+  transition: right 0.3s ease;
+  z-index: 9998;
+  overflow-y: auto;
 }
 
-.feedback-rating span {
-  font-size: 24px;
-  cursor: pointer;
-  opacity: .5;
-  margin-right: 6px;
+#feedback-panel.open {
+  right: 0;
 }
 
-.feedback-rating span.selected {
-  opacity: 1;
-  transform: scale(1.1);
+#feedback-panel h3 {
+  color: #1f4fd8;
+  margin-top: 0;
 }
 
-#feedback-send {
+.feedback-text {
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: #444;
+}
+
+.rating-group {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.rating-group input {
+  margin-right: 4px;
+}
+
+#feedback-panel input,
+#feedback-panel textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  font-family: inherit;
+}
+
+#feedback-panel button {
+  width: 100%;
   background: #1f4fd8;
   color: #fff;
   border: none;
   padding: 10px;
-  width: 100%;
-  border-radius: 6px;
+  font-size: 15px;
   cursor: pointer;
+  border-radius: 6px;
+}
+
+#feedback-panel button:hover {
+  background: #163db3;
+}
+
+.feedback-note {
+  font-size: 12px;
+  color: #666;
+  margin-top: 10px;
+  text-align: center;
 }
