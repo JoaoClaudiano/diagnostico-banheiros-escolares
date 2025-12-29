@@ -1,61 +1,47 @@
 const fab = document.getElementById("feedback-fab");
 const modal = document.getElementById("feedback-modal");
 const closeBtn = document.getElementById("feedback-close");
-const form = modal.querySelector("form");
+const form = document.getElementById("feedback-form");
 const success = document.getElementById("feedback-success");
 
-/* ABRIR MODAL */
-fab.addEventListener("click", () => {
-  modal.classList.remove("hidden");
-});
+/* ESTADO INICIAL */
+success.classList.add("hidden");
+form.classList.remove("hidden");
 
+/* ABRIR / FECHAR */
+fab.onclick = () => modal.classList.remove("hidden");
+closeBtn.onclick = () => modal.classList.add("hidden");
 
-/* FECHAR MODAL */
-closeBtn.addEventListener("click", () => {
-  modal.classList.add("hidden");
-});
-
-/* FECHAR AO CLICAR FORA (UX) */
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.classList.add("hidden");
-  }
-});
-
-/* ESC para fechar (desktop) */
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    modal.classList.add("hidden");
-  }
-});
-
-/* RATING – tornar emojis clicáveis */
-document.querySelectorAll(".rating label").forEach(label => {
-  label.addEventListener("click", () => {
-    document
-      .querySelectorAll(".rating label")
-      .forEach(l => l.classList.remove("active"));
-
-    label.classList.add("active");
-  });
-});
-
-/* URL AUTOMÁTICA DA PÁGINA */
+/* URL automática */
 document.getElementById("page-url").value = window.location.href;
 
-/* CALLBACK DE ENVIO (iframe) */
-function feedbackEnviado() {
-  form.classList.add("hidden");
-  success.classList.remove("hidden");
+/* SUBMIT */
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  setTimeout(() => {
-    modal.classList.add("hidden");
-    success.classList.add("hidden");
-    form.classList.remove("hidden");
-    form.reset();
+  const data = new FormData(form);
 
-    document
-      .querySelectorAll(".rating label")
-      .forEach(l => l.classList.remove("active"));
-  }, 2000);
-}
+  try {
+    const res = await fetch("https://formspree.io/f/SEU_ID_REAL_AQUI", {
+      method: "POST",
+      body: data,
+      headers: { "Accept": "application/json" }
+    });
+
+    if (res.ok) {
+      form.classList.add("hidden");
+      success.classList.remove("hidden");
+
+      setTimeout(() => {
+        modal.classList.add("hidden");
+        success.classList.add("hidden");
+        form.classList.remove("hidden");
+        form.reset();
+      }, 2000);
+    } else {
+      alert("Erro ao enviar feedback.");
+    }
+  } catch {
+    alert("Falha de conexão.");
+  }
+});
