@@ -1336,3 +1336,399 @@ body.dark-theme ::-webkit-scrollbar-track {
         font-size: 0.9rem;
     }
 }
+
+/* ============================================ */
+/* RESPONSIVIDADE PARA SMARTPHONES (MOBILE-FIRST) */
+/* ============================================ */
+
+/* Smartphones grandes (acima de 480px) */
+@media (max-width: 480px) {
+    /* HEADER COMPACTO */
+    .header-container {
+        padding: 0 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .header-content {
+        order: 3;
+        width: 100%;
+        padding: 15px 0 0;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+        text-align: center;
+        line-height: 1.3;
+    }
+    
+    .header-btn {
+        width: 42px;
+        height: 42px;
+        margin: 0 5px;
+        font-size: 1.1rem;
+    }
+    
+    /* NAVEGAÇÃO VERTICAL */
+    .nav-tabs {
+        flex-direction: column;
+        padding: 15px;
+        margin: 1rem 0;
+        gap: 8px;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        padding: 12px 20px;
+        justify-content: flex-start;
+        border-radius: 8px;
+    }
+    
+    /* CONTEÚDO PRINCIPAL */
+    .container {
+        padding: 12px;
+    }
+    
+    .tab-content {
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+    }
+    
+    .tab-content h2 {
+        font-size: 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    /* ACCORDIONS */
+    .tech-accordion-header {
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .tech-card {
+        padding: 1rem;
+    }
+    
+    /* TABELAS COM SCROLL HORIZONTAL */
+    .tech-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .tech-table th,
+    .tech-table td {
+        padding: 0.75rem;
+        min-width: 120px;
+    }
+    
+    /* GRIDS E LAYOUTS */
+    .impact-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .impact-card {
+        padding: 1rem;
+    }
+    
+    /* EQUAÇÕES E FÓRMULAS */
+    .formula-destaque {
+        padding: 1.2rem;
+        overflow-x: auto;
+    }
+    
+    .formula-destaque h3 {
+        font-size: 1.3rem;
+        word-break: break-word;
+    }
+    
+    .equacao {
+        font-size: 1rem;
+        padding: 1rem;
+        overflow-x: auto;
+    }
+    
+    /* MENU SIDEBAR */
+    .sidebar-tools {
+        width: 100vw;
+        right: -100vw;
+    }
+    
+    .tools-content {
+        padding: 1rem;
+    }
+    
+    /* BOTÕES DE FERRAMENTAS */
+    .tool-btn {
+        padding: 0.8rem 0.9rem;
+        font-size: 0.9rem;
+    }
+    
+    .tool-btn i {
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+    
+    /* FOOTER */
+    footer {
+        padding: 1.5rem;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    /* UTILITÁRIOS */
+    .info-box,
+    .warning-box,
+    .success-box,
+    .danger-box {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* BOTÃO VOLTAR AO TOPO */
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Smartphones muito pequenos (até 360px) */
+@media (max-width: 360px) {
+    /* HEADER ULTRA COMPACTO */
+    header {
+        padding: 1.2rem 0;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header-container {
+        padding: 0 8px;
+    }
+    
+    .header-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+    
+    /* CONTEÚDO MAIS COMPACTO */
+    .container {
+        padding: 10px;
+    }
+    
+    .tab-content {
+        padding: 1rem;
+    }
+    
+    .tab-content h2 {
+        font-size: 1.3rem;
+    }
+    
+    /* ACCORDION MAIS COMPACTO */
+    .tech-accordion-header {
+        padding: 0.9rem;
+        font-size: 1rem;
+    }
+    
+    .tech-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    /* CLASSIFICAÇÃO POR STATUS */
+    .classificacao li {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    /* BUSCADOR COMPACTO */
+    .search-container {
+        padding: 1rem;
+    }
+    
+    .search-box {
+        flex-direction: column;
+    }
+    
+    #searchBtn {
+        width: 100%;
+    }
+    
+    /* BOTÕES DE TEMA */
+    .theme-toggle {
+        flex-direction: column;
+    }
+    
+    .theme-btn {
+        width: 100%;
+        padding: 0.6rem;
+    }
+}
+
+/* AJUSTES ESPECÍFICOS PARA ORIENTAÇÃO RETRATO */
+@media (max-width: 480px) and (orientation: portrait) {
+    body {
+        font-size: 15px;
+    }
+    
+    .nav-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 998;
+        background: white;
+        margin-top: 0;
+        border-radius: 0 0 16px 16px;
+    }
+    
+    body.dark-theme .nav-tabs {
+        background: #2d3748;
+    }
+}
+
+/* AJUSTES ESPECÍFICOS PARA ORIENTAÇÃO PAISAGEM EM SMARTPHONES */
+@media (max-height: 480px) and (orientation: landscape) {
+    .sidebar-tools {
+        height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .tools-content {
+        max-height: 60vh;
+    }
+    
+    .nav-tabs {
+        padding: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tab-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* MELHORIAS DE TOCHE PARA SMARTPHONES */
+@media (hover: none) and (pointer: coarse) {
+    /* AUMENTAR ÁREA DE TOQUE PARA BOTÕES */
+    .header-btn,
+    .tool-btn,
+    .tab-btn,
+    .search-result-item,
+    .accordion-header,
+    .tech-accordion-header {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* REMOVER HOVER EFFECTS QUE PODEM ATRAPALHAR TOQUE */
+    .tool-btn:hover,
+    .tab-btn:hover,
+    .header-btn:hover {
+        transform: none;
+    }
+    
+    /* MELHORAR VISIBILIDADE DE FOCUS */
+    .tab-btn:focus,
+    .tool-btn:focus,
+    #searchInput:focus {
+        outline: 3px solid var(--primary);
+        outline-offset: 2px;
+    }
+    
+    /* AUMENTAR TAMANHO DE INPUTS */
+    #searchInput {
+        font-size: 16px; /* Evita zoom automático no iOS */
+        padding: 12px 15px;
+    }
+}
+
+/* AJUSTES PARA iOS SAFARI */
+@supports (-webkit-touch-callout: none) {
+    .container {
+        min-height: -webkit-fill-available;
+    }
+    
+    .sidebar-tools {
+        height: -webkit-fill-available;
+    }
+}
+
+/* ANIMAÇÕES MAIS SUAVES PARA MOBILE */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* DARK THEME OPTIMIZATIONS PARA MOBILE */
+@media (max-width: 480px) {
+    body.dark-theme .tab-content,
+    body.dark-theme .methodology-card,
+    body.dark-theme .impact-card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark-theme .nav-tabs {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* GARANTIR QUE IMAGENS NÃO EXCEDAM A LARGURA DA TELA */
+@media (max-width: 480px) {
+    img,
+    .formula-destaque,
+    .equacao,
+    .tech-table {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* MELHORAR LEGIBILIDADE DO TEXTO EM TELAS PEQUENAS */
+@media (max-width: 480px) {
+    body {
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+    
+    p, li, td {
+        font-size: 0.95rem;
+    }
+    
+    h1, h2, h3, h4 {
+        line-height: 1.3;
+    }
+}
+
+/* AJUSTES FINAIS PARA DISPOSITIVOS COM NOTCH/DYNAMIC ISLAND */
+@media (max-width: 480px) {
+    .container {
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+    }
+    
+    header {
+        padding-top: max(1.5rem, env(safe-area-inset-top));
+    }
+}
+
