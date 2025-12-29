@@ -1,47 +1,81 @@
-<!-- BOTÃO FLUTUANTE -->
-<div id="feedback-fab" title="Enviar feedback">
-  💬
-</div>
+<div id="feedback-fab" aria-label="Enviar feedback">💬</div>
 
-<!-- MODAL / SANDBOX -->
 <div id="feedback-modal" class="hidden">
   <div class="feedback-card">
-
-    <button id="feedback-close">✕</button>
+    <button id="feedback-close" aria-label="Fechar">✕</button>
 
     <h3>Feedback do CheckInfra</h3>
 
     <p>
-      O CheckInfra está em fase de testes.
-      Sua avaliação ajuda a aprimorar a metodologia e a experiência do sistema.
+      O CheckInfra está em fase de testes e aprimoramento.
+      Sua avaliação contribui para a melhoria da metodologia
+      e da experiência do sistema.
     </p>
 
-    <form id="feedback-form">
-      
-      <label>Avaliação geral</label>
+    <form
+      action="https://formspree.io/f/SEU_ID_AQUI"
+      method="POST"
+      target="hidden_iframe"
+      onsubmit="feedbackEnviado()"
+    >
+      <!-- página automática -->
+      <input type="hidden" name="page_url" id="page-url">
+
+      <!-- AVALIAÇÃO -->
+      <label><strong>Avaliação geral</strong></label>
+
       <div class="rating">
-        <span data-value="😕">😕</span>
-        <span data-value="🙂">🙂</span>
-        <span data-value="😀">😀</span>
-        <span data-value="🤩">🤩</span>
+        <label>
+          <input type="radio" name="rating" value="Confusa">
+          😕
+          <span>Confusa</span>
+        </label>
+
+        <label>
+          <input type="radio" name="rating" value="Regular">
+          😐
+          <span>Regular</span>
+        </label>
+
+        <label>
+          <input type="radio" name="rating" value="Boa">
+          🙂
+          <span>Boa</span>
+        </label>
+
+        <label>
+          <input type="radio" name="rating" value="Muito boa">
+          😃
+          <span>Muito boa</span>
+        </label>
+
+        <label>
+          <input type="radio" name="rating" value="Excelente">
+          🤩
+          <span>Excelente</span>
+        </label>
       </div>
 
-      <input type="hidden" name="rating" id="rating-value">
-
-      <label>Seu feedback</label>
+      <!-- MENSAGEM -->
+      <label for="message"><strong>Comentário (opcional)</strong></label>
       <textarea
         name="message"
-        required
-        placeholder="Sugestões, problemas, percepções técnicas..."
-      ></textarea>
+        rows="4"
+        placeholder="Sugestões, observações ou pontos de melhoria…">
+      </textarea>
 
-      <label>Nome (opcional)</label>
+      <!-- NOME -->
+      <label for="name"><strong>Nome (opcional)</strong></label>
       <input type="text" name="name" placeholder="Anônimo">
 
       <button type="submit">Enviar feedback</button>
-
-      <p id="feedback-status"></p>
     </form>
 
+    <!-- iframe invisível -->
+    <iframe name="hidden_iframe" style="display:none"></iframe>
+
+    <div id="feedback-success" class="hidden">
+      <p>Obrigado! Seu feedback foi enviado 🙏</p>
+    </div>
   </div>
 </div>
