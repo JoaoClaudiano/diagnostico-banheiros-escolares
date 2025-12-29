@@ -4,7 +4,10 @@
   <div class="feedback-card">
     <button id="feedback-close" aria-label="Fechar">✕</button>
 
-    <h3>Feedback do CheckInfra</h3>
+    <h3 class="feedback-title">
+  Feedback do CheckInfra
+  <span class="status-dot" aria-label="Sistema ativo"></span>
+</h3>
 
     <p>
       O CheckInfra está em fase de testes e aprimoramento.
@@ -72,10 +75,7 @@
     </form>
 
     <!-- iframe invisível -->
-    <iframe name="hidden_iframe" style="display:none"></iframe>
+    <form id="feedback-form">
 
-    <div id="feedback-success" class="hidden">
-      <p>Obrigado! Seu feedback foi enviado 🙏</p>
-    </div>
   </div>
 </div>
