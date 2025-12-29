@@ -1068,9 +1068,8 @@ footer {
 }
 
 .footer-links a {
-    color: white;
+    color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
-    opacity: 0.8;
     transition: all 0.3s;
     display: flex;
     align-items: center;
@@ -1078,9 +1077,11 @@ footer {
 }
 
 .footer-links a:hover {
-    opacity: 1;
+    color: white;
     transform: translateY(-2px);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 
 /* UTILITÁRIOS */
 .info-box {
