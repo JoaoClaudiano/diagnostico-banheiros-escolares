@@ -68,13 +68,15 @@
       <label><strong>Nome (opcional)</strong></label>
       <input type="text" name="name" placeholder="Anônimo">
 
-      <button type="submit">Enviar feedback</button>
+      <button type="submit" id="feedback-submit">
+  Enviar feedback
+</button>
+
+<div id="feedback-status" class="hidden"></div>
     </form>
 
     <!-- SUCESSO (inicialmente oculto) -->
-    <div id="feedback-success" class="hidden">
-      <p>Obrigado! Seu feedback foi enviado ✅</p>
-    </div>
+
 
   </div>
 </div>
