@@ -1,19 +1,34 @@
 const fab = document.getElementById("feedback-fab");
 const modal = document.getElementById("feedback-modal");
 const closeBtn = document.getElementById("feedback-close");
-const form = document.getElementById("feedback-form");
-const status = document.getElementById("feedback-status");
+const form = modal.querySelector("form");
+const success = document.getElementById("feedback-success");
 
-/* ABRIR / FECHAR */
+/* ABRIR MODAL */
 fab.addEventListener("click", () => {
   modal.classList.remove("hidden");
 });
 
+/* FECHAR MODAL */
 closeBtn.addEventListener("click", () => {
   modal.classList.add("hidden");
 });
 
-/* RATING VISUAL (radio + emoji) */
+/* FECHAR AO CLICAR FORA (UX) */
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.classList.add("hidden");
+  }
+});
+
+/* ESC para fechar (desktop) */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    modal.classList.add("hidden");
+  }
+});
+
+/* RATING – tornar emojis clicáveis */
 document.querySelectorAll(".rating label").forEach(label => {
   label.addEventListener("click", () => {
     document
@@ -24,40 +39,22 @@ document.querySelectorAll(".rating label").forEach(label => {
   });
 });
 
-/* SUBMIT ASSÍNCRONO */
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+/* URL AUTOMÁTICA DA PÁGINA */
+document.getElementById("page-url").value = window.location.href;
 
-  status.textContent = "Enviando feedback…";
+/* CALLBACK DE ENVIO (iframe) */
+function feedbackEnviado() {
+  form.classList.add("hidden");
+  success.classList.remove("hidden");
 
-  const data = new FormData(form);
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    success.classList.add("hidden");
+    form.classList.remove("hidden");
+    form.reset();
 
-  try {
-    const res = await fetch("https://formspree.io/f/xdaobedn", {
-      method: "POST",
-      body: data,
-      headers: {
-        "Accept": "application/json"
-      }
-    });
-
-    if (res.ok) {
-      status.textContent = "✅ Obrigado! Seu feedback foi enviado.";
-      form.reset();
-
-      document
-        .querySelectorAll(".rating label")
-        .forEach(l => l.classList.remove("active"));
-
-      setTimeout(() => {
-        modal.classList.add("hidden");
-        status.textContent = "";
-      }, 1500);
-    } else {
-      status.textContent = "⚠️ Erro ao enviar. Tente novamente.";
-    }
-
-  } catch (err) {
-    status.textContent = "⚠️ Falha de conexão.";
-  }
-});
+    document
+      .querySelectorAll(".rating label")
+      .forEach(l => l.classList.remove("active"));
+  }, 2000);
+}
