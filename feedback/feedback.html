@@ -1,28 +1,52 @@
 <div id="feedback-tab" title="Enviar feedback do projeto">
-💬 Feedback
+  💬 Feedback
 </div>
 
 <div id="feedback-panel">
-<h3>Feedback do Projeto</h3>
+  <h3>Feedback do CheckInfra</h3>
 
-<p class="feedback-text">
-O CheckInfra está em fase de testes.
-Sua avaliação ajuda a melhorar nosso sistema.
-</p>
+  <p class="feedback-text">
+    O CheckInfra está em fase de testes e aprimoramento.
+    Sua avaliação é anônima e contribui diretamente
+    para a melhoria da metodologia e da experiência do sistema.
+  </p>
 
-<div class="feedback-rating">
-<span data-value="Excelente">😍</span>
-<span data-value="Boa">🙂</span>
-<span data-value="Regular">😐</span>
-<span data-value="Ruim">😕</span>
-<span data-value="Muito ruim">😞</span>
-</div>
+  <form
+    action="https://formspree.io/f/SEU_FORM_ID"
+    method="POST"
+    id="feedback-form"
+  >
 
-<textarea id="feedback-textarea"
-placeholder="Sugestões ou observações (opcional)..."></textarea>
+    <!-- Avaliação qualitativa -->
+    <label class="rating-label">Como você avalia sua experiência?</label>
+    <div class="rating-group">
+      <label><input type="radio" name="rating" value="Ruim"> 😞</label>
+      <label><input type="radio" name="rating" value="Regular"> 😐</label>
+      <label><input type="radio" name="rating" value="Boa"> 🙂</label>
+      <label><input type="radio" name="rating" value="Ótima"> 😄</label>
+    </div>
 
-<button id="feedback-send">Enviar feedback</button>
+    <!-- Nome opcional -->
+    <input
+      type="text"
+      name="name"
+      placeholder="Nome (opcional)"
+    >
 
-  
-<div id="feedback-status"></div>
+    <!-- Mensagem -->
+    <textarea
+      name="message"
+      required
+      placeholder="Descreva sua experiência, sugestões ou observações técnicas..."
+    ></textarea>
+
+    <!-- Campo oculto para identificar origem -->
+    <input type="hidden" name="source" value="Feedback MVP - CheckInfra">
+
+    <button type="submit">Enviar feedback</button>
+
+    <p class="feedback-note">
+      ✔️ Feedback anônimo • ✔️ Sem cadastro • ✔️ Leva menos de 1 minuto
+    </p>
+  </form>
 </div>
