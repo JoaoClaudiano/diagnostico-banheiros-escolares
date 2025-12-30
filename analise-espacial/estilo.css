@@ -10,9 +10,22 @@ header { background:#1f4fd8; color:#fff; padding:16px; position:relative; }
 footer { background:#1f4fd8; color:#fff; text-align:center; padding:12px; font-size:12px; }
 
 /* Sidebar */
-.sidebar { position:fixed; top:0; right:0; width:360px; max-width:90%; height:100%; background:#fff;
-box-shadow:-4px 0 12px rgba(0,0,0,0.15); padding:20px; overflow-y:auto; z-index:9999;
-transform:translateX(100%); transition:transform 0.35s ease; }
+.sidebar { 
+  position:fixed; 
+  top:0; 
+  right:0; 
+  width:360px; 
+  max-width:90%; 
+  height:100%; 
+  background:#fff;
+  box-shadow:-4px 0 12px rgba(0,0,0,0.15); 
+  padding:20px; 
+  overflow-y:auto; 
+  z-index:9999;
+  transform:translateX(100%); 
+  transition:transform 0.35s ease; 
+}
+
 .sidebar.visible { transform:translateX(0); }
 #close-sidebar { background:none; border:none; font-size:22px; cursor:pointer; position:absolute; top:12px; right:12px; }
 #sidebar-menu ul { list-style:none; padding:0; margin:0 0 20px 0; }
