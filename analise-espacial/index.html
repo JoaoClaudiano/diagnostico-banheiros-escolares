@@ -2,256 +2,24 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
   
 <title>Análise Espacial Inteligente – CheckInfra</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="estilo.css">
+<link rel="stylesheet" href="estilo-avancado.css">
+
 <style>
-/* VARIÁVEIS CSS */
-:root {
-  --primary: #1f4fd8;
-  --danger: #dc3545;
-  --warning: #ffc107;
-  --success: #28a745;
-  --secondary: #6c757d;
-  --light: #f8f9fa;
-  --dark: #343a40;
-}
-
-/* RESET E BASE */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* ESTILOS MINIMALISTAS APENAS PARA O QUE NÃO TEM NO CSS EXTERNO */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--light);
-  color: var(--dark);
-  overflow-x: hidden;
-}
-
-/* LAYOUT PRINCIPAL - 3 COLUNAS */
-.interface-container {
-  display: grid;
-  grid-template-columns: 280px 1fr 320px;
-  grid-template-rows: auto 1fr auto;
-  height: 100vh;
-  gap: 0;
-  transition: all 0.3s;
-}
-
-/* HEADER CENTRALIZADO */
-.header {
-  grid-column: 1 / -1;
-  background: linear-gradient(135deg, var(--primary) 0%, #0d3cb6 100%);
-  color: white;
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  position: relative;
-  z-index: 100;
-}
-
-.header-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  text-align: center;
-}
-
-.header-title h1 {
   margin: 0;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-}
-
-.header-subtitle {
-  font-size: 11px;
-  opacity: 0.9;
-  margin-top: 2px;
-}
-
-.header-left, .header-right {
-  width: 100px;
-}
-
-.back-btn {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s;
-  text-decoration: none;
-}
-
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* PAINEL ESQUERDO - CAMADAS E PARÂMETROS */
-.left-panel {
-  background: white;
-  border-right: 1px solid #e0e0e0;
-  overflow-y: auto;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* ACORDEÕES */
-.accordion {
-  background: #f8f9fa;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.accordion-header {
-  padding: 12px 15px;
-  background: linear-gradient(135deg, var(--primary) 0%, #0d3cb6 100%);
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.3s;
-}
-
-.accordion-header:hover {
-  background: linear-gradient(135deg, #0d3cb6 0%, var(--primary) 100%);
-}
-
-.accordion-header h3 {
-  margin: 0;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.accordion-icon {
-  transition: transform 0.3s;
-  font-size: 12px;
-}
-
-.accordion.active .accordion-icon {
-  transform: rotate(180deg);
-}
-
-.accordion-content {
   padding: 0;
-  max-height: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
 }
 
-.accordion.active .accordion-content {
-  padding: 15px;
-  max-height: 1000px;
-}
-
-/* TOGGLE SWITCH */
-.toggle-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.toggle-item {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.toggle-item:hover {
-  background: #f8f9fa;
-}
-
-.toggle-item.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-.toggle-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.toggle-switch {
-  position: relative;
-  width: 40px;
-  height: 20px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 20px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 14px;
-  width: 14px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .toggle-slider {
-  background-color: var(--primary);
-}
-
-input:checked + .toggle-slider:before {
-  transform: translateX(20px);
-}
-
-/* PARÂMETROS */
+/* Parâmetros */
 .param-group {
   margin-bottom: 15px;
 }
@@ -281,10 +49,9 @@ input:checked + .toggle-slider:before {
 
 .param-range {
   flex: 1;
-  -webkit-appearance: none;
   height: 6px;
-  background: #e0e0e0;
   border-radius: 3px;
+  background: #e0e0e0;
   outline: none;
 }
 
@@ -295,7 +62,6 @@ input:checked + .toggle-slider:before {
   background: var(--primary);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .param-value {
@@ -329,161 +95,7 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 4px 12px rgba(31, 79, 216, 0.3);
 }
 
-/* MAPA CENTRAL */
-.map-container {
-  background: #e9ecef;
-  position: relative;
-  z-index: 1;
-}
-
-#map {
-  height: 100%;
-  width: 100%;
-}
-
-/* CONTROLES DO MAPA */
-.map-controls {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.map-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  border: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--primary);
-  transition: all 0.3s;
-}
-
-.map-btn:hover {
-  background: white;
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-/* LEGENDA */
-.map-legend {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  min-width: 150px;
-  backdrop-filter: blur(5px);
-}
-
-.legend-title {
-  font-weight: 600;
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: var(--dark);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin: 4px 0;
-  font-size: 11px;
-}
-
-.legend-color {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  margin-right: 8px;
-  border: 1px solid rgba(255,255,255,0.8);
-}
-
-.legend-label {
-  color: var(--dark);
-}
-
-/* PAINEL DIREITO - DASHBOARD */
-.right-panel {
-  background: white;
-  border-left: 1px solid #e0e0e0;
-  overflow-y: auto;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.dashboard-header {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.dashboard-header h3 {
-  color: var(--primary);
-  margin: 0 0 8px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: 16px;
-}
-
-.dashboard-status {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--secondary);
-  flex-wrap: wrap;
-}
-
-/* MÉTRICAS */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.metric-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  border-left: 4px solid var(--primary);
-}
-
-.metric-card.critical {
-  border-left-color: var(--danger);
-}
-
-.metric-value {
-  font-size: 20px;
-  font-weight: 800;
-  display: block;
-  color: var(--dark);
-  margin-bottom: 2px;
-}
-
-.metric-label {
-  font-size: 11px;
-  color: var(--secondary);
-  font-weight: 500;
-}
-
-/* DISTRIBUIÇÃO */
+/* Distribuição */
 .distribuicao-chart {
   display: flex;
   flex-direction: column;
@@ -531,7 +143,7 @@ input:checked + .toggle-slider:before {
   text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
 }
 
-/* ATUALIZAÇÕES */
+/* Atualizações */
 .update-list {
   display: flex;
   flex-direction: column;
@@ -559,7 +171,7 @@ input:checked + .toggle-slider:before {
   color: var(--dark);
 }
 
-/* INDICADORES */
+/* Indicadores */
 .indicadores-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -598,35 +210,57 @@ input:checked + .toggle-slider:before {
   color: var(--dark);
 }
 
-/* FOOTER CENTRALIZADO */
-.footer {
-  grid-column: 1 / -1;
-  background: white;
-  padding: 12px 20px;
-  border-top: 1px solid #e0e0e0;
-  text-align: center;
+/* Status */
+.dashboard-status {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   font-size: 11px;
   color: var(--secondary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 15px;
   flex-wrap: wrap;
-  justify-content: center;
 }
 
-.footer-links span {
+/* Legenda */
+.map-legend {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  min-width: 150px;
+  backdrop-filter: blur(5px);
+}
+
+.legend-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--dark);
+}
+
+.legend-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  margin: 4px 0;
+  font-size: 11px;
 }
 
-/* LOADING */
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-right: 8px;
+  border: 1px solid rgba(255,255,255,0.8);
+}
+
+.legend-label {
+  color: var(--dark);
+}
+
+/* Loading */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -663,97 +297,10 @@ input:checked + .toggle-slider:before {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-/* RESPONSIVIDADE */
-@media (max-width: 992px) {
-  .interface-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr auto;
-  }
-  
-  .header {
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-  }
-  
-  .header-left, .header-right {
-    width: auto;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .header-center {
-    order: -1;
-  }
-  
-  .left-panel {
-    grid-row: 2;
-    max-height: 200px;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .map-container {
-    grid-row: 3;
-    height: 60vh;
-  }
-  
-  .right-panel {
-    grid-row: 4;
-    max-height: 300px;
-    border-left: none;
-    border-top: 1px solid #e0e0e0;
-  }
-}
-
-@media (max-width: 576px) {
-  .toggle-group {
-    grid-template-columns: 1fr;
-  }
-  
-  .indicadores-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .metrics-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .map-controls {
-    top: 10px;
-    right: 10px;
-  }
-  
-  .map-legend {
-    left: 10px;
-    bottom: 10px;
-    padding: 10px;
-  }
-}
-
-/* SCROLLBAR */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #0d3cb6;
-}
 </style>
 </head>
-<body>
 
+<body>
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
@@ -970,14 +517,6 @@ input:checked + .toggle-slider:before {
         <div class="legend-color" style="background: #28a745;"></div>
         <div class="legend-label">Adequada</div>
       </div>
-      <div class="legend-item">
-        <div class="legend-color" style="background: #6f42c1;"></div>
-        <div class="legend-label">Voronoi</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color" style="background: #17a2b8;"></div>
-        <div class="legend-label">Hotspot</div>
-      </div>
     </div>
   </div>
   
@@ -1111,136 +650,88 @@ input:checked + .toggle-slider:before {
 <script src="dados.js"></script>
 
 <!-- Módulos principais -->
-<!-- CORRIGIR ERRO NO analise-inteligente.js -->
-<script>
-// Corrigir o erro de sintaxe antes de carregar
-console.log('🔧 Verificando scripts...');
-</script>
-
 <script src="mapa-unificado.js"></script>
-<!-- Corrigido: Remover a linha problemática do analise-inteligente.js -->
-<script>
-// Carregar analise-inteligente.js com correção
-fetch('analise-inteligente.js')
-  .then(response => response.text())
-  .then(code => {
-    // Corrigir o erro de sintaxe na linha 400
-    const correctedCode = code.replace(/const\s+(\w+)\s*=\s*function/g, 'window.$1 = function');
-    const script = document.createElement('script');
-    script.textContent = correctedCode;
-    document.head.appendChild(script);
-    console.log('✅ analise-inteligente.js carregado com correção');
-  })
-  .catch(err => {
-    console.error('❌ Erro ao carregar analise-inteligente.js:', err);
-    // Carregar versão simplificada
-    const fallbackScript = document.createElement('script');
-    fallbackScript.textContent = `
-      window.calcularKDE = function(criticidade, raio = 500) {
-        console.log('🔥 Calculando KDE para:', criticidade, 'raio:', raio);
-        if (!window.mapa) return;
-        
-        // Simular pontos de calor
-        const pontos = [];
-        window.mapa.eachLayer(layer => {
-          if (layer instanceof L.Marker && layer.options && layer.options.escolaData) {
-            const escola = layer.options.escolaData;
-            if ((criticidade === 'todos') || 
-                (criticidade === 'critico' && escola.status === 'crítico') ||
-                (criticidade === 'atencao' && (escola.status === 'crítico' || escola.status === 'atenção')) ||
-                (criticidade === 'alerta' && (escola.status === 'crítico' || escola.status === 'atenção' || escola.status === 'alerta'))) {
-              pontos.push([escola.lat, escola.lng, escola.status === 'crítico' ? 1.0 : 0.5]);
-            }
-          }
-        });
-        
-        if (pontos.length > 0) {
-          L.heatLayer(pontos, {
-            radius: raio / 10,
-            blur: 15,
-            maxZoom: 17,
-            gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
-          }).addTo(window.mapa);
-        }
-      };
-      
-      window.analisarZonasRisco = function() {
-        console.log('⚠️ Analisando zonas de risco...');
-      };
-    `;
-    document.head.appendChild(fallbackScript);
-  });
-</script>
-
+<script src="analise-inteligente.js"></script>
 <script src="voronoi-critico.js"></script>
 
 <!-- Configuração inicial -->
 <script>
-// ==================== CONFIGURAÇÃO INICIAL ====================
+// CORREÇÃO DO ERRO NO analise-inteligente.js
+window.calcularKDE = window.calcularKDE || function(criticidade, raio = 500) {
+  console.log('🔥 Calculando KDE para:', criticidade, 'raio:', raio);
+  
+  // Remover KDE anterior
+  window.mapa.eachLayer(layer => {
+    if (layer instanceof L.HeatLayer) {
+      window.mapa.removeLayer(layer);
+    }
+  });
+  
+  // Coletar pontos baseados na criticidade
+  const pontos = [];
+  window.mapa.eachLayer(layer => {
+    if (layer instanceof L.Marker && layer.options && layer.options.escolaData) {
+      const escola = layer.options.escolaData;
+      const incluir = 
+        criticidade === 'todos' ||
+        (criticidade === 'critico' && escola.status === 'crítico') ||
+        (criticidade === 'atencao' && (escola.status === 'crítico' || escola.status === 'atenção')) ||
+        (criticidade === 'alerta' && ['crítico', 'atenção', 'alerta'].includes(escola.status));
+      
+      if (incluir) {
+        const intensidade = escola.status === 'crítico' ? 1.0 : 0.5;
+        pontos.push([escola.lat, escola.lng, intensidade]);
+      }
+    }
+  });
+  
+  if (pontos.length > 0) {
+    const heat = L.heatLayer(pontos, {
+      radius: Math.min(raio / 8, 25),
+      blur: 15,
+      maxZoom: 17,
+      gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+    }).addTo(window.mapa);
+    console.log(`✅ KDE aplicado com ${pontos.length} pontos`);
+  }
+};
+
+// Inicialização
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 CheckInfra - Análise Espacial Inteligente');
   
   // Mostrar loading
-  mostrarLoading();
+  document.getElementById('loadingOverlay').classList.add('active');
   
-  // Inicializar componentes
+  // Inicializar interface
   inicializarInterface();
-  inicializarEventos();
-  inicializarMapa();
   
-  // Carregar dados REAIS do Firebase
-  carregarDadosReais();
-  
-  // Ocultar loading após inicialização
-  setTimeout(ocultarLoading, 2000);
+  // Inicializar mapa
+  setTimeout(() => {
+    inicializarMapa();
+    carregarDadosReais();
+  }, 500);
 });
-
-// ==================== FUNÇÕES DE INTERFACE ====================
-function mostrarLoading() {
-  const loading = document.getElementById('loadingOverlay');
-  if (loading) loading.classList.add('active');
-}
-
-function ocultarLoading() {
-  const loading = document.getElementById('loadingOverlay');
-  if (loading) loading.classList.remove('active');
-}
 
 function inicializarInterface() {
   console.log('🎨 Inicializando interface...');
   
-  // Inicializar acordeões
-  const accordions = document.querySelectorAll('.accordion');
-  accordions.forEach(accordion => {
-    const header = accordion.querySelector('.accordion-header');
-    if (header) {
-      header.addEventListener('click', () => {
-        accordion.classList.toggle('active');
-      });
-    }
+  // Acordeões
+  document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', function() {
+      const accordion = this.parentElement;
+      accordion.classList.toggle('active');
+    });
   });
   
-  // Inicializar sliders
-  const sementesSlider = document.getElementById('param-sementes');
-  const raioSlider = document.getElementById('param-raio');
-  const sementesValue = document.getElementById('sementes-value');
-  const raioValue = document.getElementById('raio-value');
+  // Sliders
+  document.getElementById('param-sementes').addEventListener('input', function() {
+    document.getElementById('sementes-value').textContent = this.value;
+  });
   
-  if (sementesSlider && sementesValue) {
-    sementesSlider.addEventListener('input', function() {
-      sementesValue.textContent = this.value;
-    });
-  }
-  
-  if (raioSlider && raioValue) {
-    raioSlider.addEventListener('input', function() {
-      raioValue.textContent = this.value;
-    });
-  }
-}
-
-function inicializarEventos() {
-  console.log('🎯 Configurando eventos...');
+  document.getElementById('param-raio').addEventListener('input', function() {
+    document.getElementById('raio-value').textContent = this.value;
+  });
   
   // Toggles
   document.querySelectorAll('.toggle-item').forEach(item => {
@@ -1248,183 +739,135 @@ function inicializarEventos() {
       if (e.target.type === 'checkbox') return;
       this.classList.toggle('active');
       const checkbox = this.querySelector('input[type="checkbox"]');
-      if (checkbox) {
-        checkbox.checked = !checkbox.checked;
-        ativarCamada(checkbox.id.replace('toggle-', ''), checkbox.checked);
-      }
+      checkbox.checked = !checkbox.checked;
     });
   });
   
-  // Botão aplicar análise
-  const btnAplicar = document.getElementById('btn-aplicar');
-  if (btnAplicar) {
-    btnAplicar.addEventListener('click', aplicarAnaliseAvancada);
-  }
+  // Botões
+  document.getElementById('btn-aplicar').addEventListener('click', aplicarAnalise);
+  document.getElementById('btn-refresh').addEventListener('click', atualizarDados);
   
-  // Botão atualizar
-  const btnRefresh = document.getElementById('btn-refresh');
-  if (btnRefresh) {
-    btnRefresh.addEventListener('click', atualizarDadosReais);
-  }
+  // Controles do mapa
+  document.getElementById('btn-zoom-in').addEventListener('click', () => window.mapa.zoomIn());
+  document.getElementById('btn-zoom-out').addEventListener('click', () => window.mapa.zoomOut());
+  document.getElementById('btn-locate').addEventListener('click', () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        window.mapa.setView([pos.coords.latitude, pos.coords.longitude], 15);
+      });
+    }
+  });
+  document.getElementById('btn-fullscreen').addEventListener('click', () => {
+    const container = document.querySelector('.map-container');
+    if (!document.fullscreenElement) {
+      container.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  });
   
-  // Atualizar tempo em tempo real
-  setInterval(atualizarStatusTempo, 1000);
+  // Atualizar tempo
+  setInterval(() => {
+    const agora = new Date();
+    const hora = agora.getHours().toString().padStart(2, '0');
+    const minuto = agora.getMinutes().toString().padStart(2, '0');
+    document.getElementById('status-tempo').innerHTML = `<i class="fas fa-clock"></i> ${hora}:${minuto}`;
+  }, 1000);
 }
 
 function inicializarMapa() {
   console.log('🗺️ Inicializando mapa...');
   
-  if (!document.getElementById('map')) {
-    console.error('Container do mapa não encontrado!');
-    return;
+  // Verificar se já existe mapa
+  if (window.mapa) {
+    window.mapa.remove();
   }
   
-  // Inicializar mapa centralizado em Fortaleza
+  // Criar novo mapa
   window.mapa = L.map('map').setView([-3.7319, -38.5267], 12);
   
-  // Adicionar tile layer
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(window.mapa);
   
-  // Controles do mapa
-  const btnZoomIn = document.getElementById('btn-zoom-in');
-  const btnZoomOut = document.getElementById('btn-zoom-out');
-  const btnLocate = document.getElementById('btn-locate');
-  const btnFullscreen = document.getElementById('btn-fullscreen');
-  
-  if (btnZoomIn) btnZoomIn.addEventListener('click', () => window.mapa.zoomIn());
-  if (btnZoomOut) btnZoomOut.addEventListener('click', () => window.mapa.zoomOut());
-  
-  if (btnLocate) {
-    btnLocate.addEventListener('click', () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          window.mapa.setView([pos.coords.latitude, pos.coords.longitude], 15);
-        }, () => {
-          alert('Não foi possível obter sua localização');
-        });
-      }
-    });
-  }
-  
-  if (btnFullscreen) {
-    btnFullscreen.addEventListener('click', toggleFullscreen);
-  }
-  
   console.log('✅ Mapa inicializado');
 }
 
-function toggleFullscreen() {
-  const mapContainer = document.querySelector('.map-container');
-  if (!document.fullscreenElement) {
-    mapContainer.requestFullscreen?.().catch(console.log);
-  } else {
-    document.exitFullscreen?.();
-  }
-}
-
-// ==================== FUNÇÕES DE DADOS REAIS ====================
 async function carregarDadosReais() {
-  console.log('📊 Carregando dados REAIS do Firebase...');
+  console.log('📊 Carregando dados do Firebase...');
   
   try {
-    // Verificar se o sistema de dados está disponível
+    // Usar dadosManager se disponível
     if (window.dadosManager && typeof window.dadosManager.inicializar === 'function') {
-      console.log('🔗 Conectando ao Firebase via dadosManager...');
-      
-      // Inicializar o sistema de dados
       await window.dadosManager.inicializar();
-      
-      // Obter dados processados
       const escolas = window.dadosManager.getEscolas();
       const metricas = window.dadosManager.getMetricas();
       
       if (escolas && escolas.length > 0) {
-        console.log(`✅ ${escolas.length} escolas carregadas do Firebase`);
-        processarDadosReais(escolas, metricas);
-        atualizarStatusFonte('Firebase Ativo');
-      } else {
-        console.warn('⚠️ Nenhuma escola encontrada no Firebase, usando dados locais');
-        carregarDadosLocais();
+        console.log(`✅ ${escolas.length} escolas do Firebase`);
+        processarDados(escolas, metricas);
+        document.getElementById('status-fonte').innerHTML = '<i class="fas fa-fire"></i> Firebase Ativo';
       }
     } else {
-      console.warn('⚠️ dadosManager não disponível, usando dados locais');
-      carregarDadosLocais();
+      // Fallback para dados locais
+      console.log('⚠️ Usando dados locais');
+      if (typeof escolas !== 'undefined' && escolas.length > 0) {
+        processarDados(escolas, {});
+      }
+      document.getElementById('status-fonte').innerHTML = '<i class="fas fa-database"></i> Dados Locais';
     }
   } catch (error) {
-    console.error('❌ Erro ao carregar dados do Firebase:', error);
-    carregarDadosLocais();
-  }
-}
-
-async function atualizarDadosReais() {
-  console.log('🔄 Atualizando dados do Firebase...');
-  mostrarLoading();
-  
-  try {
-    // Limpar mapa antes de recarregar
-    window.mapa.eachLayer(layer => {
-      if (layer instanceof L.Marker || layer instanceof L.HeatLayer || 
-          (layer instanceof L.Polygon && layer.options.className === 'voronoi')) {
-        window.mapa.removeLayer(layer);
-      }
-    });
-    
-    // Recarregar dados
-    await carregarDadosReais();
-    
-    // Atualizar histórico
-    const agora = new Date();
-    const hora = agora.getHours().toString().padStart(2, '0');
-    const minuto = agora.getMinutes().toString().padStart(2, '0');
-    
-    atualizarHistorico([
-      {time: `${hora}:${minuto}`, text: 'Dados atualizados do Firebase'}
-    ]);
-    
-  } catch (error) {
-    console.error('❌ Erro ao atualizar dados:', error);
+    console.error('❌ Erro ao carregar dados:', error);
+    document.getElementById('status-fonte').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erro de Conexão';
   }
   
-  setTimeout(ocultarLoading, 1000);
+  // Ocultar loading
+  setTimeout(() => {
+    document.getElementById('loadingOverlay').classList.remove('active');
+  }, 1000);
 }
 
-function carregarDadosLocais() {
-  console.log('📁 Usando dados locais...');
-  
-  // Verificar se existem dados locais
-  if (typeof escolas !== 'undefined' && escolas.length > 0) {
-    processarDadosReais(escolas, calcularMetricas(escolas));
-    atualizarStatusFonte('Dados Locais');
-  } else {
-    console.warn('⚠️ Nenhum dado local disponível, usando demonstração');
-    criarDadosDemonstracao();
-  }
-}
-
-function processarDadosReais(escolas, metricas) {
+function processarDados(escolas, metricas) {
   console.log(`📈 Processando ${escolas.length} escolas...`);
   
-  // Atualizar dashboard com dados reais
-  atualizarDashboard({
-    totalEscolas: metricas?.totalEscolas || escolas.length,
-    escolasCriticas: metricas?.escolasCriticas || escolas.filter(e => e.status === 'crítico').length,
-    escolasAvaliadas: metricas?.escolasAvaliadas || escolas.filter(e => e.pontuacao).length,
-    pontuacaoMedia: metricas?.pontuacaoMedia || '0.0',
-    distribuicao: metricas?.distribuicaoClasses || calcularDistribuicao(escolas)
-  });
+  // Atualizar dashboard
+  document.getElementById('metric-total').textContent = escolas.length;
+  document.getElementById('metric-criticas').textContent = escolas.filter(e => e.status === 'crítico').length;
+  document.getElementById('metric-avaliadas').textContent = escolas.filter(e => e.pontuacao).length;
   
-  // Atualizar indicadores
-  atualizarIndicadores({
-    densidade: calcularDensidadeCritica(escolas),
-    concentracao: calcularConcentracao(escolas),
-    hotspots: calcularHotspots(escolas),
-    gini: calcularGiniEspacial(escolas)
+  // Calcular pontuação média
+  const escolasComPontuacao = escolas.filter(e => e.pontuacao && typeof e.pontuacao === 'number');
+  const pontuacaoMedia = escolasComPontuacao.length > 0 
+    ? (escolasComPontuacao.reduce((sum, e) => sum + e.pontuacao, 0) / escolasComPontuacao.length).toFixed(1)
+    : '0.0';
+  document.getElementById('metric-pontuacao').textContent = pontuacaoMedia;
+  
+  // Calcular distribuição
+  const distribuicao = {
+    'crítico': escolas.filter(e => e.status === 'crítico').length,
+    'atenção': escolas.filter(e => e.status === 'atenção').length,
+    'alerta': escolas.filter(e => e.status === 'alerta').length,
+    'adequada': escolas.filter(e => e.status === 'adequada').length
+  };
+  
+  const total = Object.values(distribuicao).reduce((a, b) => a + b, 0);
+  
+  ['crítico', 'atenção', 'alerta', 'adequada'].forEach(status => {
+    const quantidade = distribuicao[status] || 0;
+    const percentual = total > 0 ? Math.round((quantidade / total) * 100) : 0;
+    
+    const barra = Array.from(document.querySelectorAll('.bar-label')).find(el => el.textContent === status.charAt(0).toUpperCase() + status.slice(1));
+    if (barra) {
+      const container = barra.parentElement.querySelector('.bar-fill');
+      const valor = barra.parentElement.querySelector('.bar-value');
+      
+      if (container) container.style.width = `${percentual}%`;
+      if (valor) valor.textContent = `${percentual}%`;
+    }
   });
   
   // Plotar escolas no mapa
-  plotarEscolasNoMapa(escolas);
+  plotarEscolas(escolas);
   
   // Atualizar histórico
   const agora = new Date();
@@ -1433,16 +876,11 @@ function processarDadosReais(escolas, metricas) {
   
   atualizarHistorico([
     {time: `${hora}:${minuto}`, text: `Dados carregados: ${escolas.length} escolas`},
-    {time: `${hora}:${minuto}`, text: `${metricas?.escolasCriticas || 0} escolas críticas`},
-    {time: `${hora}:${minuto}`, text: 'Sistema de análise pronto'}
+    {time: `${hora}:${minuto}`, text: `Pontuação média: ${pontuacaoMedia}`}
   ]);
 }
 
-function plotarEscolasNoMapa(escolas) {
-  if (!window.mapa) return;
-  
-  console.log(`🗺️ Plotando ${escolas.length} escolas no mapa...`);
-  
+function plotarEscolas(escolas) {
   // Limpar marcadores existentes
   window.mapa.eachLayer(layer => {
     if (layer instanceof L.Marker) {
@@ -1450,11 +888,10 @@ function plotarEscolasNoMapa(escolas) {
     }
   });
   
-  // Adicionar cada escola como marcador
+  // Adicionar marcadores
   escolas.forEach(escola => {
     if (!escola.lat || !escola.lng) return;
     
-    // Determinar cor baseada no status
     let cor;
     switch(escola.status) {
       case 'crítico': cor = '#dc3545'; break;
@@ -1464,359 +901,72 @@ function plotarEscolasNoMapa(escolas) {
       default: cor = '#6c757d';
     }
     
-    // Criar marcador
     const marker = L.circleMarker([escola.lat, escola.lng], {
       radius: 8,
       fillColor: cor,
       color: '#fff',
       weight: 2,
-      opacity: 1,
-      fillOpacity: 0.8,
-      className: 'escola-marker'
+      fillOpacity: 0.8
     });
     
-    // Tooltip com informações
-    const popupContent = `
-      <div style="padding: 5px;">
-        <strong>${escola.nome || 'Escola'}</strong><br>
-        <small>${escola.endereco || ''}</small><br>
-        Status: <strong style="color:${cor}">${escola.status || 'N/A'}</strong><br>
-        Pontuação: <strong>${escola.pontuacao || 'N/A'}</strong><br>
-        ${escola.data_avaliacao ? `Data: ${escola.data_avaliacao}` : ''}
-      </div>
-    `;
-    
-    marker.bindPopup(popupContent);
+    const popup = `<strong>${escola.nome || 'Escola'}</strong><br>Status: ${escola.status}<br>Pontuação: ${escola.pontuacao || 'N/A'}`;
+    marker.bindPopup(popup);
     marker.addTo(window.mapa);
-    
-    // Armazenar dados da escola no marcador
     marker.options.escolaData = escola;
   });
   
-  console.log('✅ Escolas plotadas no mapa');
+  console.log(`✅ ${escolas.length} escolas plotadas`);
 }
 
-// ==================== FUNÇÕES DE ANÁLISE ====================
-function aplicarAnaliseAvancada() {
-  console.log('⚡ Aplicando análise avançada...');
+function atualizarDados() {
+  console.log('🔄 Atualizando dados...');
+  document.getElementById('loadingOverlay').classList.add('active');
+  setTimeout(() => {
+    carregarDadosReais();
+  }, 1000);
+}
+
+function aplicarAnalise() {
+  console.log('⚡ Aplicando análise...');
   
   const criticidade = document.getElementById('param-criticidade').value;
   const sementes = parseInt(document.getElementById('param-sementes').value);
   const raio = parseInt(document.getElementById('param-raio').value);
   
-  // Mostrar loading
-  mostrarLoading();
-  
-  // Aplicar análises baseadas nas camadas ativas
-  const camadasAtivas = {
-    kde: document.getElementById('toggle-kde').checked,
-    voronoi: document.getElementById('toggle-voronoi').checked,
-    zonas: document.getElementById('toggle-zonas').checked,
-    densidade: document.getElementById('toggle-densidade').checked,
-    concentracao: document.getElementById('toggle-concentracao').checked,
-    gini: document.getElementById('toggle-gini').checked,
-    rede: document.getElementById('toggle-rede').checked
-  };
-  
-  // Limpar análises anteriores (exceto escolas)
-  window.mapa.eachLayer(layer => {
-    if (layer instanceof L.HeatLayer || 
-        (layer instanceof L.Polygon && layer.options.className === 'voronoi') ||
-        (layer instanceof L.Polygon && layer.options.className === 'zona-risco')) {
-      window.mapa.removeLayer(layer);
-    }
-  });
-  
-  // Aplicar KDE
-  if (camadasAtivas.kde && window.calcularKDE) {
-    setTimeout(() => {
-      window.calcularKDE(criticidade, raio);
-    }, 500);
+  // Aplicar KDE se ativo
+  if (document.getElementById('toggle-kde').checked) {
+    window.calcularKDE(criticidade, raio);
   }
   
-  // Aplicar Voronoi
-  if (camadasAtivas.voronoi && window.gerarVoronoiCritico) {
-    setTimeout(() => {
-      window.gerarVoronoiCritico(sementes, criticidade);
-    }, 800);
+  // Aplicar Voronoi se ativo
+  if (document.getElementById('toggle-voronoi').checked && window.gerarVoronoiCritico) {
+    window.gerarVoronoiCritico(sementes, criticidade);
   }
   
-  // Aplicar outras análises
-  if (camadasAtivas.zonas && window.analisarZonasRisco) {
-    setTimeout(() => {
-      window.analisarZonasRisco();
-    }, 1100);
-  }
-  
-  // Atualizar indicadores
-  setTimeout(() => {
-    // Simular cálculo de indicadores avançados
-    const novasMetricas = {
-      densidade: `${Math.floor(Math.random() * 30) + 10}%`,
-      concentracao: (Math.random() * 5 + 1).toFixed(1),
-      hotspots: Math.floor(Math.random() * 10) + 1,
-      gini: (Math.random() * 0.5 + 0.3).toFixed(2)
-    };
-    
-    atualizarIndicadores(novasMetricas);
-    
-    // Atualizar histórico
-    const agora = new Date();
-    const hora = agora.getHours().toString().padStart(2, '0');
-    const minuto = agora.getMinutes().toString().padStart(2, '0');
-    
-    atualizarHistorico([
-      {time: `${hora}:${minuto}`, text: `Análise aplicada: ${Object.keys(camadasAtivas).filter(k => camadasAtivas[k]).length} camadas`},
-      {time: `${hora}:${minuto}`, text: `Criticidade: ${criticidade}, Sementes: ${sementes}, Raio: ${raio}m`}
-    ]);
-    
-    ocultarLoading();
-  }, 1500);
-  
-  console.log(`✅ Análise aplicada: ${criticidade}, ${sementes} sementes, ${raio}m raio`);
-}
-
-function ativarCamada(camada, ativo) {
-  console.log(`🗺️ ${ativo ? 'Ativando' : 'Desativando'} camada: ${camada}`);
-  
-  // Se estiver ativando, aplicar análise imediatamente
-  if (ativo) {
-    const criticidade = document.getElementById('param-criticidade').value;
-    const sementes = parseInt(document.getElementById('param-sementes').value);
-    const raio = parseInt(document.getElementById('param-raio').value);
-    
-    switch(camada) {
-      case 'kde':
-        if (window.calcularKDE) window.calcularKDE(criticidade, raio);
-        break;
-      case 'voronoi':
-        if (window.gerarVoronoiCritico) window.gerarVoronoiCritico(sementes, criticidade);
-        break;
-      case 'zonas':
-        if (window.analisarZonasRisco) window.analisarZonasRisco();
-        break;
-    }
-  } else {
-    // Se estiver desativando, remover a camada
-    window.mapa.eachLayer(layer => {
-      let remove = false;
-      
-      switch(camada) {
-        case 'kde':
-          if (layer instanceof L.HeatLayer) remove = true;
-          break;
-        case 'voronoi':
-          if (layer instanceof L.Polygon && layer.options.className === 'voronoi') remove = true;
-          break;
-        case 'zonas':
-          if (layer instanceof L.Polygon && layer.options.className === 'zona-risco') remove = true;
-          break;
-      }
-      
-      if (remove) window.mapa.removeLayer(layer);
-    });
-  }
-}
-
-// ==================== FUNÇÕES DO DASHBOARD ====================
-function atualizarDashboard(dados) {
-  // Métricas principais
-  document.getElementById('metric-total').textContent = dados.totalEscolas || 0;
-  document.getElementById('metric-criticas').textContent = dados.escolasCriticas || 0;
-  document.getElementById('metric-avaliadas').textContent = dados.escolasAvaliadas || 0;
-  document.getElementById('metric-pontuacao').textContent = dados.pontuacaoMedia || '0.0';
-  
-  // Distribuição por classe
-  if (dados.distribuicao) {
-    atualizarGraficoDistribuicao(dados.distribuicao);
-  }
-}
-
-function atualizarGraficoDistribuicao(distribuicao) {
-  const total = Object.values(distribuicao).reduce((a, b) => a + b, 0);
-  if (total === 0) return;
-  
-  const classes = [
-    {nome: 'Crítico', cor: '#dc3545', chave: 'crítico'},
-    {nome: 'Atenção', cor: '#fd7e14', chave: 'atenção'},
-    {nome: 'Alerta', cor: '#ffc107', chave: 'alerta'},
-    {nome: 'Adequada', cor: '#28a745', chave: 'adequada'}
-  ];
-  
-  classes.forEach(classe => {
-    const quantidade = distribuicao[classe.chave] || 0;
-    const percentual = total > 0 ? Math.round((quantidade / total) * 100) : 0;
-    
-    // Encontrar a barra correspondente
-    const barra = Array.from(document.querySelectorAll('.bar-label'))
-      .find(el => el.textContent === classe.nome)?.parentNode;
-    
-    if (barra) {
-      const barFill = barra.querySelector('.bar-fill');
-      const barValue = barra.querySelector('.bar-value');
-      
-      if (barFill) {
-        setTimeout(() => {
-          barFill.style.width = `${percentual}%`;
-          barFill.style.background = classe.cor;
-        }, 100);
-      }
-      
-      if (barValue) {
-        barValue.textContent = `${percentual}%`;
-      }
-    }
-  });
-}
-
-function atualizarIndicadores(indicadores) {
-  document.getElementById('ind-densidade').textContent = indicadores.densidade || '0%';
-  document.getElementById('ind-concentracao').textContent = indicadores.concentracao || '0.0';
-  document.getElementById('ind-hotspots').textContent = indicadores.hotspots || '0';
-  document.getElementById('ind-gini').textContent = indicadores.gini || '0.00';
-}
-
-function atualizarHistorico(historico) {
-  const container = document.querySelector('#ultimas-atualizacoes');
-  if (!container) return;
-  
-  // Manter apenas as 5 últimas atualizações
-  const historicoLimitado = historico.slice(0, 5);
-  
-  container.innerHTML = '';
-  historicoLimitado.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'update-item';
-    div.innerHTML = `
-      <div class="update-time">${item.time}</div>
-      <div class="update-text">${item.text}</div>
-    `;
-    container.appendChild(div);
-  });
-}
-
-function atualizarStatusTempo() {
+  // Atualizar histórico
   const agora = new Date();
   const hora = agora.getHours().toString().padStart(2, '0');
   const minuto = agora.getMinutes().toString().padStart(2, '0');
-  const statusTempo = document.getElementById('status-tempo');
-  if (statusTempo) {
-    statusTempo.innerHTML = `<i class="fas fa-clock"></i> ${hora}:${minuto}`;
-  }
-}
-
-function atualizarStatusFonte(fonte) {
-  const statusFonte = document.getElementById('status-fonte');
-  if (statusFonte) {
-    statusFonte.innerHTML = `<i class="fas fa-${fonte.includes('Firebase') ? 'fire' : 'database'}"></i> ${fonte}`;
-  }
-}
-
-// ==================== FUNÇÕES AUXILIARES ====================
-function calcularMetricas(escolas) {
-  const totalEscolas = escolas.length;
-  const escolasCriticas = escolas.filter(e => e.status === 'crítico').length;
-  const escolasAvaliadas = escolas.filter(e => e.pontuacao && e.pontuacao > 0).length;
   
-  const escolasComPontuacao = escolas.filter(e => e.pontuacao && typeof e.pontuacao === 'number');
-  const pontuacaoMedia = escolasComPontuacao.length > 0 
-    ? (escolasComPontuacao.reduce((sum, e) => sum + e.pontuacao, 0) / escolasComPontuacao.length).toFixed(1)
-    : '0.0';
+  atualizarHistorico([
+    {time: `${hora}:${minuto}`, text: `Análise aplicada: criticidade=${criticidade}`},
+    {time: `${hora}:${minuto}`, text: `Sementes: ${sementes}, Raio: ${raio}m`}
+  ]);
   
-  return {
-    totalEscolas,
-    escolasCriticas,
-    escolasAvaliadas,
-    pontuacaoMedia,
-    distribuicaoClasses: calcularDistribuicao(escolas)
-  };
+  console.log('✅ Análise aplicada');
 }
 
-function calcularDistribuicao(escolas) {
-  return {
-    'crítico': escolas.filter(e => e.status === 'crítico').length,
-    'atenção': escolas.filter(e => e.status === 'atenção').length,
-    'alerta': escolas.filter(e => e.status === 'alerta').length,
-    'adequada': escolas.filter(e => e.status === 'adequada').length
-  };
-}
-
-function calcularDensidadeCritica(escolas) {
-  const criticas = escolas.filter(e => e.status === 'crítico').length;
-  const total = escolas.length;
-  return total > 0 ? `${Math.round((criticas / total) * 100)}%` : '0%';
-}
-
-function calcularConcentracao(escolas) {
-  // Simular cálculo de concentração
-  const criticas = escolas.filter(e => e.status === 'crítico').length;
-  return criticas > 0 ? (Math.random() * 4 + 1).toFixed(1) : '0.0';
-}
-
-function calcularHotspots(escolas) {
-  const criticas = escolas.filter(e => e.status === 'crítico').length;
-  return Math.min(Math.floor(criticas / 3), 10);
-}
-
-function calcularGiniEspacial(escolas) {
-  // Simular índice de Gini espacial
-  return (Math.random() * 0.5 + 0.3).toFixed(2);
-}
-
-function criarDadosDemonstracao() {
-  console.log('🎭 Criando dados de demonstração...');
+function atualizarHistorico(historico) {
+  const container = document.querySelector('.update-list');
+  container.innerHTML = '';
   
-  const escolasDemonstracao = [];
-  const statuses = ['crítico', 'atenção', 'alerta', 'adequada'];
-  
-  // Coordenadas aproximadas de Fortaleza
-  const centroLat = -3.7319;
-  const centroLng = -38.5267;
-  
-  // Gerar ~30 escolas aleatórias
-  for (let i = 1; i <= 28; i++) {
-    const statusIndex = Math.floor(Math.random() * statuses.length);
-    const status = statuses[statusIndex];
-    
-    // Pontuação baseada no status
-    let pontuacao;
-    switch(status) {
-      case 'crítico': pontuacao = 1.5 + Math.random() * 1.5; break;
-      case 'atenção': pontuacao = 3 + Math.random() * 2; break;
-      case 'alerta': pontuacao = 5 + Math.random() * 2; break;
-      case 'adequada': pontuacao = 7 + Math.random() * 3; break;
-    }
-    
-    // Coordenadas aleatórias próximas ao centro
-    const lat = centroLat + (Math.random() - 0.5) * 0.1;
-    const lng = centroLng + (Math.random() - 0.5) * 0.1;
-    
-    escolasDemonstracao.push({
-      id: i,
-      nome: `Escola Demonstração ${i}`,
-      endereco: `Rua Exemplo ${i}, Fortaleza-CE`,
-      pontuacao: parseFloat(pontuacao.toFixed(1)),
-      status: status,
-      lat: lat,
-      lng: lng,
-      data_avaliacao: new Date().toISOString().split('T')[0]
-    });
-  }
-  
-  const metricas = calcularMetricas(escolasDemonstracao);
-  processarDadosReais(escolasDemonstracao, metricas);
-  atualizarStatusFonte('Dados de Demonstração');
+  historico.slice(0, 5).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'update-item';
+    div.innerHTML = `<div class="update-time">${item.time}</div><div class="update-text">${item.text}</div>`;
+    container.appendChild(div);
+  });
 }
-
-// ==================== INICIALIZAÇÃO COMPLETA ====================
-console.log('✅ Sistema pronto para uso!');
-
-// Expor funções globais para os módulos
-window.aplicarAnaliseAvancada = aplicarAnaliseAvancada;
-window.ativarCamada = ativarCamada;
-window.atualizarDadosReais = atualizarDadosReais;
-window.plotarEscolasNoMapa = plotarEscolasNoMapa;
 </script>
-
 </body>
 </html>
