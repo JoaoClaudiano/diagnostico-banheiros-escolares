@@ -192,6 +192,10 @@ removerDuplicatas() {
           pontuacao: 0,
           peso: (window.PESOS_CLASSE && window.PESOS_CLASSE['não avaliada']) || 0.5
         });
+        
+        // Dentro do método combinarDados(), adicione no final:
+this.removerDuplicatas();
+        
       }
       
       // Adicionar avaliação
