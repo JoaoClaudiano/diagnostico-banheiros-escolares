@@ -11,6 +11,29 @@ class DadosManager {
     
     this.eventListeners = new Map();
     this.initialized = false;
+    
+    // Adicione ao final da classe DadosManager, antes do } (fechamento da classe)
+removerDuplicatas() {
+  console.log('🔍 Removendo duplicatas de escolas...');
+  
+  const escolasUnicas = [];
+  const nomesProcessados = new Set();
+  
+  this.dados.escolas.forEach(escola => {
+    const chave = `${escola.nome.toLowerCase()}_${escola.lat.toFixed(6)}_${escola.lng.toFixed(6)}`;
+    
+    if (!nomesProcessados.has(chave)) {
+      nomesProcessados.add(chave);
+      escolasUnicas.push(escola);
+    } else {
+      console.log(`⚠️ Removendo duplicata: ${escola.nome}`);
+    }
+  });
+  
+  this.dados.escolas = escolasUnicas;
+  console.log(`✅ ${this.dados.escolas.length} escolas únicas após remoção de duplicatas`);
+}
+    
   }
   
   async inicializar() {
