@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Análise Espacial</title>
+    <link rel="stylesheet" href="estilo.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar de Indicadores -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-bar"></i> Indicadores</h2>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <div class="indicators-container" id="indicatorsContainer">
+                <!-- Indicadores serão carregados dinamicamente via sidebar.js -->
+                <div class="loading-indicators">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando indicadores...
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-dot active"></span>
+                    <span>Sistema Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho com Abas -->
+            <header class="main-header">
+                <div class="logo-section">
+                    <h1><i class="fas fa-map-marked-alt"></i> Análise Espacial</h1>
+                    <p class="subtitle">Plataforma de monitoramento territorial</p>
+                </div>
+                
+                <div class="tabs-container">
+                    <div class="tabs" id="mainTabs">
+                        <button class="tab active" data-tab="mapa">
+                            <i class="fas fa-map"></i> Mapa
+                        </button>
+                        <button class="tab" data-tab="ranking">
+                            <i class="fas fa-trophy"></i> Ranking
+                        </button>
+                        <button class="tab" data-tab="metodologia">
+                            <i class="fas fa-book"></i> Metodologia
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="header-controls">
+                    <button class="btn-icon" id="fullscreenBtn" title="Tela cheia">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="btn-icon" id="exportBtn" title="Exportar dados">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Conteúdo das Abas -->
+            <div class="tab-content">
+                <!-- Aba Mapa -->
+                <div class="tab-pane active" id="mapa-pane">
+                    <div class="map-container">
+                        <div id="map"></div>
+                        
+                        <div class="map-controls">
+                            <div class="map-control-group">
+                                <button class="map-control-btn" id="zoomIn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="map-control-btn" id="zoomOut">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button class="map-control-btn" id="resetView">
+                                    <i class="fas fa-home"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="layer-controls">
+                                <div class="layer-control">
+                                    <input type="checkbox" id="heatmapToggle" checked>
+                                    <label for="heatmapToggle">Heatmap</label>
+                                </div>
+                                <div class="layer-control">
+                                    <input type="checkbox" id="boundariesToggle" checked>
+                                    <label for="boundariesToggle">Limites</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="map-legend" id="mapLegend">
+                            <div class="legend-header">
+                                <h4>Legenda</h4>
+                            </div>
+                            <div class="legend-content">
+                                <!-- Conteúdo da legenda será preenchido dinamicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Ranking -->
+                <div class="tab-pane" id="ranking-pane">
+                    <div class="ranking-container">
+                        <div class="ranking-header">
+                            <h3><i class="fas fa-list-ol"></i> Ranking de Territórios</h3>
+                            <div class="ranking-filters">
+                                <select id="rankingFilter">
+                                    <option value="pareto">Índice Pareto</option>
+                                    <option value="densidade">Densidade Crítica</option>
+                                    <option value="concentracao">Concentração Relativa</option>
+                                    <option value="zonas">Zonas Prioritárias</option>
+                                </select>
+                                <button class="btn-secondary" id="exportRanking">
+                                    <i class="fas fa-file-export"></i> Exportar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="ranking-table-container">
+                            <table class="ranking-table" id="rankingTable">
+                                <thead>
+                                    <tr>
+                                        <th>Posição</th>
+                                        <th>Território</th>
+                                        <th>Índice</th>
+                                        <th>Valor</th>
+                                        <th>Tendência</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dados do ranking serão preenchidos dinamicamente -->
+                                    <tr>
+                                        <td colspan="5" class="loading-row">
+                                            <i class="fas fa-spinner fa-spin"></i> Carregando ranking...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="ranking-footer">
+                            <div class="pagination">
+                                <button class="page-btn" disabled>Anterior</button>
+                                <span class="page-info">Página 1 de 1</span>
+                                <button class="page-btn">Próxima</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Metodologia -->
+                <div class="tab-pane" id="metodologia-pane">
+                    <div class="methodology-container">
+                        <div class="methodology-header">
+                            <h3><i class="fas fa-clipboard-check"></i> Metodologia da Análise</h3>
+                        </div>
+                        
+                        <div class="methodology-content">
+                            <div class="methodology-card">
+                                <h4><i class="fas fa-bullseye"></i> Objetivo</h4>
+                                <p>Esta plataforma tem como objetivo fornecer análises espaciais integradas para suporte à tomada de decisão em políticas públicas e planejamento territorial.</p>
+                            </div>
+                            
+                            <div class="indicators-grid">
+                                <div class="indicator-card">
+                                    <h5><i class="fas fa-chart-line"></i> Índice Pareto</h5>
+                                    <p>Identifica áreas onde 20% dos territórios concentram 80% dos fenômenos analisados.</p>
+                                </div>
+                                
+                                <div class="indicator-card">
+                                    <h5><i class="fas fa-users"></i> Densidade Crítica</h5>
+                                    <p>Avalia a concentração populacional em relação à capacidade de infraestrutura.</p>
+                                </div>
+                                
+                                <div class="indicator-card">
+                                    <h5><i class="fas fa-balance-scale"></i> Concentração Relativa</h5>
+                                    <p>Compara a distribuição espacial de recursos em relação à demanda.</p>
+                                </div>
+                                
+                                <div class="indicator-card">
+                                    <h5><i class="fas fa-exclamation-triangle"></i> Zonas Prioritárias</h5>
+                                    <p>Identifica áreas que requerem intervenções imediatas baseadas em múltiplos critérios.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="methodology-card">
+                                <h4><i class="fas fa-database"></i> Fontes de Dados</h4>
+                                <ul>
+                                    <li>Instituto Brasileiro de Geografia e Estatística (IBGE)</li>
+                                    <li>Cadastro Nacional de Endereços para Fins Estatísticos (CNEFE)</li>
+                                    <li>Ministério das Cidades</li>
+                                    <li>Secretarias Estaduais e Municipais</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rodapé -->
+            <footer class="main-footer">
+                <div class="footer-content">
+                    <div class="footer-info">
+                        <span><i class="fas fa-calendar-alt"></i> Última atualização: <span id="lastUpdate">Carregando...</span></span>
+                        <span><i class="fas fa-copyright"></i> Plataforma de Análise Espacial 2024</span>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-question-circle"></i> Ajuda</a>
+                        <a href="#"><i class="fas fa-envelope"></i> Contato</a>
+                        <a href="#"><i class="fas fa-shield-alt"></i> Privacidade</a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- Scripts do Projeto -->
+    <script src="sidebar.js"></script>
+    <script src="mapa.js"></script>
+    <script src="abas.js"></script>
+    <script src="recalculos.js"></script>
+    <script src="eventos.js"></script>
+</body>
+</html>
