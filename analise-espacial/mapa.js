@@ -1,77 +1,124 @@
+// mapa.js - VERSÃO CORRIGIDA
+let map = null;
+let marcadores = [];
+let heatmapLayer = null;
 
-/* =========================
-   MAPA PRINCIPAL
-========================= */
-const map = L.map("map").setView([-3.7319, -38.5267], 12);
-
-// TileLayer
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
-
-/* =========================
-   CAMADAS
-========================= */
-const camadaHeatmap = L.heatLayer([], {
-  radius: 35,
-  blur: 25,
-  minOpacity: 0.35
-}).addTo(map);
-
-const camadaZonas = L.layerGroup().addTo(map);
-
-/* =========================
-   VARIÁVEIS GLOBAIS
-========================= */
-let dadosOriginais = [];
-let modoIndicador = 1;
-
-/* =========================
-   FUNÇÃO DE DEBUG
-========================= */
-function logDados() {
-  console.log("Dados originais:", dadosOriginais);
+// Inicializar mapa
+function inicializarMapa() {
+    if (map) return map;
+    
+    // Coordenadas centrais de Fortaleza
+    const centroFortaleza = [-3.717, -38.543];
+    
+    // Criar mapa
+    map = L.map('map').setView(centroFortaleza, 12);
+    window.map = map; // Para compatibilidade com código existente
+    
+    // Adicionar tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    console.log('🗺️ Mapa inicializado');
+    
+    // Escutar atualizações de dados
+    if (window.dadosManager) {
+        window.dadosManager.adicionarListener('dados_atualizados', function(dados) {
+            atualizarMarcadoresNoMapa(dados.escolas);
+        });
+    }
+    
+    return map;
 }
 
-/* =========================
-   CARREGAMENTO DE DADOS
-========================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbyt4wD8LQ67NOD-Zz7EEvfc7RuYEhKDYE50gkK7rp-47idg6STKUGqk5pYVDclamentdQ/exec";
-
-fetch(API_URL)
-  .then(r => r.json())
-  .then(d => {
-    dadosOriginais = d;
-    logDados();
+// Atualizar marcadores no mapa
+function atualizarMarcadoresNoMapa(escolas) {
+    if (!map) return;
     
-    // Chamar função de recalculo que agora está em recalculos.js
-    if (typeof recalcularMapa === 'function') {
-      recalcularMapa(dadosOriginais);
-    } else {
-      console.error("Erro: função recalcularMapa não encontrada!");
-      // Fallback básico
-      d.forEach(e => {
-        if (e.lat && e.lng) {
-          camadaHeatmap.addLatLng([e.lat, e.lng, 0.5]);
-        }
-      });
+    // Limpar marcadores anteriores
+    marcadores.forEach(marker => map.removeLayer(marker));
+    marcadores = [];
+    
+    // Adicionar novos marcadores
+    escolas.forEach(escola => {
+        if (!escola.lat || !escola.lng) return;
+        
+        const marker = L.circleMarker([escola.lat, escola.lng], {
+            radius: 8,
+            fillColor: escola.cor || '#1f4fd8',
+            color: '#000',
+            weight: 1,
+            opacity: 0.8,
+            fillOpacity: 0.7
+        });
+        
+        // Tooltip com informações
+        marker.bindPopup(`
+            <strong>${escola.nome}</strong><br>
+            Classe: ${escola.classe}<br>
+            Pontuação: ${escola.pontuacao || 0}<br>
+            Avaliações: ${escola.avaliacoes?.length || 0}
+        `);
+        
+        marker.addTo(map);
+        marcadores.push(marker);
+    });
+    
+    console.log(`📍 ${marcadores.length} marcadores adicionados ao mapa`);
+}
+
+// Função para invalidar tamanho (corrigir renderização)
+function invalidarTamanhoMapa() {
+    if (map) {
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
     }
-  })
-  .catch(err => console.error("Erro ao carregar dados:", err));
+}
 
-// REMOVIDO: funções gerarGrid e recalcularMapa duplicadas
-// (elas já existem em recalculos.js)
+// Adicionar mapa de calor (KDE)
+function adicionarMapaCalor(pontos) {
+    if (!map) return;
+    
+    // Remover camada anterior
+    if (heatmapLayer) {
+        map.removeLayer(heatmapLayer);
+    }
+    
+    // Converter pontos para formato do leaflet.heat
+    const heatPoints = pontos.map(ponto => [
+        ponto.lat, 
+        ponto.lng, 
+        ponto.valor || 1
+    ]);
+    
+    // Adicionar camada de calor
+    heatmapLayer = L.heatLayer(heatPoints, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 17,
+        gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+    }).addTo(map);
+    
+    console.log('🔥 Mapa de calor adicionado');
+}
 
-/* =========================
-   EVENTOS DO MAPA
-========================= */
-// Recalcular ao mover/zoom o mapa
-map.on("moveend", () => {
-  if (typeof recalcularMapa === 'function') {
-    recalcularMapa(dadosOriginais);
-  }
+// Inicializar quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🗺️ Inicializando mapa...');
+    
+    // Aguardar um pouco para garantir que o container está pronto
+    setTimeout(() => {
+        inicializarMapa();
+        
+        // Atualizar com dados se já estiverem carregados
+        if (window.dadosManager && window.dadosManager.getEscolas().length > 0) {
+            atualizarMarcadoresNoMapa(window.dadosManager.getEscolas());
+        }
+    }, 500);
 });
 
-// Mudança de indicador (removido - agora está em eventos.js)
-// Toggle zonas prioritárias (removido - agora está em eventos.js)
-
+// Exportar funções para uso global
+window.inicializarMapa = inicializarMapa;
+window.atualizarMarcadoresNoMapa = atualizarMarcadoresNoMapa;
+window.invalidarTamanhoMapa = invalidarTamanhoMapa;
