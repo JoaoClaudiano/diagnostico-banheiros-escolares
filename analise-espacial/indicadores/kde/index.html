@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Kernel Density Estimation (KDE)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<main>
+<div class="card">
+<h1>📍 Kernel Density Estimation (KDE)</h1>
+
+<p><strong>KDE</strong> é um método estatístico para estimar a densidade de pontos em uma área geográfica.</p>
+
+<div class="conceito">
+<h2>🧠 Conceito Matemático</h2>
+<p>Cada escola crítica "espalha" sua influência ao redor, criando um campo de densidade que decai com a distância.</p>
+<p>Fórmula do kernel gaussiano:</p>
+<div class="formula">K(d) = e^(-0.5 × (d/h)²)</div>
+<p>Onde <em>d</em> é a distância e <em>h</em> é a largura de banda.</p>
+</div>
+
+<div class="aplicacao">
+<h2>🎯 Aplicação no CheckInfra</h2>
+<ul>
+<li><strong>Escola crítica:</strong> peso = 2.0</li>
+<li><strong>Escola em alerta:</strong> peso = 1.0</li>
+<li><strong>Escola adequada:</strong> não contribui para o KDE</li>
+</ul>
+</div>
+
+<div class="interpretacao">
+<h2>📊 Como Interpretar</h2>
+<div class="legenda">
+<div class="item-legenda">
+<span class="cor" style="background:#FFEDA0"></span>
+<span>Baixa densidade (0-15%)</span>
+</div>
+<div class="item-legenda">
+<span class="cor" style="background:#FEB24C"></span>
+<span>Média densidade (15-30%)</span>
+</div>
+<div class="item-legenda">
+<span class="cor" style="background:#FD8D3C"></span>
+<span>Alta densidade (30-50%)</span>
+</div>
+<div class="item-legenda">
+<span class="cor" style="background:#E31A1C"></span>
+<span>Muito alta (50%+)</span>
+</div>
+</div>
+</div>
+
+<div class="referencia">
+<h2>📚 Referência Técnica</h2>
+<p>Silverman, B. W. (1986). Density Estimation for Statistics and Data Analysis.</p>
+<p>Metodologia amplamente utilizada em epidemiologia espacial e análise criminal.</p>
+</div>
+</div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
