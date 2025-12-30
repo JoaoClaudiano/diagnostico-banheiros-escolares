@@ -580,6 +580,264 @@ input[type="checkbox"] {
   min-height: 60px;
   border: 1px dashed #ccc;
 }
+/* Estilos adicionais para a nova interface */
+
+/* Controles de parâmetros */
+.param-group {
+  margin-bottom: 15px;
+}
+
+.param-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+.param-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+.param-range {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.param-value {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background: #0d3cb6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 60, 182, 0.3);
+}
+
+/* Legenda do mapa */
+.map-legend {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  background: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.legend-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 1px solid #ddd;
+}
+
+.legend-label {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Dashboard sections */
+.dashboard-section {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.dashboard-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--primary);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Gráfico de barras */
+.chart-bar {
+  margin: 10px 0;
+}
+
+.bar-label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bar-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-fill {
+  height: 20px;
+  border-radius: 3px;
+  transition: width 1s ease-in-out;
+  min-width: 20px;
+}
+
+.bar-value {
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 35px;
+  text-align: right;
+}
+
+/* Lista de atualizações */
+.update-list {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.update-item {
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.update-time {
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: bold;
+  min-width: 45px;
+}
+
+.update-text {
+  font-size: 12px;
+  flex: 1;
+}
+
+/* Status grid */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.status-item {
+  text-align: center;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #6c757d;
+  margin: 0 auto 5px;
+}
+
+.status-indicator.active {
+  background: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+.status-label {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Popup do Voronoi */
+.voronoi-popup {
+  min-width: 200px;
+}
+
+.voronoi-popup h4 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.voronoi-popup p {
+  margin: 5px 0;
+  font-size: 13px;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.metric-card, .dashboard-section, .controle-section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsividade adicional */
+@media (max-width: 576px) {
+  .header-title h1 {
+    font-size: 16px;
+  }
+  
+  .header-controls {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .map-btn {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 
 /* Estilos específicos para resultados */
 .resultado-sucesso {
