@@ -8,7 +8,9 @@
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
+  
 <script src="debug-dados.js"></script>
+
 <header>
   <button id="btn-voltar" style="position:absolute;left:16px;top:16px;padding:6px 12px;cursor:pointer;">⬅️ Voltar</button>
   <div style="text-align:center;">
@@ -233,10 +235,9 @@
 </footer>
 
 <!-- Scripts Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js"></script>
-
-<!-- Dados locais - AJUSTE O CAMINHO CONFORME SUA ESTRUTURA -->
+<!-- Use a versão COMPAT (global) do Firebase v9 -->
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script><!-- Dados locais - AJUSTE O CAMINHO CONFORME SUA ESTRUTURA -->
 <script src="../mapa/escolas.js"></script>
 
 <!-- Configuração do Firebase (crie este arquivo na pasta análise-espacial) -->
