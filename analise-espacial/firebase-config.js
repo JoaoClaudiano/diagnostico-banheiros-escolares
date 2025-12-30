@@ -1,8 +1,7 @@
-// firebase-config.js
-// Configuração do Firebase para análise espacial
+// firebase-config.js - VERSÃO CORRIGIDA
+// IMPORTANTE: Use Firebase v9+ (modular)
 
-// Configuração do projeto (substitua com suas credenciais)
-// 🔥 CONFIG FIREBASE
+// 🔥 Configuração do Firebase (mantenha suas credenciais)
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
@@ -12,19 +11,28 @@ const firebaseConfig = {
   appId: "1:206434271838:web:347d68e6956fe26ee1eacf"
 };
 
-// Verificar se Firebase já foi inicializado
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-} else {
-  firebase.app(); // Se já estiver inicializado, use essa instância
+// Inicializar Firebase apenas uma vez
+let firebaseApp, firestoreDb, firebaseManager;
+
+try {
+  // Verificar se Firebase já foi carregado
+  if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+    firebaseApp = firebase.initializeApp(firebaseConfig);
+    firestoreDb = firebase.firestore();
+    
+    console.log('✅ Firebase inicializado com sucesso!');
+  } else if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+    firebaseApp = firebase.app();
+    firestoreDb = firebase.firestore();
+    console.log('✅ Firebase já estava inicializado');
+  } else {
+    console.warn('⚠️ Firebase não encontrado. Usando modo offline.');
+  }
+} catch (error) {
+  console.error('❌ Erro ao inicializar Firebase:', error);
 }
 
-// Referências do Firestore
-const db = firebase.firestore();
-const avaliacoesRef = db.collection('avaliacoes');
-const escolasRef = db.collection('escolas'); // Se quiser armazenar também
-
-// Mapeamento de classes para pesos (para análise ponderada)
+// Mapeamento de classes para pesos
 const PESOS_CLASSE = {
   'adequada': 1,
   'alerta': 2,
@@ -33,19 +41,34 @@ const PESOS_CLASSE = {
   'não avaliada': 0.5
 };
 
-// Gerenciador do Firebase
+// Gerenciador simplificado do Firebase
 const FirebaseManager = {
-  
-  // Buscar TODAS as avaliações
   async buscarTodasAvaliacoes() {
     try {
-      console.log('📡 Buscando avaliações do Firebase...');
-      const snapshot = await avaliacoesRef.orderBy('createdAt', 'desc').get();
-      const avaliacoes = [];
+      if (!firestoreDb) {
+        console.warn('⚠️ Firestore não disponível. Retornando array vazio.');
+        return [];
+      }
       
+      console.log('📡 Buscando avaliações do Firebase...');
+      const snapshot = await firestoreDb.collection('avaliacoes')
+        .orderBy('createdAt', 'desc')
+        .limit(100) // Limitar para evitar sobrecarga
+        .get();
+      
+      const avaliacoes = [];
       snapshot.forEach(doc => {
         const data = doc.data();
-        // Formatar dados para garantir consistência
+        // Tratar timestamps corretamente
+        let createdAt = new Date();
+        if (data.createdAt) {
+          if (data.createdAt.toDate) {
+            createdAt = data.createdAt.toDate();
+          } else if (data.createdAt instanceof Date) {
+            createdAt = data.createdAt;
+          }
+        }
+        
         avaliacoes.push({
           id: doc.id,
           nome: data.nome || 'Escola não identificada',
@@ -53,7 +76,7 @@ const FirebaseManager = {
           lng: parseFloat(data.lng) || -38.543,
           classe: data.classe || 'não avaliada',
           pontuacao: parseInt(data.pontuacao) || 0,
-          createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+          createdAt: createdAt,
           metadata: data.metadata || {}
         });
       });
@@ -62,70 +85,49 @@ const FirebaseManager = {
       return avaliacoes;
     } catch (error) {
       console.error('❌ Erro ao buscar avaliações:', error);
+      // Retornar array vazio para continuar funcionando
       return [];
     }
   },
   
-  // Buscar avaliações de uma escola específica
-  async buscarAvaliacoesEscola(nomeEscola) {
-    try {
-      const snapshot = await avaliacoesRef
-        .where('nome', '==', nomeEscola)
-        .orderBy('createdAt', 'desc')
-        .get();
-      
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-    } catch (error) {
-      console.error(`Erro ao buscar avaliações de ${nomeEscola}:`, error);
-      return [];
-    }
-  },
-  
-  // Adicionar nova avaliação
   async adicionarAvaliacao(avaliacao) {
     try {
-      const docRef = await avaliacoesRef.add({
+      if (!firestoreDb) {
+        console.warn('⚠️ Firestore não disponível. Não foi possível salvar.');
+        return null;
+      }
+      
+      const docRef = await firestoreDb.collection('avaliacoes').add({
         ...avaliacao,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      console.log('✅ Avaliação adicionada com ID:', docRef.id);
+      
+      console.log('✅ Avaliação salva com ID:', docRef.id);
       return docRef.id;
     } catch (error) {
-      console.error('❌ Erro ao adicionar avaliação:', error);
+      console.error('❌ Erro ao salvar avaliação:', error);
       return null;
     }
   },
   
-  // Estatísticas rápidas
-  async getEstatisticas() {
-    const avaliacoes = await this.buscarTodasAvaliacoes();
-    const estatisticas = {
-      total: avaliacoes.length,
-      porClasse: {},
-      dataMaisRecente: null
-    };
-    
-    // Contar por classe
-    avaliacoes.forEach(av => {
-      estatisticas.porClasse[av.classe] = (estatisticas.porClasse[av.classe] || 0) + 1;
-    });
-    
-    // Data mais recente
-    if (avaliacoes.length > 0) {
-      estatisticas.dataMaisRecente = avaliacoes[0].createdAt;
+  // Testar conexão
+  async testarConexao() {
+    try {
+      if (!firestoreDb) return false;
+      await firestoreDb.collection('avaliacoes').limit(1).get();
+      return true;
+    } catch (error) {
+      console.error('❌ Teste de conexão falhou:', error);
+      return false;
     }
-    
-    return estatisticas;
   }
 };
 
 // Exportar para uso global
 window.firebaseManager = FirebaseManager;
-window.firebaseDb = db;
+window.firestoreDb = firestoreDb;
 window.PESOS_CLASSE = PESOS_CLASSE;
+window.firebaseApp = firebaseApp;
 
 console.log('🔥 Firebase configurado para análise espacial');
