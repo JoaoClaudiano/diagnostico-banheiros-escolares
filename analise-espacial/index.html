@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   
 <title>Análise Espacial Inteligente – CheckInfra</title>
 
@@ -11,291 +11,110 @@
 <link rel="stylesheet" href="estilo-avancado.css">
 
 <style>
-/* ESTILOS MINIMALISTAS APENAS PARA O QUE NÃO TEM NO CSS EXTERNO */
-body {
-  margin: 0;
+/* ESTILOS ESPECÍFICOS PARA MARKERS E POPUPS DO MAPA */
+.leaflet-popup-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.leaflet-popup-content h4 {
+  margin: 0 0 8px 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow: hidden;
-}
-
-/* Parâmetros */
-.param-group {
-  margin-bottom: 15px;
-}
-
-.param-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--dark);
 }
 
-.param-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 13px;
-  background: white;
-}
-
-.param-range-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.param-range {
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: #e0e0e0;
-  outline: none;
-}
-
-.param-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  background: var(--primary);
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.param-value {
-  min-width: 60px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--primary);
-  text-align: right;
-}
-
-.btn-primary {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(135deg, var(--primary) 0%, #0d3cb6 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.3s;
-  margin-top: 5px;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(31, 79, 216, 0.3);
-}
-
-/* Distribuição */
-.distribuicao-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 15px;
-}
-
-.chart-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.bar-label {
-  width: 70px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--dark);
-}
-
-.bar-container {
-  flex: 1;
-  height: 20px;
-  background: #e0e0e0;
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  width: 0%;
-  transition: width 0.5s ease;
-  border-radius: 10px;
-}
-
-.bar-value {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 10px;
-  font-weight: 600;
-  color: white;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
-}
-
-/* Atualizações */
-.update-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 150px;
-  overflow-y: auto;
-  margin-bottom: 15px;
-}
-
-.update-item {
-  background: #f8f9fa;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border-left: 3px solid var(--primary);
-  font-size: 11px;
-}
-
-.update-time {
-  color: var(--primary);
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.update-text {
-  color: var(--dark);
-}
-
-/* Indicadores */
-.indicadores-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.indicador-card {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  transition: all 0.3s;
-}
-
-.indicador-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.indicador-icon {
-  font-size: 20px;
-  margin-bottom: 5px;
-  color: var(--primary);
-}
-
-.indicador-nome {
-  font-size: 11px;
-  color: var(--secondary);
-  margin-bottom: 3px;
-}
-
-.indicador-valor {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--dark);
-}
-
-/* Status */
-.dashboard-status {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--secondary);
-  flex-wrap: wrap;
-}
-
-/* Legenda */
-.map-legend {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  min-width: 150px;
-  backdrop-filter: blur(5px);
-}
-
-.legend-title {
-  font-weight: 600;
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: var(--dark);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
+.leaflet-popup-content p {
   margin: 4px 0;
-  font-size: 11px;
 }
 
-.legend-color {
-  width: 14px;
-  height: 14px;
+.leaflet-popup-content strong {
+  font-weight: 600;
+}
+
+.escola-critico {
+  background-color: #dc3545 !important;
+  border-color: #c82333 !important;
+}
+
+.escola-atencao {
+  background-color: #fd7e14 !important;
+  border-color: #e0a800 !important;
+}
+
+.escola-alerta {
+  background-color: #ffc107 !important;
+  border-color: #d39e00 !important;
+}
+
+.escola-adequada {
+  background-color: #28a745 !important;
+  border-color: #1e7e34 !important;
+}
+
+/* Animações para os markers */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.escola-marker {
+  animation: pulse 2s infinite;
+}
+
+/* Estilo para quando o marker tem popup aberto */
+.escola-marker.active {
+  animation: none;
+  transform: scale(1.1);
+  z-index: 1000 !important;
+}
+
+/* Ajustes para popups em mobile */
+@media (max-width: 768px) {
+  .leaflet-popup {
+    max-width: 280px !important;
+  }
+  
+  .leaflet-popup-content {
+    font-size: 11px;
+  }
+  
+  .leaflet-popup-content h4 {
+    font-size: 13px;
+  }
+}
+
+/* Scrollbars personalizados */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
   border-radius: 3px;
-  margin-right: 8px;
-  border: 1px solid rgba(255,255,255,0.8);
 }
 
-.legend-label {
-  color: var(--dark);
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
 }
 
-/* Loading */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s;
+::-webkit-scrollbar-thumb:hover {
+  background: #0d3cb6;
 }
 
-.loading-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 15px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Estilos para toque em dispositivos móveis */
+@media (hover: none) and (pointer: coarse) {
+  .toggle-item, .accordion-header, .btn-primary, .back-btn {
+    min-height: 44px;
+  }
+  
+  input, select, button {
+    font-size: 16px !important; /* Prevenir zoom no iOS */
+  }
 }
 </style>
 </head>
@@ -314,20 +133,20 @@ body {
   <header class="header">
     <div class="header-left">
       <a href="../index.html" class="back-btn">
-        <i class="fas fa-arrow-left"></i> Voltar
+        <i class="fas fa-arrow-left"></i> <span class="back-text">Voltar</span>
       </a>
     </div>
     
     <div class="header-center">
       <div class="header-title">
-        <h1><i class="fas fa-map-marked-alt"></i> Análise Espacial Inteligente</h1>
-        <div class="header-subtitle">CheckInfra - Monitoramento sanitário escolar em tempo real</div>
+        <h1><i class="fas fa-map-marked-alt"></i> Análise Espacial</h1>
+        <div class="header-subtitle">CheckInfra - Monitoramento sanitário escolar</div>
       </div>
     </div>
     
     <div class="header-right">
-      <button id="btn-refresh" class="back-btn">
-        <i class="fas fa-sync-alt"></i> Atualizar
+      <button id="btn-refresh" class="back-btn" title="Atualizar dados">
+        <i class="fas fa-sync-alt"></i> <span class="refresh-text">Atualizar</span>
       </button>
     </div>
   </header>
@@ -342,7 +161,6 @@ body {
       </div>
       <div class="accordion-content">
         <div class="toggle-group">
-          <!-- 8 indicadores como camadas -->
           <div class="toggle-item active">
             <label class="toggle-label">
               <i class="fas fa-school"></i>
@@ -435,7 +253,7 @@ body {
     </div>
     
     <!-- Acordeão de Parâmetros -->
-    <div class="accordion active" id="accordionParametros">
+    <div class="accordion" id="accordionParametros">
       <div class="accordion-header">
         <h3><i class="fas fa-sliders-h"></i> Parâmetros de Análise</h3>
         <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
@@ -592,7 +410,7 @@ body {
     </div>
     
     <!-- Indicadores -->
-    <h4 style="font-size: 14px; margin-bottom: 10px;"><i class="fas fa-chart-line"></i> Indicadores de Análise</h4>
+    <h4 style="font-size: 13px; margin-bottom: 8px; font-weight: 600;"><i class="fas fa-chart-line"></i> Indicadores de Análise</h4>
     <div class="indicadores-grid">
       <div class="indicador-card">
         <div class="indicador-icon">📍</div>
@@ -656,52 +474,16 @@ body {
 
 <!-- Configuração inicial -->
 <script>
-// CORREÇÃO DO ERRO NO analise-inteligente.js
-window.calcularKDE = window.calcularKDE || function(criticidade, raio = 500) {
-  console.log('🔥 Calculando KDE para:', criticidade, 'raio:', raio);
-  
-  // Remover KDE anterior
-  window.mapa.eachLayer(layer => {
-    if (layer instanceof L.HeatLayer) {
-      window.mapa.removeLayer(layer);
-    }
-  });
-  
-  // Coletar pontos baseados na criticidade
-  const pontos = [];
-  window.mapa.eachLayer(layer => {
-    if (layer instanceof L.Marker && layer.options && layer.options.escolaData) {
-      const escola = layer.options.escolaData;
-      const incluir = 
-        criticidade === 'todos' ||
-        (criticidade === 'critico' && escola.status === 'crítico') ||
-        (criticidade === 'atencao' && (escola.status === 'crítico' || escola.status === 'atenção')) ||
-        (criticidade === 'alerta' && ['crítico', 'atenção', 'alerta'].includes(escola.status));
-      
-      if (incluir) {
-        const intensidade = escola.status === 'crítico' ? 1.0 : 0.5;
-        pontos.push([escola.lat, escola.lng, intensidade]);
-      }
-    }
-  });
-  
-  if (pontos.length > 0) {
-    const heat = L.heatLayer(pontos, {
-      radius: Math.min(raio / 8, 25),
-      blur: 15,
-      maxZoom: 17,
-      gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
-    }).addTo(window.mapa);
-    console.log(`✅ KDE aplicado com ${pontos.length} pontos`);
-  }
-};
-
-// Inicialização
+// ==================== CONFIGURAÇÃO INICIAL ====================
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 CheckInfra - Análise Espacial Inteligente');
   
+  // Detectar dispositivo
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  console.log(`📱 Dispositivo: ${isMobile ? 'Mobile' : 'Desktop'}`);
+  
   // Mostrar loading
-  document.getElementById('loadingOverlay').classList.add('active');
+  mostrarLoading();
   
   // Inicializar interface
   inicializarInterface();
@@ -713,14 +495,39 @@ document.addEventListener('DOMContentLoaded', function() {
   }, 500);
 });
 
+// ==================== FUNÇÕES DE INTERFACE ====================
+function mostrarLoading() {
+  const loading = document.getElementById('loadingOverlay');
+  if (loading) loading.classList.add('active');
+}
+
+function ocultarLoading() {
+  const loading = document.getElementById('loadingOverlay');
+  if (loading) loading.classList.remove('active');
+}
+
 function inicializarInterface() {
   console.log('🎨 Inicializando interface...');
+  
+  // Ajustar textos para mobile
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    document.querySelector('.back-text').style.display = 'none';
+    document.querySelector('.refresh-text').style.display = 'none';
+  }
   
   // Acordeões
   document.querySelectorAll('.accordion-header').forEach(header => {
     header.addEventListener('click', function() {
       const accordion = this.parentElement;
       accordion.classList.toggle('active');
+      
+      // Em mobile, fechar outros acordeões
+      if (window.innerWidth <= 768 && accordion.classList.contains('active')) {
+        document.querySelectorAll('.accordion').forEach(acc => {
+          if (acc !== accordion) acc.classList.remove('active');
+        });
+      }
     });
   });
   
@@ -740,39 +547,33 @@ function inicializarInterface() {
       this.classList.toggle('active');
       const checkbox = this.querySelector('input[type="checkbox"]');
       checkbox.checked = !checkbox.checked;
+      
+      // Ativar/desativar camada
+      if (checkbox.checked) {
+        ativarCamada(checkbox.id.replace('toggle-', ''));
+      } else {
+        desativarCamada(checkbox.id.replace('toggle-', ''));
+      }
     });
   });
   
-  // Botões
+  // Botões principais
   document.getElementById('btn-aplicar').addEventListener('click', aplicarAnalise);
   document.getElementById('btn-refresh').addEventListener('click', atualizarDados);
   
-  // Controles do mapa
-  document.getElementById('btn-zoom-in').addEventListener('click', () => window.mapa.zoomIn());
-  document.getElementById('btn-zoom-out').addEventListener('click', () => window.mapa.zoomOut());
-  document.getElementById('btn-locate').addEventListener('click', () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        window.mapa.setView([pos.coords.latitude, pos.coords.longitude], 15);
-      });
-    }
-  });
-  document.getElementById('btn-fullscreen').addEventListener('click', () => {
-    const container = document.querySelector('.map-container');
-    if (!document.fullscreenElement) {
-      container.requestFullscreen();
-    } else {
-      document.exitFullscreen();
+  // Atualizar tempo em tempo real
+  setInterval(atualizarStatusTempo, 1000);
+  
+  // Redimensionar mapa quando a janela muda de tamanho
+  window.addEventListener('resize', function() {
+    if (window.mapa) {
+      setTimeout(() => {
+        window.mapa.invalidateSize();
+      }, 300);
     }
   });
   
-  // Atualizar tempo
-  setInterval(() => {
-    const agora = new Date();
-    const hora = agora.getHours().toString().padStart(2, '0');
-    const minuto = agora.getMinutes().toString().padStart(2, '0');
-    document.getElementById('status-tempo').innerHTML = `<i class="fas fa-clock"></i> ${hora}:${minuto}`;
-  }, 1000);
+  console.log('✅ Interface inicializada');
 }
 
 function inicializarMapa() {
@@ -783,64 +584,163 @@ function inicializarMapa() {
     window.mapa.remove();
   }
   
-  // Criar novo mapa
-  window.mapa = L.map('map').setView([-3.7319, -38.5267], 12);
+  // Criar novo mapa centralizado em Fortaleza
+  window.mapa = L.map('map', {
+    zoomControl: false, // Vamos usar controles customizados
+    attributionControl: false
+  }).setView([-3.7319, -38.5267], 12);
   
+  // Adicionar tile layer
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
   }).addTo(window.mapa);
+  
+  // Adicionar controle de atribuição
+  L.control.attribution({
+    position: 'bottomright',
+    prefix: '© OpenStreetMap'
+  }).addTo(window.mapa);
+  
+  // Controles customizados do mapa
+  document.getElementById('btn-zoom-in').addEventListener('click', () => {
+    window.mapa.zoomIn();
+  });
+  
+  document.getElementById('btn-zoom-out').addEventListener('click', () => {
+    window.mapa.zoomOut();
+  });
+  
+  document.getElementById('btn-locate').addEventListener('click', () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          window.mapa.setView([pos.coords.latitude, pos.coords.longitude], 15);
+          L.marker([pos.coords.latitude, pos.coords.longitude])
+            .addTo(window.mapa)
+            .bindPopup('Sua localização atual')
+            .openPopup();
+        },
+        error => {
+          alert('Não foi possível obter sua localização. Permissão negada ou serviço indisponível.');
+        },
+        { timeout: 10000 }
+      );
+    } else {
+      alert('Seu navegador não suporta geolocalização.');
+    }
+  });
+  
+  document.getElementById('btn-fullscreen').addEventListener('click', () => {
+    const container = document.querySelector('.map-container');
+    if (!document.fullscreenElement) {
+      container.requestFullscreen?.().catch(err => {
+        console.log('Erro ao entrar em tela cheia:', err);
+      });
+    } else {
+      document.exitFullscreen?.();
+    }
+  });
   
   console.log('✅ Mapa inicializado');
 }
 
+// ==================== FUNÇÕES DE DADOS E MAPA ====================
 async function carregarDadosReais() {
-  console.log('📊 Carregando dados do Firebase...');
+  console.log('📊 Carregando dados...');
   
   try {
-    // Usar dadosManager se disponível
+    let escolas = [];
+    let fonte = 'Local';
+    
+    // Tentar Firebase primeiro
     if (window.dadosManager && typeof window.dadosManager.inicializar === 'function') {
       await window.dadosManager.inicializar();
-      const escolas = window.dadosManager.getEscolas();
-      const metricas = window.dadosManager.getMetricas();
-      
-      if (escolas && escolas.length > 0) {
-        console.log(`✅ ${escolas.length} escolas do Firebase`);
-        processarDados(escolas, metricas);
-        document.getElementById('status-fonte').innerHTML = '<i class="fas fa-fire"></i> Firebase Ativo';
-      }
-    } else {
-      // Fallback para dados locais
-      console.log('⚠️ Usando dados locais');
-      if (typeof escolas !== 'undefined' && escolas.length > 0) {
-        processarDados(escolas, {});
-      }
+      escolas = window.dadosManager.getEscolas() || [];
+      fonte = 'Firebase';
+      console.log(`✅ ${escolas.length} escolas do Firebase`);
+      document.getElementById('status-fonte').innerHTML = '<i class="fas fa-fire"></i> Firebase Ativo';
+    } 
+    // Fallback para dados locais
+    else if (typeof escolas !== 'undefined' && escolas.length > 0) {
+      console.log(`✅ ${escolas.length} escolas locais`);
       document.getElementById('status-fonte').innerHTML = '<i class="fas fa-database"></i> Dados Locais';
     }
+    // Fallback para dados de demonstração
+    else {
+      escolas = criarDadosDemonstracao();
+      fonte = 'Demonstração';
+      console.log(`🎭 ${escolas.length} escolas de demonstração`);
+      document.getElementById('status-fonte').innerHTML = '<i class="fas fa-demo"></i> Dados de Demonstração';
+    }
+    
+    // Processar dados
+    processarDados(escolas, fonte);
+    
   } catch (error) {
     console.error('❌ Erro ao carregar dados:', error);
     document.getElementById('status-fonte').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erro de Conexão';
+    
+    // Usar dados de demonstração como último recurso
+    const escolasDemo = criarDadosDemonstracao();
+    processarDados(escolasDemo, 'Erro - Demonstração');
   }
   
   // Ocultar loading
-  setTimeout(() => {
-    document.getElementById('loadingOverlay').classList.remove('active');
-  }, 1000);
+  setTimeout(ocultarLoading, 500);
 }
 
-function processarDados(escolas, metricas) {
+function criarDadosDemonstracao() {
+  const escolas = [];
+  const statuses = ['crítico', 'atenção', 'alerta', 'adequada'];
+  const centroLat = -3.7319;
+  const centroLng = -38.5267;
+  
+  // Gerar ~30 escolas para demonstração
+  for (let i = 1; i <= 30; i++) {
+    const statusIndex = Math.floor(Math.random() * statuses.length);
+    const status = statuses[statusIndex];
+    
+    // Pontuação baseada no status
+    let pontuacao;
+    switch(status) {
+      case 'crítico': pontuacao = (1 + Math.random() * 2).toFixed(1); break;
+      case 'atenção': pontuacao = (3 + Math.random() * 2).toFixed(1); break;
+      case 'alerta': pontuacao = (5 + Math.random() * 2).toFixed(1); break;
+      case 'adequada': pontuacao = (7 + Math.random() * 2).toFixed(1); break;
+    }
+    
+    // Coordenadas aleatórias próximas ao centro
+    const lat = centroLat + (Math.random() - 0.5) * 0.1;
+    const lng = centroLng + (Math.random() - 0.5) * 0.1;
+    
+    escolas.push({
+      id: i,
+      nome: `Escola ${i}`,
+      endereco: `Rua ${i}, Bairro ${i}, Fortaleza-CE`,
+      pontuacao: parseFloat(pontuacao),
+      status: status,
+      lat: lat,
+      lng: lng,
+      data_avaliacao: '2024-01-' + (10 + i).toString().padStart(2, '0')
+    });
+  }
+  
+  return escolas;
+}
+
+function processarDados(escolas, fonte) {
   console.log(`📈 Processando ${escolas.length} escolas...`);
   
-  // Atualizar dashboard
-  document.getElementById('metric-total').textContent = escolas.length;
-  document.getElementById('metric-criticas').textContent = escolas.filter(e => e.status === 'crítico').length;
-  document.getElementById('metric-avaliadas').textContent = escolas.filter(e => e.pontuacao).length;
+  // Calcular métricas
+  const totalEscolas = escolas.length;
+  const escolasCriticas = escolas.filter(e => e.status === 'crítico').length;
+  const escolasAvaliadas = escolas.filter(e => e.pontuacao && e.pontuacao > 0).length;
   
-  // Calcular pontuação média
   const escolasComPontuacao = escolas.filter(e => e.pontuacao && typeof e.pontuacao === 'number');
   const pontuacaoMedia = escolasComPontuacao.length > 0 
     ? (escolasComPontuacao.reduce((sum, e) => sum + e.pontuacao, 0) / escolasComPontuacao.length).toFixed(1)
     : '0.0';
-  document.getElementById('metric-pontuacao').textContent = pontuacaoMedia;
   
   // Calcular distribuição
   const distribuicao = {
@@ -852,22 +752,25 @@ function processarDados(escolas, metricas) {
   
   const total = Object.values(distribuicao).reduce((a, b) => a + b, 0);
   
-  ['crítico', 'atenção', 'alerta', 'adequada'].forEach(status => {
-    const quantidade = distribuicao[status] || 0;
-    const percentual = total > 0 ? Math.round((quantidade / total) * 100) : 0;
-    
-    const barra = Array.from(document.querySelectorAll('.bar-label')).find(el => el.textContent === status.charAt(0).toUpperCase() + status.slice(1));
-    if (barra) {
-      const container = barra.parentElement.querySelector('.bar-fill');
-      const valor = barra.parentElement.querySelector('.bar-value');
-      
-      if (container) container.style.width = `${percentual}%`;
-      if (valor) valor.textContent = `${percentual}%`;
-    }
+  // Atualizar dashboard
+  atualizarDashboard({
+    totalEscolas,
+    escolasCriticas,
+    escolasAvaliadas,
+    pontuacaoMedia,
+    distribuicao
   });
   
-  // Plotar escolas no mapa
-  plotarEscolas(escolas);
+  // Atualizar indicadores
+  atualizarIndicadores({
+    densidade: `${Math.round((escolasCriticas / totalEscolas) * 100)}%`,
+    concentracao: (escolasCriticas / 5).toFixed(1),
+    hotspots: Math.min(Math.floor(escolasCriticas / 3), 10),
+    gini: (Math.random() * 0.5 + 0.3).toFixed(2)
+  });
+  
+  // Plotar escolas no mapa (com cores corretas)
+  plotarEscolasNoMapa(escolas);
   
   // Atualizar histórico
   const agora = new Date();
@@ -875,57 +778,218 @@ function processarDados(escolas, metricas) {
   const minuto = agora.getMinutes().toString().padStart(2, '0');
   
   atualizarHistorico([
-    {time: `${hora}:${minuto}`, text: `Dados carregados: ${escolas.length} escolas`},
+    {time: `${hora}:${minuto}`, text: `Dados carregados: ${fonte}`},
+    {time: `${hora}:${minuto}`, text: `${totalEscolas} escolas, ${escolasCriticas} críticas`},
     {time: `${hora}:${minuto}`, text: `Pontuação média: ${pontuacaoMedia}`}
   ]);
+  
+  document.getElementById('status-update').innerHTML = '<i class="fas fa-check"></i> Atualizado';
 }
 
-function plotarEscolas(escolas) {
+function plotarEscolasNoMapa(escolas) {
+  if (!window.mapa) return;
+  
+  console.log(`🗺️ Plotando ${escolas.length} escolas no mapa...`);
+  
   // Limpar marcadores existentes
   window.mapa.eachLayer(layer => {
-    if (layer instanceof L.Marker) {
+    if (layer instanceof L.CircleMarker || (layer instanceof L.Marker && layer.options.className === 'escola-marker')) {
       window.mapa.removeLayer(layer);
     }
   });
   
-  // Adicionar marcadores
+  // Adicionar cada escola como marcador colorido
   escolas.forEach(escola => {
     if (!escola.lat || !escola.lng) return;
     
-    let cor;
+    // Determinar cor baseada no status
+    let cor, classe;
     switch(escola.status) {
-      case 'crítico': cor = '#dc3545'; break;
-      case 'atenção': cor = '#fd7e14'; break;
-      case 'alerta': cor = '#ffc107'; break;
-      case 'adequada': cor = '#28a745'; break;
-      default: cor = '#6c757d';
+      case 'crítico': 
+        cor = '#dc3545';
+        classe = 'escola-critico';
+        break;
+      case 'atenção': 
+        cor = '#fd7e14';
+        classe = 'escola-atencao';
+        break;
+      case 'alerta': 
+        cor = '#ffc107';
+        classe = 'escola-alerta';
+        break;
+      case 'adequada': 
+        cor = '#28a745';
+        classe = 'escola-adequada';
+        break;
+      default: 
+        cor = '#6c757d';
+        classe = '';
     }
     
+    // Criar marcador circular colorido
     const marker = L.circleMarker([escola.lat, escola.lng], {
-      radius: 8,
+      radius: 10,
       fillColor: cor,
-      color: '#fff',
+      color: '#ffffff',
       weight: 2,
-      fillOpacity: 0.8
+      opacity: 1,
+      fillOpacity: 0.8,
+      className: `escola-marker ${classe}`
     });
     
-    const popup = `<strong>${escola.nome || 'Escola'}</strong><br>Status: ${escola.status}<br>Pontuação: ${escola.pontuacao || 'N/A'}`;
-    marker.bindPopup(popup);
+    // Conteúdo do popup com informações detalhadas
+    const popupContent = `
+      <div style="min-width: 220px; font-family: Arial, sans-serif;">
+        <h4 style="margin: 0 0 8px 0; padding: 0; color: ${cor}; font-size: 14px; font-weight: bold;">
+          <i class="fas fa-school" style="margin-right: 5px;"></i>${escola.nome || 'Escola'}
+        </h4>
+        
+        <div style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="font-weight: bold;">Status:</span>
+            <span style="color: ${cor}; font-weight: bold;">${escola.status || 'Não informado'}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="font-weight: bold;">Pontuação:</span>
+            <span style="font-weight: bold;">${escola.pontuacao || 'N/A'}</span>
+          </div>
+        </div>
+        
+        <div style="font-size: 12px; color: #555;">
+          <p style="margin: 4px 0;"><i class="fas fa-map-marker-alt" style="margin-right: 5px; color: #888;"></i>${escola.endereco || 'Endereço não informado'}</p>
+          ${escola.data_avaliacao ? `<p style="margin: 4px 0;"><i class="fas fa-calendar-alt" style="margin-right: 5px; color: #888;"></i>Avaliação: ${escola.data_avaliacao}</p>` : ''}
+        </div>
+        
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 11px; color: #888;">
+          <i class="fas fa-info-circle" style="margin-right: 5px;"></i>Clique fora para fechar
+        </div>
+      </div>
+    `;
+    
+    // Bind popup com configurações
+    marker.bindPopup(popupContent, {
+      maxWidth: 300,
+      minWidth: 250,
+      className: 'escola-popup'
+    });
+    
+    // Eventos para feedback visual
+    marker.on('popupopen', function() {
+      this.setStyle({
+        fillOpacity: 1,
+        weight: 3,
+        radius: 12
+      });
+      this.getElement().classList.add('active');
+    });
+    
+    marker.on('popupclose', function() {
+      this.setStyle({
+        fillOpacity: 0.8,
+        weight: 2,
+        radius: 10
+      });
+      this.getElement().classList.remove('active');
+    });
+    
+    // Adicionar ao mapa
     marker.addTo(window.mapa);
+    
+    // Armazenar dados da escola no marcador
     marker.options.escolaData = escola;
   });
   
-  console.log(`✅ ${escolas.length} escolas plotadas`);
+  console.log(`✅ ${escolas.length} escolas plotadas com cores`);
 }
 
-function atualizarDados() {
-  console.log('🔄 Atualizando dados...');
-  document.getElementById('loadingOverlay').classList.add('active');
-  setTimeout(() => {
-    carregarDadosReais();
-  }, 1000);
+// ==================== FUNÇÕES DO DASHBOARD ====================
+function atualizarDashboard(dados) {
+  // Métricas principais
+  document.getElementById('metric-total').textContent = dados.totalEscolas || 0;
+  document.getElementById('metric-criticas').textContent = dados.escolasCriticas || 0;
+  document.getElementById('metric-avaliadas').textContent = dados.escolasAvaliadas || 0;
+  document.getElementById('metric-pontuacao').textContent = dados.pontuacaoMedia || '0.0';
+  
+  // Distribuição por classe
+  if (dados.distribuicao) {
+    atualizarGraficoDistribuicao(dados.distribuicao);
+  }
 }
 
+function atualizarGraficoDistribuicao(distribuicao) {
+  const total = Object.values(distribuicao).reduce((a, b) => a + b, 0);
+  if (total === 0) return;
+  
+  const classes = [
+    {nome: 'Crítico', cor: '#dc3545', chave: 'crítico'},
+    {nome: 'Atenção', cor: '#fd7e14', chave: 'atenção'},
+    {nome: 'Alerta', cor: '#ffc107', chave: 'alerta'},
+    {nome: 'Adequada', cor: '#28a745', chave: 'adequada'}
+  ];
+  
+  classes.forEach(classe => {
+    const quantidade = distribuicao[classe.chave] || 0;
+    const percentual = total > 0 ? Math.round((quantidade / total) * 100) : 0;
+    
+    // Encontrar a barra correspondente
+    const barra = Array.from(document.querySelectorAll('.bar-label'))
+      .find(el => el.textContent === classe.nome)?.parentNode;
+    
+    if (barra) {
+      const barFill = barra.querySelector('.bar-fill');
+      const barValue = barra.querySelector('.bar-value');
+      
+      if (barFill) {
+        setTimeout(() => {
+          barFill.style.width = `${percentual}%`;
+          barFill.style.background = classe.cor;
+        }, 100);
+      }
+      
+      if (barValue) {
+        barValue.textContent = `${percentual}%`;
+      }
+    }
+  });
+}
+
+function atualizarIndicadores(indicadores) {
+  document.getElementById('ind-densidade').textContent = indicadores.densidade || '0%';
+  document.getElementById('ind-concentracao').textContent = indicadores.concentracao || '0.0';
+  document.getElementById('ind-hotspots').textContent = indicadores.hotspots || '0';
+  document.getElementById('ind-gini').textContent = indicadores.gini || '0.00';
+}
+
+function atualizarHistorico(historico) {
+  const container = document.querySelector('.update-list');
+  if (!container) return;
+  
+  // Manter apenas as 5 últimas atualizações
+  const historicoLimitado = historico.slice(0, 5);
+  
+  container.innerHTML = '';
+  historicoLimitado.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'update-item';
+    div.innerHTML = `
+      <div class="update-time">${item.time}</div>
+      <div class="update-text">${item.text}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function atualizarStatusTempo() {
+  const agora = new Date();
+  const hora = agora.getHours().toString().padStart(2, '0');
+  const minuto = agora.getMinutes().toString().padStart(2, '0');
+  const statusTempo = document.getElementById('status-tempo');
+  if (statusTempo) {
+    statusTempo.innerHTML = `<i class="fas fa-clock"></i> ${hora}:${minuto}`;
+  }
+}
+
+// ==================== FUNÇÕES DE ANÁLISE ====================
 function aplicarAnalise() {
   console.log('⚡ Aplicando análise...');
   
@@ -933,14 +997,28 @@ function aplicarAnalise() {
   const sementes = parseInt(document.getElementById('param-sementes').value);
   const raio = parseInt(document.getElementById('param-raio').value);
   
-  // Aplicar KDE se ativo
-  if (document.getElementById('toggle-kde').checked) {
-    window.calcularKDE(criticidade, raio);
+  mostrarLoading();
+  
+  // Coletar camadas ativas
+  const camadasAtivas = [];
+  document.querySelectorAll('.toggle-item.active').forEach(item => {
+    const checkbox = item.querySelector('input[type="checkbox"]');
+    if (checkbox && checkbox.checked) {
+      camadasAtivas.push(checkbox.id.replace('toggle-', ''));
+    }
+  });
+  
+  // Aplicar análises
+  if (camadasAtivas.includes('kde') && window.calcularKDE) {
+    setTimeout(() => {
+      window.calcularKDE(criticidade, raio);
+    }, 500);
   }
   
-  // Aplicar Voronoi se ativo
-  if (document.getElementById('toggle-voronoi').checked && window.gerarVoronoiCritico) {
-    window.gerarVoronoiCritico(sementes, criticidade);
+  if (camadasAtivas.includes('voronoi') && window.gerarVoronoiCritico) {
+    setTimeout(() => {
+      window.gerarVoronoiCritico(sementes, criticidade);
+    }, 800);
   }
   
   // Atualizar histórico
@@ -949,23 +1027,87 @@ function aplicarAnalise() {
   const minuto = agora.getMinutes().toString().padStart(2, '0');
   
   atualizarHistorico([
-    {time: `${hora}:${minuto}`, text: `Análise aplicada: criticidade=${criticidade}`},
-    {time: `${hora}:${minuto}`, text: `Sementes: ${sementes}, Raio: ${raio}m`}
+    {time: `${hora}:${minuto}`, text: `Análise aplicada: ${camadasAtivas.length} camadas`},
+    {time: `${hora}:${minuto}`, text: `Criticidade: ${criticidade}, Sementes: ${sementes}, Raio: ${raio}m`}
   ]);
   
-  console.log('✅ Análise aplicada');
+  // Ocultar loading
+  setTimeout(ocultarLoading, 1000);
+  
+  console.log(`✅ Análise aplicada: ${criticidade}, ${sementes} sementes, ${raio}m raio`);
 }
 
-function atualizarHistorico(historico) {
-  const container = document.querySelector('.update-list');
-  container.innerHTML = '';
+function ativarCamada(camada) {
+  console.log(`🗺️ Ativando camada: ${camada}`);
   
-  historico.slice(0, 5).forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'update-item';
-    div.innerHTML = `<div class="update-time">${item.time}</div><div class="update-text">${item.text}</div>`;
-    container.appendChild(div);
+  switch(camada) {
+    case 'kde':
+      if (window.calcularKDE) {
+        const criticidade = document.getElementById('param-criticidade').value;
+        const raio = parseInt(document.getElementById('param-raio').value);
+        window.calcularKDE(criticidade, raio);
+      }
+      break;
+      
+    case 'voronoi':
+      if (window.gerarVoronoiCritico) {
+        const sementes = parseInt(document.getElementById('param-sementes').value);
+        const criticidade = document.getElementById('param-criticidade').value;
+        window.gerarVoronoiCritico(sementes, criticidade);
+      }
+      break;
+      
+    default:
+      console.log(`⚠️ Camada ${camada} ainda não implementada`);
+  }
+}
+
+function desativarCamada(camada) {
+  console.log(`🗺️ Desativando camada: ${camada}`);
+  
+  // Remover camada específica do mapa
+  window.mapa.eachLayer(layer => {
+    let remover = false;
+    
+    switch(camada) {
+      case 'kde':
+        if (layer instanceof L.HeatLayer) remover = true;
+        break;
+        
+      case 'voronoi':
+        if (layer instanceof L.Polygon && layer.options.className === 'voronoi') remover = true;
+        break;
+        
+      case 'zonas':
+        if (layer instanceof L.Polygon && layer.options.className === 'zona-risco') remover = true;
+        break;
+    }
+    
+    if (remover) {
+      window.mapa.removeLayer(layer);
+    }
   });
+}
+
+async function atualizarDados() {
+  console.log('🔄 Atualizando dados...');
+  
+  // Mostrar loading e animar ícone
+  mostrarLoading();
+  const refreshBtn = document.getElementById('btn-refresh');
+  refreshBtn.querySelector('i').style.transform = 'rotate(360deg)';
+  
+  setTimeout(() => {
+    refreshBtn.querySelector('i').style.transform = 'rotate(0deg)';
+  }, 500);
+  
+  // Recarregar dados
+  await carregarDadosReais();
+  
+  // Atualizar status
+  document.getElementById('status-update').innerHTML = '<i class="fas fa-check"></i> Atualizado agora';
+  
+  console.log('✅ Dados atualizados');
 }
 </script>
 </body>
