@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Índice de Gini Espacial</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<main>
+<div class="card">
+<h1>⚖️ Índice de Gini Espacial</h1>
+
+<p class="intro"><strong>Mede a desigualdade na distribuição espacial</strong> das escolas críticas entre diferentes áreas da cidade.</p>
+
+<div class="definicao">
+<h2>📐 O que é o Gini?</h2>
+<p>Originalmente criado para medir desigualdade de renda, adaptado para análise espacial.</p>
+<p>Varia de <strong>0</strong> (igualdade perfeita) a <strong>1</strong> (desigualdade máxima).</p>
+</div>
+
+<div class="curva-lorenz">
+<h2>📈 Curva de Lorenz Espacial</h2>
+<div class="ilustracao">
+<div class="grafico">
+<div class="linha-perfeita"></div>
+<div class="curva-real" style="height: 70%;"></div>
+<div class="area-gini"></div>
+</div>
+<div class="legenda-grafico">
+<p><strong>Área A:</strong> Desigualdade observada</p>
+<p><strong>Área A + B:</strong> Igualdade perfeita</p>
+<p class="formula">Gini = Área A / (Área A + B)</p>
+</div>
+</div>
+</div>
+
+<div class="interpretacao-gini">
+<h2>🎯 Interpretação dos Valores</h2>
+<div class="escala-gini">
+<div class="nivel" style="background:#2ecc71;">
+<span class="valor">0.0 - 0.3</span>
+<span class="descricao">Baixa desigualdade</span>
+</div>
+<div class="nivel" style="background:#f1c40f;">
+<span class="valor">0.3 - 0.4</span>
+<span class="descricao">Desigualdade moderada</span>
+</div>
+<div class="nivel" style="background:#e67e22;">
+<span class="valor">0.4 - 0.5</span>
+<span class="descricao">Alta desigualdade</span>
+</div>
+<div class="nivel" style="background:#e74c3c;">
+<span class="valor">0.5 - 1.0</span>
+<span class="descricao">Desigualdade extrema</span>
+</div>
+</div>
+</div>
+
+<div class="aplicacao-checkinfra">
+<h2>🏫 Aplicação no CheckInfra</h2>
+<ul>
+<li><strong>Gini = 0.25:</strong> Escolas críticas razoavelmente distribuídas</li>
+<li><strong>Gini = 0.45:</strong> Concentração significativa em poucos bairros</li>
+<li><strong>Gini > 0.55:</strong> Problema territorial grave, desigualdade extrema</li>
+</ul>
+<p class="dica">Valores acima de 0.4 indicam necessidade de políticas específicas para territórios vulneráveis.</p>
+</div>
+
+<div class="referencia">
+<h2>📚 Fundamentação</h2>
+<p>Gini, C. (1912). Variabilità e mutabilità.</p>
+<p>Aplicado em: análise de saúde pública, educação, desenvolvimento urbano.</p>
+</div>
+</div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
