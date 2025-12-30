@@ -1,6 +1,7 @@
-// firebase-config.js - VERSÃO COMPAT (CORRIGIDA)
+// firebase-config.js - VERSÃO 8 (compatível)
+console.log('🔥 Configurando Firebase v8...');
 
-// 🔥 Configuração do Firebase
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
   authDomain: "checkinfra-adf3c.firebaseapp.com",
@@ -10,33 +11,21 @@ const firebaseConfig = {
   appId: "1:206434271838:web:347d68e6956fe26ee1eacf"
 };
 
-// Variáveis globais
-let firebaseApp = null;
-let firestoreDb = null;
-let firebaseManager = null;
+// Inicializar Firebase apenas uma vez
+let firebaseApp, db, firebaseManager;
 
 try {
-  // Verificar se firebase está disponível (versão compat)
+  // Verificar se Firebase está disponível
   if (typeof firebase !== 'undefined') {
-    // Inicializar apenas se não foi inicializado
-    if (!firebase.apps.length) {
-      firebaseApp = firebase.initializeApp(firebaseConfig);
-    } else {
-      firebaseApp = firebase.app();
-    }
+    // Inicializar Firebase
+    firebaseApp = firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
     
-    firestoreDb = firebase.firestore();
-    
-    console.log('✅ Firebase COMPAT inicializado com sucesso!');
-    
-    // Testar conexão
-    firestoreDb.collection('avaliacoes').limit(1).get()
-      .then(() => console.log('✅ Conexão com Firestore estabelecida'))
-      .catch(err => console.warn('⚠️ Firestore disponível, mas erro na consulta:', err.message));
+    console.log('✅ Firebase v8 inicializado com sucesso!');
+    console.log('📡 Conectado ao projeto:', firebaseConfig.projectId);
     
   } else {
-    console.warn('⚠️ Firebase não encontrado. Certifique-se de usar:');
-    console.warn('   firebase-app-compat.js e firebase-firestore-compat.js');
+    console.error('❌ Firebase não está disponível');
   }
 } catch (error) {
   console.error('❌ Erro ao inicializar Firebase:', error);
@@ -51,40 +40,40 @@ const PESOS_CLASSE = {
   'não avaliada': 0.5
 };
 
-// Gerenciador simplificado do Firebase
+// Gerenciador do Firebase
 const FirebaseManager = {
+  // Buscar TODAS as avaliações
   async buscarTodasAvaliacoes() {
     try {
-      if (!firestoreDb) {
-        console.warn('⚠️ Firestore não disponível. Verifique a conexão.');
+      if (!db) {
+        console.warn('⚠️ Firestore não disponível');
         return [];
       }
       
-      console.log('📡 Buscando avaliações do Firebase...');
-      const snapshot = await firestoreDb.collection('avaliacoes')
+      console.log('📡 Buscando avaliações do Firestore...');
+      
+      // Obter snapshot das avaliações
+      const snapshot = await db.collection('avaliacoes')
         .orderBy('createdAt', 'desc')
-        .limit(500) // Limite razoável
         .get();
       
       const avaliacoes = [];
+      
       snapshot.forEach(doc => {
         const data = doc.data();
         
-        // Extrair timestamp corretamente
+        // Extrair timestamp corretamente para Firebase v8
         let createdAt = new Date();
         if (data.createdAt) {
-          if (data.createdAt.toDate && typeof data.createdAt.toDate === 'function') {
-            createdAt = data.createdAt.toDate();
-          } else if (data.createdAt._seconds) {
-            createdAt = new Date(data.createdAt._seconds * 1000);
-          }
+          // Firebase v8 usa .toDate()
+          createdAt = data.createdAt.toDate ? data.createdAt.toDate() : new Date();
         }
         
         avaliacoes.push({
           id: doc.id,
           nome: data.nome || 'Escola não identificada',
-          lat: parseFloat(data.lat) || -3.717,
-          lng: parseFloat(data.lng) || -38.543,
+          lat: parseFloat(data.lat) || 0,
+          lng: parseFloat(data.lng) || 0,
           classe: data.classe || 'não avaliada',
           pontuacao: parseInt(data.pontuacao) || 0,
           createdAt: createdAt,
@@ -93,71 +82,71 @@ const FirebaseManager = {
       });
       
       console.log(`✅ ${avaliacoes.length} avaliações carregadas do Firebase`);
+      
+      // Verificar se há dados
+      if (avaliacoes.length > 0) {
+        console.log('📊 Exemplo de avaliação:', avaliacoes[0]);
+      }
+      
       return avaliacoes;
+      
     } catch (error) {
       console.error('❌ Erro ao buscar avaliações:', error.message || error);
+      
+      // Mostrar erro específico de permissão
+      if (error.code === 'permission-denied') {
+        console.error('🔒 Permissão negada. Verifique as regras do Firestore:');
+        console.error('1. Acesse https://console.firebase.google.com/');
+        console.error('2. Vá para Firestore Database > Regras');
+        console.error('3. Use regras temporárias para teste:');
+        console.error(`
+          rules_version = '2';
+          service cloud.firestore {
+            match /databases/{database}/documents {
+              match /{document=**} {
+                allow read, write: if true;
+              }
+            }
+          }
+        `);
+      }
+      
       return [];
     }
   },
   
-  async adicionarAvaliacao(avaliacao) {
-    try {
-      if (!firestoreDb) {
-        console.warn('⚠️ Firestore não disponível. Não foi possível salvar.');
-        return null;
-      }
-      
-      const docRef = await firestoreDb.collection('avaliacoes').add({
-        ...avaliacao,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      
-      console.log('✅ Avaliação salva com ID:', docRef.id);
-      return docRef.id;
-    } catch (error) {
-      console.error('❌ Erro ao salvar avaliação:', error);
-      return null;
-    }
-  },
-  
+  // Testar conexão
   async testarConexao() {
     try {
-      if (!firestoreDb) {
-        console.log('⚠️ Firestore não disponível para teste');
-        return false;
-      }
+      if (!db) return false;
       
-      // Teste simples
-      await firestoreDb.collection('avaliacoes').limit(1).get();
+      // Tentar uma consulta simples
+      const snapshot = await db.collection('avaliacoes').limit(1).get();
+      console.log('✅ Conexão com Firebase OK');
       return true;
     } catch (error) {
-      console.log('❌ Teste de conexão falhou:', error.message);
+      console.error('❌ Falha na conexão Firebase:', error.message);
       return false;
     }
   },
   
-  async buscarAvaliacoesRecentes(limite = 50) {
-    try {
-      if (!firestoreDb) return [];
-      
-      const snapshot = await firestoreDb.collection('avaliacoes')
-        .orderBy('createdAt', 'desc')
-        .limit(limite)
-        .get();
-      
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-      console.error('Erro ao buscar avaliações recentes:', error);
-      return [];
-    }
+  // Obter estatísticas
+  async getEstatisticas() {
+    const avaliacoes = await this.buscarTodasAvaliacoes();
+    return {
+      total: avaliacoes.length,
+      porClasse: avaliacoes.reduce((acc, av) => {
+        acc[av.classe] = (acc[av.classe] || 0) + 1;
+        return acc;
+      }, {})
+    };
   }
 };
 
 // Exportar para uso global
 window.firebaseManager = FirebaseManager;
-window.firestoreDb = firestoreDb;
+window.firebaseDb = db;
 window.PESOS_CLASSE = PESOS_CLASSE;
 window.firebaseApp = firebaseApp;
 
-console.log('🔥 Firebase configurado (modo compat)');
+console.log('🔥 Firebase v8 configurado para análise espacial');
