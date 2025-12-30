@@ -3,34 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <title>Análise Espacial – CheckInfra</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1f4fd8">
-
-<!-- CSS -->
-<link rel="stylesheet" href="./estilo.css">
-
-<!-- Leaflet -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<link rel="stylesheet" href="estilo.css">
 </head>
-
 <body>
-
-<!-- Navegação Global -->
-<div class="nav-global">
-  <button onclick="history.back()" title="Voltar">⬅️</button>
-  <a href="./index.html" title="Início">🏠</a>
-</div>
 
 <header>
   🧭 Análise Espacial – Leitura Territorial Exploratória
-  <div class="subheader">
+  <div style="font-size:12px;font-weight:normal;opacity:.9;">
     Indicadores espaciais relativos às condições sanitárias das escolas
   </div>
+
+  <!-- Botão sidebar -->
+  <button id="btn-sidebar" style="position:absolute;right:16px;top:16px;padding:6px 12px;cursor:pointer;">📑 Indicadores</button>
 </header>
 
-<!-- Abas -->
+<!-- Sidebar -->
+<div id="sidebar" class="sidebar hidden">
+  <button id="close-sidebar" aria-label="Fechar">✕</button>
+  <nav id="sidebar-menu">
+    <ul>
+      <li data-indicador="pareto" class="ativa">📊 Pareto</li>
+      <li data-indicador="densidade-critica">📍 Densidade Crítica</li>
+      <li data-indicador="concentracao-relativa">📈 Concentração Relativa</li>
+      <li data-indicador="zonas-prioritarias">🟥 Zonas Prioritárias</li>
+    </ul>
+  </nav>
+  <div id="sidebar-content"></div>
+</div>
+
 <div class="abas">
   <button class="ativa" onclick="abrirAba('mapa')">🗺️ Mapa</button>
   <button onclick="abrirAba('ranking')">📊 Ranking</button>
@@ -47,7 +49,6 @@
         <option value="2">Indicador 2 — Concentração Relativa</option>
       </select>
     </label>
-
     <label>
       <input type="checkbox" id="toggleZonas" checked>
       🟥 Zonas prioritárias
@@ -56,54 +57,26 @@
   <div id="map"></div>
 </div>
 
-<!-- RANKING -->
 <div id="ranking" class="secao">
   <h3>📊 Ranking Territorial — Zonas Prioritárias</h3>
   <ol id="listaRanking"></ol>
 </div>
 
-<!-- METODOLOGIA -->
 <div id="metodologia" class="secao">
   <h3>📘 Metodologia e Indicadores</h3>
-  <p>
-    Esta análise utiliza <strong>unidades territoriais regulares</strong>
-    (células espaciais de aproximadamente 1 km²) para identificar padrões
-    de concentração relativa das condições sanitárias das escolas.
-  </p>
-  <h4>Indicadores</h4>
-  <ul>
-    <li><strong>Indicador 1 – Densidade Crítica:</strong> presença absoluta de escolas em situação crítica.</li>
-    <li><strong>Indicador 2 – Concentração Relativa:</strong> pondera criticidade e alerta de forma equilibrada.</li>
-  </ul>
-  <h4>Índice Territorial (0–100)</h4>
-  <p>
-    Representa a intensidade relativa da condição sanitária
-    em cada célula, permitindo comparação entre áreas.
-  </p>
-  <p><em>Análises exploratórias, não substituem vistorias técnicas presenciais.</em></p>
+  <p>As análises são exploratórias e não substituem vistorias técnicas presenciais.</p>
 </div>
 
-<!-- FOOTER -->
 <footer>
-  <div>
-    <p>© 2026 CheckInfra — Projeto acadêmico — MIT License</p>
-    <p>
-      <a href="./pages/sobre.html">Sobre</a> | 
-      <a href="./pages/contato.html">Contato</a> | 
-      <a href="./pages/politica-privacidade.html">Política de Privacidade</a> | 
-      <a href="./pages/termos-de-uso.html">Termos de Uso</a>
-    </p>
-    <p>
-      🔒 Dados pessoais tratados conforme LGPD.
-    </p>
-  </div>
+  © 2026 CheckInfra — Código MIT | 🔒 LGPD conforme lei nº 13.709/2018
 </footer>
 
-<!-- SCRIPTS -->
-<script src="./abas.js"></script>
-<script src="./mapa.js"></script>
-<script src="./recalculos.js"></script>
-<script src="./eventos.js"></script>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<script src="abas.js"></script>
+<script src="mapa.js"></script>
+<script src="recalculos.js"></script>
+<script src="eventos.js"></script>
+<script src="sidebar.js"></script>
 </body>
 </html>
