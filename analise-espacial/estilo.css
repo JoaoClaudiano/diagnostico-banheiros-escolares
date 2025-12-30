@@ -1,13 +1,67 @@
-body { margin:0; font-family: Arial,sans-serif; background:#f4f6f8; }
-header { background:#1f4fd8; color:#fff; padding:16px; position:relative; }
-.abas { display:flex; justify-content:center; background:#e9ecef; border-bottom:1px solid #ccc; }
-.abas button { padding:10px 16px; border:none; background:none; cursor:pointer; font-weight:bold; }
-.abas button.ativa { background:#fff; border-bottom:3px solid #1f4fd8; }
-.secao { display:none; }
-.secao.ativa { display:block; }
-.painel { padding:10px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-#map { height: calc(100vh - 260px); }
-footer { background:#1f4fd8; color:#fff; text-align:center; padding:12px; font-size:12px; }
+body { 
+  margin:0; 
+  font-family: Arial, sans-serif; 
+  background:#f4f6f8; 
+}
+
+header { 
+  background:#1f4fd8; 
+  color:#fff; 
+  padding:16px; 
+  position:relative; 
+}
+
+.abas { 
+  display:flex; 
+  justify-content:center; 
+  background:#e9ecef; 
+  border-bottom:1px solid #ccc; 
+}
+
+.abas button { 
+  padding:10px 16px; 
+  border:none; 
+  background:none; 
+  cursor:pointer; 
+  font-weight:bold; 
+}
+
+.abas button.ativa { 
+  background:#fff; 
+  border-bottom:3px solid #1f4fd8; 
+}
+
+.secao { 
+  display:none; 
+}
+
+.secao.ativa { 
+  display:block; 
+}
+
+.painel { 
+  padding:10px; 
+  display:flex; 
+  gap:12px; 
+  justify-content:center; 
+  flex-wrap:wrap; 
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 10px;
+}
+
+#map { 
+  height: calc(100vh - 260px); 
+}
+
+footer { 
+  background:#1f4fd8; 
+  color:#fff; 
+  text-align:center; 
+  padding:12px; 
+  font-size:12px; 
+}
 
 /* Sidebar */
 .sidebar { 
@@ -26,18 +80,298 @@ footer { background:#1f4fd8; color:#fff; text-align:center; padding:12px; font-s
   transition:transform 0.35s ease; 
 }
 
-.sidebar.visible { transform:translateX(0); }
-#close-sidebar { background:none; border:none; font-size:22px; cursor:pointer; position:absolute; top:12px; right:12px; }
-#sidebar-menu ul { list-style:none; padding:0; margin:0 0 20px 0; }
-#sidebar-menu li { padding:10px 12px; cursor:pointer; border-radius:6px; margin-bottom:6px; font-weight:bold; background:#f1f1f1; transition:background 0.2s; }
-#sidebar-menu li:hover { background:#e0e0e0; }
-#sidebar-menu li.ativa { background:#1f4fd8; color:#fff; }
-#sidebar-content { margin-top:10px; }
-#sidebar-content iframe { width:100%; height:80vh; border:none; }
+.sidebar.visible { 
+  transform:translateX(0); 
+}
+
+#close-sidebar { 
+  background:none; 
+  border:none; 
+  font-size:22px; 
+  cursor:pointer; 
+  position:absolute; 
+  top:12px; 
+  right:12px; 
+}
+
+#sidebar-menu ul { 
+  list-style:none; 
+  padding:0; 
+  margin:0 0 20px 0; 
+}
+
+#sidebar-menu li { 
+  padding:10px 12px; 
+  cursor:pointer; 
+  border-radius:6px; 
+  margin-bottom:6px; 
+  font-weight:bold; 
+  background:#f1f1f1; 
+  transition:background 0.2s; 
+}
+
+#sidebar-menu li:hover { 
+  background:#e0e0e0; 
+}
+
+#sidebar-menu li.ativa { 
+  background:#1f4fd8; 
+  color:#fff; 
+}
+
+#sidebar-content { 
+  margin-top:10px; 
+}
+
+#sidebar-content iframe { 
+  width:100%; 
+  height:80vh; 
+  border:none; 
+}
+
+/* Estilos para a nova aba de Análise Avançada */
+#avancada.ativa {
+  display: block;
+}
+
+.avancada-content {
+  padding: 20px;
+}
+
+.avancada-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.avancada-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.avancada-card h4 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.btn-avancada {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 15px;
+  width: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-avancada:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.avancada-output {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  min-height: 60px;
+  border: 1px dashed #ccc;
+}
+
+.avancada-map {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+/* Estilos para a metodologia */
+.metodologia-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+  padding: 20px;
+}
+
+.metodologia-content h4 {
+  color: #2c3e50;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.metodologia-content ul, .metodologia-content ol {
+  margin: 15px 0;
+  padding-left: 20px;
+}
+
+.metodologia-content li {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.metodologia-content strong {
+  color: #1f4fd8;
+}
+
+/* Estilos para botões no painel */
+#btn-voronoi {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+#btn-voronoi:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para controles de slider */
+input[type="range"] {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #ddd;
+  outline: none;
+  margin: 10px 0;
+}
+
+#raio-value {
+  display: inline-block;
+  margin-left: 10px;
+  font-weight: bold;
+  color: #1f4fd8;
+}
+
+/* Estilos para o ranking */
+#ranking {
+  padding: 20px;
+}
+
+#listaRanking {
+  margin: 20px;
+  padding-left: 20px;
+}
+
+#listaRanking li {
+  padding: 10px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
 /* Responsividade */
-@media (max-width: 600px) {
-  header div { text-align:center; }
-  .sidebar { width:90%; }
-  #sidebar-content iframe { height:70vh; }
+@media (max-width: 768px) {
+  .avancada-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .painel {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+  }
+  
+  .abas button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  #sidebar-menu li {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  
+  .sidebar {
+    width: 90%;
+  }
+  
+  #sidebar-content iframe {
+    height: 70vh;
+  }
+  
+  .metodologia-content {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 12px;
+  }
+  
+  header div {
+    font-size: 14px;
+  }
+  
+  .abas button {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  
+  .avancada-card {
+    padding: 15px;
+  }
+  
+  #map {
+    height: calc(100vh - 240px);
+  }
+}
+
+/* Estilos para loading states */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Estilos para mensagens de erro */
+.error-message {
+  background: #ffe6e6;
+  border: 1px solid #ff9999;
+  color: #cc0000;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+  margin: 20px;
+}
+
+/* Estilos para labels no painel */
+label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+select {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: white;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 }
