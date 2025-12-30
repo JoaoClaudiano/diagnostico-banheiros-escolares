@@ -1,23 +1,56 @@
-const btnSidebar = document.getElementById("btn-sidebar");
+/* =====================
+   SIDEBAR – EXPLICAÇÃO METODOLÓGICA
+===================== */
+
 const sidebar = document.getElementById("sidebar");
-const closeSidebar = document.getElementById("close-sidebar");
-const sidebarContent = document.getElementById("sidebar-content");
-const menuItems = document.querySelectorAll("#sidebar-menu li");
+const toggle = document.getElementById("sidebar-toggle");
+const closeBtn = document.getElementById("sidebar-close");
+const frame = document.getElementById("sidebar-frame");
 
-btnSidebar.addEventListener("click", () => sidebar.classList.add("visible"));
-closeSidebar.addEventListener("click", () => sidebar.classList.remove("visible"));
-
-function carregarIndicador(nomeIndicador) {
-  sidebarContent.innerHTML = `<iframe src="./indicadores/${nomeIndicador}/index.html" title="${nomeIndicador}"></iframe>`;
+/**
+ * Abre o sidebar e carrega o indicador
+ * @param {string} indicador - Caminho relativo do indicador (ex: "./pareto/index.html")
+ */
+function abrirSidebar(indicador) {
+  if (indicador) frame.src = indicador;
+  sidebar.classList.remove("hidden");
 }
 
-menuItems.forEach(item => {
-  item.addEventListener("click", () => {
-    menuItems.forEach(i => i.classList.remove("ativa"));
-    item.classList.add("ativa");
-    const indicador = item.getAttribute("data-indicador");
-    carregarIndicador(indicador);
-  });
+/**
+ * Fecha o sidebar e limpa o conteúdo do iframe
+ */
+function fecharSidebar() {
+  sidebar.classList.add("hidden");
+  frame.src = "";
+}
+
+/* =====================
+   EVENTOS DE INTERAÇÃO
+===================== */
+
+// Botão toggle no header (ℹ️)
+toggle.addEventListener("click", () => {
+  // Por padrão, abre o Pareto (pode ser alterado dinamicamente)
+  abrirSidebar("./pareto/index.html");
 });
 
-window.addEventListener("DOMContentLoaded", () => carregarIndicador("pareto"));
+// Botão de fechar dentro do sidebar
+closeBtn.addEventListener("click", fecharSidebar);
+
+// Fechar sidebar ao clicar fora (opcional, melhora UX)
+sidebar.addEventListener("click", (e) => {
+  if (e.target === sidebar) fecharSidebar();
+});
+
+/* =====================
+   FUNÇÃO PARA INDICADORES DINÂMICOS
+===================== */
+
+/**
+ * Função utilitária para abrir qualquer indicador
+ * Exemplo:
+ * abrirIndicador("./densidade/index.html")
+ */
+function abrirIndicador(caminho) {
+  abrirSidebar(caminho);
+}
