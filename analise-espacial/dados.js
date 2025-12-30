@@ -1,5 +1,4 @@
-// dados.js - VERSÃO CORRIGIDA E SIMPLIFICADA
-
+// dados.js - VERSÃO CORRIGIDA PARA INTEGRAÇÃO COMPLETA
 class DadosManager {
   constructor() {
     this.dados = {
@@ -10,66 +9,38 @@ class DadosManager {
     };
     
     this.eventListeners = new Map();
-    this.initialized = false;
-    
-    // Adicione ao final da classe DadosManager, antes do } (fechamento da classe)
-removerDuplicatas() {
-  console.log('🔍 Removendo duplicatas de escolas...');
-  
-  const escolasUnicas = [];
-  const nomesProcessados = new Set();
-  
-  this.dados.escolas.forEach(escola => {
-    const chave = `${escola.nome.toLowerCase()}_${escola.lat.toFixed(6)}_${escola.lng.toFixed(6)}`;
-    
-    if (!nomesProcessados.has(chave)) {
-      nomesProcessados.add(chave);
-      escolasUnicas.push(escola);
-    } else {
-      console.log(`⚠️ Removendo duplicata: ${escola.nome}`);
-    }
-  });
-  
-  this.dados.escolas = escolasUnicas;
-  console.log(`✅ ${this.dados.escolas.length} escolas únicas após remoção de duplicatas`);
-}
-    
   }
   
   async inicializar() {
-    // Evitar inicialização múltipla
-    if (this.initialized) {
-      console.log('⚠️ Dados já inicializados');
-      return this.dados;
-    }
-    
     console.log('🚀 Inicializando sistema de dados...');
     this.dados.status = 'carregando';
     this.notificar('status', 'carregando');
     
     try {
-      // 1. Tentar carregar escolas locais
+      // 1. Carregar escolas locais (sempre primeiro)
       await this.carregarEscolasLocais();
       
-      // 2. Tentar carregar do Firebase (não bloqueante)
-      this.carregarAvaliacoesFirebase().then(() => {
-        // Quando Firebase carregar, combinar dados
-        this.combinarDados();
+      // 2. Tentar carregar do Firebase (mas não bloquear)
+      this.carregarAvaliacoesFirebase().then(avaliacoes => {
+        console.log(`📡 ${avaliacoes.length} avaliações do Firebase processadas`);
+        
+        // 3. Combinar dados quando Firebase terminar
+        this.combinarDadosComFirebase(avaliacoes);
+        
+        // 4. Calcular métricas
         this.calcularMetricas();
+        
+        // 5. Notificar que dados estão prontos
         this.notificar('dados_atualizados', this.dados);
       }).catch(error => {
-        console.warn('⚠️ Firebase falhou, usando apenas dados locais:', error);
-        this.combinarDados();
+        console.warn('⚠️ Firebase falhou, usando apenas dados locais');
         this.calcularMetricas();
         this.notificar('dados_atualizados', this.dados);
       });
       
-      // 3. Marcar como pronto (mesmo sem Firebase)
+      // Marcar como pronto (não esperar pelo Firebase)
       this.dados.status = 'pronto';
-      this.initialized = true;
       this.notificar('status', 'pronto');
-      
-      console.log(`✅ Sistema de dados inicializado: ${this.dados.escolasLocais?.length || 0} escolas locais`);
       
       return this.dados;
       
@@ -81,172 +52,170 @@ removerDuplicatas() {
     }
   }
   
-  async carregarEscolasLocais() {
-    console.log('📂 Tentando carregar escolas locais...');
+  carregarEscolasLocais() {
+    console.log('📂 Carregando escolas locais...');
     
-    // Estratégia 1: Verificar se já está carregado
+    // Verificar se já temos as escolas no window
     if (window.escolas && Array.isArray(window.escolas)) {
-      console.log(`📂 ${window.escolas.length} escolas já carregadas no window.escolas`);
-      return this.processarEscolasLocais(window.escolas);
-    }
-    
-    // Estratégia 2: Tentar carregar via fetch
-    try {
-      const response = await fetch('../mapa/escolas.js');
-      if (!response.ok) throw new Error('Arquivo não encontrado');
+      console.log(`📂 ${window.escolas.length} escolas encontradas no window.escolas`);
       
-      const text = await response.text();
-      // Extrair array do arquivo JS (hack simples)
-      const match = text.match(/window\.escolas = (\[.*?\])/s);
-      if (match) {
-        const escolasArray = eval(match[1]); // Cuidado! Mas confiamos no arquivo local
-        window.escolas = escolasArray;
-        return this.processarEscolasLocais(escolasArray);
-      }
-    } catch (error) {
-      console.warn('⚠️ Não foi possível carregar escolas locais:', error);
+      // Processar escolas locais
+      this.dados.escolas = window.escolas.map((escola, index) => ({
+        id: `local-${index}`,
+        nome: escola.nome || `Escola ${index}`,
+        lat: parseFloat(escola.lat) || -3.717,
+        lng: parseFloat(escola.lng) || -38.543,
+        fonte: 'local',
+        classe: 'não avaliada',
+        pontuacao: 0,
+        peso: window.PESOS_CLASSE ? window.PESOS_CLASSE['não avaliada'] : 0.5,
+        avaliacoes: [],
+        metadata: { indice: index }
+      }));
+      
+      console.log(`✅ ${this.dados.escolas.length} escolas locais processadas`);
+      return this.dados.escolas;
     }
     
-    // Estratégia 3: Dados de fallback
-    console.warn('⚠️ Usando dados de exemplo como fallback');
-    window.escolas = this.criarDadosExemplo();
-    return this.processarEscolasLocais(window.escolas);
-  }
-  
-  processarEscolasLocais(escolasArray) {
-    const escolasLocais = escolasArray.map((escola, index) => ({
-      id: `local-${index + 1}`,
-      nome: escola.nome || `Escola ${index + 1}`,
-      lat: parseFloat(escola.lat) || -3.717,
-      lng: parseFloat(escola.lng) || -38.543,
-      fonte: 'local',
-      metadata: { index },
-      avaliacoes: [],
-      classe: 'não avaliada',
-      pontuacao: 0,
-      peso: (window.PESOS_CLASSE && window.PESOS_CLASSE['não avaliada']) || 0.5
-    }));
-    
-    this.dados.escolasLocais = escolasLocais;
-    console.log(`📂 ${escolasLocais.length} escolas processadas`);
-    return escolasLocais;
+    console.warn('⚠️ Nenhuma escola local encontrada');
+    return [];
   }
   
   async carregarAvaliacoesFirebase() {
-    console.log('📡 Tentando conectar ao Firebase...');
+    console.log('📡 Conectando ao Firebase...');
     
     // Verificar se Firebase está disponível
     if (!window.firebaseManager) {
       console.warn('⚠️ FirebaseManager não disponível');
-      this.dados.avaliacoes = [];
-      return;
+      return [];
     }
     
     try {
-      // Testar conexão primeiro
-      if (window.firebaseManager.testarConexao) {
-        const conectado = await window.firebaseManager.testarConexao();
-        if (!conectado) {
-          console.warn('⚠️ Sem conexão com Firebase');
-          this.dados.avaliacoes = [];
-          return;
-        }
+      // Testar conexão
+      const conectado = await window.firebaseManager.testarConexao();
+      if (!conectado) {
+        console.warn('⚠️ Sem conexão com Firebase');
+        return [];
       }
       
       // Buscar avaliações
       const avaliacoes = await window.firebaseManager.buscarTodasAvaliacoes();
       this.dados.avaliacoes = avaliacoes;
-      console.log(`📡 ${avaliacoes.length} avaliações do Firebase`);
+      
+      console.log(`✅ ${avaliacoes.length} avaliações do Firebase`);
+      
+      return avaliacoes;
       
     } catch (error) {
       console.error('❌ Erro no Firebase:', error);
-      this.dados.avaliacoes = [];
-      throw error;
+      return [];
     }
   }
   
-  combinarDados() {
-    console.log('🔗 Combinando dados...');
+  combinarDadosComFirebase(avaliacoesFirebase) {
+    console.log('🔗 Combinando dados locais com Firebase...');
     
-    // Começar com as escolas locais
-    let escolasCombinadas = [...(this.dados.escolasLocais || [])];
+    // Se não houver avaliações do Firebase, apenas usar locais
+    if (!avaliacoesFirebase || avaliacoesFirebase.length === 0) {
+      console.log('⚠️ Nenhuma avaliação do Firebase para combinar');
+      return;
+    }
     
-    // Para cada avaliação, tentar encontrar escola correspondente
-    (this.dados.avaliacoes || []).forEach(avaliacao => {
-      let escolaIndex = escolasCombinadas.findIndex(escola => 
-        escola.nome.toLowerCase() === avaliacao.nome.toLowerCase()
-      );
+    // Mapa para armazenar escolas únicas por nome
+    const escolasMap = new Map();
+    
+    // Primeiro, adicionar todas as escolas locais ao mapa
+    this.dados.escolas.forEach(escola => {
+      const chave = escola.nome.toLowerCase().trim();
+      escolasMap.set(chave, { ...escola });
+    });
+    
+    // Agora, processar avaliações do Firebase
+    avaliacoesFirebase.forEach(avaliacao => {
+      const chave = avaliacao.nome.toLowerCase().trim();
       
-      if (escolaIndex === -1) {
-        // Escola nova do Firebase
-        escolaIndex = escolasCombinadas.length;
-        escolasCombinadas.push({
+      if (escolasMap.has(chave)) {
+        // Escola já existe, atualizar com dados do Firebase
+        const escola = escolasMap.get(chave);
+        
+        // Adicionar avaliação
+        if (!escola.avaliacoes) escola.avaliacoes = [];
+        escola.avaliacoes.push(avaliacao);
+        
+        // Atualizar classe se for mais crítica
+        const pesoAtual = window.PESOS_CLASSE ? window.PESOS_CLASSE[escola.classe] || 0 : 0;
+        const pesoNovo = window.PESOS_CLASSE ? window.PESOS_CLASSE[avaliacao.classe] || 0 : 0;
+        
+        if (pesoNovo > pesoAtual) {
+          escola.classe = avaliacao.classe;
+          escola.pontuacao = avaliacao.pontuacao;
+          escola.peso = pesoNovo;
+        }
+        
+        // Marcar que tem dados do Firebase
+        escola.fonte = 'local+firebase';
+        
+      } else {
+        // Escola nova do Firebase (não está na lista local)
+        escolasMap.set(chave, {
           id: `firebase-${avaliacao.id}`,
           nome: avaliacao.nome,
           lat: avaliacao.lat,
           lng: avaliacao.lng,
           fonte: 'firebase',
-          metadata: {},
-          avaliacoes: [],
-          classe: 'não avaliada',
-          pontuacao: 0,
-          peso: (window.PESOS_CLASSE && window.PESOS_CLASSE['não avaliada']) || 0.5
+          classe: avaliacao.classe,
+          pontuacao: avaliacao.pontuacao,
+          peso: window.PESOS_CLASSE ? window.PESOS_CLASSE[avaliacao.classe] || 0.5 : 0.5,
+          avaliacoes: [avaliacao],
+          metadata: { fonte: 'firebase' }
         });
-        
-        // Dentro do método combinarDados(), adicione no final:
-this.removerDuplicatas();
-        
-      }
-      
-      // Adicionar avaliação
-      escolasCombinadas[escolaIndex].avaliacoes.push(avaliacao);
-      
-      // Atualizar classe se for mais crítica
-      const pesoAtual = (window.PESOS_CLASSE && window.PESOS_CLASSE[escolasCombinadas[escolaIndex].classe]) || 0;
-      const pesoNovo = (window.PESOS_CLASSE && window.PESOS_CLASSE[avaliacao.classe]) || 0;
-      
-      if (pesoNovo > pesoAtual) {
-        escolasCombinadas[escolaIndex].classe = avaliacao.classe;
-        escolasCombinadas[escolaIndex].pontuacao = avaliacao.pontuacao;
-        escolasCombinadas[escolaIndex].peso = pesoNovo;
       }
     });
     
-    // Adicionar propriedades para análise
-    this.dados.escolas = escolasCombinadas.map(escola => ({
-      ...escola,
-      x: escola.lng,
-      y: escola.lat,
-      valor: escola.peso,
-      cor: this.getCorPorClasse(escola.classe),
-      grupo: `grupo-${Math.floor(escola.lat * 10)}-${Math.floor(escola.lng * 10)}`
-    }));
+    // Converter mapa de volta para array
+    this.dados.escolas = Array.from(escolasMap.values());
     
-    console.log(`🔗 ${this.dados.escolas.length} escolas combinadas`);
+    console.log(`🔗 ${this.dados.escolas.length} escolas após combinação`);
   }
   
   calcularMetricas() {
     const escolas = this.dados.escolas;
     const total = escolas.length;
     
-    // Distribuição por classe
+    if (total === 0) {
+      this.dados.metricas = {
+        totalEscolas: 0,
+        escolasCriticas: 0,
+        escolasAvaliadas: 0,
+        percentualCriticas: '0.0',
+        percentualAvaliadas: '0.0',
+        pontuacaoMedia: '0.0',
+        distribuicaoClasses: {},
+        ultimaAtualizacao: new Date().toISOString(),
+        fonteDados: 'Nenhuma'
+      };
+      return;
+    }
+    
+    // Calcular distribuição por classe
     const distribuicao = {};
-    escolas.forEach(e => {
-      distribuicao[e.classe] = (distribuicao[e.classe] || 0) + 1;
+    escolas.forEach(escola => {
+      distribuicao[escola.classe] = (distribuicao[escola.classe] || 0) + 1;
     });
     
     // Estatísticas
-    const criticas = escolas.filter(e => e.classe === 'crítico').length;
-    const avaliadas = escolas.filter(e => e.classe !== 'não avaliada').length;
+    const escolasCriticas = escolas.filter(e => e.classe === 'crítico').length;
+    const escolasAvaliadas = escolas.filter(e => e.classe !== 'não avaliada').length;
     const pontuacoes = escolas.filter(e => e.pontuacao > 0).map(e => e.pontuacao);
-    const media = pontuacoes.length > 0 ? pontuacoes.reduce((a, b) => a + b, 0) / pontuacoes.length : 0;
+    const media = pontuacoes.length > 0 ? 
+      pontuacoes.reduce((a, b) => a + b, 0) / pontuacoes.length : 0;
     
     this.dados.metricas = {
       totalEscolas: total,
-      escolasCriticas: criticas,
-      escolasAvaliadas: avaliadas,
-      percentualCriticas: total > 0 ? ((criticas / total) * 100).toFixed(1) : '0',
-      percentualAvaliadas: total > 0 ? ((avaliadas / total) * 100).toFixed(1) : '0',
+      escolasCriticas,
+      escolasAvaliadas,
+      percentualCriticas: ((escolasCriticas / total) * 100).toFixed(1),
+      percentualAvaliadas: ((escolasAvaliadas / total) * 100).toFixed(1),
       pontuacaoMedia: media.toFixed(1),
       distribuicaoClasses: distribuicao,
       ultimaAtualizacao: new Date().toISOString(),
@@ -254,60 +223,58 @@ this.removerDuplicatas();
     };
     
     console.log('📊 Métricas calculadas:', this.dados.metricas);
-    return this.dados.metricas;
-  }
-  
-  getCorPorClasse(classe) {
-    const cores = {
-      'adequada': '#28a745',
-      'alerta': '#ffc107',
-      'atenção': '#fd7e14',
-      'crítico': '#dc3545',
-      'não avaliada': '#6c757d'
-    };
-    return cores[classe] || '#6c757d';
   }
   
   // Métodos de acesso
-  getEscolas() { return this.dados.escolas; }
-  getAvaliacoes() { return this.dados.avaliacoes; }
-  getMetricas() { return this.dados.metricas; }
-  getStatus() { return this.dados.status; }
+  getEscolas() { 
+    return this.dados.escolas; 
+  }
+  
+  getAvaliacoes() { 
+    return this.dados.avaliacoes; 
+  }
+  
+  getMetricas() { 
+    return this.dados.metricas; 
+  }
+  
+  getStatus() { 
+    return this.dados.status; 
+  }
   
   // Sistema de eventos
   adicionarListener(evento, callback) {
-    if (!this.eventListeners.has(evento)) this.eventListeners.set(evento, []);
+    if (!this.eventListeners.has(evento)) {
+      this.eventListeners.set(evento, []);
+    }
     this.eventListeners.get(evento).push(callback);
   }
   
   notificar(evento, ...args) {
     if (this.eventListeners.has(evento)) {
-      this.eventListeners.get(evento).forEach(cb => {
-        try { cb(...args); } catch (e) { console.error(e); }
+      this.eventListeners.get(evento).forEach(callback => {
+        try {
+          callback(...args);
+        } catch (error) {
+          console.error(`Erro no listener de ${evento}:`, error);
+        }
       });
     }
   }
-  
-  criarDadosExemplo() {
-    return [
-      { nome: "Escola Exemplo A", lat: -3.717, lng: -38.543 },
-      { nome: "Escola Exemplo B", lat: -3.750, lng: -38.580 }
-    ];
-  }
 }
 
-// Criar e exportar instância
+// Criar e inicializar o gerenciador de dados
 const dadosManager = new DadosManager();
 window.dadosManager = dadosManager;
 
 // Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('📊 Inicializando dados...');
+  console.log('📊 Inicializando sistema de dados...');
   
   // Aguardar um pouco para garantir que tudo está carregado
   setTimeout(() => {
     dadosManager.inicializar();
-  }, 1000);
+  }, 1500);
 });
 
 console.log('✅ Sistema de dados carregado');
