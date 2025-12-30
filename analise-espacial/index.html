@@ -281,10 +281,16 @@ document.getElementById('btn-voltar').addEventListener('click', function() {
 
 // Sistema de abas atualizado
 function abrirAba(nome) {
-  // Esconde todas as seções
-  document.querySelectorAll('.secao').forEach(sec => {
-    sec.classList.remove('ativa');
-  });
+  // Se for a aba de mapa, garante que o mapa seja redimensionado
+if (nome === 'mapa') {
+  setTimeout(() => {
+    if (window.invalidarTamanhoMapa && typeof window.invalidarTamanhoMapa === 'function') {
+      window.invalidarTamanhoMapa();
+    } else if (window.map && typeof window.map.invalidateSize === 'function') {
+      window.map.invalidateSize();
+    }
+  }, 300);
+}
   
   // Remove ativa de todos os botões
   document.querySelectorAll('.abas button').forEach(btn => {
