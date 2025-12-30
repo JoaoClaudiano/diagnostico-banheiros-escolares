@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Índice de Moran</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<main>
+<div class="card">
+<h1>🔗 Índice de Moran I</h1>
+<p class="subtitulo"><strong>Autocorrelação Espacial:</strong> Detecta padrões de agrupamento ou dispersão</p>
+
+<div class="conceito-visual">
+<h2>🎨 Visualização dos Padrões</h2>
+<div class="padroes">
+<div class="padrao-card" data-tipo="agrupamento">
+<div class="mapa-ilustrativo agrupamento"></div>
+<h3>Agrupamento (Clusters)</h3>
+<p>Valores similares próximos<br>I > 0 (positivo)</p>
+</div>
+
+<div class="padrao-card" data-tipo="aleatorio">
+<div class="mapa-ilustrativo aleatorio"></div>
+<h3>Aleatório</h3>
+<p>Sem padrão espacial<br>I ≈ 0</p>
+</div>
+
+<div class="padrao-card" data-tipo="dispersao">
+<div class="mapa-ilustrativo dispersao"></div>
+<h3>Dispersão (Outliers)</h3>
+<p>Valores similares afastados<br>I < 0 (negativo)</p>
+</div>
+</div>
+</div>
+
+<div class="formula">
+<h2>📐 Fórmula do Índice de Moran</h2>
+<div class="formula-container">
+<div class="formula-equacao">
+I = (n / Σ<sub>i</sub>Σ<sub>j</sub>w<sub>ij</sub>) ×
+(Σ<sub>i</sub>Σ<sub>j</sub>w<sub>ij</sub>(x<sub>i</sub> - x̄)(x<sub>j</sub> - x̄) / Σ<sub>i</sub>(x<sub>i</sub> - x̄)²)
+</div>
+<div class="legenda-formula">
+<p><strong>w<sub>ij</sub>:</strong> matriz de pesos espaciais</p>
+<p><strong>x<sub>i</sub>, x<sub>j</sub>:</strong> valores nas localizações i e j</p>
+<p><strong>x̄:</strong> média dos valores</p>
+<p><strong>n:</strong> número de observações</p>
+</div>
+</div>
+</div>
+
+<div class="significancia">
+<h2>📊 Teste de Significância</h2>
+<div class="zscore">
+<div class="distribuicao">
+<div class="curva-normal">
+<div class="area-rejeicao left"></div>
+<div class="area-aceitacao"></div>
+<div class="area-rejeicao right"></div>
+<div class="linha-media"></div>
+</div>
+<div class="legenda-distribuicao">
+<p class="rejeicao">Rejeita H₀<br>(padrão significativo)</p>
+<p class="aceitacao">Aceita H₀<br>(padrão aleatório)</p>
+<p class="rejeicao">Rejeita H₀<br>(padrão significativo)</p>
+</div>
+</div>
+
+<div class="valores-criticos">
+<h3>Valores Críticos (Z-Score)</h3>
+<table>
+<tr>
+<th>|Z|</th>
+<th>Significância</th>
+<th>Interpretação</th>
+</tr>
+<tr>
+<td>&lt; 1.65</td>
+<td>90%</td>
+<td>Não significativo</td>
+</tr>
+<tr>
+<td>≥ 1.65</td>
+<td>90%</td>
+<td>Significativo</td>
+</tr>
+<tr>
+<td>≥ 1.96</td>
+<td>95%</td>
+<td>Altamente significativo</td>
+</tr>
+<tr>
+<td>≥ 2.58</td>
+<td>99%</td>
+<td>Muito significativo</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+
+<div class="aplicacao-checkinfra">
+<h2>🏫 Aplicação no CheckInfra</h2>
+<div class="cenarios">
+<div class="cenario" data-resultado="agrupamento">
+<h3>🧲 Moran I positivo</h3>
+<p><strong>Exemplo:</strong> I = 0.35, Z = 2.8</p>
+<p>Escolas críticas formam clusters territoriais</p>
+<p><strong>Ação:</strong> Intervenções integradas por bairro</p>
+</div>
+
+<div class="cenario" data-resultado="aleatorio">
+<h3>🎲 Moran I próximo de zero</h3>
+<p><strong>Exemplo:</strong> I = 0.05, Z = 0.8</p>
+<p>Distribuição aleatória de problemas</p>
+<p><strong>Ação:</strong> Ações pontuais, sem padrão territorial</p>
+</div>
+
+<div class="cenario" data-resultado="dispersao">
+<h3>⚠️ Moran I negativo</h3>
+<p><strong>Exemplo:</strong> I = -0.25, Z = -2.1</p>
+<p>Escolas críticas isoladas entre adequadas</p>
+<p><strong>Ação:</strong> Casos específicos, causas locais</p>
+</div>
+</div>
+</div>
+
+<div class="consideracoes">
+<h2>💡 Considerações Importantes</h2>
+<ul>
+<li>O teste assume normalidade dos resíduos</li>
+<li>Sensível à definição da matriz de pesos</li>
+<li>Melhor para análise global que local</li>
+<li>Complementar ao LISA (Local Moran)</li>
+</ul>
+</div>
+</div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
