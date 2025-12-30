@@ -16,3 +16,4 @@ fetch(API_URL).then(r=>r.json()).then(d=>{
   dadosOriginais = d;
   recalcularMapa(dadosOriginais);
 });
+
