@@ -240,3 +240,6 @@ window.inicializarMapaAvancado = inicializarMapaAvancado;
 window.gerarVoronoi = gerarVoronoi;
 window.calcularImpacto = calcularImpacto;
 window.calcularEstatisticas = calcularEstatisticas;
+
+
+
