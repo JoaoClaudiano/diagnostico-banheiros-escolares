@@ -8,7 +8,8 @@ class AnaliseEspacialAvancada {
         this.escolas = escolas;
         this.RAIO_TERRA_KM = 6371;
     }
-    
+
+   
     /* ========================
        KERNEL DENSITY ESTIMATION (KDE)
        Calcula densidade real de pontos críticos
@@ -990,3 +991,5 @@ function analiseAvancada() {
             return analise.calcularKDE(1.0);
     }
 }
+
+
