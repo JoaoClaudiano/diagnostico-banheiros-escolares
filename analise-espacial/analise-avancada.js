@@ -204,6 +204,7 @@ class AnaliseEspacialAvancada {
             const alturaMedia = (yi + (i > 0 ? (acumulado - criticasPorCelula[i]) / somaTotal : 0)) / 2;
             areaLorenz += base * alturaMedia;
         }
+       
         
         const gini = 1 - (2 * areaLorenz);
         
