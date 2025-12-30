@@ -1,8 +1,10 @@
 // analise-avancada.js - VERSÃO FUNCIONAL
 console.log('🚀 Módulo de análise avançada carregado');
 
+
 let mapaAvancado = null;
 let voronoiGerado = false;
+
 
 // Inicializar mapa avançado
 function inicializarMapaAvancado() {
@@ -240,6 +242,7 @@ window.inicializarMapaAvancado = inicializarMapaAvancado;
 window.gerarVoronoi = gerarVoronoi;
 window.calcularImpacto = calcularImpacto;
 window.calcularEstatisticas = calcularEstatisticas;
+
 
 
 
