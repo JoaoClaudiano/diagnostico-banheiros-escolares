@@ -29,6 +29,11 @@
       <li data-indicador="densidade-critica">📍 Densidade Crítica</li>
       <li data-indicador="concentracao-relativa">📈 Concentração Relativa</li>
       <li data-indicador="zonas-prioritarias">🟥 Zonas Prioritárias</li>
+      <!-- NOVOS INDICADORES ADICIONADOS -->
+      <li data-indicador="kde">🔥 KDE</li>
+      <li data-indicador="gini">⚖️ Gini Espacial</li>
+      <li data-indicador="lq">📈 Location Quotient</li>
+      <li data-indicador="moran">🔗 Índice de Moran</li>
     </ul>
   </nav>
   <div id="sidebar-content"></div>
@@ -38,6 +43,7 @@
   <button class="ativa" onclick="abrirAba('mapa')">🗺️ Mapa</button>
   <button onclick="abrirAba('ranking')">📊 Ranking</button>
   <button onclick="abrirAba('metodologia')">📘 Metodologia</button>
+  <button onclick="abrirAba('avancada')">🚀 Análise Avançada</button>
 </div>
 
 <!-- MAPA -->
@@ -54,35 +60,116 @@
       <input type="checkbox" id="toggleZonas" checked>
       🟥 Zonas prioritárias
     </label>
+    <label>
+      <button id="btn-voronoi" style="margin-left: 10px; padding: 5px 10px; cursor: pointer;">
+        🧩 Gerar Voronoi
+      </button>
+    </label>
   </div>
   <div id="map"></div>
 </div>
 
+<!-- RANKING -->
 <div id="ranking" class="secao">
   <h3>📊 Ranking Territorial — Zonas Prioritárias</h3>
   <ol id="listaRanking"></ol>
 </div>
 
+<!-- METODOLOGIA -->
 <div id="metodologia" class="secao">
   <h3>📘 Metodologia e Indicadores</h3>
-  <p>As análises são exploratórias e não substituem vistorias técnicas presenciais.</p>
+  <div class="metodologia-content">
+    <h4>📋 Indicadores Disponíveis:</h4>
+    <ul>
+      <li><strong>📊 Pareto</strong>: Identifica os 20% de escolas que concentram 80% dos problemas</li>
+      <li><strong>📍 Densidade Crítica</strong>: Mede a concentração espacial de ocorrências</li>
+      <li><strong>📈 Concentração Relativa</strong>: Compara densidade local com média global</li>
+      <li><strong>🟥 Zonas Prioritárias</strong>: Áreas com múltiplas vulnerabilidades sobrepostas</li>
+      <li><strong>🔥 KDE</strong>: Kernel Density Estimation para identificação de hotspots</li>
+      <li><strong>⚖️ Gini Espacial</strong>: Mede desigualdade na distribuição espacial</li>
+      <li><strong>📈 Location Quotient</strong>: Identifica especialização regional</li>
+      <li><strong>🔗 Índice de Moran</strong>: Detecta autocorrelação espacial</li>
+    </ul>
+    
+    <h4>🎯 Metodologia:</h4>
+    <p>As análises são exploratórias e baseadas em:</p>
+    <ol>
+      <li>Dados geoespaciais das escolas</li>
+      <li>Indicadores de condições sanitárias</li>
+      <li>Análises estatísticas espaciais</li>
+      <li>Visualização interativa</li>
+    </ol>
+    <p><em>⚠️ As análises não substituem vistorias técnicas presenciais.</em></p>
+  </div>
+</div>
+
+<!-- ANÁLISE AVANÇADA -->
+<div id="avancada" class="secao">
+  <h3>🚀 Análise Avançada</h3>
+  <div class="avancada-content">
+    <div class="avancada-grid">
+      <div class="avancada-card">
+        <h4>🧩 Diagrama de Voronoi</h4>
+        <p>Particiona o território em áreas de influência para cada escola.</p>
+        <button id="btn-analise-voronoi" class="btn-avancada">Gerar Voronoi</button>
+        <div id="voronoi-container" class="avancada-output"></div>
+      </div>
+      
+      <div class="avancada-card">
+        <h4>📐 Análise de Impacto</h4>
+        <p>Calcula raio de impacto baseado na severidade dos problemas.</p>
+        <label>Raio de Impacto (metros): 
+          <input type="range" id="raio-impacto" min="100" max="2000" value="500">
+          <span id="raio-value">500m</span>
+        </label>
+        <button id="btn-calcular-impacto" class="btn-avancada">Calcular Impacto</button>
+        <div id="impacto-container" class="avancada-output"></div>
+      </div>
+      
+      <div class="avancada-card">
+        <h4>📈 Estatísticas Avançadas</h4>
+        <p>Métricas estatísticas para tomada de decisão.</p>
+        <div id="estatisticas-container" class="avancada-output">
+          <p>Clique em "Calcular" para gerar estatísticas.</p>
+        </div>
+        <button id="btn-calcular-estatisticas" class="btn-avancada">Calcular Estatísticas</button>
+      </div>
+    </div>
+    
+    <div class="avancada-map">
+      <h4>🗺️ Mapa de Análise Avançada</h4>
+      <div id="mapa-avancado" style="height: 400px; border-radius: 8px; margin-top: 10px;"></div>
+    </div>
+  </div>
 </div>
 
 <footer>
   © 2026 CheckInfra — Código MIT | 🔒 LGPD conforme lei nº 13.709/2018
+  <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">
+    v2.0 | Análise Espacial com 8 indicadores integrados
+  </div>
 </footer>
 
 <!-- Scripts -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
+<!-- Bibliotecas para Voronoi e análise espacial -->
+<script src="https://cdn.jsdelivr.net/npm/d3-delaunay@6"></script>
+
+<!-- Scripts principais -->
 <script src="abas.js"></script>
 <script src="recalculos.js"></script>
 <script src="mapa.js"></script>
 <script src="eventos.js"></script>
 <script src="sidebar.js"></script>
 
-<!-- Pareto JS -->
+<!-- Scripts de análise avançada -->
+<script src="analise-avancada.js"></script>
+<script src="voronoi-impacto.js"></script>
+<script src="mapa-voronoi.js"></script>
+
+<!-- Configuração inicial -->
 <script>
 // Handler para botão voltar
 document.getElementById('btn-voltar').addEventListener('click', function() {
@@ -91,6 +178,58 @@ document.getElementById('btn-voltar').addEventListener('click', function() {
   } else {
     window.location.href = '/';
   }
+});
+
+// Adiciona a aba "Análise Avançada" à função abrirAba
+function abrirAba(nome) {
+  // Esconde todas as seções
+  document.querySelectorAll('.secao').forEach(sec => {
+    sec.classList.remove('ativa');
+  });
+  
+  // Remove ativa de todos os botões
+  document.querySelectorAll('.abas button').forEach(btn => {
+    btn.classList.remove('ativa');
+  });
+  
+  // Mostra a seção correspondente
+  const secao = document.getElementById(nome);
+  if (secao) {
+    secao.classList.add('ativa');
+    
+    // Ativa o botão correspondente
+    document.querySelectorAll('.abas button').forEach(btn => {
+      if (btn.textContent.includes(nome === 'mapa' ? '🗺️' : 
+                                   nome === 'ranking' ? '📊' : 
+                                   nome === 'metodologia' ? '📘' : '🚀')) {
+        btn.classList.add('ativa');
+      }
+    });
+    
+    // Se for a aba de mapa, garante que o mapa seja redimensionado
+    if (nome === 'mapa') {
+      setTimeout(() => {
+        if (window.map) {
+          window.map.invalidateSize();
+        }
+      }, 300);
+    }
+    
+    // Se for a aba avançada, inicializa o mapa avançado
+    if (nome === 'avancada') {
+      setTimeout(() => {
+        if (typeof inicializarMapaAvancado === 'function') {
+          inicializarMapaAvancado();
+        }
+      }, 300);
+    }
+  }
+}
+
+// Inicialização quando a página carrega
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Análise Espacial v2.0 carregada');
+  console.log('Indicadores disponíveis: Pareto, Densidade Crítica, Concentração Relativa, Zonas Prioritárias, KDE, Gini, LQ, Moran');
 });
 </script>
 
