@@ -7,7 +7,8 @@ function desenharPoligonosVoronoi(poligonos) {
         console.log('⚠️ Nenhum polígono Voronoi para desenhar');
         return;
     }
-    
+
+   
     camadaVoronoi.clearLayers();
     
     // Encontrar máximo de impacto para normalização
