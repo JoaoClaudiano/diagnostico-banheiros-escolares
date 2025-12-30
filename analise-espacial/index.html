@@ -4,19 +4,21 @@
 <meta charset="UTF-8">
 <title>Análise Espacial – CheckInfra</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 
 <header>
-  <button id="btn-voltar" title="Voltar">⬅️</button>
-  <h1>🧭 Análise Espacial – Leitura Territorial Exploratória</h1>
-  <div style="font-size:12px;font-weight:normal;opacity:.9;">
-    Indicadores espaciais relativos às condições sanitárias das escolas
+  <button id="btn-voltar" title="Voltar" style="position:absolute; left:16px; top:16px; padding:6px 12px; cursor:pointer;">⬅️</button>
+  <div style="text-align:center;">
+    🧭 Análise Espacial – Leitura Territorial Exploratória
+    <div style="font-size:12px;font-weight:normal;opacity:.9;">
+      Indicadores espaciais relativos às condições sanitárias das escolas
+    </div>
   </div>
-  <button id="btn-sidebar">📑 Indicadores</button>
+  <!-- Botão sidebar -->
+  <button id="btn-sidebar" style="position:absolute; right:16px; top:16px; padding:6px 12px; cursor:pointer;">📑 Indicadores</button>
 </header>
 
 <!-- Sidebar -->
@@ -33,7 +35,6 @@
   <div id="sidebar-content"></div>
 </div>
 
-<!-- Abas -->
 <div class="abas">
   <button class="ativa" onclick="abrirAba('mapa')">🗺️ Mapa</button>
   <button onclick="abrirAba('ranking')">📊 Ranking</button>
@@ -72,7 +73,6 @@
   © 2026 CheckInfra — Código MIT | 🔒 LGPD conforme lei nº 13.709/2018
 </footer>
 
-<!-- Scripts -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 <script src="abas.js"></script>
@@ -80,5 +80,8 @@
 <script src="recalculos.js"></script>
 <script src="eventos.js"></script>
 <script src="sidebar.js"></script>
+<script>
+document.getElementById("btn-voltar").onclick = () => history.back();
+</script>
 </body>
 </html>
