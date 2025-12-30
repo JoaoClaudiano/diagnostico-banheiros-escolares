@@ -154,6 +154,8 @@ const linhaMedia = document.querySelector('.linha-media');
 linhaMedia.style.transition = 'all 2s ease';
 linhaMedia.style.height = '100%';
 
+  
+
 setTimeout(() => {
 atualizarExemplosMoran('agrupamento');
 }, 1000);
