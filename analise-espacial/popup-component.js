@@ -1,148 +1,178 @@
-// popup-original.js
+// popup-ux-refinado.js
 (function() {
     'use strict';
     
-    // Verifica se já existe ou se não deve mostrar
-    if (document.getElementById('devPopup') || !shouldShowPopup()) {
+    // Configurações
+    const CONFIG = {
+        showDelay: 4000, // 4 segundos
+        hideDays: 7,
+        popupId: 'ux-popup',
+        storageKey: 'uxPopupHidden'
+    };
+    
+    // Verifica se deve mostrar
+    function shouldShow() {
+        const hiddenUntil = localStorage.getItem(CONFIG.storageKey);
+        return !hiddenUntil || Date.now() > parseInt(hiddenUntil);
+    }
+    
+    // Não mostrar se já existe ou não deve
+    if (document.getElementById(CONFIG.popupId) || !shouldShow()) {
         return;
     }
     
     // Adiciona CSS
     const style = document.createElement('style');
     style.textContent = `
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .ux-popup-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; backdrop-filter: blur(2px);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            animation: uxFadeIn 0.3s ease;
         }
-        .popup-card {
-            background: white;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            animation: slideUp 0.4s ease-out;
-            border: 1px solid #e1e5e9;
+        @keyframes uxFadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes uxFadeOut { from { opacity:1; } to { opacity:0; } }
+        
+        .ux-popup-card {
+            background: white; border-radius: 12px;
+            width: 90%; max-width: 380px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            animation: uxSlideIn 0.4s cubic-bezier(0.16,1,0.3,1);
+            border: 1px solid rgba(0,0,0,0.08);
         }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes uxSlideIn {
+            0% { opacity:0; transform: translateY(15px) scale(0.98); }
+            100% { opacity:1; transform: translateY(0) scale(1); }
         }
-        .popup-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        
+        .ux-popup-header {
+            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+            color: white; padding: 18px 24px;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .popup-header h3 {
-            margin: 0;
-            font-size: 22px;
-            font-weight: 600;
+        .ux-popup-icon {
+            font-size:20px; background:rgba(255,255,255,0.15);
+            width:36px; height:36px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
         }
-        .close-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            font-size: 28px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
+        .ux-popup-header h3 {
+            margin:0; font-size:16px; font-weight:600;
+            line-height:1.3; flex:1;
         }
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
+        .ux-close-btn {
+            background:rgba(255,255,255,0.15); border:none;
+            color:white; font-size:20px; width:32px; height:32px;
+            border-radius:50%; cursor:pointer; display:flex;
+            align-items:center; justify-content:center;
+            transition:all 0.2s; flex-shrink:0; padding:0;
         }
-        .popup-content {
-            padding: 28px;
-            color: #333;
-            line-height: 1.6;
-            text-align: center;
+        .ux-close-btn:hover { background:rgba(255,255,255,0.25); transform:scale(1.1); }
+        
+        .ux-popup-content { padding:24px; color:#374151; line-height:1.5; }
+        .ux-popup-message {
+            margin:0 0 20px 0; font-size:14px; text-align:center;
         }
-        .popup-content p { margin: 10px 0; }
-        .popup-footer {
-            padding: 0 28px 28px;
-            display: flex;
-            gap: 12px;
+        .ux-popup-message strong {
+            display:block; color:#1F2937; font-size:15px;
+            margin-bottom:8px; font-weight:600;
         }
-        .popup-btn {
-            flex: 1;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+        .ux-progress { display:flex; gap:8px; justify-content:center; margin:20px 0; }
+        .ux-progress-dot {
+            width:6px; height:6px; background:#D1D5DB;
+            border-radius:50%; animation:uxPulse 2s infinite;
         }
-        .primary-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .ux-progress-dot:nth-child(2) { animation-delay:0.2s; }
+        .ux-progress-dot:nth-child(3) { animation-delay:0.4s; }
+        @keyframes uxPulse {
+            0%,100% { opacity:0.3; transform:scale(0.8); }
+            50% { opacity:1; transform:scale(1); }
         }
-        .primary-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        
+        .ux-popup-footer { padding:0 24px 24px; display:flex; flex-direction:column; gap:10px; }
+        .ux-popup-btn {
+            padding:12px 20px; border:none; border-radius:8px;
+            font-size:14px; font-weight:500; cursor:pointer;
+            transition:all 0.2s; font-family:inherit;
         }
-        .secondary-btn {
-            background: #f1f5f9;
-            color: #64748b;
-            border: 2px solid #e2e8f0;
+        .ux-primary-btn {
+            background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+            color:white; box-shadow:0 2px 4px rgba(124,58,237,0.2);
         }
-        .secondary-btn:hover { background: #e2e8f0; }
-        .popup-options {
-            padding: 0 28px 24px;
-            text-align: center;
-            color: #64748b;
-            font-size: 14px;
+        .ux-primary-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(124,58,237,0.3); }
+        .ux-secondary-btn {
+            background:transparent; color:#6B7280; border:1px solid #E5E7EB;
         }
-        .popup-options label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
+        .ux-secondary-btn:hover { background:#F9FAFB; border-color:#D1D5DB; }
+        
+        .ux-popup-options { padding:0 24px 20px; text-align:center; }
+        .ux-option-label {
+            display:inline-flex; align-items:center; gap:8px;
+            cursor:pointer; color:#6B7280; font-size:12px;
         }
-        @media (max-width: 480px) {
-            .popup-card { width: 95%; }
-            .popup-footer { flex-direction: column; }
-            .popup-header { padding: 18px; }
-            .popup-content { padding: 20px; }
+        .ux-option-checkbox {
+            width:14px; height:14px; border-radius:3px;
+            border:1.5px solid #D1D5DB; cursor:pointer;
+            position:relative; flex-shrink:0;
+        }
+        .ux-option-checkbox:checked {
+            background:#7C3AED; border-color:#7C3AED;
+        }
+        .ux-option-checkbox:checked::after {
+            content:''; position:absolute; top:1px; left:4px;
+            width:3px; height:7px; border:solid white;
+            border-width:0 2px 2px 0; transform:rotate(45deg);
+        }
+        .ux-hint { font-size:11px; color:#9CA3AF; text-align:center; margin-top:8px; }
+        
+        @media (max-width:480px) {
+            .ux-popup-card { width:92%; max-width:320px; }
+            .ux-popup-header { padding:16px 20px; }
+            .ux-popup-content { padding:20px; }
+            .ux-popup-footer { padding:0 20px 20px; }
+            .ux-popup-options { padding:0 20px 18px; }
+            .ux-popup-header h3 { font-size:15px; }
         }
     `;
     document.head.appendChild(style);
     
     // Adiciona HTML
     const popupHTML = `
-        <div id="devPopup" class="popup-overlay">
-            <div class="popup-card">
-                <div class="popup-header">
-                    <h3>Atenção! Página em Desenvolvimento</h3>
-                    <button class="close-btn" aria-label="Fechar">&times;</button>
+        <div id="${CONFIG.popupId}" class="ux-popup-overlay">
+            <div class="ux-popup-card">
+                <div class="ux-popup-header">
+                    <div class="ux-popup-icon">⚠️</div>
+                    <h3>Página em construção</h3>
+                    <button class="ux-close-btn" aria-label="Fechar">&times;</button>
                 </div>
-                <div class="popup-content">
-                    <p><strong>Esta página está em construção</strong></p>
-                    <p>Alguns recursos podem não estar disponíveis ou conter informações incompletas. Agradecemos sua compreensão!</p>
+                <div class="ux-popup-content">
+                    <div class="ux-popup-message">
+                        <strong>Estamos ajustando alguns detalhes</strong>
+                        Esta seção do site ainda está em desenvolvimento. Algumas funcionalidades podem estar temporariamente indisponíveis.
+                    </div>
+                    <div class="ux-progress">
+                        <div class="ux-progress-dot"></div>
+                        <div class="ux-progress-dot"></div>
+                        <div class="ux-progress-dot"></div>
+                    </div>
+                    <div class="ux-hint">Obrigado pela paciência</div>
                 </div>
-                <div class="popup-footer">
-                    <button class="popup-btn primary-btn" id="understandBtn">Entendi</button>
-                    <button class="popup-btn secondary-btn" id="feedbackBtn">Reportar Problema</button>
+                <div class="ux-popup-footer">
+                    <button class="ux-popup-btn ux-primary-btn" id="uxUnderstandBtn">
+                        Entendi, obrigado!
+                    </button>
+                    <button class="ux-popup-btn ux-secondary-btn" id="uxFeedbackBtn">
+                        Avisar sobre problemas
+                    </button>
                 </div>
-                <div class="popup-options">
-                    <label>
-                        <input type="checkbox" id="dontShowAgain">
-                        Não mostrar novamente por 7 dias
+                <div class="ux-popup-options">
+                    <label class="ux-option-label">
+                        <input type="checkbox" class="ux-option-checkbox" id="uxDontShowAgain">
+                        Não mostrar novamente por uma semana
                     </label>
                 </div>
             </div>
@@ -151,66 +181,96 @@
     document.body.insertAdjacentHTML('beforeend', popupHTML);
     
     // Lógica do popup
-    function shouldShowPopup() {
-        const hideUntil = localStorage.getItem('devPopupHideUntil');
-        if (!hideUntil) return true;
-        return Date.now() > parseInt(hideUntil);
-    }
+    let popupShown = false;
     
     function showPopup() {
-        const popup = document.getElementById('devPopup');
+        if (popupShown) return;
+        popupShown = true;
+        
+        const popup = document.getElementById(CONFIG.popupId);
         popup.style.display = 'flex';
-        document.addEventListener('keydown', closeOnEscape);
-        popup.addEventListener('click', closeOnOutsideClick);
-    }
-    
-    function closePopup() {
-        const popup = document.getElementById('devPopup');
-        const dontShowAgain = document.getElementById('dontShowAgain');
         
-        popup.style.display = 'none';
-        document.removeEventListener('keydown', closeOnEscape);
-        popup.removeEventListener('click', closeOnOutsideClick);
+        // Foco no botão principal
+        setTimeout(() => {
+            document.getElementById('uxUnderstandBtn').focus();
+        }, 300);
         
-        if (dontShowAgain.checked) {
-            const hideUntil = Date.now() + (7 * 24 * 60 * 60 * 1000);
-            localStorage.setItem('devPopupHideUntil', hideUntil.toString());
+        // Event listeners
+        const closeBtn = popup.querySelector('.ux-close-btn');
+        const understandBtn = document.getElementById('uxUnderstandBtn');
+        const feedbackBtn = document.getElementById('uxFeedbackBtn');
+        const dontShowAgain = document.getElementById('uxDontShowAgain');
+        
+        function closePopup() {
+            popup.style.animation = 'uxFadeOut 0.2s ease-out forwards';
+            
+            if (dontShowAgain.checked) {
+                const hideUntil = Date.now() + (CONFIG.hideDays * 24 * 60 * 60 * 1000);
+                localStorage.setItem(CONFIG.storageKey, hideUntil.toString());
+            }
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 200);
         }
-    }
-    
-    function closeOnEscape(event) {
-        if (event.key === 'Escape') closePopup();
-    }
-    
-    function closeOnOutsideClick(event) {
-        if (event.target.id === 'devPopup') closePopup();
-    }
-    
-    // Event Listeners
-    document.addEventListener('DOMContentLoaded', function() {
-        const closeBtn = document.querySelector('.close-btn');
-        const understandBtn = document.getElementById('understandBtn');
-        const feedbackBtn = document.getElementById('feedbackBtn');
+        
+        function handleFeedback() {
+            feedbackBtn.textContent = 'Obrigado!';
+            feedbackBtn.disabled = true;
+            setTimeout(closePopup, 800);
+        }
         
         closeBtn.addEventListener('click', closePopup);
         understandBtn.addEventListener('click', closePopup);
-        feedbackBtn.addEventListener('click', function() {
-            alert('Obrigado pelo interesse em reportar um problema!');
-            closePopup();
+        feedbackBtn.addEventListener('click', handleFeedback);
+        
+        // Fecha com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closePopup();
         });
         
-        // Mostra automaticamente
-        if (shouldShowPopup()) {
-            setTimeout(showPopup, 800);
-        }
-        
-        // API pública
-        window.showDevPopup = showPopup;
-        window.hideDevPopup = closePopup;
-        window.resetDevPopup = function() {
-            localStorage.removeItem('devPopupHideUntil');
-            showPopup();
+        // Fecha ao clicar fora
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) closePopup();
+        });
+    }
+    
+    // Lógica de exibição inteligente
+    function initPopup() {
+        // Mostra após interação do usuário ou timeout
+        const triggerPopup = () => {
+            if (!popupShown) showPopup();
         };
-    });
+        
+        // Eventos de interação
+        ['scroll', 'mousemove', 'click', 'touchstart'].forEach(event => {
+            window.addEventListener(event, triggerPopup, { once: true });
+        });
+        
+        // Fallback após delay
+        setTimeout(() => {
+            if (!popupShown) showPopup();
+        }, CONFIG.showDelay);
+    }
+    
+    // Inicializa quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPopup);
+    } else {
+        initPopup();
+    }
+    
+    // API pública
+    window.uxPopup = {
+        show: showPopup,
+        hide: function() {
+            const popup = document.getElementById(CONFIG.popupId);
+            if (popup) popup.style.display = 'none';
+        },
+        reset: function() {
+            localStorage.removeItem(CONFIG.storageKey);
+            showPopup();
+        }
+    };
     
 })();
