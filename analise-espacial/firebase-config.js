@@ -59,30 +59,58 @@ const FirebaseManager = {
       
       const avaliacoes = [];
       
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        
-        // Extrair timestamp corretamente para Firebase v8
-        let createdAt = new Date();
-        if (data.createdAt) {
-          // Firebase v8 usa .toDate()
-          createdAt = data.createdAt.toDate ? data.createdAt.toDate() : new Date();
-        }
-        
-        avaliacoes.push({
-          id: doc.id,
-          nome: data.nome || 'Escola não identificada',
-          lat: parseFloat(data.lat) || 0,
-          lng: parseFloat(data.lng) || 0,
-          classe: data.classe || 'não avaliada',
-          pontuacao: parseInt(data.pontuacao) || 0,
-          createdAt: createdAt,
-          metadata: data.metadata || {}
-        });
+// Dentro de firebase-config.js
+
+async buscarTodasAvaliacoes() {
+  try {
+    if (!db) {
+      console.warn('⚠️ Firestore não disponível');
+      return [];
+    }
+    
+    console.log('📡 Buscando avaliações do Firestore...');
+    
+    const snapshot = await db.collection('avaliacoes')
+      .orderBy('createdAt', 'desc')
+      .get();
+    
+    const avaliacoes = [];
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      
+      // Tratamento de data
+      let createdAt = new Date();
+      if (data.createdAt) {
+        createdAt = data.createdAt.toDate ? data.createdAt.toDate() : new Date();
+      }
+
+      // --- CORREÇÃO AQUI ---
+      // Pegamos o campo 'escola' do firebase. Se não existir, tentamos 'nome'.
+      const nomeRealDaEscola = data.escola || data.nome || 'Escola sem nome';
+      
+      avaliacoes.push({
+        id: doc.id,
+        escola: nomeRealDaEscola, // Criamos a propriedade 'escola' explicitamente
+        nome: nomeRealDaEscola,   // Mantemos 'nome' para compatibilidade
+        lat: parseFloat(data.lat) || 0,
+        lng: parseFloat(data.lng) || 0,
+        classe: data.classe || data.status || 'não avaliada', // Adicionado fallback para 'status'
+        pontuacao: parseInt(data.pontuacao) || 0,
+        createdAt: createdAt,
+        metadata: data.metadata || {}
       });
-      
-      console.log(`✅ ${avaliacoes.length} avaliações carregadas do Firebase`);
-      
+    });
+    
+    console.log(`✅ ${avaliacoes.length} avaliações carregadas.`);
+    return avaliacoes;
+    
+  } catch (error) {
+    console.error('❌ Erro ao buscar avaliações:', error);
+    return [];
+  }
+},
+
       // Verificar se há dados
       if (avaliacoes.length > 0) {
         console.log('📊 Exemplo de avaliação:', avaliacoes[0]);
