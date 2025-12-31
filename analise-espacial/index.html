@@ -777,22 +777,18 @@ body {
 </head>
 
 <body>
-<!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
   <div class="loading-text">Carregando análise...</div>
 </div>
 
-<!-- Header Mobile-First -->
 <header class="header">
-  <!-- Seta de voltar à esquerda -->
   <div class="header-back">
     <a href="../index.html" class="back-btn">
       <i class="fas fa-arrow-left"></i> <span>Voltar</span>
     </a>
   </div>
   
-  <!-- Título centralizado -->
   <div class="header-center">
     <div class="header-title">
       <h1><i class="fas fa-map-marked-alt"></i> Análise Espacial</h1>
@@ -800,7 +796,6 @@ body {
     </div>
   </div>
   
-  <!-- Botão de atualizar à direita -->
   <div class="header-refresh">
     <button id="btn-refresh" class="back-btn" title="Atualizar dados">
       <i class="fas fa-sync-alt"></i> <span>Atualizar</span>
@@ -808,11 +803,8 @@ body {
   </div>
 </header>
 
-<!-- Conteúdo Principal -->
 <div class="main-container">
-  <!-- Painel Esquerdo com Acordeões -->
   <div class="left-panel">
-    <!-- Acordeão de Camadas do Mapa -->
     <div class="accordion" id="accordionCamadas">
       <div class="accordion-header">
         <h3><i class="fas fa-layer-group"></i> Camadas do Mapa</h3>
@@ -820,7 +812,6 @@ body {
       </div>
       <div class="accordion-content">
         <div class="toggle-group">
-          <!-- 8 INDICADORES COMO CAMADAS -->
           <div class="toggle-item active" id="toggle-escolas-item">
             <label class="toggle-label">
               <i class="fas fa-school"></i>
@@ -912,7 +903,6 @@ body {
       </div>
     </div>
     
-    <!-- Acordeão de Parâmetros -->
     <div class="accordion active" id="accordionParametros">
       <div class="accordion-header">
         <h3><i class="fas fa-sliders-h"></i> Parâmetros de Análise</h3>
@@ -956,11 +946,9 @@ body {
     </div>
   </div>
   
-  <!-- Mapa Central -->
   <div class="map-container">
     <div id="map"></div>
     
-    <!-- Controles do Mapa -->
     <div class="map-controls">
       <button id="btn-zoom-in" class="map-btn" title="Zoom In">
         <i class="fas fa-plus"></i>
@@ -976,7 +964,6 @@ body {
       </button>
     </div>
     
-    <!-- Legenda do Mapa -->
     <div class="map-legend">
       <div class="legend-title">Legenda</div>
       <div class="legend-item">
@@ -998,7 +985,6 @@ body {
     </div>
   </div>
   
-  <!-- Dashboard Direito -->
   <div class="right-panel">
     <div class="dashboard-header">
       <h3><i class="fas fa-tachometer-alt"></i> Dashboard em Tempo Real</h3>
@@ -1009,7 +995,6 @@ body {
       </div>
     </div>
     
-    <!-- Métricas Principais -->
     <div class="metrics-grid">
       <div class="metric-card">
         <span class="metric-value" id="metric-total">0</span>
@@ -1029,7 +1014,6 @@ body {
       </div>
     </div>
     
-    <!-- Distribuição -->
     <div class="distribuicao-chart">
       <div class="chart-bar">
         <div class="bar-label">Crítico</div>
@@ -1061,7 +1045,6 @@ body {
       </div>
     </div>
     
-    <!-- Últimas Atualizações -->
     <div class="update-list">
       <div class="update-item">
         <div class="update-time">Carregando...</div>
@@ -1069,7 +1052,6 @@ body {
       </div>
     </div>
     
-    <!-- Indicadores -->
     <h4 style="font-size: 13px; margin-bottom: 8px; font-weight: 600;"><i class="fas fa-chart-line"></i> Indicadores de Análise</h4>
     <div class="indicadores-grid">
       <div class="indicador-card">
@@ -1096,7 +1078,6 @@ body {
   </div>
 </div>
 
-<!-- Footer -->
 <footer class="footer">
   <div>
     <strong>© 2026 CheckInfra</strong> | Análise Espacial Inteligente v3.0 | Fortaleza/CE
@@ -1109,20 +1090,17 @@ body {
   </div>
 </footer>
 
-<!-- Scripts -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 
-<!-- Sistema de dados -->
 <script src="firebase-config.js"></script>
 <script src="dados.js"></script>
 <script src="mapa-unificado.js"></script>
 <script src="analise-inteligente.js"></script>
 <script src="voronoi-critico.js"></script>
-<!-- Novas funcionalidades de camadas -->
 <script src="./indicadores/kde/kde.js"></script>
 <script src="./indicadores/zonas-prioritarias/zonas-risco.js"></script>
 <script src="./indicadores/densidade-critica/densidade-critica.js"></script>
@@ -1131,7 +1109,6 @@ body {
 <script src="./indicadores/rede-influencia.js"></script>
 
 
-<!-- Configuração inicial -->
 <script>
 // ==================== CONFIGURAÇÃO INICIAL ====================
 document.addEventListener('DOMContentLoaded', function() {
@@ -1548,8 +1525,9 @@ function plotarEscolasNoMapa(escolas) {
     // 🔥 OBTER STATUS - pode vir como 'clase' ou 'status'
     let status = (escola.classe || escola.status || '').toLowerCase().trim();
     
-    // 🔥 OBTER NOME DA ESCOLA - campo correto é 'escola'
-    const nomeEscola = escola.escola || `escola ${index + 1}`;
+    // 🔥 OBTER NOME DA ESCOLA - CORREÇÃO APLICADA AQUI
+    // Tenta pegar o campo 'escola', se não existir, tenta 'nome', depois 'name'
+    const nomeEscola = escola.escola || escola.nome || escola.name || `Escola ${index + 1}`;
     
     console.log(`🏫 ${index + 1}: "${nomeEscola}" - Status: ${status}`);
     
@@ -1614,12 +1592,13 @@ function plotarEscolasNoMapa(escolas) {
       minWidth: 250
     });
     
-    // 🔥 TOOLTIP COM NOME DA ESCOLA (campo 'escola')
+    // 🔥 TOOLTIP COM NOME DA ESCOLA (CORREÇÃO)
+    // Usamos o nome capturado de forma segura acima
     marker.bindTooltip(nomeEscola, {
       direction: 'top',
       offset: [0, -10],
-      opacity: 0.9,
-      permanent: false,
+      opacity: 1, // Opacidade total para garantir visibilidade
+      permanent: false, // Só aparece no hover
       sticky: true,
       className: 'escola-tooltip'
     });
