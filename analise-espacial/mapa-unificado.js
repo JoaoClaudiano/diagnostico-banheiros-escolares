@@ -1,139 +1,26 @@
-// mapa-unificado.js - ORQUESTRADOR
-console.log('🗺️ Carregando mapa unificado...');
+// ==================== mapa-unificado.js UNIFICADO ====================
 
-let map = null;
-let escolasLayer = null;
-let heatLayer = null;
-let zonasLayer = null;
-let layersControl = null; // controle de camadas
+console.log('🗺️ Carregando mapa unificado unificado...');
 
-// Inicializar (USAR MAPA EXISTENTE)
+// -------------------- Variáveis Globais --------------------
+window.map = null;
+window.camadas = {};
+window.escolasDados = [];
+let layersControl = null;
+
+// -------------------- Inicialização do Mapa --------------------
 function inicializarMapa() {
-  if (window.map && window.map instanceof L.Map) {
-    map = window.map;
-    console.log('🗺️ Usando mapa global existente');
+  if (window.map) window.map.remove();
 
-    setTimeout(() => {
-      try { map.invalidateSize(); } catch (e) {}
-    }, 200);
+  window.map = L.map('map').setView([-3.7319, -38.5267], 12);
 
-    return map;
-  }
-
-  console.error('❌ Mapa global não encontrado');
-  return null;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(window.map);
 }
 
-// Plotar escolas (layer separada)
-function plotarEscolas() {
-  if (!map || !window.dadosManager) return;
-
-  if (escolasLayer) map.removeLayer(escolasLayer);
-
-  const marcadores = [];
-
-  window.dadosManager.getEscolas().forEach(escola => {
-    if (!escola.lat || !escola.lng) return;
-
-    // Usar classe ou status para determinar cor
-    const cor = getCorPorClasse(escola.classe || escola.status);
-
-    // Criar marcador circular colorido
-    const marker = L.circleMarker([escola.lat, escola.lng], {
-      radius: 6,
-      fillColor: cor,
-      color: '#222',
-      fillOpacity: 0.8
-    });
-
-    // Conteúdo do popup detalhado
-    const popupContent = `
-      <div style="min-width:200px; padding:10px; font-family: Arial, sans-serif;">
-        <h4 style="margin:0 0 10px 0; color:${cor}; border-bottom:1px solid #eee; padding-bottom:5px;">
-          <i class="fas fa-school"></i> ${escola.nome || 'Escola'}
-        </h4>
-        <p style="margin:5px 0;"><strong>Status:</strong> <span style="color:${cor}; font-weight:bold;">${escola.status || 'N/A'}</span></p>
-        <p style="margin:5px 0;"><strong>Pontuação:</strong> ${escola.pontuacao || 'N/A'}</p>
-        <p style="margin:5px 0;"><strong>Endereço:</strong> ${escola.endereco || 'Não informado'}</p>
-        ${escola.data_avaliacao ? `<p style="margin:5px 0;"><strong>Data da avaliação:</strong> ${escola.data_avaliacao}</p>` : ''}
-        <div style="margin-top:10px; padding-top:10px; border-top:1px solid #eee; font-size:11px; color:#888;">
-          <i class="fas fa-info-circle"></i> Clique fora para fechar
-        </div>
-      </div>
-    `;
-
-    // Adicionar popup
-    marker.bindPopup(popupContent, { maxWidth: 300, minWidth: 250 });
-
-    marcadores.push(marker);
-  });
-
-  escolasLayer = L.layerGroup(marcadores).addTo(map);
-  console.log(`✅ ${marcadores.length} escolas (layer unificado)`);
-
-  atualizarControleLayers();
-}
-
-// Heatmap
-function adicionarMapaCalor() {
-  if (!map || !window.dadosManager) return;
-
-  if (heatLayer) map.removeLayer(heatLayer);
-
-  const pontos = window.dadosManager.getEscolas()
-    .filter(e => e.lat && e.lng && e.peso > 0)
-    .map(e => [e.lat, e.lng, e.peso * 10]);
-
-  if (!pontos.length) return;
-
-  heatLayer = L.heatLayer(pontos, {
-    radius: 25,
-    blur: 15,
-    maxZoom: 17
-  }).addTo(map);
-
-  console.log('🔥 Heatmap adicionado');
-
-  atualizarControleLayers();
-}
-
-// Zonas críticas
-function adicionarZonasRisco() {
-  if (!map || !window.dadosManager) return;
-
-  if (zonasLayer) map.removeLayer(zonasLayer);
-
-  const circulos = window.dadosManager.getEscolas()
-    .filter(e => e.classe?.toLowerCase().includes('crít'))
-    .map(e => L.circle([e.lat, e.lng], {
-      radius: 500,
-      color: '#dc3545',
-      fillOpacity: 0.2
-    }));
-
-  zonasLayer = L.layerGroup(circulos).addTo(map);
-  console.log(`🟥 ${circulos.length} zonas de risco`);
-
-  atualizarControleLayers();
-}
-
-// Atualiza ou cria o controle de camadas
-function atualizarControleLayers() {
-  if (!map) return;
-
-  const overlays = {};
-  if (escolasLayer) overlays["Escolas"] = escolasLayer;
-  if (heatLayer) overlays["Heatmap"] = heatLayer;
-  if (zonasLayer) overlays["Zonas de risco"] = zonasLayer;
-
-  if (layersControl) {
-    layersControl.remove();
-  }
-
-  layersControl = L.control.layers(null, overlays, { collapsed: false }).addTo(map);
-}
-
-// Cor por classe – unifica várias variações do Firebase
+// -------------------- Cor por Classe --------------------
 function getCorPorClasse(classe) {
   if (!classe) return '#6c757d';
   const c = classe.toString().toLowerCase().trim();
@@ -149,14 +36,139 @@ function getCorPorClasse(classe) {
   return map[c] || '#6c757d';
 }
 
-// Init
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(inicializarMapa, 1000);
+// -------------------- Criar Marcadores --------------------
+function criarMarcador(escola) {
+  const cor = getCorPorClasse(escola.status || escola.classe);
+
+  return L.circleMarker([escola.lat, escola.lng], {
+    radius: 6,
+    fillColor: cor,
+    color: '#222',
+    fillOpacity: 0.8
+  }).bindPopup(`
+    <div style="min-width:200px; padding:10px; font-family: Arial, sans-serif;">
+      <h4 style="margin:0 0 10px 0; color:${cor}; border-bottom:1px solid #eee; padding-bottom:5px;">
+        <i class="fas fa-school"></i> ${escola.nome || 'Escola'}
+      </h4>
+      <p><strong>Status:</strong> <span style="color:${cor}; font-weight:bold;">${escola.status || 'N/A'}</span></p>
+      <p><strong>Pontuação:</strong> ${escola.pontuacao || 'N/A'}</p>
+      <p><strong>Endereço:</strong> ${escola.endereco || 'Não informado'}</p>
+      ${escola.data_avaliacao ? `<p><strong>Data da avaliação:</strong> ${escola.data_avaliacao}</p>` : ''}
+      <div style="margin-top:10px; font-size:11px; color:#888;">
+        <i class="fas fa-info-circle"></i> Clique fora para fechar
+      </div>
+    </div>
+  `);
+}
+
+// -------------------- Criar Camadas --------------------
+function criarCamadaEscolas(escolas) {
+  const layerGroup = L.layerGroup();
+  escolas.forEach(e => layerGroup.addLayer(criarMarcador(e)));
+  return layerGroup;
+}
+
+function criarCamadaKDE(escolas) {
+  const pontos = escolas.filter(e => e.lat && e.lng).map(e => [e.lat, e.lng, 1]);
+  return L.heatLayer(pontos, {radius: 25, blur: 15, maxZoom: 17});
+}
+
+function criarCamadaVoronoi(escolas) {
+  const layerGroup = L.layerGroup();
+  escolas.forEach(e => {
+    const polygon = L.polygon([
+      [e.lat, e.lng],
+      [e.lat + 0.001, e.lng + 0.001],
+      [e.lat + 0.001, e.lng - 0.001]
+    ], {color: 'blue', weight: 1, fillOpacity: 0.2});
+    polygon.addTo(layerGroup);
+  });
+  return layerGroup;
+}
+
+function criarCamadaZonas(escolas) {
+  const layerGroup = L.layerGroup();
+  escolas.filter(e => e.classe?.toLowerCase().includes('crít')).forEach(e => {
+    L.circle([e.lat, e.lng], {
+      radius: 500,
+      color: '#dc3545',
+      fillOpacity: 0.2
+    }).addTo(layerGroup);
+  });
+  return layerGroup;
+}
+
+// -------------------- Controle de Camadas --------------------
+function atualizarControleLayers() {
+  if (!window.map) return;
+  const overlays = {};
+  Object.keys(window.camadas).forEach(k => { if (window.camadas[k]) overlays[k] = window.camadas[k]; });
+
+  if (layersControl) layersControl.remove();
+  layersControl = L.control.layers(null, overlays, {collapsed:false}).addTo(window.map);
+}
+
+function ativarCamada(nome) {
+  if (window.camadas[nome] && !window.map.hasLayer(window.camadas[nome])) window.camadas[nome].addTo(window.map);
+}
+
+function desativarCamada(nome) {
+  if (window.camadas[nome] && window.map.hasLayer(window.camadas[nome])) window.map.removeLayer(window.camadas[nome]);
+}
+
+// -------------------- Carregar Mapa --------------------
+function carregarMapaUnificado({escolas}) {
+  window.escolasDados = escolas || [];
+
+  if (!window.map) inicializarMapa();
+
+  // Criar camadas
+  window.camadas['Escolas'] = criarCamadaEscolas(escolas);
+  window.camadas['Heatmap'] = criarCamadaKDE(escolas);
+  window.camadas['Voronoi'] = criarCamadaVoronoi(escolas);
+  window.camadas['Zonas de Risco'] = criarCamadaZonas(escolas);
+
+  // Adicionar camadas iniciais
+  ativarCamada('Escolas');
+  atualizarControleLayers();
+
+  // Toggles (se existirem no HTML)
+  const toggles = [
+    {id:'toggle-escolas', nome:'Escolas'},
+    {id:'toggle-kde', nome:'Heatmap'},
+    {id:'toggle-voronoi', nome:'Voronoi'},
+    {id:'toggle-zonas', nome:'Zonas de Risco'}
+  ];
+
+  toggles.forEach(t => {
+    const input = document.getElementById(t.id);
+    if (!input) return;
+    input.checked = window.map.hasLayer(window.camadas[t.nome]);
+    input.addEventListener('change',()=>{input.checked ? ativarCamada(t.nome) : desativarCamada(t.nome)});
+  });
+}
+
+// -------------------- Inicialização --------------------
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🔗 Inicializando mapa unificado');
+
+  const maxTentativas = 20;
+  let tentativas = 0;
+
+  const aguardarMapa = setInterval(() => {
+    tentativas++;
+    if (window.dadosManager && window.dadosManager.getEscolas) {
+      clearInterval(aguardarMapa);
+      const escolas = window.dadosManager.getEscolas() || [];
+      carregarMapaUnificado({escolas});
+      console.log(`✅ Mapa unificado carregado com ${escolas.length} escolas`);
+    } else if (tentativas > maxTentativas) {
+      clearInterval(aguardarMapa);
+      console.warn('⚠️ Dados não disponíveis. Usando dados de demonstração.');
+      carregarMapaUnificado({escolas: []});
+    }
+  }, 300);
 });
 
 window.inicializarMapa = inicializarMapa;
-window.plotarEscolas = plotarEscolas;
-window.adicionarMapaCalor = adicionarMapaCalor;
-window.adicionarZonasRisco = adicionarZonasRisco;
-
-console.log('✅ mapa-unificado.js carregado');
+window.carregarMapaUnificado = carregarMapaUnificado;
