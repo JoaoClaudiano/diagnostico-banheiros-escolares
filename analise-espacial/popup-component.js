@@ -1,12 +1,10 @@
-// popup-counter-api-documentacao.js
+// popup-counter-api-final.js
 (function() {
     'use strict';
     
     // ==================== CONFIGURAÇÃO DA API (SEGUNDO SUA DOCUMENTAÇÃO) ====================
     const API_CONFIG = {
-        // Base Endpoint exatamente como na documentação
         baseUrl: "https://api.counterapi.dev/v2/joao-claudianos-team-2325/first-counter-2325",
-        // Seu token de API
         apiToken: "ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN"
     };
     
@@ -30,12 +28,8 @@
     
     // ==================== FUNÇÕES DE API SEGUINDO A DOCUMENTAÇÃO ====================
     
-    // Função para buscar o valor do contador (GET)
-    // Documentação: curl https://api.counterapi.dev/v2/joao-claudianos-team-2325/first-counter-2325 -H "Authorization: Bearer YOUR_API_KEY"
     async function getCounterValue() {
         try {
-            console.log('Buscando valor do contador...');
-            
             const response = await fetch(API_CONFIG.baseUrl, {
                 method: 'GET',
                 headers: {
@@ -44,31 +38,19 @@
                 mode: 'cors'
             });
             
-            console.log('Status da resposta:', response.status);
-            
             if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
+                throw new Error(`Erro HTTP: ${response.status}`);
             }
             
             const data = await response.json();
-            console.log('Dados recebidos:', data);
             
-            // Baseado na documentação da CounterAPI, vamos tentar extrair o valor
             let count = 0;
-            
-            // A CounterAPI geralmente retorna { count: number } ou { value: number }
             if (data && typeof data.count === 'number') {
                 count = data.count;
             } else if (data && typeof data.value === 'number') {
                 count = data.value;
             } else if (typeof data === 'number') {
                 count = data;
-            } else if (data && data.data && typeof data.data.count === 'number') {
-                count = data.data.count;
-            } else {
-                console.warn('Formato de resposta inesperado:', data);
-                // Se não conseguimos extrair, retornamos 0
-                count = 0;
             }
             
             return {
@@ -87,67 +69,10 @@
         }
     }
     
-    // Função para incrementar o contador (POST /up)
-    // Documentação: curl https://api.counterapi.dev/v2/joao-claudianos-team-2325/first-counter-2325/up -H "Authorization: Bearer YOUR_API_KEY"
     async function incrementCounter() {
         try {
-            console.log('Incrementando contador via POST /up...');
-            
             const response = await fetch(`${API_CONFIG.baseUrl}/up`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${API_CONFIG.apiToken}`
-                },
-                mode: 'cors'
-            });
-            
-            console.log('Status do incremento:', response.status);
-            
-            if (!response.ok) {
-                // Vamos tentar ver se há uma mensagem de erro
-                let errorMsg = `Erro HTTP: ${response.status}`;
-                try {
-                    const errorData = await response.json();
-                    errorMsg = `${errorMsg} - ${JSON.stringify(errorData)}`;
-                } catch (e) {
-                    // Ignora se não conseguir parsear JSON
-                }
-                throw new Error(errorMsg);
-            }
-            
-            const data = await response.json();
-            console.log('Resposta do incremento:', data);
-            
-            // Após incrementar, busca o novo valor
-            const updatedCount = await getCounterValue();
-            
-            return {
-                success: true,
-                newCount: updatedCount.success ? updatedCount.count : 0,
-                rawData: data
-            };
-            
-        } catch (error) {
-            console.error('Erro ao incrementar contador:', error);
-            
-            // Fallback local
-            const newCount = incrementLocalCount();
-            return {
-                success: false,
-                newCount: newCount,
-                error: error.message
-            };
-        }
-    }
-    
-    // Função para obter estatísticas (GET /stats) - Opcional
-    // Documentação: curl https://api.counterapi.dev/v2/joao-claudianos-team-2325/first-counter-2325/stats -H "Authorization: Bearer YOUR_API_KEY"
-    async function getCounterStats() {
-        try {
-            console.log('Buscando estatísticas...');
-            
-            const response = await fetch(`${API_CONFIG.baseUrl}/stats`, {
-                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${API_CONFIG.apiToken}`
                 },
@@ -159,23 +84,25 @@
             }
             
             const data = await response.json();
-            console.log('Estatísticas:', data);
+            const updatedCount = await getCounterValue();
             
             return {
                 success: true,
-                stats: data
+                newCount: updatedCount.success ? updatedCount.count : 0,
+                rawData: data
             };
             
         } catch (error) {
-            console.error('Erro ao buscar estatísticas:', error);
+            console.error('Erro ao incrementar contador:', error);
+            const newCount = incrementLocalCount();
             return {
                 success: false,
+                newCount: newCount,
                 error: error.message
             };
         }
     }
     
-    // Funções de fallback local
     function getLocalCount() {
         try {
             const localData = JSON.parse(localStorage.getItem('coffeeCount') || '{"count": 0}');
@@ -300,12 +227,16 @@
             padding: 25px;
             color: #333;
             line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            height: 500px;
         }
         
         .counter-message {
             margin: 0 0 20px 0;
             font-size: 15px;
             text-align: center;
+            flex-shrink: 0;
         }
         
         .counter-message strong {
@@ -316,48 +247,59 @@
             font-weight: 700;
         }
         
-        /* JOGO TETRIS */
-        .tetris-card {
-            background: #1a1a1a;
+        /* JOGO TETRIS - OCUPA O CARD */
+        .tetris-container {
+            flex: 1;
+            background: #0a0a1a;
             border-radius: 12px;
-            padding: 15px;
-            margin: 20px 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            font-family: 'Courier New', monospace;
-            color: white;
+            overflow: hidden;
+            position: relative;
+            margin: 10px 0;
+            border: 3px solid #1a1a2e;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tetris-title {
+            padding: 10px;
             text-align: center;
-            border: 2px solid #333;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #333;
         }
         
-        .tetris-card h3 { 
-            margin: 0 0 10px 0; 
-            font-size: 1.2rem; 
-            color: #ffeb3b; 
+        .tetris-title h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #ffeb3b;
             text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+            font-family: 'Courier New', monospace;
         }
         
-        .tetris-card canvas {
+        .tetris-canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .tetris-canvas-container canvas {
             border: 2px solid #333;
             background: #000;
             display: block;
-            margin: 0 auto;
             width: 100%;
-            max-width: 200px;
-            height: 200px;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             image-rendering: pixelated;
-        }
-        
-        .tetris-card p {
-            font-size: 10px; 
-            color: #888;
-            margin: 8px 0 0 0;
         }
         
         /* BOTÕES LADO A LADO */
         .counter-buttons-row {
             display: flex;
             gap: 12px;
-            margin: 25px 0 20px 0;
+            margin: 20px 0 15px 0;
         }
         
         .counter-buttons-row button {
@@ -433,7 +375,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 15px 0 5px 0;
+            margin: 10px 0 5px 0;
         }
         
         .counter-circle {
@@ -497,22 +439,9 @@
             50% { opacity: 0.5; }
         }
         
-        /* DEBUG INFO */
-        .debug-info {
-            font-size: 10px;
-            color: #999;
-            text-align: center;
-            margin-top: 10px;
-            font-family: monospace;
-            background: #f5f5f5;
-            padding: 5px;
-            border-radius: 4px;
-            display: none; /* Oculto por padrão */
-        }
-        
         /* OPÇÃO NÃO MOSTRAR */
         .counter-option {
-            margin-top: 20px;
+            margin-top: 15px;
             padding-top: 15px;
             border-top: 1px dashed #E0E0E0;
             text-align: center;
@@ -591,6 +520,7 @@
             
             .counter-popup-content {
                 padding: 20px;
+                height: 450px;
             }
             
             .counter-buttons-row {
@@ -602,11 +532,6 @@
                 width: 50px;
                 height: 50px;
                 font-size: 18px;
-            }
-            
-            .tetris-card canvas {
-                max-width: 180px;
-                height: 180px;
             }
             
             .counter-popup-header {
@@ -641,11 +566,6 @@
             .counter-option {
                 border-color: #444;
             }
-            
-            .debug-info {
-                background: #2D2D2D;
-                color: #AAA;
-            }
         }
         
         @media (prefers-reduced-motion: reduce) {
@@ -677,14 +597,17 @@
                 <div class="counter-popup-content">
                     <div class="counter-message">
                         <strong>Ajude-nos com um cafezinho! ☕</strong>
-                        Estamos trabalhando duro para melhorar esta página. Cada café nos dá mais energia para continuar!
+                        Estamos trabalhando duro para melhorar esta página.
                     </div>
                     
-                    <!-- JOGO TETRIS -->
-                    <div class="tetris-card" id="tetrisCard">
-                        <h3>MINI TETRIS</h3>
-                        <canvas width="200" height="200" id="game-canvas"></canvas>
-                        <p>Use as setas para jogar</p>
+                    <!-- JOGO TETRIS OCUPANDO O CARD -->
+                    <div class="tetris-container" id="tetrisContainer">
+                        <div class="tetris-title">
+                            <h3>MINI TETRIS</h3>
+                        </div>
+                        <div class="tetris-canvas-container">
+                            <canvas width="300" height="300" id="tetrisCanvas"></canvas>
+                        </div>
                     </div>
                     
                     <!-- BOTÕES LADO A LADO -->
@@ -710,11 +633,6 @@
                         <span id="apiStatusText">Conectando à API...</span>
                     </div>
                     
-                    <!-- INFO DE DEBUG (oculto por padrão) -->
-                    <div class="debug-info" id="debugInfo">
-                        Endpoint: ${API_CONFIG.baseUrl}
-                    </div>
-                    
                     <div class="counter-option">
                         <label class="counter-option-label">
                             <input type="checkbox" class="counter-checkbox" id="dontShowAgain">
@@ -736,31 +654,33 @@
     const totalCountElement = document.getElementById('totalCoffeeCount');
     const apiStatusIndicator = document.getElementById('apiStatusIndicator');
     const apiStatusText = document.getElementById('apiStatusText');
-    const debugInfo = document.getElementById('debugInfo');
     
     let currentCount = 0;
     let popupShown = false;
     let apiConnected = false;
     let tetrisGame = null;
     
-    // ==================== JOGO TETRIS (integrando sua função) ====================
+    // ==================== JOGO TETRIS AUTOMÁTICO E INTELIGENTE ====================
     function createTetrisGame() {
-        const container = document.getElementById('tetrisCard');
-        const canvas = document.getElementById('game-canvas');
+        const canvas = document.getElementById('tetrisCanvas');
         const context = canvas.getContext('2d');
         const grid = 20;
         const tetrominoSequence = [];
         const playfield = [];
         
-        // 1. Inicializar campo de jogo
-        for (let row = -2; row < 10; row++) {
+        // Tamanho do campo ajustado para o canvas
+        const COLS = 10;
+        const ROWS = 15;
+        
+        // Inicializar campo de jogo
+        for (let row = -2; row < ROWS; row++) {
             playfield[row] = [];
-            for (let col = 0; col < 10; col++) {
+            for (let col = 0; col < COLS; col++) {
                 playfield[row][col] = 0;
             }
         }
         
-        // 2. Definir tetrominós
+        // Definir tetrominós
         const tetrominos = {
             'I': [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
             'J': [[1,0,0],[1,1,1],[0,0,0]],
@@ -772,16 +692,16 @@
         };
         
         const colors = {
-            'I': '#00f0f0',
-            'O': '#f0f000',
-            'T': '#a000f0',
-            'S': '#00f000',
-            'Z': '#f00000',
-            'J': '#0000f0',
-            'L': '#f0a000'
+            'I': '#00f0f0', // cyan
+            'O': '#f0f000', // yellow
+            'T': '#a000f0', // purple
+            'S': '#00f000', // green
+            'Z': '#f00000', // red
+            'J': '#0000f0', // blue
+            'L': '#f0a000'  // orange
         };
         
-        // 3. Funções auxiliares
+        // Funções auxiliares
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
@@ -800,7 +720,7 @@
             }
             const name = tetrominoSequence.pop();
             const matrix = tetrominos[name];
-            const col = playfield[0].length / 2 - Math.ceil(matrix[0].length / 2);
+            const col = Math.floor(COLS / 2 - matrix[0].length / 2);
             const row = name === 'I' ? -1 : -2;
             return { name, matrix, row, col };
         }
@@ -822,8 +742,8 @@
                 for (let c = 0; c < matrix[r].length; c++) {
                     if (matrix[r][c] && (
                         cellCol + c < 0 ||
-                        cellCol + c >= playfield[0].length ||
-                        cellRow + r >= playfield.length ||
+                        cellCol + c >= COLS ||
+                        cellRow + r >= ROWS ||
                         (cellRow + r >= 0 && playfield[cellRow + r][cellCol + c])
                     )) {
                         return false;
@@ -833,12 +753,69 @@
             return true;
         }
         
+        // Função inteligente para encontrar a melhor posição
+        function findBestPosition(tetromino) {
+            let bestScore = -Infinity;
+            let bestRotation = 0;
+            let bestCol = 0;
+            
+            // Testa todas as rotações (0, 1, 2, 3)
+            for (let rotation = 0; rotation < 4; rotation++) {
+                let currentMatrix = tetromino.matrix;
+                for (let r = 0; r < rotation; r++) {
+                    currentMatrix = rotate(currentMatrix);
+                }
+                
+                // Testa todas as colunas possíveis
+                for (let col = 0; col <= COLS - currentMatrix[0].length; col++) {
+                    // Encontra a linha mais baixa onde a peça pode ser colocada
+                    let row = tetromino.row;
+                    while (isValidMove(currentMatrix, row + 1, col)) {
+                        row++;
+                    }
+                    
+                    // Calcula pontuação baseada em:
+                    // 1. Altura (quanto mais baixo, melhor)
+                    // 2. Linhas completas potenciais
+                    // 3. Buracos criados
+                    let score = row * 10; // Quanto mais baixo, melhor
+                    
+                    // Bônus por preencher linhas
+                    for (let r = 0; r < currentMatrix.length; r++) {
+                        for (let c = 0; c < currentMatrix[r].length; c++) {
+                            if (currentMatrix[r][c] && row + r >= 0) {
+                                // Verifica se completa uma linha
+                                let lineComplete = true;
+                                for (let cc = 0; cc < COLS; cc++) {
+                                    if (!playfield[row + r][cc] && 
+                                        !(cc >= col && cc < col + currentMatrix[r].length && 
+                                          currentMatrix[r][cc - col])) {
+                                        lineComplete = false;
+                                        break;
+                                    }
+                                }
+                                if (lineComplete) score += 100;
+                            }
+                        }
+                    }
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestRotation = rotation;
+                        bestCol = col;
+                    }
+                }
+            }
+            
+            return { rotation: bestRotation, col: bestCol };
+        }
+        
         function placeTetromino() {
             for (let r = 0; r < tetromino.matrix.length; r++) {
                 for (let c = 0; c < tetromino.matrix[r].length; c++) {
                     if (tetromino.matrix[r][c]) {
                         if (tetromino.row + r < 0) {
-                            showGameOver();
+                            restartGame();
                             return;
                         }
                         playfield[tetromino.row + r][tetromino.col + c] = tetromino.name;
@@ -846,46 +823,71 @@
                 }
             }
             
-            // Verificar linhas completas
-            for (let row = playfield.length - 1; row >= 0; ) {
+            // Verificar e remover linhas completas
+            let linesCleared = 0;
+            for (let row = ROWS - 1; row >= 0; ) {
                 if (playfield[row].every(cell => !!cell)) {
+                    // Remove a linha
                     for (let r = row; r >= 0; r--) {
-                        for (let c = 0; c < playfield[0].length; c++) {
+                        for (let c = 0; c < COLS; c++) {
                             playfield[r][c] = r > 0 ? playfield[r-1][c] : 0;
                         }
                     }
+                    linesCleared++;
                 } else {
                     row--;
                 }
             }
             
-            tetromino = getNextTetromino();
-        }
-        
-        function showGameOver() {
-            if (rAF) {
-                cancelAnimationFrame(rAF);
-                rAF = null;
+            // Efeito visual para linhas limpas
+            if (linesCleared > 0) {
+                createLineClearEffect(linesCleared);
             }
             
-            context.fillStyle = 'rgba(0,0,0,0.75)';
-            context.fillRect(0, canvas.height / 2 - 20, canvas.width, 40);
+            tetromino = getNextTetromino();
+            // Encontra a melhor posição para a nova peça
+            const bestPos = findBestPosition(tetromino);
             
-            context.fillStyle = 'white';
-            context.font = '16px monospace';
-            context.textAlign = 'center';
-            context.fillText('FIM DE JOGO', canvas.width / 2, canvas.height / 2 + 5);
+            // Aplica a rotação
+            for (let i = 0; i < bestPos.rotation; i++) {
+                tetromino.matrix = rotate(tetromino.matrix);
+            }
             
-            // Reinicia após 3 segundos
-            setTimeout(() => {
-                restartGame();
-            }, 3000);
+            // Move para a melhor coluna
+            tetromino.col = bestPos.col;
+            
+            // Move para baixo até encontrar obstáculo
+            while (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+                tetromino.row++;
+            }
+        }
+        
+        function createLineClearEffect(lines) {
+            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'];
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.style.position = 'absolute';
+                    particle.style.width = '4px';
+                    particle.style.height = '4px';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.borderRadius = '50%';
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.top = `${Math.random() * 100}%`;
+                    particle.style.pointerEvents = 'none';
+                    particle.style.zIndex = '1000';
+                    particle.style.animation = 'floatUp 0.5s ease-out forwards';
+                    document.getElementById('tetrisContainer').appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 500);
+                }, i * 20);
+            }
         }
         
         function restartGame() {
-            // Limpa campo
-            for (let row = -2; row < 10; row++) {
-                for (let col = 0; col < 10; col++) {
+            // Limpa o campo
+            for (let row = -2; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
                     playfield[row][col] = 0;
                 }
             }
@@ -896,26 +898,51 @@
             // Reseta tetrominó atual
             tetromino = getNextTetromino();
             
-            // Reinicia animação
-            if (!rAF) {
-                rAF = requestAnimationFrame(loop);
+            // Encontra a melhor posição inicial
+            const bestPos = findBestPosition(tetromino);
+            for (let i = 0; i < bestPos.rotation; i++) {
+                tetromino.matrix = rotate(tetromino.matrix);
             }
+            tetromino.col = bestPos.col;
         }
         
-        // 4. Variáveis do jogo
-        let count = 0;
+        // Variáveis do jogo
         let tetromino = getNextTetromino();
         let rAF = null;
-        let gameOver = false;
+        let lastTime = 0;
+        const dropInterval = 300; // Velocidade aumentada (ms entre quedas)
         
-        // 5. Loop do jogo
-        function loop() {
+        // Encontra a melhor posição inicial
+        const bestPos = findBestPosition(tetromino);
+        for (let i = 0; i < bestPos.rotation; i++) {
+            tetromino.matrix = rotate(tetromino.matrix);
+        }
+        tetromino.col = bestPos.col;
+        
+        // Loop do jogo otimizado
+        function loop(timestamp) {
             rAF = requestAnimationFrame(loop);
+            
+            if (!lastTime) lastTime = timestamp;
+            const delta = timestamp - lastTime;
+            
+            if (delta > dropInterval) {
+                lastTime = timestamp;
+                
+                // Move para baixo
+                if (isValidMove(tetromino.matrix, tetromino.row + 1, tetromino.col)) {
+                    tetromino.row++;
+                } else {
+                    placeTetromino();
+                }
+            }
+            
+            // Renderização
             context.clearRect(0, 0, canvas.width, canvas.height);
             
             // Desenha o campo
-            for (let r = 0; r < 10; r++) {
-                for (let c = 0; c < 10; c++) {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
                     if (playfield[r] && playfield[r][c]) {
                         context.fillStyle = colors[playfield[r][c]];
                         context.fillRect(c * grid, r * grid, grid-1, grid-1);
@@ -924,72 +951,38 @@
             }
             
             // Desenha o tetrominó atual
-            if (tetromino) {
-                if (++count > 25) {
-                    tetromino.row++;
-                    count = 0;
-                    
-                    if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
-                        tetromino.row--;
-                        placeTetromino();
+            context.fillStyle = colors[tetromino.name];
+            for (let r = 0; r < tetromino.matrix.length; r++) {
+                for (let c = 0; c < tetromino.matrix[r].length; c++) {
+                    if (tetromino.matrix[r][c]) {
+                        context.fillRect(
+                            (tetromino.col + c) * grid,
+                            (tetromino.row + r) * grid,
+                            grid-1,
+                            grid-1
+                        );
                     }
                 }
-                
-                context.fillStyle = colors[tetromino.name];
-                for (let r = 0; r < tetromino.matrix.length; r++) {
-                    for (let c = 0; c < tetromino.matrix[r].length; c++) {
-                        if (tetromino.matrix[r][c]) {
-                            context.fillRect(
-                                (tetromino.col + c) * grid,
-                                (tetromino.row + r) * grid,
-                                grid-1,
-                                grid-1
-                            );
-                        }
-                    }
-                }
+            }
+            
+            // Grade
+            context.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            context.lineWidth = 0.5;
+            for (let c = 0; c <= COLS; c++) {
+                context.beginPath();
+                context.moveTo(c * grid, 0);
+                context.lineTo(c * grid, ROWS * grid);
+                context.stroke();
+            }
+            for (let r = 0; r <= ROWS; r++) {
+                context.beginPath();
+                context.moveTo(0, r * grid);
+                context.lineTo(COLS * grid, r * grid);
+                context.stroke();
             }
         }
         
-        // 6. Controles
-        const keydownHandler = (e) => {
-            if (!rAF) return;
-            
-            // Esquerda
-            if (e.keyCode === 37) {
-                const col = tetromino.col - 1;
-                if (isValidMove(tetromino.matrix, tetromino.row, col)) {
-                    tetromino.col = col;
-                }
-            }
-            // Direita
-            else if (e.keyCode === 39) {
-                const col = tetromino.col + 1;
-                if (isValidMove(tetromino.matrix, tetromino.row, col)) {
-                    tetromino.col = col;
-                }
-            }
-            // Cima (rotacionar)
-            else if (e.keyCode === 38) {
-                const matrix = rotate(tetromino.matrix);
-                if (isValidMove(matrix, tetromino.row, tetromino.col)) {
-                    tetromino.matrix = matrix;
-                }
-            }
-            // Baixo (descer rápido)
-            else if (e.keyCode === 40) {
-                const row = tetromino.row + 1;
-                if (!isValidMove(tetromino.matrix, row, tetromino.col)) {
-                    tetromino.row = row - 1;
-                    placeTetromino();
-                    return;
-                }
-                tetromino.row = row;
-            }
-        };
-        
         // Inicia o jogo
-        document.addEventListener('keydown', keydownHandler);
         rAF = requestAnimationFrame(loop);
         
         // Retorna função para limpar
@@ -999,7 +992,6 @@
                     cancelAnimationFrame(rAF);
                     rAF = null;
                 }
-                document.removeEventListener('keydown', keydownHandler);
             },
             restart: restartGame
         };
@@ -1007,14 +999,12 @@
     
     // ==================== FUNÇÕES AUXILIARES ====================
     
-    // Verifica se deve mostrar o popup
     function shouldShowPopup() {
         const hideUntil = localStorage.getItem(POPUP_CONFIG.storageKey);
         if (!hideUntil) return true;
         return Date.now() > parseInt(hideUntil, 10);
     }
     
-    // Atualiza status da API
     function updateApiStatus(status, message = '') {
         apiConnected = status === 'connected';
         
@@ -1046,7 +1036,6 @@
         }
     }
     
-    // Busca e atualiza o contador
     async function updateCoffeeCounter() {
         try {
             updateApiStatus('connecting', 'Buscando dados...');
@@ -1072,49 +1061,38 @@
         }
     }
     
-    // Envia um café
     async function handleSendCoffee() {
         if (sendBtn.disabled) return;
         
-        // Desabilita o botão durante o envio
         sendBtn.disabled = true;
         const originalText = sendBtn.innerHTML;
         sendBtn.innerHTML = '<span class="coffee-icon">⏳</span><span>Enviando...</span>';
         
         try {
-            // Efeito visual
             createCoffeeFloats();
-            
-            // Envia para a API
             updateApiStatus('connecting', 'Enviando café...');
             const result = await incrementCounter();
             
             if (result.success) {
-                // Atualiza o contador
                 currentCount = result.newCount;
                 totalCountElement.textContent = currentCount;
                 
-                // Efeito visual
                 totalCountElement.style.transform = 'scale(1.5)';
                 setTimeout(() => {
                     totalCountElement.style.transform = 'scale(1)';
                 }, 300);
                 
-                // Mostra notificação
                 showNotification('☕ Café enviado com sucesso!');
                 
-                // Efeito no botão
                 sendBtn.innerHTML = '<span class="coffee-icon">✅</span><span>Enviado!</span>';
                 sendBtn.style.background = `linear-gradient(135deg, ${POPUP_CONFIG.colors.success} 0%, #0DA271 100%)`;
                 
                 updateApiStatus('connected', `Café enviado! Total: ${currentCount}`);
                 
             } else {
-                // Fallback local
                 currentCount = result.newCount;
                 totalCountElement.textContent = currentCount;
                 
-                // Efeito visual
                 totalCountElement.style.transform = 'scale(1.5)';
                 setTimeout(() => {
                     totalCountElement.style.transform = 'scale(1)';
@@ -1138,7 +1116,6 @@
             updateApiStatus('error', 'Erro ao enviar');
             
         } finally {
-            // Restaura o botão após 2 segundos
             setTimeout(() => {
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalText;
@@ -1147,7 +1124,6 @@
         }
     }
     
-    // Cria efeito de cafés flutuantes
     function createCoffeeFloats() {
         for (let i = 0; i < 5; i++) {
             setTimeout(() => {
@@ -1167,9 +1143,7 @@
         }
     }
     
-    // Mostra notificação
     function showNotification(message) {
-        // Remove notificação anterior se existir
         const existing = document.querySelector('.coffee-notification');
         if (existing) existing.remove();
         
@@ -1184,16 +1158,13 @@
         }, 3000);
     }
     
-    // Fecha o popup
     function closePopup() {
-        // Salva preferência se marcado
         const dontShowAgain = document.getElementById('dontShowAgain');
         if (dontShowAgain && dontShowAgain.checked) {
             const hideUntil = Date.now() + (POPUP_CONFIG.hideDays * 24 * 60 * 60 * 1000);
             localStorage.setItem(POPUP_CONFIG.storageKey, hideUntil.toString());
         }
         
-        // Para o jogo Tetris
         if (tetrisGame && tetrisGame.cleanup) {
             tetrisGame.cleanup();
         }
@@ -1205,46 +1176,34 @@
         }, 300);
     }
     
-    // Mostra o popup
     async function showPopup() {
         if (popupShown) return;
         popupShown = true;
         
         popup.style.display = 'flex';
         
-        // Inicia o jogo Tetris
         tetrisGame = createTetrisGame();
-        
-        // Carrega o contador atual
         await updateCoffeeCounter();
-        
-        // Configura eventos
         setupEventListeners();
     }
     
-    // Configura event listeners
     function setupEventListeners() {
         sendBtn.addEventListener('click', handleSendCoffee);
         understandBtn.addEventListener('click', closePopup);
         if (closeBtn) closeBtn.addEventListener('click', closePopup);
         
-        // Fecha ao clicar fora
         popup.addEventListener('click', (e) => {
             if (e.target === popup) closePopup();
         });
         
-        // Fecha com ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closePopup();
         });
     }
     
-    // Inicialização
     function init() {
-        // Mostra após delay
         setTimeout(showPopup, POPUP_CONFIG.showDelay);
         
-        // Mostra mais cedo se houver interação
         const earlyShow = () => {
             if (!popupShown) {
                 showPopup();
@@ -1266,7 +1225,6 @@
         init();
     }
     
-    // ==================== API PÚBLICA ====================
     window.coffeeCounterPopup = {
         show: showPopup,
         hide: closePopup,
@@ -1280,90 +1238,7 @@
             const result = await getCounterValue();
             return result.success ? result.count : getLocalCount();
         },
-        sendCoffee: handleSendCoffee,
-        
-        // Debug - mostra informações úteis
-        debug: {
-            showInfo: function() {
-                debugInfo.style.display = 'block';
-                console.log('=== DEBUG INFO ===');
-                console.log('Base URL:', API_CONFIG.baseUrl);
-                console.log('Token:', API_CONFIG.apiToken ? 'Presente' : 'Ausente');
-                console.log('Token (primeiros 10 chars):', API_CONFIG.apiToken ? API_CONFIG.apiToken.substring(0, 10) + '...' : 'N/A');
-            },
-            
-            testApi: async function() {
-                console.log('=== TESTANDO API ===');
-                console.log('1. Testando GET (buscar valor)...');
-                const getResult = await getCounterValue();
-                console.log('Resultado GET:', getResult);
-                
-                console.log('2. Testando POST /up (incrementar)...');
-                const postResult = await incrementCounter();
-                console.log('Resultado POST /up:', postResult);
-                
-                console.log('3. Testando GET /stats (estatísticas)...');
-                const statsResult = await getCounterStats();
-                console.log('Resultado GET /stats:', statsResult);
-                
-                return { getResult, postResult, statsResult };
-            },
-            
-            // Função para testar manualmente com fetch
-            testManual: async function() {
-                console.log('=== TESTE MANUAL ===');
-                
-                // Teste GET
-                try {
-                    console.log('Testando GET com fetch...');
-                    const response = await fetch(API_CONFIG.baseUrl, {
-                        headers: {
-                            'Authorization': `Bearer ${API_CONFIG.apiToken}`
-                        }
-                    });
-                    console.log('Status GET:', response.status);
-                    console.log('Headers GET:', Object.fromEntries(response.headers.entries()));
-                    const text = await response.text();
-                    console.log('Texto GET:', text);
-                    try {
-                        console.log('JSON GET:', JSON.parse(text));
-                    } catch {
-                        console.log('GET não retornou JSON válido');
-                    }
-                } catch (error) {
-                    console.error('Erro no GET:', error);
-                }
-                
-                // Teste POST /up
-                try {
-                    console.log('Testando POST /up com fetch...');
-                    const response = await fetch(`${API_CONFIG.baseUrl}/up`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${API_CONFIG.apiToken}`
-                        }
-                    });
-                    console.log('Status POST /up:', response.status);
-                    console.log('Headers POST /up:', Object.fromEntries(response.headers.entries()));
-                    const text = await response.text();
-                    console.log('Texto POST /up:', text);
-                    try {
-                        console.log('JSON POST /up:', JSON.parse(text));
-                    } catch {
-                        console.log('POST /up não retornou JSON válido');
-                    }
-                } catch (error) {
-                    console.error('Erro no POST /up:', error);
-                }
-            }
-        }
-    };
-    
-    // Para facilitar o debug, expõe as funções de API
-    window.coffeeCounterAPI = {
-        getCounterValue,
-        incrementCounter,
-        getCounterStats
+        sendCoffee: handleSendCoffee
     };
     
 })();
