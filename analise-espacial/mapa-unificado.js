@@ -8,7 +8,7 @@ let zonasLayer = null;
 
 // Inicializar mapa
 function inicializarMapa() {
-  // 🔒 USAR mapa global já inicializado
+  // 🔒 Usar mapa global já criado em mapa.js
   if (window.map && window.map instanceof L.Map) {
     map = window.map;
     console.log('🗺️ Usando mapa global existente');
@@ -46,7 +46,8 @@ function inicializarMapa() {
     
     return map;
     
-  } catch (error) {
+  }
+  catch (error) {
     console.error('❌ Erro ao inicializar mapa:', error);
     return null;
   }
