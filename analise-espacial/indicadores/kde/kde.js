@@ -17,6 +17,7 @@ class KDEHandler {
       }
     };
   }
+  
 
   calcular(criticidade = 'todos', raio = 500) {
     console.log(`🔥 Calculando KDE: ${criticidade}, raio: ${raio}m`);
@@ -25,6 +26,7 @@ class KDEHandler {
       console.error('❌ Mapa não inicializado');
       return;
     }
+    
     
     // Limpar camada anterior
     if (this.layer) {
