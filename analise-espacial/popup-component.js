@@ -3,10 +3,13 @@
     'use strict';
     
     // ==================== CONFIGURAÇÃO DA API ====================
-    // API CounterAPI v2 - NÃO requer Authorization header para chamadas GET/POST básicas
     const API_CONFIG = {
         baseUrl: "https://api.counterapi.dev/v2/joao-claudianos-team-2325/first-counter-2325",
-        // Removemos o header Authorization pois a API pública não requer
+        apiToken: "ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN",
+        headers: {
+            'Authorization': 'Bearer ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN',
+            'Content-Type': 'application/json'
+        }
     };
     
     // ==================== CONFIGURAÇÃO DO POPUP ====================
@@ -32,7 +35,25 @@
         }
     };
     
-    // ==================== SISTEMA DE API SIMPLIFICADO ====================
+    // ==================== SISTEMA DE API CORRIGIDO ====================
+    
+    // Testa se a API está funcionando
+    async function testApiConnection() {
+        try {
+            console.log('Testando conexão com API...');
+            const response = await fetch(API_CONFIG.baseUrl, {
+                method: 'GET',
+                headers: API_CONFIG.headers,
+                mode: 'cors'
+            });
+            
+            console.log('Status da API:', response.status);
+            return response.ok;
+        } catch (error) {
+            console.error('Erro ao testar API:', error);
+            return false;
+        }
+    }
     
     // Função para buscar o total de cafés
     async function fetchCoffeeCount() {
@@ -41,8 +62,8 @@
             
             const response = await fetch(API_CONFIG.baseUrl, {
                 method: 'GET',
+                headers: API_CONFIG.headers,
                 mode: 'cors'
-                // Removemos headers para evitar erro CORS
             });
             
             if (!response.ok) {
@@ -53,17 +74,7 @@
             console.log('Resposta da API:', data);
             
             // Extrai o valor do contador
-            let count = 0;
-            
-            if (data && typeof data.count === 'number') {
-                count = data.count;
-            } else if (data && data.value !== undefined) {
-                count = data.value;
-            } else if (typeof data === 'number') {
-                count = data;
-            } else if (data && data.data && typeof data.data.count === 'number') {
-                count = data.data.count;
-            }
+            let count = extractCountFromData(data);
             
             return {
                 success: true,
@@ -80,24 +91,48 @@
         }
     }
     
+    // Função para extrair contador de diferentes formatos
+    function extractCountFromData(data) {
+        if (data && typeof data.count === 'number') {
+            return data.count;
+        } else if (data && data.value !== undefined) {
+            return data.value;
+        } else if (typeof data === 'number') {
+            return data;
+        } else if (data && data.data && typeof data.data.count === 'number') {
+            return data.data.count;
+        }
+        return 0;
+    }
+    
     // Função para enviar um café (incrementar contador)
     async function sendCoffee() {
         try {
             console.log('Enviando café...');
             
-            // Faz POST sem headers para evitar CORS issues
+            // Primeiro testa a conexão
+            const apiWorking = await testApiConnection();
+            if (!apiWorking) {
+                throw new Error('API não está respondendo');
+            }
+            
+            // Faz POST para o endpoint /up
             const response = await fetch(`${API_CONFIG.baseUrl}/up`, {
                 method: 'POST',
+                headers: API_CONFIG.headers,
                 mode: 'cors'
-                // Removemos headers pois a API pública não requer
             });
             
+            console.log('Status do envio:', response.status);
+            
             if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
+                // Se /up não funcionar, tenta PUT na raiz
+                console.log('Tentando método alternativo (PUT)...');
+                return await tryPutMethod();
             }
             
             const data = await response.json();
-            console.log('Café enviado:', data);
+            console.log('Café enviado com sucesso:', data);
             
             // Busca o novo total atualizado
             const updated = await fetchCoffeeCount();
@@ -116,12 +151,48 @@
         }
     }
     
+    // Método alternativo usando PUT
+    async function tryPutMethod() {
+        try {
+            // Primeiro pega o valor atual
+            const current = await fetchCoffeeCount();
+            if (!current.success) {
+                throw new Error('Não foi possível obter valor atual');
+            }
+            
+            // Incrementa e faz PUT
+            const newCount = current.count + 1;
+            const response = await fetch(API_CONFIG.baseUrl, {
+                method: 'PUT',
+                headers: API_CONFIG.headers,
+                body: JSON.stringify({ count: newCount }),
+                mode: 'cors'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`PUT failed: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('PUT bem sucedido:', data);
+            
+            return {
+                success: true,
+                newCount: newCount
+            };
+            
+        } catch (error) {
+            console.error('Erro no método PUT:', error);
+            throw error;
+        }
+    }
+    
     // ==================== VERIFICAÇÃO INICIAL ====================
     if (document.getElementById(POPUP_CONFIG.popupId) || !shouldShowPopup()) {
         return;
     }
     
-    // ==================== CSS COM TETRIS ANIMATION ====================
+    // ==================== CSS COM ANIMAÇÃO TETRIS DE PREENCHIMENTO ====================
     const style = document.createElement('style');
     style.textContent = `
         /* OVERLAY */
@@ -151,12 +222,11 @@
             background: white;
             border-radius: 24px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             overflow: hidden;
             animation: cardSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 1px solid rgba(0, 0, 0, 0.1);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-            text-align: center;
             position: relative;
         }
         
@@ -168,56 +238,6 @@
             100% {
                 opacity: 1;
                 transform: translateY(0) scale(1);
-            }
-        }
-        
-        /* ANIMAÇÃO TETRIS - LINHA HORIZONTAL */
-        .tetris-animation {
-            height: 30px;
-            background: linear-gradient(90deg, 
-                ${POPUP_CONFIG.colors.tetrisBlue} 0%,
-                ${POPUP_CONFIG.colors.tetrisGreen} 20%,
-                ${POPUP_CONFIG.colors.tetrisRed} 40%,
-                ${POPUP_CONFIG.colors.tetrisYellow} 60%,
-                ${POPUP_CONFIG.colors.tetrisPurple} 80%,
-                ${POPUP_CONFIG.colors.tetrisBlue} 100%
-            );
-            background-size: 200% 100%;
-            animation: tetrisMove 3s linear infinite;
-            position: relative;
-            overflow: hidden;
-            border-bottom: 3px solid rgba(0, 0, 0, 0.1);
-        }
-        
-        @keyframes tetrisMove {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
-        }
-        
-        .tetris-block {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: white;
-            animation: tetrisFloat 15s linear infinite;
-            opacity: 0.7;
-            border-radius: 3px;
-        }
-        
-        @keyframes tetrisFloat {
-            0% {
-                transform: translateY(-100px) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.7;
-            }
-            90% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(100px) rotate(360deg);
-                opacity: 0;
             }
         }
         
@@ -274,8 +294,9 @@
         }
         
         .counter-message {
-            margin: 0 0 25px 0;
+            margin: 0 0 20px 0;
             font-size: 15px;
+            text-align: center;
         }
         
         .counter-message strong {
@@ -286,30 +307,132 @@
             font-weight: 700;
         }
         
-        /* BOTÃO ENVIAR CAFÉ */
+        /* ANIMAÇÃO TETRIS - BARRA DE PROGRESSO */
+        .tetris-progress-container {
+            height: 40px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            margin: 25px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .tetris-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, 
+                ${POPUP_CONFIG.colors.tetrisBlue},
+                ${POPUP_CONFIG.colors.tetrisGreen},
+                ${POPUP_CONFIG.colors.tetrisYellow},
+                ${POPUP_CONFIG.colors.tetrisRed},
+                ${POPUP_CONFIG.colors.tetrisPurple}
+            );
+            background-size: 400% 100%;
+            animation: gradientMove 3s linear infinite;
+            border-radius: 20px;
+            transition: width 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+        
+        .tetris-block {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+            animation: blockFall 15s linear infinite;
+            opacity: 0;
+        }
+        
+        @keyframes blockFall {
+            0% {
+                transform: translateY(-40px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(40px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .progress-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+        
+        /* BOTÕES LADO A LADO */
+        .counter-buttons-row {
+            display: flex;
+            gap: 12px;
+            margin: 25px 0 20px 0;
+        }
+        
+        .counter-buttons-row button {
+            flex: 1;
+        }
+        
+        .primary-counter-btn {
+            background: linear-gradient(135deg, ${POPUP_CONFIG.colors.primary} 0%, ${POPUP_CONFIG.colors.primaryDark} 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .primary-counter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .primary-counter-btn:active {
+            transform: translateY(0);
+        }
+        
         .coffee-action-btn {
             background: linear-gradient(135deg, ${POPUP_CONFIG.colors.cafeBrown} 0%, #8B4513 100%);
             color: white;
             border: none;
             border-radius: 12px;
-            padding: 16px 24px;
-            font-size: 16px;
+            padding: 14px 20px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: inherit;
-            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3);
-            margin-bottom: 15px;
+            gap: 8px;
         }
         
         .coffee-action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(160, 82, 45, 0.4);
+            box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3);
         }
         
         .coffee-action-btn:active {
@@ -323,7 +446,7 @@
         }
         
         .coffee-icon {
-            font-size: 22px;
+            font-size: 18px;
             animation: coffeeSteam 2s infinite;
         }
         
@@ -337,7 +460,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 15px 0;
+            margin: 15px 0 5px 0;
         }
         
         .counter-circle {
@@ -369,31 +492,32 @@
             letter-spacing: 0.5px;
         }
         
-        /* BOTÕES */
-        .counter-buttons {
+        /* STATUS DA API */
+        .api-status {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
         }
         
-        .primary-counter-btn {
-            background: linear-gradient(135deg, ${POPUP_CONFIG.colors.primary} 0%, ${POPUP_CONFIG.colors.primaryDark} 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 14px 20px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            width: 100%;
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: ${POPUP_CONFIG.colors.success};
+            animation: statusBlink 2s infinite;
         }
         
-        .primary-counter-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        .status-indicator.offline {
+            background: ${POPUP_CONFIG.colors.warning};
+        }
+        
+        @keyframes statusBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         /* OPÇÃO NÃO MOSTRAR */
@@ -401,6 +525,7 @@
             margin-top: 20px;
             padding-top: 15px;
             border-top: 1px dashed #E0E0E0;
+            text-align: center;
         }
         
         .counter-option-label {
@@ -478,10 +603,19 @@
                 padding: 20px;
             }
             
+            .counter-buttons-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
             .counter-circle {
                 width: 50px;
                 height: 50px;
                 font-size: 18px;
+            }
+            
+            .tetris-progress-container {
+                height: 35px;
             }
             
             .counter-popup-header {
@@ -505,6 +639,16 @@
                 color: #FF8585;
             }
             
+            .tetris-progress-container {
+                background: #2D2D2D;
+                border-color: #444;
+            }
+            
+            .progress-label {
+                color: #E0E0E0;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            }
+            
             .counter-circle {
                 border-color: #1E1E1E;
             }
@@ -520,12 +664,13 @@
         
         @media (prefers-reduced-motion: reduce) {
             .counter-popup-card,
-            .tetris-animation,
+            .tetris-progress-bar,
             .tetris-block,
             .coffee-icon,
             .counter-circle,
             .coffee-action-btn,
-            .primary-counter-btn {
+            .primary-counter-btn,
+            .status-indicator {
                 animation: none !important;
                 transition: none !important;
             }
@@ -538,9 +683,6 @@
     const popupHTML = `
         <div id="${POPUP_CONFIG.popupId}" class="counter-popup-overlay">
             <div class="counter-popup-card">
-                <!-- ANIMAÇÃO TETRIS NO TOPO -->
-                <div class="tetris-animation" id="tetrisContainer"></div>
-                
                 <div class="counter-popup-header">
                     <div class="counter-header-content">
                         <h3>🚧 Página em Desenvolvimento</h3>
@@ -554,10 +696,23 @@
                         Estamos trabalhando duro para melhorar esta página. Cada café nos dá mais energia para continuar!
                     </div>
                     
-                    <button class="coffee-action-btn" id="sendCoffeeBtn">
-                        <span class="coffee-icon">☕</span>
-                        <span>Enviar Café</span>
-                    </button>
+                    <!-- ANIMAÇÃO TETRIS - BARRA DE PROGRESSO -->
+                    <div class="tetris-progress-container">
+                        <div class="tetris-progress-bar" id="tetrisProgressBar">
+                            <div class="progress-label" id="progressLabel">Carregando...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- BOTÕES LADO A LADO -->
+                    <div class="counter-buttons-row">
+                        <button class="primary-counter-btn" id="understandBtn">
+                            Obrigado!
+                        </button>
+                        <button class="coffee-action-btn" id="sendCoffeeBtn">
+                            <span class="coffee-icon">☕</span>
+                            <span>Enviar Café</span>
+                        </button>
+                    </div>
                     
                     <!-- CONTADOR EM CÍRCULO PEQUENO -->
                     <div class="coffee-counter-mini">
@@ -565,10 +720,10 @@
                         <div class="counter-label">Total de Cafés</div>
                     </div>
                     
-                    <div class="counter-buttons">
-                        <button class="primary-counter-btn" id="understandBtn">
-                            Entendi, obrigado!
-                        </button>
+                    <!-- STATUS DA API -->
+                    <div class="api-status">
+                        <span class="status-indicator" id="apiStatusIndicator"></span>
+                        <span id="apiStatusText">Conectando à API...</span>
                     </div>
                     
                     <div class="counter-option">
@@ -590,26 +745,28 @@
     const understandBtn = document.getElementById('understandBtn');
     const closeBtn = popup.querySelector('.counter-close-btn');
     const totalCountElement = document.getElementById('totalCoffeeCount');
+    const tetrisProgressBar = document.getElementById('tetrisProgressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const apiStatusIndicator = document.getElementById('apiStatusIndicator');
+    const apiStatusText = document.getElementById('apiStatusText');
+    
     let currentCount = 0;
     let popupShown = false;
+    let apiConnected = false;
     
-    // ==================== ANIMAÇÃO TETRIS ====================
+    // ==================== ANIMAÇÃO TETRIS DE BARRA DE PROGRESSO ====================
     function createTetrisAnimation() {
-        const container = document.getElementById('tetrisContainer');
-        if (!container) return;
-        
-        // Limpa container
-        container.innerHTML = '';
+        if (!tetrisProgressBar) return;
         
         // Cria blocos flutuantes
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 10; i++) {
             const block = document.createElement('div');
             block.className = 'tetris-block';
             
             // Posição aleatória
             const left = Math.random() * 100;
             const delay = Math.random() * 15;
-            const size = 15 + Math.random() * 15;
+            const size = 20 + Math.random() * 15;
             const colorIndex = Math.floor(Math.random() * 5);
             const colors = [
                 POPUP_CONFIG.colors.tetrisBlue,
@@ -626,7 +783,30 @@
             block.style.background = colors[colorIndex];
             block.style.boxShadow = `0 0 10px ${colors[colorIndex]}`;
             
-            container.appendChild(block);
+            tetrisProgressBar.appendChild(block);
+        }
+        
+        // Inicia animação da barra
+        updateTetrisProgress(0);
+    }
+    
+    function updateTetrisProgress(percentage) {
+        if (!tetrisProgressBar || !progressLabel) return;
+        
+        const targetWidth = Math.min(100, Math.max(0, percentage));
+        tetrisProgressBar.style.width = `${targetWidth}%`;
+        
+        // Atualiza label
+        if (percentage >= 100) {
+            progressLabel.textContent = '🎉 Completo!';
+        } else if (percentage >= 75) {
+            progressLabel.textContent = 'Quase lá!';
+        } else if (percentage >= 50) {
+            progressLabel.textContent = 'Metade do caminho!';
+        } else if (percentage >= 25) {
+            progressLabel.textContent = 'Em progresso...';
+        } else {
+            progressLabel.textContent = 'Iniciando...';
         }
     }
     
@@ -639,21 +819,61 @@
         return Date.now() > parseInt(hideUntil, 10);
     }
     
+    // Atualiza status da API
+    function updateApiStatus(status, message = '') {
+        apiConnected = status === 'connected';
+        
+        if (apiStatusIndicator && apiStatusText) {
+            switch(status) {
+                case 'connected':
+                    apiStatusIndicator.className = 'status-indicator';
+                    apiStatusIndicator.style.background = POPUP_CONFIG.colors.success;
+                    apiStatusText.textContent = message || 'API Conectada';
+                    break;
+                case 'connecting':
+                    apiStatusIndicator.className = 'status-indicator';
+                    apiStatusIndicator.style.background = POPUP_CONFIG.colors.warning;
+                    apiStatusText.textContent = message || 'Conectando...';
+                    break;
+                case 'error':
+                    apiStatusIndicator.className = 'status-indicator offline';
+                    apiStatusIndicator.style.background = '#EF4444';
+                    apiStatusText.textContent = message || 'Erro na API';
+                    break;
+                default:
+                    apiStatusIndicator.className = 'status-indicator';
+                    apiStatusText.textContent = message || 'Desconectado';
+            }
+        }
+    }
+    
     // Busca e atualiza o contador
     async function updateCoffeeCounter() {
         try {
+            updateApiStatus('connecting', 'Buscando dados...');
+            
             const result = await fetchCoffeeCount();
             if (result.success) {
                 currentCount = result.count;
                 totalCountElement.textContent = currentCount;
+                
+                // Atualiza barra de progresso (limitada a 100%)
+                const progressPercentage = Math.min(100, (currentCount % 100));
+                updateTetrisProgress(progressPercentage);
+                
+                updateApiStatus('connected', `API Online (${currentCount} cafés)`);
+                
                 // Efeito visual ao atualizar
                 totalCountElement.style.transform = 'scale(1.3)';
                 setTimeout(() => {
                     totalCountElement.style.transform = 'scale(1)';
                 }, 300);
+            } else {
+                updateApiStatus('error', 'Erro ao conectar');
             }
         } catch (error) {
             console.error('Erro ao atualizar contador:', error);
+            updateApiStatus('error', 'Conexão falhou');
         }
     }
     
@@ -670,7 +890,11 @@
             // Efeito visual de cafés flutuantes
             createCoffeeFloats();
             
+            // Efeito na barra de progresso
+            tetrisProgressBar.style.filter = 'brightness(1.5)';
+            
             // Envia para a API
+            updateApiStatus('connecting', 'Enviando café...');
             const result = await sendCoffee();
             
             if (result.success) {
@@ -684,17 +908,37 @@
                 sendBtn.innerHTML = '<span class="coffee-icon">✅</span><span>Enviado!</span>';
                 sendBtn.style.background = `linear-gradient(135deg, ${POPUP_CONFIG.colors.success} 0%, #0DA271 100%)`;
                 
+                // Efeito especial na barra
+                tetrisProgressBar.style.animation = 'gradientMove 1s linear infinite';
+                
             } else {
                 throw new Error(result.error);
             }
             
         } catch (error) {
             console.error('Erro:', error);
-            showNotification('⚠️ Erro ao enviar. Tente novamente.');
-            sendBtn.innerHTML = '<span class="coffee-icon">❌</span><span>Erro</span>';
-            sendBtn.style.background = `linear-gradient(135deg, #EF4444 0%, #DC2626 100%)`;
+            showNotification('⚠️ Erro ao enviar café');
+            
+            // Fallback local
+            currentCount++;
+            totalCountElement.textContent = currentCount;
+            
+            // Atualiza barra de progresso
+            const progressPercentage = Math.min(100, (currentCount % 100));
+            updateTetrisProgress(progressPercentage);
+            
+            sendBtn.innerHTML = '<span class="coffee-icon">☕</span><span>Salvo Local</span>';
+            sendBtn.style.background = `linear-gradient(135deg, ${POPUP_CONFIG.colors.warning} 0%, #D97706 100%)`;
+            
+            updateApiStatus('error', 'Modo Local Ativo');
             
         } finally {
+            // Restaura efeitos
+            setTimeout(() => {
+                tetrisProgressBar.style.filter = '';
+                tetrisProgressBar.style.animation = 'gradientMove 3s linear infinite';
+            }, 1000);
+            
             // Restaura o botão após 2 segundos
             setTimeout(() => {
                 sendBtn.disabled = false;
@@ -716,6 +960,7 @@
                 coffee.style.fontSize = `${20 + Math.random() * 15}px`;
                 coffee.style.color = POPUP_CONFIG.colors.cafeBrown;
                 coffee.style.textShadow = '0 0 10px rgba(160, 82, 45, 0.5)';
+                coffee.style.zIndex = '10001';
                 document.body.appendChild(coffee);
                 
                 setTimeout(() => coffee.remove(), 1000);
@@ -789,6 +1034,13 @@
             if (e.key === 'Escape') closePopup();
             if (e.key === 'Enter' && e.target === sendBtn) handleSendCoffee();
         });
+        
+        // Atualiza periodicamente
+        setInterval(async () => {
+            if (apiConnected) {
+                await updateCoffeeCounter();
+            }
+        }, 30000); // A cada 30 segundos
     }
     
     // Inicialização
@@ -831,7 +1083,59 @@
             const result = await fetchCoffeeCount();
             return result.success ? result.count : 0;
         },
-        sendCoffee: handleSendCoffee
+        sendCoffee: handleSendCoffee,
+        
+        // Debug functions
+        debug: {
+            testApi: async function() {
+                console.log('=== Testando API CounterAPI v2 ===');
+                console.log('URL:', API_CONFIG.baseUrl);
+                console.log('Token:', API_CONFIG.apiToken);
+                console.log('Headers:', API_CONFIG.headers);
+                
+                // Test GET
+                try {
+                    console.log('Testando GET...');
+                    const getResponse = await fetch(API_CONFIG.baseUrl, {
+                        method: 'GET',
+                        headers: API_CONFIG.headers
+                    });
+                    console.log('GET Status:', getResponse.status);
+                    const getData = await getResponse.json();
+                    console.log('GET Data:', getData);
+                } catch (error) {
+                    console.error('GET Error:', error);
+                }
+                
+                // Test POST /up
+                try {
+                    console.log('Testando POST /up...');
+                    const postResponse = await fetch(`${API_CONFIG.baseUrl}/up`, {
+                        method: 'POST',
+                        headers: API_CONFIG.headers
+                    });
+                    console.log('POST /up Status:', postResponse.status);
+                    if (postResponse.ok) {
+                        const postData = await postResponse.json();
+                        console.log('POST /up Data:', postData);
+                    }
+                } catch (error) {
+                    console.error('POST /up Error:', error);
+                }
+            },
+            
+            testWithoutAuth: async function() {
+                console.log('=== Testando SEM autenticação ===');
+                try {
+                    const response = await fetch(API_CONFIG.baseUrl);
+                    console.log('Status sem auth:', response.status);
+                    const data = await response.json();
+                    console.log('Data sem auth:', data);
+                } catch (error) {
+                    console.error('Error sem auth:', error);
+                }
+            }
+        }
     };
     
 })();
