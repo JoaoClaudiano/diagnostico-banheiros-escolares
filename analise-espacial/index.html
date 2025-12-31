@@ -1433,16 +1433,7 @@ function processarDados(escolas, fonte) {
   document.getElementById('status-update').innerHTML = '<i class="fas fa-check"></i> Atualizado';
   console.log(`✅ ${escolas.length} escolas processadas`);
 }
-function plotarEscolasNoMapa(escolas) {
 
-  if (!window.layerEscolas) {
-    window.layerEscolas = L.layerGroup().addTo(window.mapa);
-  } else {
-    window.layerEscolas.clearLayers();
-  }
-
-  ...
-}
 function plotarEscolasNoMapa(escolas) {
   if (!window.mapa) {
     console.error('❌ Mapa não inicializado');
@@ -1677,14 +1668,16 @@ function aplicarAnalise() {
 function ativarCamada(camada) {
   console.log(`🗺️ Ativando camada: ${camada}`);
 
-  const criticidade = document.getElementById('param-criticidade')?.value || 'todas';
-  const sementes = parseInt(document.getElementById('param-sementes')?.value || 10);
+  const criticidade = document.getElementById('param-criticidade')?.value || 'todos';
+  const sementes = parseInt(document.getElementById('param-sementes')?.value || 3);
   const raio = parseInt(document.getElementById('param-raio')?.value || 500);
 
   switch (camada) {
 
     case 'escolas':
-      // já renderizadas
+      if (window.layerEscolas) {
+        window.mapa.addLayer(window.layerEscolas);
+      }
       break;
 
     case 'kde':
@@ -1733,6 +1726,7 @@ function ativarCamada(camada) {
       console.warn('⚠️ Camada desconhecida:', camada);
   }
 }
+
 
 function desativarCamada(camada) {
   console.log(`🗺️ Desativando camada: ${camada}`);
