@@ -145,6 +145,12 @@ class DadosManager {
           escola.peso = pesoNovo;
         }
         
+        // Após linha 145 no dados.js, dentro do processarAvaliacoesFirebase:
+classe: avaliacao.classe,
+status: avaliacao.classe,  // ← ADICIONE ESTA LINHA para compatibilidade
+pontuacao: avaliacao.pontuacao,
+peso: this.calcularPeso(avaliacao.classe, avaliacao.pontuacao),
+        
         // Atualizar metadados
         escola.metadata.totalAvaliacoes++;
         escola.updatedAt = avaliacao.createdAt;
