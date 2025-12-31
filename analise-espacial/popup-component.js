@@ -1,13 +1,14 @@
-// popup-counter-api.js
+// popup-counter-api-v2.js
 (function() {
     'use strict';
     
-    // ==================== CONFIGURAÇÃO DA API ====================
+    // ==================== CONFIGURAÇÃO DA API V2 ====================
     const API_CONFIG = {
-        apiUrl: "https://api.counterapi.dev/v1/instances/cafe-counter", // URL base da API
-        apiToken: "ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN", // Seu token de 2025
+        // URL base da API v2 com SEU namespace específico
+        baseUrl: "https://api.counterapi.dev/v2/joao-claudianos-team-2325/first-counter-2325",
+        apiToken: "ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN",
         headers: {
-            'Authorization': `Bearer ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN`,
+            'Authorization': 'Bearer ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN',
             'Content-Type': 'application/json'
         }
     };
@@ -32,14 +33,14 @@
         }
     };
     
-    // ==================== SISTEMA DE API ====================
+    // ==================== SISTEMA DE API V2 ====================
     
-    // Função para buscar o contador atual da API
+    // Função para buscar o contador atual da API v2
     async function fetchCafeCount() {
         try {
-            console.log('Buscando contador da API...');
+            console.log('Buscando contador da API v2...');
             
-            const response = await fetch(API_CONFIG.apiUrl, {
+            const response = await fetch(API_CONFIG.baseUrl, {
                 method: 'GET',
                 headers: API_CONFIG.headers,
                 mode: 'cors'
@@ -50,20 +51,24 @@
             }
             
             const data = await response.json();
-            console.log('Resposta da API:', data);
+            console.log('Resposta da API v2:', data);
             
-            // Ajuste baseado na estrutura da resposta da CounterAPI v2
+            // Extrai o valor do contador baseado na estrutura da API v2
             let count = 0;
             
+            // Tenta diferentes formatos possíveis da resposta
             if (data && typeof data.count === 'number') {
-                // Formato v2: { count: 123 }
+                // Formato: { count: 123 }
                 count = data.count;
-            } else if (data && data.data && typeof data.data.count === 'number') {
-                // Formato alternativo: { data: { count: 123 } }
-                count = data.data.count;
-            } else if (data && typeof data.value === 'number') {
-                // Formato alternativo: { value: 123 }
+            } else if (data && data.value !== undefined) {
+                // Formato: { value: 123 }
                 count = data.value;
+            } else if (typeof data === 'number') {
+                // Formato: 123 (apenas o número)
+                count = data;
+            } else if (data && data.data && typeof data.data.count === 'number') {
+                // Formato aninhado: { data: { count: 123 } }
+                count = data.data.count;
             }
             
             return {
@@ -82,25 +87,15 @@
         }
     }
     
-    // Função para incrementar o contador via API
+    // Função para incrementar o contador via API v2 (endpoint /up)
     async function incrementCafeCount() {
         try {
-            console.log('Incrementando contador via API...');
+            console.log('Incrementando contador via API v2 /up endpoint...');
             
-            // Primeiro busca o valor atual
-            const current = await fetchCafeCount();
-            if (!current.success) {
-                throw new Error('Não foi possível obter o contador atual');
-            }
-            
-            // Para a CounterAPI v2, geralmente é um PUT ou POST para atualizar
-            // Como a documentação não está clara, vamos fazer um PUT com o valor incrementado
-            const newCount = current.count + 1;
-            
-            const response = await fetch(API_CONFIG.apiUrl, {
-                method: 'PUT', // Ou POST, dependendo da API
+            // Faz POST para o endpoint /up conforme documentação
+            const response = await fetch(`${API_CONFIG.baseUrl}/up`, {
+                method: 'POST',
                 headers: API_CONFIG.headers,
-                body: JSON.stringify({ count: newCount }),
                 mode: 'cors'
             });
             
@@ -109,7 +104,11 @@
             }
             
             const data = await response.json();
-            console.log('Resposta do incremento:', data);
+            console.log('Resposta do incremento v2:', data);
+            
+            // Busca o valor atualizado após o incremento
+            const updatedResult = await fetchCafeCount();
+            const newCount = updatedResult.success ? updatedResult.count : 0;
             
             // Salva a contribuição do usuário localmente
             saveUserContribution();
@@ -130,6 +129,70 @@
                 newCount: incrementFallbackCount(),
                 error: error.message,
                 userCount: getUserContributionCount()
+            };
+        }
+    }
+    
+    // Função para obter estatísticas da API v2 (opcional)
+    async function getCounterStats() {
+        try {
+            console.log('Buscando estatísticas da API v2...');
+            
+            const response = await fetch(`${API_CONFIG.baseUrl}/stats`, {
+                method: 'GET',
+                headers: API_CONFIG.headers,
+                mode: 'cors'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Estatísticas da API v2:', data);
+            
+            return {
+                success: true,
+                stats: data
+            };
+            
+        } catch (error) {
+            console.error('Erro ao buscar estatísticas:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+    
+    // Função para decrementar o contador (opcional - endpoint /down)
+    async function decrementCafeCount() {
+        try {
+            console.log('Decrementando contador via API v2 /down endpoint...');
+            
+            const response = await fetch(`${API_CONFIG.baseUrl}/down`, {
+                method: 'POST',
+                headers: API_CONFIG.headers,
+                mode: 'cors'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Resposta do decremento v2:', data);
+            
+            return {
+                success: true,
+                data: data
+            };
+            
+        } catch (error) {
+            console.error('Erro ao decrementar contador:', error);
+            return {
+                success: false,
+                error: error.message
             };
         }
     }
@@ -793,7 +856,7 @@
             case 'connected':
                 indicator.className = 'status-indicator';
                 indicator.style.background = POPUP_CONFIG.colors.success;
-                text.textContent = message || 'Conectado à API';
+                text.textContent = message || 'Conectado à API v2';
                 break;
             case 'offline':
                 indicator.className = 'status-indicator offline';
@@ -813,15 +876,15 @@
     
     // Carrega os dados iniciais da API
     async function loadInitialData() {
-        updateApiStatus('connecting', 'Buscando dados da API...');
+        updateApiStatus('connecting', 'Buscando dados da API v2...');
         
         const result = await fetchCafeCount();
         const userCount = getUserContributionCount();
         
         if (result.success) {
             currentGlobalCount = result.count;
-            updateApiStatus('connected', `API conectada (${result.count} cafés)`);
-            console.log('Dados da API carregados:', result);
+            updateApiStatus('connected', `API v2 conectada (${result.count} cafés)`);
+            console.log('Dados da API v2 carregados:', result);
         } else {
             currentGlobalCount = result.count;
             updateApiStatus('offline', `Modo offline (${result.count} cafés)`);
@@ -831,7 +894,7 @@
         updateCountersUI(currentGlobalCount, userCount);
     }
     
-    // Envia um café via API
+    // Envia um café via API v2
     async function sendCoffee() {
         const sendBtn = document.getElementById('sendCoffeeBtn');
         if (!sendBtn) return;
@@ -855,7 +918,7 @@
                 createCoffeeEffect();
                 showSuccessMessage(userCount);
                 
-                console.log('Café enviado com sucesso:', result);
+                console.log('Café enviado com sucesso via API v2:', result);
             } else {
                 currentGlobalCount = result.newCount;
                 updateApiStatus('offline', `Café salvo localmente (${result.newCount} total)`);
@@ -1050,7 +1113,7 @@
             if (result.success) {
                 currentGlobalCount = result.count;
                 updateCountersUI(currentGlobalCount, getUserContributionCount());
-                updateApiStatus('connected', `API sincronizada (${result.count} cafés)`);
+                updateApiStatus('connected', `API v2 sincronizada (${result.count} cafés)`);
             }
         }, 60000);
     }
@@ -1104,11 +1167,33 @@
             };
         },
         sendCoffee: sendCoffee,
+        // Novas funções da API v2
+        incrementCounter: incrementCafeCount,
+        decrementCounter: decrementCafeCount,
+        getCounterStats: getCounterStats,
         // Funções para debug
         debug: {
             testApiConnection: async function() {
-                const result = await fetchCafeCount();
-                console.log('Teste de conexão API:', result);
+                console.log('=== Teste de Conexão API v2 ===');
+                console.log('URL base:', API_CONFIG.baseUrl);
+                console.log('Headers:', API_CONFIG.headers);
+                
+                // Testa GET
+                console.log('Testando GET...');
+                const getResult = await fetchCafeCount();
+                console.log('Resultado GET:', getResult);
+                
+                // Testa estatísticas
+                console.log('Testando GET /stats...');
+                const statsResult = await getCounterStats();
+                console.log('Resultado estatísticas:', statsResult);
+                
+                return { getResult, statsResult };
+            },
+            testIncrement: async function() {
+                console.log('=== Teste de Incremento ===');
+                const result = await incrementCafeCount();
+                console.log('Resultado incremento:', result);
                 return result;
             },
             resetLocalData: function() {
@@ -1116,19 +1201,25 @@
                 localStorage.removeItem('cafeFallbackData');
                 console.log('Dados locais resetados');
             },
-            simulateApiCall: async function() {
-                console.log('Simulando chamada API para:', API_CONFIG.apiUrl);
+            simulateRawApiCall: async function(endpoint = '') {
+                const url = `${API_CONFIG.baseUrl}${endpoint}`;
+                console.log('Simulando chamada API para:', url);
                 console.log('Headers:', API_CONFIG.headers);
                 
                 try {
-                    const response = await fetch(API_CONFIG.apiUrl, {
-                        method: 'GET',
+                    const response = await fetch(url, {
+                        method: endpoint.includes('/up') || endpoint.includes('/down') ? 'POST' : 'GET',
                         headers: API_CONFIG.headers
                     });
-                    console.log('Resposta bruta:', response);
+                    console.log('Status:', response.status);
+                    console.log('Headers:', Object.fromEntries(response.headers.entries()));
                     const text = await response.text();
-                    console.log('Texto da resposta:', text);
-                    return JSON.parse(text);
+                    console.log('Resposta texto:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch {
+                        return text;
+                    }
                 } catch (error) {
                     console.error('Erro na simulação:', error);
                     throw error;
