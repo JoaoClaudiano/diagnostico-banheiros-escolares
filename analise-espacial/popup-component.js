@@ -1,16 +1,12 @@
-// popup-counter-api-simplificado.js
+// popup-counter-api-corrigido.js
 (function() {
     'use strict';
     
-    // ==================== CONFIGURAÇÃO DA API V2 ====================
+    // ==================== CONFIGURAÇÃO DA API ====================
+    // API CounterAPI v2 - NÃO requer Authorization header para chamadas GET/POST básicas
     const API_CONFIG = {
-        // URL base da API v2 com SEU namespace específico
         baseUrl: "https://api.counterapi.dev/v2/joao-claudianos-team-2325/first-counter-2325",
-        apiToken: "ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN",
-        headers: {
-            'Authorization': 'Bearer ut_CldwAFarCYi9tYcS4IZToYMDqjoUsRa0ToUv46zN',
-            'Content-Type': 'application/json'
-        }
+        // Removemos o header Authorization pois a API pública não requer
     };
     
     // ==================== CONFIGURAÇÃO DO POPUP ====================
@@ -27,21 +23,26 @@
             cafeBrown: '#A0522D',
             cafeLight: '#DEB887',
             success: '#10B981',
-            warning: '#F59E0B'
+            warning: '#F59E0B',
+            tetrisBlue: '#3498db',
+            tetrisGreen: '#2ecc71',
+            tetrisRed: '#e74c3c',
+            tetrisYellow: '#f1c40f',
+            tetrisPurple: '#9b59b6'
         }
     };
     
-    // ==================== SISTEMA DE API V2 SIMPLIFICADO ====================
+    // ==================== SISTEMA DE API SIMPLIFICADO ====================
     
-    // Função para buscar o total de cafés da API
+    // Função para buscar o total de cafés
     async function fetchCoffeeCount() {
         try {
-            console.log('Buscando total de cafés da API...');
+            console.log('Buscando total de cafés...');
             
             const response = await fetch(API_CONFIG.baseUrl, {
                 method: 'GET',
-                headers: API_CONFIG.headers,
                 mode: 'cors'
+                // Removemos headers para evitar erro CORS
             });
             
             if (!response.ok) {
@@ -60,6 +61,8 @@
                 count = data.value;
             } else if (typeof data === 'number') {
                 count = data;
+            } else if (data && data.data && typeof data.data.count === 'number') {
+                count = data.data.count;
             }
             
             return {
@@ -80,13 +83,13 @@
     // Função para enviar um café (incrementar contador)
     async function sendCoffee() {
         try {
-            console.log('Enviando café para a API...');
+            console.log('Enviando café...');
             
-            // Faz POST para o endpoint /up
+            // Faz POST sem headers para evitar CORS issues
             const response = await fetch(`${API_CONFIG.baseUrl}/up`, {
                 method: 'POST',
-                headers: API_CONFIG.headers,
                 mode: 'cors'
+                // Removemos headers pois a API pública não requer
             });
             
             if (!response.ok) {
@@ -94,7 +97,7 @@
             }
             
             const data = await response.json();
-            console.log('Café enviado com sucesso:', data);
+            console.log('Café enviado:', data);
             
             // Busca o novo total atualizado
             const updated = await fetchCoffeeCount();
@@ -118,7 +121,7 @@
         return;
     }
     
-    // ==================== CSS SIMPLIFICADO ====================
+    // ==================== CSS COM TETRIS ANIMATION ====================
     const style = document.createElement('style');
     style.textContent = `
         /* OVERLAY */
@@ -128,13 +131,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
             animation: overlayFade 0.3s ease-out;
         }
         
@@ -143,23 +146,24 @@
             to { opacity: 1; }
         }
         
-        /* CARD SIMPLES */
+        /* CARD PRINCIPAL */
         .counter-popup-card {
             background: white;
-            border-radius: 20px;
+            border-radius: 24px;
             width: 90%;
-            max-width: 350px;
+            max-width: 400px;
             overflow: hidden;
             animation: cardSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
             text-align: center;
+            position: relative;
         }
         
         @keyframes cardSlide {
             0% {
                 opacity: 0;
-                transform: translateY(20px) scale(0.95);
+                transform: translateY(30px) scale(0.95);
             }
             100% {
                 opacity: 1;
@@ -167,12 +171,70 @@
             }
         }
         
+        /* ANIMAÇÃO TETRIS - LINHA HORIZONTAL */
+        .tetris-animation {
+            height: 30px;
+            background: linear-gradient(90deg, 
+                ${POPUP_CONFIG.colors.tetrisBlue} 0%,
+                ${POPUP_CONFIG.colors.tetrisGreen} 20%,
+                ${POPUP_CONFIG.colors.tetrisRed} 40%,
+                ${POPUP_CONFIG.colors.tetrisYellow} 60%,
+                ${POPUP_CONFIG.colors.tetrisPurple} 80%,
+                ${POPUP_CONFIG.colors.tetrisBlue} 100%
+            );
+            background-size: 200% 100%;
+            animation: tetrisMove 3s linear infinite;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes tetrisMove {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+        
+        .tetris-block {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            animation: tetrisFloat 15s linear infinite;
+            opacity: 0.7;
+            border-radius: 3px;
+        }
+        
+        @keyframes tetrisFloat {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
         /* CABEÇALHO */
         .counter-popup-header {
             background: linear-gradient(135deg, ${POPUP_CONFIG.colors.primary} 0%, ${POPUP_CONFIG.colors.primaryDark} 100%);
             color: white;
-            padding: 20px;
+            padding: 20px 25px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        
+        .counter-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
         }
         
         .counter-popup-header h3 {
@@ -180,15 +242,33 @@
             font-size: 18px;
             font-weight: 600;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            flex: 1;
+        }
+        
+        .counter-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .counter-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
         }
         
         /* CONTEÚDO */
         .counter-popup-content {
-            padding: 30px 25px;
+            padding: 25px;
             color: #333;
             line-height: 1.5;
         }
@@ -206,7 +286,7 @@
             font-weight: 700;
         }
         
-        /* BOTÃO PRINCIPAL */
+        /* BOTÃO ENVIAR CAFÉ */
         .coffee-action-btn {
             background: linear-gradient(135deg, ${POPUP_CONFIG.colors.cafeBrown} 0%, #8B4513 100%);
             color: white;
@@ -252,50 +332,68 @@
             50% { transform: translateY(-3px); opacity: 1; }
         }
         
-        /* CONTADOR SIMPLES */
-        .coffee-counter {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px dashed #E0E0E0;
+        /* CONTADOR EM CÍRCULO PEQUENO */
+        .coffee-counter-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .counter-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, ${POPUP_CONFIG.colors.cafeLight} 0%, ${POPUP_CONFIG.colors.cafeBrown} 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3);
+            margin-bottom: 5px;
+            border: 3px solid white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .counter-label {
-            font-size: 13px;
+            font-size: 12px;
             color: #666;
-            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        .counter-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: ${POPUP_CONFIG.colors.cafeBrown};
-            background: ${POPUP_CONFIG.colors.cafeLight}20;
-            padding: 10px 20px;
-            border-radius: 10px;
-            display: inline-block;
-            min-width: 80px;
+        /* BOTÕES */
+        .counter-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
         }
         
-        /* BOTÃO FECHAR */
-        .counter-close-btn {
-            background: #F0F0F0;
-            color: #666;
+        .primary-counter-btn {
+            background: linear-gradient(135deg, ${POPUP_CONFIG.colors.primary} 0%, ${POPUP_CONFIG.colors.primaryDark} 100%);
+            color: white;
             border: none;
-            border-radius: 10px;
-            padding: 12px 20px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             font-family: inherit;
             width: 100%;
-            margin-top: 10px;
         }
         
-        .counter-close-btn:hover {
-            background: #E0E0E0;
+        .primary-counter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
         }
         
         /* OPÇÃO NÃO MOSTRAR */
@@ -327,7 +425,7 @@
             border-color: ${POPUP_CONFIG.colors.primary};
         }
         
-        /* EFEITO DE CAFÉ */
+        /* EFEITO DE CAFÉ FLUTUANTE */
         .coffee-float {
             position: fixed;
             font-size: 24px;
@@ -342,7 +440,7 @@
                 opacity: 1;
             }
             100% {
-                transform: translateY(-80px) rotate(20deg);
+                transform: translateY(-100px) rotate(20deg);
                 opacity: 0;
             }
         }
@@ -360,6 +458,7 @@
             animation: slideIn 0.3s ease-out;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             font-size: 14px;
+            max-width: 300px;
         }
         
         @keyframes slideIn {
@@ -367,21 +466,26 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        /* RESPONSIVO */
+        /* RESPONSIVIDADE */
         @media (max-width: 480px) {
             .counter-popup-card {
                 width: 95%;
                 max-width: 320px;
-                border-radius: 16px;
+                border-radius: 20px;
             }
             
             .counter-popup-content {
-                padding: 25px 20px;
+                padding: 20px;
             }
             
-            .counter-value {
-                font-size: 28px;
-                padding: 8px 16px;
+            .counter-circle {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+            
+            .counter-popup-header {
+                padding: 15px 20px;
             }
         }
         
@@ -390,6 +494,7 @@
             .counter-popup-card {
                 background: #1E1E1E;
                 color: #E0E0E0;
+                border-color: #333;
             }
             
             .counter-popup-content {
@@ -400,43 +505,53 @@
                 color: #FF8585;
             }
             
-            .coffee-counter {
-                border-color: #444;
+            .counter-circle {
+                border-color: #1E1E1E;
             }
             
             .counter-label {
                 color: #AAA;
             }
             
-            .counter-close-btn {
-                background: #2D2D2D;
-                color: #CCC;
-            }
-            
-            .counter-close-btn:hover {
-                background: #3D3D3D;
-            }
-            
             .counter-option {
                 border-color: #444;
+            }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .counter-popup-card,
+            .tetris-animation,
+            .tetris-block,
+            .coffee-icon,
+            .counter-circle,
+            .coffee-action-btn,
+            .primary-counter-btn {
+                animation: none !important;
+                transition: none !important;
             }
         }
     `;
     
     document.head.appendChild(style);
     
-    // ==================== HTML SIMPLIFICADO ====================
+    // ==================== CRIAÇÃO DO HTML ====================
     const popupHTML = `
         <div id="${POPUP_CONFIG.popupId}" class="counter-popup-overlay">
             <div class="counter-popup-card">
+                <!-- ANIMAÇÃO TETRIS NO TOPO -->
+                <div class="tetris-animation" id="tetrisContainer"></div>
+                
                 <div class="counter-popup-header">
-                    <h3>☕ Envie um Café!</h3>
+                    <div class="counter-header-content">
+                        <h3>🚧 Página em Desenvolvimento</h3>
+                        <button class="counter-close-btn" aria-label="Fechar">&times;</button>
+                    </div>
                 </div>
                 
                 <div class="counter-popup-content">
                     <div class="counter-message">
-                        <strong>Apoie nosso trabalho</strong>
-                        Cada café nos dá energia para continuar melhorando esta página!
+                        <strong>Ajude-nos com um cafezinho! ☕</strong>
+                        Estamos trabalhando duro para melhorar esta página. Cada café nos dá mais energia para continuar!
                     </div>
                     
                     <button class="coffee-action-btn" id="sendCoffeeBtn">
@@ -444,14 +559,17 @@
                         <span>Enviar Café</span>
                     </button>
                     
-                    <div class="coffee-counter">
-                        <div class="counter-label">Total de Cafés Recebidos</div>
-                        <div class="counter-value" id="totalCoffeeCount">0</div>
+                    <!-- CONTADOR EM CÍRCULO PEQUENO -->
+                    <div class="coffee-counter-mini">
+                        <div class="counter-circle" id="totalCoffeeCount">0</div>
+                        <div class="counter-label">Total de Cafés</div>
                     </div>
                     
-                    <button class="counter-close-btn" id="closeBtn">
-                        Fechar
-                    </button>
+                    <div class="counter-buttons">
+                        <button class="primary-counter-btn" id="understandBtn">
+                            Entendi, obrigado!
+                        </button>
+                    </div>
                     
                     <div class="counter-option">
                         <label class="counter-option-label">
@@ -466,13 +584,53 @@
     
     document.body.insertAdjacentHTML('beforeend', popupHTML);
     
-    // ==================== LÓGICA SIMPLIFICADA ====================
+    // ==================== LÓGICA DO POPUP ====================
     const popup = document.getElementById(POPUP_CONFIG.popupId);
     const sendBtn = document.getElementById('sendCoffeeBtn');
-    const closeBtn = document.getElementById('closeBtn');
+    const understandBtn = document.getElementById('understandBtn');
+    const closeBtn = popup.querySelector('.counter-close-btn');
     const totalCountElement = document.getElementById('totalCoffeeCount');
     let currentCount = 0;
     let popupShown = false;
+    
+    // ==================== ANIMAÇÃO TETRIS ====================
+    function createTetrisAnimation() {
+        const container = document.getElementById('tetrisContainer');
+        if (!container) return;
+        
+        // Limpa container
+        container.innerHTML = '';
+        
+        // Cria blocos flutuantes
+        for (let i = 0; i < 15; i++) {
+            const block = document.createElement('div');
+            block.className = 'tetris-block';
+            
+            // Posição aleatória
+            const left = Math.random() * 100;
+            const delay = Math.random() * 15;
+            const size = 15 + Math.random() * 15;
+            const colorIndex = Math.floor(Math.random() * 5);
+            const colors = [
+                POPUP_CONFIG.colors.tetrisBlue,
+                POPUP_CONFIG.colors.tetrisGreen,
+                POPUP_CONFIG.colors.tetrisRed,
+                POPUP_CONFIG.colors.tetrisYellow,
+                POPUP_CONFIG.colors.tetrisPurple
+            ];
+            
+            block.style.left = `${left}%`;
+            block.style.animationDelay = `${delay}s`;
+            block.style.width = `${size}px`;
+            block.style.height = `${size}px`;
+            block.style.background = colors[colorIndex];
+            block.style.boxShadow = `0 0 10px ${colors[colorIndex]}`;
+            
+            container.appendChild(block);
+        }
+    }
+    
+    // ==================== FUNÇÕES AUXILIARES ====================
     
     // Verifica se deve mostrar o popup
     function shouldShowPopup() {
@@ -489,7 +647,7 @@
                 currentCount = result.count;
                 totalCountElement.textContent = currentCount;
                 // Efeito visual ao atualizar
-                totalCountElement.style.transform = 'scale(1.2)';
+                totalCountElement.style.transform = 'scale(1.3)';
                 setTimeout(() => {
                     totalCountElement.style.transform = 'scale(1)';
                 }, 300);
@@ -509,7 +667,7 @@
         sendBtn.innerHTML = '<span class="coffee-icon">⏳</span><span>Enviando...</span>';
         
         try {
-            // Efeito visual de café flutuante
+            // Efeito visual de cafés flutuantes
             createCoffeeFloats();
             
             // Envia para a API
@@ -555,6 +713,9 @@
                 coffee.className = 'coffee-float';
                 coffee.style.left = `${40 + Math.random() * 20}%`;
                 coffee.style.top = '50%';
+                coffee.style.fontSize = `${20 + Math.random() * 15}px`;
+                coffee.style.color = POPUP_CONFIG.colors.cafeBrown;
+                coffee.style.textShadow = '0 0 10px rgba(160, 82, 45, 0.5)';
                 document.body.appendChild(coffee);
                 
                 setTimeout(() => coffee.remove(), 1000);
@@ -564,6 +725,10 @@
     
     // Mostra notificação
     function showNotification(message) {
+        // Remove notificação anterior se existir
+        const existing = document.querySelector('.coffee-notification');
+        if (existing) existing.remove();
+        
         const notification = document.createElement('div');
         notification.className = 'coffee-notification';
         notification.textContent = message;
@@ -598,12 +763,21 @@
         
         popup.style.display = 'flex';
         
+        // Cria animação Tetris
+        createTetrisAnimation();
+        
         // Carrega o contador atual
         await updateCoffeeCounter();
         
         // Configura eventos
+        setupEventListeners();
+    }
+    
+    // Configura event listeners
+    function setupEventListeners() {
         sendBtn.addEventListener('click', handleSendCoffee);
-        closeBtn.addEventListener('click', closePopup);
+        understandBtn.addEventListener('click', closePopup);
+        if (closeBtn) closeBtn.addEventListener('click', closePopup);
         
         // Fecha ao clicar fora
         popup.addEventListener('click', (e) => {
@@ -626,13 +800,15 @@
         const earlyShow = () => {
             if (!popupShown) {
                 showPopup();
-                window.removeEventListener('click', earlyShow);
-                window.removeEventListener('scroll', earlyShow);
+                ['click', 'scroll', 'mousemove'].forEach(event => {
+                    window.removeEventListener(event, earlyShow);
+                });
             }
         };
         
-        window.addEventListener('click', earlyShow, { once: true });
-        window.addEventListener('scroll', earlyShow, { once: true });
+        ['click', 'scroll', 'mousemove'].forEach(event => {
+            window.addEventListener(event, earlyShow, { once: true });
+        });
     }
     
     // ==================== INICIALIZAÇÃO ====================
@@ -642,10 +818,15 @@
         init();
     }
     
-    // ==================== API PÚBLICA SIMPLES ====================
-    window.coffeeCounter = {
-        showPopup: showPopup,
-        hidePopup: closePopup,
+    // ==================== API PÚBLICA ====================
+    window.coffeeCounterPopup = {
+        show: showPopup,
+        hide: closePopup,
+        reset: function() {
+            localStorage.removeItem(POPUP_CONFIG.storageKey);
+            popupShown = false;
+            showPopup();
+        },
         getCount: async () => {
             const result = await fetchCoffeeCount();
             return result.success ? result.count : 0;
