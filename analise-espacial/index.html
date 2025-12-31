@@ -1453,11 +1453,19 @@ function plotarEscolasNoMapa(escolas) {
   console.log(`🗺️ Plotando ${escolas.length} escolas no mapa...`);
   
   // Limpar marcadores existentes
-if (window.layerEscolas) {
-  window.layerEscolas.clearLayers();
-} else {
-  window.layerEscolas = L.layerGroup().addTo(window.mapa);
-}
+  if (window.layerEscolas) {
+    window.layerEscolas.clearLayers();
+  } else {
+    window.layerEscolas = L.layerGroup().addTo(window.mapa);
+  }
+  
+  // Mapeamento direto de status para classes CSS
+  const statusParaClasse = {
+    'crítico': 'escola-critico',
+    'atenção': 'escola-atencao',
+    'alerta': 'escola-alerta',
+    'adequada': 'escola-adequada'
+  };
   
   // Adicionar cada escola como marcador colorido
   escolas.forEach(escola => {
@@ -1477,10 +1485,9 @@ if (window.layerEscolas) {
       default: cor = '#6c757d';
     }
     
-    const statusNormalizado = escola.status
-  ?.toLowerCase()
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '');
+    // Determinar classe CSS baseada no status
+    const classeCSS = statusParaClasse[status] || 'escola-desconhecido';
+    console.log(`Escola ${escola.nome}: status="${status}", classe="${classeCSS}"`);
     
     // Criar marcador circular colorido
     const marker = L.circleMarker([escola.lat, escola.lng], {
@@ -1490,10 +1497,10 @@ if (window.layerEscolas) {
       weight: 2,
       opacity: 1,
       fillOpacity: 0.8,
-      className: `escola-marker escola-${statusNormalizado}`
+      className: classeCSS  // AQUI: usar a classe CSS mapeada
     });
     
-    // Conteúdo do popup
+    // Conteúdo do popup (mantenha igual)
     const popupContent = `
       <div style="min-width: 200px; padding: 10px; font-family: Arial, sans-serif;">
         <h4 style="margin: 0 0 10px 0; color: ${cor}; border-bottom: 1px solid #eee; padding-bottom: 5px;">
@@ -1539,8 +1546,9 @@ if (window.layerEscolas) {
     marker.options.escolaData = escola;
   });
   
-  console.log(`✅ ${escolas.length} escolas plotadas com cores`);
+  console.log(`✅ ${escolas.length} escolas plotadas com classes CSS`);
 }
+
 
 // ==================== FUNÇÕES DO DASHBOARD ====================
 function atualizarDashboard(dados) {
@@ -1683,55 +1691,66 @@ function aplicarAnalise() {
 
 function ativarCamada(camada) {
   console.log(`🗺️ Ativando camada: ${camada}`);
-
+  
+  // Garantir que a camada seja minúscula
+  camada = camada.toLowerCase();
+  
   const criticidade = document.getElementById('param-criticidade')?.value || 'todos';
   const sementes = parseInt(document.getElementById('param-sementes')?.value || 3);
   const raio = parseInt(document.getElementById('param-raio')?.value || 500);
 
   switch (camada) {
     case 'escolas':
+      console.log('✅ Ativando camada de escolas');
       if (window.layerEscolas) {
         window.mapa.addLayer(window.layerEscolas);
       }
       break;
 
     case 'kde':
+      console.log('✅ Ativando camada KDE');
       if (window.calcularKDE) {
         window.calcularKDE(criticidade, raio);
       }
       break;
 
     case 'voronoi':
+      console.log('✅ Ativando camada Voronoi');
       if (window.gerarVoronoiCritico) {
         window.gerarVoronoiCritico(sementes, criticidade);
       }
       break;
 
     case 'zonas':
+      console.log('✅ Ativando camada Zonas de Risco');
       if (window.gerarZonasRisco) {
         window.gerarZonasRisco();
       }
       break;
 
     case 'densidade':
+      console.log('✅ Ativando camada Densidade Crítica');
       if (window.calcularDensidadeCritica) {
         window.calcularDensidadeCritica();
       }
       break;
 
     case 'concentracao':
+      console.log('✅ Ativando camada Concentração Relativa');
       if (window.calcularConcentracaoRelativa) {
         window.calcularConcentracaoRelativa();
       }
       break;
 
     case 'gini':
+      console.log('✅ Ativando camada Gini Espacial');
       if (window.calcularGiniEspacial) {
         window.calcularGiniEspacial();
       }
       break;
 
     case 'rede':
+      console.log('✅ Ativando camada Rede de Influência');
       if (window.gerarRedeInfluencia) {
         window.gerarRedeInfluencia();
       }
@@ -1745,41 +1764,55 @@ function ativarCamada(camada) {
 function desativarCamada(camada) {
   console.log(`🗺️ Desativando camada: ${camada}`);
   
+  // Garantir que a camada seja minúscula
+  camada = camada.toLowerCase();
+  
   // Chamar função de remoção específica de cada handler
   switch(camada) {
-    case 'kde':
-      if (window.kdeHandler) window.kdeHandler.remover();
-      break;
-      
-    case 'voronoi':
-      if (window.voronoiCritico) window.voronoiCritico.limpar();
-      break;
-      
-    case 'zonas':
-      if (window.zonasRiscoHandler) window.zonasRiscoHandler.remover();
-      break;
-      
-    case 'densidade':
-      if (window.densidadeCriticaHandler) window.densidadeCriticaHandler.remover();
-      break;
-      
-    case 'concentracao':
-      if (window.concentracaoRelativaHandler) window.concentracaoRelativaHandler.remover();
-      break;
-      
-    case 'gini':
-      if (window.giniEspacialHandler) window.giniEspacialHandler.remover();
-      break;
-      
-    case 'rede':
-      if (window.redeInfluenciaHandler) window.redeInfluenciaHandler.remover();
-      break;
-      
     case 'escolas':
+      console.log('❌ Desativando camada de escolas');
       if (window.layerEscolas) {
         window.mapa.removeLayer(window.layerEscolas);
       }
       break;
+      
+    case 'kde':
+      console.log('❌ Desativando camada KDE');
+      if (window.kdeHandler) window.kdeHandler.remover();
+      break;
+      
+    case 'voronoi':
+      console.log('❌ Desativando camada Voronoi');
+      if (window.voronoiCritico) window.voronoiCritico.limpar();
+      break;
+      
+    case 'zonas':
+      console.log('❌ Desativando camada Zonas de Risco');
+      if (window.zonasRiscoHandler) window.zonasRiscoHandler.remover();
+      break;
+      
+    case 'densidade':
+      console.log('❌ Desativando camada Densidade Crítica');
+      if (window.densidadeCriticaHandler) window.densidadeCriticaHandler.remover();
+      break;
+      
+    case 'concentracao':
+      console.log('❌ Desativando camada Concentração Relativa');
+      if (window.concentracaoRelativaHandler) window.concentracaoRelativaHandler.remover();
+      break;
+      
+    case 'gini':
+      console.log('❌ Desativando camada Gini Espacial');
+      if (window.giniEspacialHandler) window.giniEspacialHandler.remover();
+      break;
+      
+    case 'rede':
+      console.log('❌ Desativando camada Rede de Influência');
+      if (window.redeInfluenciaHandler) window.redeInfluenciaHandler.remover();
+      break;
+      
+    default:
+      console.warn('⚠️ Camada desconhecida para desativação:', camada);
   }
 }
 
