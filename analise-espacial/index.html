@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  
+
 <title>Análise Espacial Inteligente – CheckInfra</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -11,7 +11,7 @@
 
 <style>
 /* ====== RESET E ESTILOS GERAIS ====== */
-{
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -675,7 +675,7 @@ body {
   .back-btn span, .header-refresh span {
     display: none;
   }
-  
+
   .header-center {
     padding: 0 45px;
   }
@@ -686,11 +686,11 @@ body {
   .header-title h1 {
     font-size: 18px;
   }
-  
+
   .header-subtitle {
     font-size: 12px;
   }
-  
+
   .left-panel, .right-panel {
     max-height: 35vh;
   }
@@ -791,7 +791,7 @@ body {
       <i class="fas fa-arrow-left"></i> <span>Voltar</span>
     </a>
   </div>
-  
+
   <!-- Título centralizado -->
   <div class="header-center">
     <div class="header-title">
@@ -799,7 +799,7 @@ body {
       <div class="header-subtitle">CheckInfra - Monitoramento sanitário escolar</div>
     </div>
   </div>
-  
+
   <!-- Botão de atualizar à direita -->
   <div class="header-refresh">
     <button id="btn-refresh" class="back-btn" title="Atualizar dados">
@@ -831,7 +831,7 @@ body {
               <span class="toggle-slider"></span>
             </label>
           </div>
-          
+
           <div class="toggle-item" id="toggle-kde-item">
             <label class="toggle-label">
               <i class="fas fa-fire"></i>
@@ -842,7 +842,7 @@ body {
               <span class="toggle-slider"></span>
             </label>
           </div>
-          
+
           <div class="toggle-item" id="toggle-voronoi-item">
             <label class="toggle-label">
               <i class="fas fa-draw-polygon"></i>
@@ -853,7 +853,7 @@ body {
               <span class="toggle-slider"></span>
             </label>
           </div>
-          
+
           <div class="toggle-item" id="toggle-zonas-item">
             <label class="toggle-label">
               <i class="fas fa-exclamation-triangle"></i>
@@ -864,7 +864,7 @@ body {
               <span class="toggle-slider"></span>
             </label>
           </div>
-          
+
           <div class="toggle-item" id="toggle-densidade-item">
             <label class="toggle-label">
               <i class="fas fa-chart-area"></i>
@@ -875,7 +875,7 @@ body {
               <span class="toggle-slider"></span>
             </label>
           </div>
-          
+
           <div class="toggle-item" id="toggle-concentracao-item">
             <label class="toggle-label">
               <i class="fas fa-bullseye"></i>
@@ -886,7 +886,7 @@ body {
               <span class="toggle-slider"></span>
             </label>
           </div>
-          
+
           <div class="toggle-item" id="toggle-gini-item">
             <label class="toggle-label">
               <i class="fas fa-balance-scale"></i>
@@ -897,7 +897,7 @@ body {
               <span class="toggle-slider"></span>
             </label>
           </div>
-          
+
           <div class="toggle-item" id="toggle-rede-item">
             <label class="toggle-label">
               <i class="fas fa-project-diagram"></i>
@@ -911,7 +911,7 @@ body {
         </div>
       </div>
     </div>
-    
+
     <!-- Acordeão de Parâmetros -->
     <div class="accordion active" id="accordionParametros">
       <div class="accordion-header">
@@ -928,7 +928,7 @@ body {
             <option value="alerta">Alerta + Atenção + Críticas</option>
           </select>
         </div>
-        
+
         <div class="param-group">
           <label>Número de Sementes (Voronoi):</label>
           <div class="param-range-container">
@@ -938,7 +938,7 @@ body {
             </div>
           </div>
         </div>
-        
+
         <div class="param-group">
           <label>Raio de Influência:</label>
           <div class="param-range-container">
@@ -948,18 +948,18 @@ body {
             </div>
           </div>
         </div>
-        
+
         <button id="btn-aplicar" class="btn-primary">
           <i class="fas fa-play-circle"></i> Aplicar Análise
         </button>
       </div>
     </div>
   </div>
-  
+
   <!-- Mapa Central -->
   <div class="map-container">
     <div id="map"></div>
-    
+
     <!-- Controles do Mapa -->
     <div class="map-controls">
       <button id="btn-zoom-in" class="map-btn" title="Zoom In">
@@ -975,7 +975,7 @@ body {
         <i class="fas fa-expand"></i>
       </button>
     </div>
-    
+
     <!-- Legenda do Mapa -->
     <div class="map-legend">
       <div class="legend-title">Legenda</div>
@@ -997,7 +997,7 @@ body {
       </div>
     </div>
   </div>
-  
+
   <!-- Dashboard Direito -->
   <div class="right-panel">
     <div class="dashboard-header">
@@ -1008,7 +1008,7 @@ body {
         <span id="status-update"><i class="fas fa-sync"></i> Atualizando</span>
       </div>
     </div>
-    
+
     <!-- Métricas Principais -->
     <div class="metrics-grid">
       <div class="metric-card">
@@ -1028,7 +1028,7 @@ body {
         <span class="metric-label">Pontuação Média</span>
       </div>
     </div>
-    
+
     <!-- Distribuição -->
     <div class="distribuicao-chart">
       <div class="chart-bar">
@@ -1060,7 +1060,7 @@ body {
         </div>
       </div>
     </div>
-    
+
     <!-- Últimas Atualizações -->
     <div class="update-list">
       <div class="update-item">
@@ -1068,7 +1068,7 @@ body {
         <div class="update-text">Inicializando sistema...</div>
       </div>
     </div>
-    
+
     <!-- Indicadores -->
     <h4 style="font-size: 13px; margin-bottom: 8px; font-weight: 600;"><i class="fas fa-chart-line"></i> Indicadores de Análise</h4>
     <div class="indicadores-grid">
@@ -1116,8 +1116,9 @@ body {
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 
-<script src="popup-component.js"></script>
 
+<script src="popup-component.js"></script>
+  
 <!-- Sistema de dados -->
 <script src="firebase-config.js"></script>
 <script src="dados.js"></script>
@@ -1138,10 +1139,10 @@ body {
 // ==================== CONFIGURAÇÃO INICIAL ====================
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 CheckInfra - Análise Espacial (Mobile First)');
-  
+
   // Inicializar interface
   inicializarInterface();
-  
+
   // Inicializar mapa
   setTimeout(() => {
     inicializarMapa();
@@ -1152,16 +1153,16 @@ document.addEventListener('DOMContentLoaded', function() {
 // ==================== FUNÇÕES DE INTERFACE ====================
 function inicializarInterface() {
   console.log('🎨 Inicializando interface...');
-  
+
   // ACORDEÕES - FUNCIONANDO CORRETAMENTE
   document.querySelectorAll('.accordion-header').forEach(header => {
     header.addEventListener('click', function() {
       const accordion = this.parentElement;
       const content = this.nextElementSibling;
-      
+
       // Alternar classe active
       accordion.classList.toggle('active');
-      
+
       // Fechar outros acordeões se for mobile
       if (window.innerWidth <= 768) {
         document.querySelectorAll('.accordion').forEach(acc => {
@@ -1172,19 +1173,19 @@ function inicializarInterface() {
       }
     });
   });
-  
+
   // Sliders
   const sementesSlider = document.getElementById('param-sementes');
   const raioSlider = document.getElementById('param-raio');
-  
+
   sementesSlider.addEventListener('input', function() {
     document.getElementById('sementes-value').textContent = this.value;
   });
-  
+
   raioSlider.addEventListener('input', function() {
     document.getElementById('raio-value').textContent = this.value;
   });
-  
+
   // TOGGLES - CORRIGIDOS PARA FUNCIONAREM
   document.querySelectorAll('.toggle-item').forEach(item => {
     item.addEventListener('click', function(e) {
@@ -1192,14 +1193,14 @@ function inicializarInterface() {
       if (e.target.classList.contains('toggle-switch') || e.target.type === 'checkbox') {
         return;
       }
-      
+
       const toggleItem = this;
       const checkbox = this.querySelector('input[type="checkbox"]');
-      
+
       // Alternar estado
       checkbox.checked = !checkbox.checked;
       toggleItem.classList.toggle('active');
-      
+
       // Atualizar visual do slider
       const slider = checkbox.nextElementSibling;
       if (checkbox.checked) {
@@ -1209,7 +1210,7 @@ function inicializarInterface() {
   slider.style.backgroundColor = '#ccc';
   slider.classList.remove('ativo');
 }
-      
+
       // Feedback
       const camada = checkbox.id.replace('toggle-', '');
       if (checkbox.checked) {
@@ -1221,23 +1222,23 @@ function inicializarInterface() {
       }
     });
   });
-  
+
   // Botões principais
   document.getElementById('btn-aplicar').addEventListener('click', aplicarAnalise);
   document.getElementById('btn-refresh').addEventListener('click', atualizarDados);
-  
+
   // Mostrar/ocultar loading
   window.mostrarLoading = function() {
     document.getElementById('loadingOverlay').classList.add('active');
   };
-  
+
   window.ocultarLoading = function() {
     document.getElementById('loadingOverlay').classList.remove('active');
   };
-  
+
   // Atualizar tempo em tempo real
   setInterval(atualizarStatusTempo, 1000);
-  
+
   console.log('✅ Interface inicializada');
 }
 
@@ -1253,30 +1254,30 @@ function atualizarStatusTempo() {
 
 function inicializarMapa() {
   console.log('🗺️ Inicializando mapa...');
-  
+
   // Verificar se já existe mapa
   if (window.mapa) {
     window.mapa.remove();
   }
-  
+
   // Criar novo mapa centralizado em Fortaleza
   window.mapa = L.map('map').setView([-3.7319, -38.5267], 12);
-  
+
   // Adicionar tile layer
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
     maxZoom: 19
   }).addTo(window.mapa);
-  
+
   // Controles do mapa
   document.getElementById('btn-zoom-in').addEventListener('click', () => {
     window.mapa.zoomIn();
   });
-  
+
   document.getElementById('btn-zoom-out').addEventListener('click', () => {
     window.mapa.zoomOut();
   });
-  
+
   document.getElementById('btn-locate').addEventListener('click', () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
@@ -1293,7 +1294,7 @@ function inicializarMapa() {
       });
     }
   });
-  
+
   document.getElementById('btn-fullscreen').addEventListener('click', () => {
     const container = document.querySelector('.map-container');
     if (!document.fullscreenElement) {
@@ -1304,14 +1305,14 @@ function inicializarMapa() {
       document.exitFullscreen();
     }
   });
-  
+
   // Redimensionar mapa quando necessário
   window.addEventListener('resize', function() {
     setTimeout(() => {
       if (window.mapa) window.mapa.invalidateSize();
     }, 300);
   });
-  
+
   console.log('✅ Mapa inicializado');
   // 🔧 ALIAS CRÍTICO PARA COMPATIBILIDADE
 window.map = window.mapa;
@@ -1321,11 +1322,11 @@ window.map = window.mapa;
 async function carregarDadosReais() {
   console.log('📊 Carregando dados...');
   mostrarLoading();
-  
+
   try {
     let escolas = [];
     let fonte = 'Local';
-    
+
     // Tentar Firebase primeiro
     if (window.dadosManager && typeof window.dadosManager.inicializar === 'function') {
       await window.dadosManager.inicializar();
@@ -1346,19 +1347,19 @@ async function carregarDadosReais() {
       console.log(`🎭 ${escolas.length} escolas de demonstração`);
       document.getElementById('status-fonte').innerHTML = '<i class="fas fa-demo"></i> Demo';
     }
-    
+
     // Processar dados
     processarDados(escolas, fonte);
-    
+
   } catch (error) {
     console.error('❌ Erro ao carregar dados:', error);
     document.getElementById('status-fonte').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erro';
-    
+
     // Usar dados de demonstração como último recurso
     const escolasDemo = criarDadosDemonstracao();
     processarDados(escolasDemo, 'Erro - Demonstração');
   }
-  
+
   // Ocultar loading
   setTimeout(ocultarLoading, 800);
 }
@@ -1369,13 +1370,13 @@ function criarDadosDemonstracao() {
   const cores = ['#dc3545', '#fd7e14', '#ffc107', '#28a745'];
   const centroLat = -3.7319;
   const centroLng = -38.5267;
-  
+
   // Gerar ~30 escolas para demonstração
   for (let i = 1; i <= 30; i++) {
     const statusIndex = Math.floor(Math.random() * statuses.length);
     const status = statuses[statusIndex];
     const cor = cores[statusIndex];
-    
+
     // Pontuação baseada no status
     let pontuacao;
     switch(status) {
@@ -1384,11 +1385,11 @@ function criarDadosDemonstracao() {
       case 'alerta': pontuacao = (5 + Math.random() * 2).toFixed(1); break;
       case 'adequada': pontuacao = (7 + Math.random() * 2).toFixed(1); break;
     }
-    
+
     // Coordenadas aleatórias próximas ao centro
     const lat = centroLat + (Math.random() - 0.5) * 0.08;
     const lng = centroLng + (Math.random() - 0.5) * 0.08;
-    
+
     escolas.push({
       id: i,
       nome: `Escola Demonstração ${i}`,
@@ -1401,25 +1402,25 @@ function criarDadosDemonstracao() {
       data_avaliacao: '2024-01-' + (10 + i).toString().padStart(2, '0')
     });
   }
-  
+
   return escolas;
 }
 
 // Função para depurar os dados do Firebase
 function depurarDadosFirebase(escolas) {
   console.log('🔍 DEPURAÇÃO DOS DADOS DO FIREBASE');
-  
+
   if (escolas.length === 0) {
     console.log('❌ Nenhuma escola encontrada');
     return;
   }
-  
+
   console.log(`📊 Total de escolas: ${escolas.length}`);
-  
+
   // Mostrar estrutura da primeira escola
   console.log('🏫 ESTRUTURA DA PRIMEIRA ESCOLA:', escolas[0]);
   console.log('🔑 CHAVES DISPONÍVEIS:', Object.keys(escolas[0]));
-  
+
   // Verificar nomes em todas as escolas
   const escolasComNomes = escolas.map((escola, index) => {
     return {
@@ -1429,9 +1430,9 @@ function depurarDadosFirebase(escolas) {
       todasChaves: Object.keys(escola)
     };
   });
-  
+
   console.log('📝 AMOSTRA DE NOMES (primeiras 5):', escolasComNomes.slice(0, 5));
-  
+
   // Contar quantas escolas têm cada tipo de campo de nome
   const contagemCampos = {
     'nombre': 0,
@@ -1441,7 +1442,7 @@ function depurarDadosFirebase(escolas) {
     'name': 0,
     'nenhum': 0
   };
-  
+
   escolas.forEach(escola => {
     if (escola.nombre) contagemCampos.nombre++;
     else if (escola.nome) contagemCampos.nome++;
@@ -1450,7 +1451,7 @@ function depurarDadosFirebase(escolas) {
     else if (escola.name) contagemCampos.name++;
     else contagemCampos.nenhum++;
   });
-  
+
   console.log('📊 CONTAGEM DE CAMPOS DE NOME:', contagemCampos);
 }
 
@@ -1459,17 +1460,17 @@ function depurarDadosFirebase(escolas) {
 
 function processarDados(escolas, fonte) {
   console.log(`📈 Processando ${escolas.length} escolas de ${fonte}...`);
-  
+
   // Calcular métricas para o dashboard
   const totalEscolas = escolas.length;
   const escolasCriticas = escolas.filter(e => e.status === 'crítico').length;
   const escolasAvaliadas = escolas.filter(e => e.pontuacao && e.pontuacao > 0).length;
-  
+
   const escolasComPontuacao = escolas.filter(e => e.pontuacao && typeof e.pontuacao === 'number');
   const pontuacaoMedia = escolasComPontuacao.length > 0 
     ? (escolasComPontuacao.reduce((sum, e) => sum + e.pontuacao, 0) / escolasComPontuacao.length).toFixed(1)
     : '0.0';
-  
+
   // Atualizar dashboard
   atualizarDashboard({
     totalEscolas: totalEscolas,
@@ -1484,22 +1485,22 @@ function processarDados(escolas, fonte) {
     }
   });
 
-  
-      
+
+
   // Plotar escolas no mapa
   plotarEscolasNoMapa(escolas);
-  
+
   // Atualizar histórico
   const agora = new Date();
   const hora = agora.getHours().toString().padStart(2, '0');
   const minuto = agora.getMinutes().toString().padStart(2, '0');
-  
+
   atualizarHistorico([
     {time: `${hora}:${minuto}`, text: `Dados carregados: ${fonte}`},
     {time: `${hora}:${minuto}`, text: `${totalEscolas} escolas, ${escolasCriticas} críticas`},
     {time: `${hora}:${minuto}`, text: `Pontuação média: ${pontuacaoMedia}`}
   ]);
-  
+
   document.getElementById('status-update').innerHTML = '<i class="fas fa-check"></i> Atualizado';
   console.log(`✅ ${escolas.length} escolas processadas`);
 }
@@ -1509,22 +1510,25 @@ function plotarEscolasNoMapa(escolas) {
     console.error('❌ Mapa não inicializado');
     return;
   }
-  
+
   console.log(`🗺️ Plotando ${escolas.length} escolas no mapa...`);
-  
+
+  // 🔍 DEPURAÇÃO: Ver estrutura dos dados
+  console.log('📋 ESTRUTURA DE DADOS RECEBIDA:', escolas.length > 0 ? Object.keys(escolas[0]) : 'Sem dados');
   // 🔍 DEPURAÇÃO: Ver estrutura do primeiro item
   if (escolas.length > 0) {
     console.log('🔍 ESTRUTURA DO PRIMEIRO ITEM:', Object.keys(escolas[0]));
     console.log('📋 DADOS DO PRIMEIRO ITEM:', escolas[0]);
   }
-  
+
   // Limpar marcadores existentes
   if (window.layerEscolas) {
     window.layerEscolas.clearLayers();
   } else {
     window.layerEscolas = L.layerGroup().addTo(window.mapa);
   }
-  
+
+  // 🔥 MAPEAMENTO CORRETO para os status do Firebase
   // 🔥 MAPEAMENTO DIRETO - Status do Firebase → Cores
   const coresStatus = {
     'critico': '#F44336',    // Vermelho
@@ -1532,46 +1536,103 @@ function plotarEscolasNoMapa(escolas) {
     'alerta': '#FFD700',     // Amarelo
     'ok': '#4CAF50'          // Verde
   };
-  
+
+  // Nomes formatados para exibição
   const nomesStatus = {
     'critico': 'Crítico',
+    'atencao': 'Atenção',
     'atencao': 'Atenção', 
     'alerta': 'Alerta',
     'ok': 'Adequado'
   };
+
+  // 🔥 FUNÇÃO MELHORADA PARA BUSCAR NOME DA ESCOLA
+  function obterNomeEscola(escola) {
+    // Tentar todos os campos possíveis (em ordem de prioridade)
+    const camposPossiveis = [
+      'escola:',      // Espanhol
+      'nome',        // Português
+      'escola',      // Firebase padrão
+      'escola_nome', // Outro possível
+      'name',        // Inglês
+      'titulo',      // Outra possibilidade
+      'escuela',     // Espanhol alternativo
+      'school',      // Inglês
+      'instituicao', // Instituição
+      'instituição'  // Com acento
+    ];
+    
+    for (const campo of camposPossiveis) {
+      if (escola[campo] && typeof escola[campo] === 'string' && escola[campo].trim() !== '') {
+        console.log(`   ✅ Nome encontrado no campo "${campo}": ${escola[campo]}`);
+        return escola[campo].trim();
+      }
+    }
+    
+    // Se não encontrou em nenhum campo específico, buscar qualquer campo string
+    for (const key in escola) {
+      if (typeof escola[key] === 'string' && escola[key].length > 5) {
+        // Verificar se parece ser um nome (tem espaços, não é um ID)
+        if (escola[key].includes(' ') && !escola[key].startsWith('Escola')) {
+          console.log(`   🔍 Possível nome no campo genérico "${key}": ${escola[key]}`);
+          return escola[key].trim();
+        }
+      }
+    }
+    
+    // Último recurso: usar ID
+    const id = escola.id || escola._id || escola.codigo || 'não identificada';
+    console.log(`   ❌ Nome não encontrado, usando ID: ${id}`);
+    return `Escola ${id}`;
+  }
   
+  // Adicionar cada escola como marcador colorido
   // 🔥 PLOTAR CADA ESCOLA
   escolas.forEach((escola, index) => {
     if (!escola.lat || !escola.lng) {
+      console.warn(`⚠️ Escola ${index} sem coordenadas`);
       console.warn(`⚠️ Item ${index} sem coordenadas:`, escola);
       return;
     }
+
+    console.log(`\n🏫 Escola ${index + 1}:`);
     
+    // 🔥 OBTER STATUS DO FIREBASE
     // 🔥 OBTER STATUS - pode vir como 'clase' ou 'status'
-    let status = (escola.classe || escola.status || '').toLowerCase().trim();
-    
+    let status = (escola.clase || escola.status || '').toLowerCase().trim();
+    console.log(`   Status: "${status}"`);
+
+    // 🔥 OBTER NOME USANDO A FUNÇÃO MELHORADA
+    const nomeEscola = obterNomeEscola(escola);
     // 🔥 OBTER NOME DA ESCOLA - campo correto é 'escola'
-    const nomeEscola = escola.escola || `escola ${index + 1}`;
+    const nomeEscola = escola.escola || `Escola ${index + 1}`;
     
     console.log(`🏫 ${index + 1}: "${nomeEscola}" - Status: ${status}`);
-    
+
     // Fallback para status inválido
     if (!status || !coresStatus[status]) {
+      console.warn(`   Status inválido, tentando inferir...`);
+      if (escola.pontuacao !== undefined) {
       console.warn(`   Status "${status}" inválido, usando pontuação para inferir`);
       if (escola.pontuacao !== undefined && escola.pontuacao !== null) {
         if (escola.pontuacao <= 2) status = 'critico';
         else if (escola.pontuacao <= 4) status = 'atencao';
         else if (escola.pontuacao <= 6) status = 'alerta';
         else status = 'ok';
+        console.log(`   Status inferido pela pontuação ${escola.pontuacao}: ${status}`);
         console.log(`   Status inferido: ${status} (pontuação: ${escola.pontuacao})`);
       } else {
         status = 'desconhecido';
       }
     }
-    
+
+    // Determinar cor e nome do status
     const cor = coresStatus[status] || '#6c757d';
     const nomeStatus = nomesStatus[status] || status;
+
+    console.log(`   Cor: ${cor}, Nome para tooltip: "${nomeEscola}"`);
     
+    // Criar marcador circular colorido
     // 🔥 CRIAR MARCADOR
     const marker = L.circleMarker([escola.lat, escola.lng], {
       radius: 10,
@@ -1581,7 +1642,8 @@ function plotarEscolasNoMapa(escolas) {
       fillOpacity: 0.8,
       opacity: 1
     });
-    
+
+    // Conteúdo do popup
     // 🔥 POPUP COM INFORMAÇÕES
     const popupContent = `
       <div style="min-width: 250px; padding: 12px; font-family: -apple-system, sans-serif;">
@@ -1589,11 +1651,23 @@ function plotarEscolasNoMapa(escolas) {
           <i class="fas fa-school"></i> ${nomeEscola}
         </h4>
         <p style="margin: 8px 0; font-size: 13px;">
+          <strong style="color: #555;">Status:</strong> 
           <strong>Status:</strong> 
           <span style="color: ${cor}; font-weight: bold; padding: 2px 8px; border-radius: 12px; background: ${cor}20;">
             ${nomeStatus}
           </span>
         </p>
+        ${escola.pontuacao !== undefined ? `
+          <p style="margin: 8px 0; font-size: 13px;">
+            <strong style="color: #555;">Pontuação:</strong> ${escola.pontuacao}
+          </p>
+        ` : ''}
+        ${escola.endereco || escola.endereço ? `
+          <p style="margin: 8px 0; font-size: 13px;">
+            <strong style="color: #555;">Endereço:</strong> ${escola.endereco || escola.endereço}
+          </p>
+        ` : ''}
+        ${escola.bairro ? `
         <p style="margin: 8px 0; font-size: 13px;">
           <strong>Pontuação:</strong> ${escola.pontuacao !== undefined ? escola.pontuacao : 'N/A'}
         </p>
@@ -1602,20 +1676,24 @@ function plotarEscolasNoMapa(escolas) {
         </p>
         ${escola.data_avaliacao ? `
           <p style="margin: 8px 0; font-size: 13px;">
+            <strong style="color: #555;">Bairro:</strong> ${escola.bairro}
             <strong>Data da avaliação:</strong> ${escola.data_avaliacao}
           </p>
         ` : ''}
         <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee; font-size: 11px; color: #888;">
+          <i class="fas fa-info-circle"></i> Clique fora para fechar
           <i class="fas fa-info-circle"></i> ID: ${escola.id || index}
         </div>
       </div>
     `;
-    
+
+    // Adicionar popup
     marker.bindPopup(popupContent, {
       maxWidth: 300,
       minWidth: 250
     });
-    
+
+    // 🔥 TOOLTIP CORRETO - usar nomeEscola
     // 🔥 TOOLTIP COM NOME DA ESCOLA (campo 'escola')
     marker.bindTooltip(nomeEscola, {
       direction: 'top',
@@ -1625,7 +1703,9 @@ function plotarEscolasNoMapa(escolas) {
       sticky: true,
       className: 'escola-tooltip'
     });
-    
+
+    // Eventos para tooltip
+    marker.on('mouseover', function(e) {
     // Eventos de hover
     marker.on('mouseover', function() {
       this.openTooltip();
@@ -1635,7 +1715,8 @@ function plotarEscolasNoMapa(escolas) {
         radius: 12
       });
     });
-    
+
+    marker.on('mouseout', function(e) {
     marker.on('mouseout', function() {
       this.closeTooltip();
       this.setStyle({
@@ -1644,14 +1725,32 @@ function plotarEscolasNoMapa(escolas) {
         radius: 10
       });
     });
+
+    // Evento de clique para debug
+    marker.on('click', function(e) {
+      console.log(`📍 Clicou em: ${nomeEscola}`);
+      console.log(`📊 Status: ${status}, Dados completos:`, escola);
+    });
     
     // Adicionar ao mapa
     marker.addTo(window.layerEscolas);
-    
+
     // Armazenar dados
     marker.options.escolaData = escola;
+    marker.options.statusOriginal = status;
+    marker.options.nomeEscola = nomeEscola;
   });
+
+  console.log(`\n✅ ${escolas.length} escolas plotadas`);
   
+  // 🔍 DEPURAÇÃO FINAL: Mostrar algumas escolas como exemplo
+  if (escolas.length > 0) {
+    console.log('\n📋 AMOSTRA DOS DADOS (3 primeiras escolas):');
+    escolas.slice(0, 3).forEach((escola, i) => {
+      console.log(`\n🏫 Escola ${i + 1}:`);
+      console.log('  Dados completos:', escola);
+    });
+  }
   console.log(`✅ ${escolas.length} escolas plotadas com sucesso!`);
   console.log('📊 Contagem por status:', contarStatus(escolas));
 }
@@ -1674,12 +1773,12 @@ function atualizarDashboard(dados) {
   document.getElementById('metric-criticas').textContent = dados.escolasCriticas || 0;
   document.getElementById('metric-avaliadas').textContent = dados.escolasAvaliadas || 0;
   document.getElementById('metric-pontuacao').textContent = dados.pontuacaoMedia || '0.0';
-  
+
   // Distribuição por classe
   if (dados.distribuicao) {
     atualizarGraficoDistribuicao(dados.distribuicao);
   }
-  
+
   // Atualizar indicadores
   atualizarIndicadores({
     densidade: dados.totalEscolas > 0 ? `${Math.round((dados.escolasCriticas / dados.totalEscolas) * 100)}%` : '0%',
@@ -1692,33 +1791,33 @@ function atualizarDashboard(dados) {
 function atualizarGraficoDistribuicao(distribuicao) {
   const total = Object.values(distribuicao).reduce((a, b) => a + b, 0);
   if (total === 0) return;
-  
+
   const classes = [
     {nome: 'Crítico', cor: '#dc3545', chave: 'crítico'},
     {nome: 'Atenção', cor: '#fd7e14', chave: 'atenção'},
     {nome: 'Alerta', cor: '#ffc107', chave: 'alerta'},
     {nome: 'Adequada', cor: '#28a745', chave: 'adequada'}
   ];
-  
+
   classes.forEach(classe => {
     const quantidade = distribuicao[classe.chave] || 0;
     const percentual = total > 0 ? Math.round((quantidade / total) * 100) : 0;
-    
+
     // Encontrar a barra correspondente
     const barra = Array.from(document.querySelectorAll('.bar-label'))
       .find(el => el.textContent === classe.nome)?.parentNode;
-    
+
     if (barra) {
       const barFill = barra.querySelector('.bar-fill');
       const barValue = barra.querySelector('.bar-value');
-      
+
       if (barFill) {
         setTimeout(() => {
           barFill.style.width = `${percentual}%`;
           barFill.style.background = classe.cor;
         }, 100);
       }
-      
+
       if (barValue) {
         barValue.textContent = `${percentual}%`;
       }
@@ -1736,10 +1835,10 @@ function atualizarIndicadores(indicadores) {
 function atualizarHistorico(historico) {
   const container = document.querySelector('.update-list');
   if (!container) return;
-  
+
   // Manter apenas as 5 últimas atualizações
   const historicoLimitado = historico.slice(0, 5);
-  
+
   container.innerHTML = '';
   historicoLimitado.forEach(item => {
     const div = document.createElement('div');
@@ -1756,11 +1855,11 @@ function atualizarHistorico(historico) {
 function aplicarAnalise() {
   console.log('⚡ Aplicando análise...');
   mostrarLoading();
-  
+
   const criticidade = document.getElementById('param-criticidade').value;
   const sementes = parseInt(document.getElementById('param-sementes').value);
   const raio = parseInt(document.getElementById('param-raio').value);
-  
+
   // Coletar camadas ativas
   const camadasAtivas = [];
   document.querySelectorAll('.toggle-item.active').forEach(item => {
@@ -1769,10 +1868,10 @@ function aplicarAnalise() {
       camadasAtivas.push(checkbox.id.replace('toggle-', ''));
     }
   });
-  
+
   console.log(`📊 Camadas ativas: ${camadasAtivas.join(', ')}`);
   console.log(`⚙️ Parâmetros: ${criticidade}, ${sementes} sementes, ${raio}m`);
-  
+
   // Aplicar KDE se ativo
   if (camadasAtivas.includes('kde') && window.calcularKDE) {
     setTimeout(() => {
@@ -1780,7 +1879,7 @@ function aplicarAnalise() {
       console.log('✅ KDE aplicado');
     }, 500);
   }
-  
+
   // Aplicar Voronoi se ativo
   if (camadasAtivas.includes('voronoi') && window.gerarVoronoiCritico) {
     setTimeout(() => {
@@ -1788,17 +1887,17 @@ function aplicarAnalise() {
       console.log('✅ Voronoi aplicado');
     }, 800);
   }
-  
+
   // Atualizar histórico
   const agora = new Date();
   const hora = agora.getHours().toString().padStart(2, '0');
   const minuto = agora.getMinutes().toString().padStart(2, '0');
-  
+
   atualizarHistorico([
     {time: `${hora}:${minuto}`, text: `Análise aplicada: ${camadasAtivas.length} camadas`},
     {time: `${hora}:${minuto}`, text: `Criticidade: ${criticidade}, Sementes: ${sementes}, Raio: ${raio}m`}
   ]);
-  
+
   // Feedback
   setTimeout(() => {
     ocultarLoading();
@@ -1808,10 +1907,10 @@ function aplicarAnalise() {
 
 function ativarCamada(camada) {
   console.log(`🗺️ Ativando camada: ${camada}`);
-  
+
   // Garantir que a camada seja minúscula
   camada = camada.toLowerCase();
-  
+
   const criticidade = document.getElementById('param-criticidade')?.value || 'todos';
   const sementes = parseInt(document.getElementById('param-sementes')?.value || 3);
   const raio = parseInt(document.getElementById('param-raio')?.value || 500);
@@ -1880,10 +1979,10 @@ function ativarCamada(camada) {
 
 function desativarCamada(camada) {
   console.log(`🗺️ Desativando camada: ${camada}`);
-  
+
   // Garantir que a camada seja minúscula
   camada = camada.toLowerCase();
-  
+
   // Chamar função de remoção específica de cada handler
   switch(camada) {
     case 'escolas':
@@ -1892,42 +1991,42 @@ function desativarCamada(camada) {
         window.mapa.removeLayer(window.layerEscolas);
       }
       break;
-      
+
     case 'kde':
       console.log('❌ Desativando camada KDE');
       if (window.kdeHandler) window.kdeHandler.remover();
       break;
-      
+
     case 'voronoi':
       console.log('❌ Desativando camada Voronoi');
       if (window.voronoiCritico) window.voronoiCritico.limpar();
       break;
-      
+
     case 'zonas':
       console.log('❌ Desativando camada Zonas de Risco');
       if (window.zonasRiscoHandler) window.zonasRiscoHandler.remover();
       break;
-      
+
     case 'densidade':
       console.log('❌ Desativando camada Densidade Crítica');
       if (window.densidadeCriticaHandler) window.densidadeCriticaHandler.remover();
       break;
-      
+
     case 'concentracao':
       console.log('❌ Desativando camada Concentração Relativa');
       if (window.concentracaoRelativaHandler) window.concentracaoRelativaHandler.remover();
       break;
-      
+
     case 'gini':
       console.log('❌ Desativando camada Gini Espacial');
       if (window.giniEspacialHandler) window.giniEspacialHandler.remover();
       break;
-      
+
     case 'rede':
       console.log('❌ Desativando camada Rede de Influência');
       if (window.redeInfluenciaHandler) window.redeInfluenciaHandler.remover();
       break;
-      
+
     default:
       console.warn('⚠️ Camada desconhecida para desativação:', camada);
   }
@@ -1937,21 +2036,20 @@ async function atualizarDados() {
   console.log('🔄 Atualizando dados...');
   mostrarLoading();
 
-  
+
   // Animar botão de atualizar
   const refreshBtn = document.getElementById('btn-refresh');
   refreshBtn.querySelector('i').style.transform = 'rotate(360deg)';
-  
+
   setTimeout(() => {
     refreshBtn.querySelector('i').style.transform = 'rotate(0deg)';
   }, 500);
-  
+
   // Recarregar dados
   await carregarDadosReais();
-  
+
   console.log('✅ Dados atualizados');
 }
 </script>
 </body>
 </html>
-
