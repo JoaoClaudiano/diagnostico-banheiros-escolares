@@ -397,18 +397,19 @@ class AnaliseInteligente {
     
     if (elementosMetricas.length > 0 && this.metricasEmTempoReal.totalEscolas) {
       // Atualizar métricas básicas
-      document.getElementById('metric-total')?.textContent = 
-        this.metricasEmTempoReal.totalEscolas || 0;
-      
-      document.getElementById('metric-criticas')?.textContent = 
-        this.metricasEmTempoReal.escolasCriticas || 0;
-      
-      document.getElementById('metric-avaliadas')?.textContent = 
-        this.metricasEmTempoReal.percentualAvaliadas || '0%';
-      
-      document.getElementById('metric-pontuacao')?.textContent = 
-        this.metricasEmTempoReal.pontuacaoMedia || '0.0';
-    }
+const elTotal = document.getElementById('metric-total');
+if (elTotal) elTotal.textContent = this.metricasEmTempoReal.totalEscolas || 0;
+
+const elCriticas = document.getElementById('metric-criticas');
+if (elCriticas) elCriticas.textContent = this.metricasEmTempoReal.escolasCriticas || 0;
+
+const elAvaliadas = document.getElementById('metric-avaliadas');
+if (elAvaliadas) elAvaliadas.textContent = this.metricasEmTempoReal.percentualAvaliadas || '0%';
+
+const elPontuacao = document.getElementById('metric-pontuacao');
+if (elPontuacao) elPontuacao.textContent = this.metricasEmTempoReal.pontuacaoMedia || '0.0';
+
+     }
     
     // Atualizar distribuição
     if (this.metricasEmTempoReal.distribuicaoClasses) {
