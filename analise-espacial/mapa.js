@@ -5,6 +5,7 @@ let map = null;
 let marcadores = [];
 let heatLayer = null;
 
+
 // Inicializar mapa
 function inicializarMapa() {
   if (map) {
