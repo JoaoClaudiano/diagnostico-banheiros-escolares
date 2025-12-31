@@ -2,6 +2,33 @@
    VISUALIZAÇÃO VORONOI - DADOS REAIS
 ========================= */
 
+// mapa-voronoi.js
+
+console.log('🔺 Carregando módulo Voronoi...');
+
+// 🔒 Garantir que o mapa Leaflet existe
+if (!window.map || !(window.map instanceof L.Map)) {
+  console.warn('⏳ Mapa ainda não pronto. Voronoi aguardando...');
+  
+  document.addEventListener('mapa_pronto', () => {
+    console.log('🟢 Mapa pronto. Inicializando Voronoi...');
+    inicializarVoronoi();
+  });
+
+} else {
+  inicializarVoronoi();
+}
+
+// =========================
+// INICIALIZAÇÃO DO VORONOI
+// =========================
+function inicializarVoronoi() {
+  window.camadaVoronoi = L.layerGroup().addTo(window.map);
+  console.log('✅ Camada Voronoi criada');
+  
+  // 🔽 TODO o resto do seu código Voronoi entra aqui embaixo
+}
+
 function desenharPoligonosVoronoi(poligonos) {
     if (!poligonos || poligonos.length === 0) {
         console.log('⚠️ Nenhum polígono Voronoi para desenhar');
