@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Página em Desenvolvimento</title>
+    <style>
+        /* Estilos do Popup */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(3px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .popup-card {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.4s ease-out;
+            border: 1px solid #e1e5e9;
+        }
+
+        .popup-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .popup-icon {
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 22px;
+            flex-grow: 1;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .popup-content {
+            padding: 28px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .popup-content p {
+            margin: 10px 0;
+        }
+
+        .popup-footer {
+            padding: 0 28px 28px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .primary-btn, .secondary-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .secondary-btn {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .secondary-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .popup-options {
+            padding: 0 28px 24px;
+            text-align: center;
+        }
+
+        .popup-options label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .popup-options input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Responsivo */
+        @media (max-width: 480px) {
+            .popup-card {
+                width: 95%;
+            }
+            
+            .popup-footer {
+                flex-direction: column;
+            }
+            
+            .popup-header {
+                padding: 18px;
+            }
+            
+            .popup-content {
+                padding: 20px;
+            }
+        }
+
+        /* Estilos da página de exemplo */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Conteúdo da página -->
+    <header>
+        <h1>Meu Site em Desenvolvimento</h1>
+        <p>Esta é uma página de exemplo para demonstrar o popup de aviso</p>
+        <button class="demo-btn" id="show-popup-btn">Mostrar Popup Novamente</button>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <h2>Bem-vindo à nossa página</h2>
+            <p>Esta página está em desenvolvimento ativo. Novos recursos e conteúdos serão adicionados em breve.</p>
+            <p>Enquanto isso, explore o que já está disponível:</p>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <h3>Recurso 1</h3>
+                    <p>Descrição do primeiro recurso disponível.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Recurso 2</h3>
+                    <p>Descrição do segundo recurso disponível.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Recurso 3</h3>
+                    <p>Descrição do terceiro recurso disponível.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Meu Site. Todos os direitos reservados.</p>
+        <p>Esta página está em constante desenvolvimento e melhoria.</p>
+    </footer>
+
+    <!-- Popup de Aviso -->
+    <div id="dev-popup" class="popup-overlay" style="display: none;">
+        <div class="popup-card">
+            <div class="popup-header">
+                <span class="popup-icon">🚧</span>
+                <h3>Atenção!</h3>
+                <button class="close-btn" aria-label="Fechar">&times;</button>
+            </div>
+            
+            <div class="popup-content">
+                <p><strong>Esta página está em desenvolvimento</strong></p>
+                <p>Alguns recursos podem não estar disponíveis ou conter informações incompletas. Agradecemos sua compreensão!</p>
+            </div>
+            
+            <div class="popup-footer">
+                <button class="primary-btn">Entendi</button>
+                <button class="secondary-btn">Reportar problema</button>
+            </div>
+            
+            <div class="popup-options">
+                <label>
+                    <input type="checkbox" id="dont-show-again">
+                    Não mostrar novamente por 7 dias
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Aguarda o DOM carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            const popup = document.getElementById('dev-popup');
+            const closeBtn = document.querySelector('.close-btn');
+            const primaryBtn = document.querySelector('.primary-btn');
+            const secondaryBtn = document.querySelector('.secondary-btn');
+            const dontShowAgain = document.getElementById('dont-show-again');
+            const showPopupBtn = document.getElementById('show-popup-btn');
+            
+            // Verifica se o usuário já fechou o popup recentemente
+            function shouldShowPopup() {
+                const hideUntil = localStorage.getItem('hideDevPopupUntil');
+                if (!hideUntil) return true;
+                
+                const now = new Date().getTime();
+                return now > parseInt(hideUntil);
+            }
+            
+            // Mostra o popup
+            function showPopup() {
+                popup.style.display = 'flex';
+                popup.style.animation = 'fadeIn 0.3s ease-out';
+                
+                // Adiciona evento de fechar ao pressionar ESC
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closePopup();
+                    }
+                });
+                
+                // Adiciona evento de clique fora do popup
+                popup.addEventListener('click', function(e) {
+                    if (e.target === popup) {
+                        closePopup();
+                    }
+                });
+            }
+            
+            // Mostra o popup se necessário
+            if (shouldShowPopup()) {
+                // Pequeno delay para melhor experiência
+                setTimeout(showPopup, 500);
+            }
+            
+            // Função para fechar o popup
+            function closePopup() {
+                // Animação de saída
+                popup.style.animation = 'fadeOut 0.3s ease-out forwards';
+                
+                // Se marcado para não mostrar novamente, armazena no localStorage
+                if (dontShowAgain.checked) {
+                    const hideUntil = new Date().getTime() + (7 * 24 * 60 * 60 * 1000); // 7 dias
+                    localStorage.setItem('hideDevPopupUntil', hideUntil);
+                }
+                
+                // Remove o popup após a animação
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 300);
+            }
+            
+            // Adiciona eventos aos botões
+            closeBtn.addEventListener('click', closePopup);
+            primaryBtn.addEventListener('click', closePopup);
+            
+            // Botão secundário (pode ser usado para reportar problema)
+            secondaryBtn.addEventListener('click', function() {
+                // Aqui você pode redirecionar para um formulário de contato
+                // ou abrir um modal de feedback
+                alert('Obrigado pelo interesse em reportar um problema! Em uma implementação real, isso abriria um formulário de contato.');
+                closePopup();
+            });
+            
+            // Botão para mostrar o popup novamente (para demonstração)
+            showPopupBtn.addEventListener('click', function() {
+                // Remove a preferência do usuário para mostrar novamente
+                localStorage.removeItem('hideDevPopupUntil');
+                showPopup();
+            });
+        });
+    </script>
+</body>
+</html>
