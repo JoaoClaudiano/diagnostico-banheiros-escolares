@@ -1460,7 +1460,8 @@ if (window.layerEscolas) {
     
     // Determinar cor baseada no status
     let cor;
-    switch(escola.status) {
+    const status = escola.status || escola.clase;
+    switch(status) {
       case 'crítico': cor = '#dc3545'; break;
       case 'atenção': cor = '#fd7e14'; break;
       case 'alerta': cor = '#ffc107'; break;
