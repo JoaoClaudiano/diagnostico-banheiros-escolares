@@ -710,7 +710,7 @@ body {
   font-weight: 600;
 }
 
-/* Estilos para os marcadores circulares */
+/* Status do Firebase (minúsculo sem acentos) */
 .escola-critico {
   background-color: #F44336 !important;
   border-color: #d32f2f !important;
@@ -729,6 +729,11 @@ body {
 .escola-adequada {
   background-color: #4CAF50 !important;
   border-color: #388e3c !important;
+}
+
+.escola-desconhecido {
+  background-color: #6c757d !important;
+  border-color: #545b62 !important;
 }
 
 /* Loading */
@@ -1460,20 +1465,28 @@ function plotarEscolasNoMapa(escolas) {
     window.layerEscolas = L.layerGroup().addTo(window.mapa);
   }
   
-  // Mapeamento de status para cores (do exemplo fornecido)
+  // 🔥 MAPEAMENTO CORRETO para os status que vêm do Firebase
   const coresStatus = {
-    'crítico': '#F44336',     // Vermelho
-    'atenção': '#FF9800',     // Laranja
-    'alerta': '#FFD700',      // Amarelo
-    'adequada': '#4CAF50'     // Verde
+    'critico': '#F44336',    // Vermelho
+    'atencao': '#FF9800',    // Laranja  
+    'alerta': '#FFD700',     // Amarelo
+    'ok': '#4CAF50'          // Verde
   };
   
   // Nomes formatados para exibição
   const nomesStatus = {
-    'crítico': 'Crítico',
-    'atenção': 'Atenção',
+    'critico': 'Crítico',
+    'atencao': 'Atenção',
     'alerta': 'Alerta',
-    'adequada': 'Adequado'
+    'ok': 'Adequado'
+  };
+  
+  // Mapeamento para classes CSS (se necessário)
+  const classesCSS = {
+    'critico': 'escola-critico',
+    'atencao': 'escola-atencao',
+    'alerta': 'escola-alerta',
+    'ok': 'escola-adequada'
   };
   
   // Adicionar cada escola como marcador colorido
@@ -1483,29 +1496,53 @@ function plotarEscolasNoMapa(escolas) {
       return;
     }
     
-    // Obter status da escola
-    const status = escola.status || escola.clase || 'desconhecido';
-    console.log(`🏫 Escola "${escola.nome}": status = "${status}"`);
+    // 🔥 OBTER STATUS DO FIREBASE (em minúsculo sem acentos)
+    // Pode vir como 'clase' ou 'status'
+    let status = (escola.clase || escola.status || '').toLowerCase().trim();
+    console.log(`🏫 Escola ID ${escola.id}: status = "${status}"`);
+    
+    // 🔥 VERIFICAÇÃO DE FALBACK - se o status está vazio ou inválido
+    if (!status || !coresStatus[status]) {
+      console.warn(`⚠️ Status inválido para escola ${escola.id}: "${status}"`);
+      // Tentar determinar status pela pontuação
+      if (escola.pontuacao !== undefined) {
+        if (escola.pontuacao <= 2) status = 'critico';
+        else if (escola.pontuacao <= 4) status = 'atencao';
+        else if (escola.pontuacao <= 6) status = 'alerta';
+        else status = 'ok';
+        console.log(`   Status inferido pela pontuação ${escola.pontuacao}: ${status}`);
+      } else {
+        status = 'desconhecido';
+      }
+    }
     
     // Determinar cor baseada no status
     const cor = coresStatus[status] || '#6c757d';
-    const nomeStatus = nomesStatus[status] || 'Desconhecido';
+    const nomeStatus = nomesStatus[status] || status;
+    const classeCSS = classesCSS[status] || 'escola-desconhecido';
     
-    // Criar marcador circular colorido (como no exemplo)
+    // 🔥 OBTER NOME DA ESCOLA (corrigir "Escola não identificada")
+    const nomeEscola = escola.nome || escola.escola || escola.escola_nome || 
+                      `Escola ${escola.id || 'não identificada'}`;
+    
+    console.log(`   Nome: "${nomeEscola}", Cor: ${cor}, Classe: ${classeCSS}`);
+    
+    // Criar marcador circular colorido
     const marker = L.circleMarker([escola.lat, escola.lng], {
       radius: 10,
       color: '#ffffff',
       weight: 2,
       fillColor: cor,
       fillOpacity: 0.8,
-      opacity: 1
+      opacity: 1,
+      className: classeCSS  // 🔥 ADICIONAR CLASSE CSS
     });
     
-    // Conteúdo do popup (estilo similar ao exemplo)
+    // Conteúdo do popup
     const popupContent = `
       <div style="min-width: 250px; padding: 12px; font-family: -apple-system, sans-serif;">
         <h4 style="margin: 0 0 10px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-          <i class="fas fa-school"></i> ${escola.nome || 'Escola'}
+          <i class="fas fa-school"></i> ${nomeEscola}
         </h4>
         <p style="margin: 8px 0; font-size: 13px;">
           <strong style="color: #555;">Status:</strong> 
@@ -1514,10 +1551,10 @@ function plotarEscolasNoMapa(escolas) {
           </span>
         </p>
         <p style="margin: 8px 0; font-size: 13px;">
-          <strong style="color: #555;">Pontuação:</strong> ${escola.pontuacao || 'N/A'}
+          <strong style="color: #555;">Pontuação:</strong> ${escola.pontuacao !== undefined ? escola.pontuacao : 'N/A'}
         </p>
         <p style="margin: 8px 0; font-size: 13px;">
-          <strong style="color: #555;">Endereço:</strong> ${escola.endereco || 'Não informado'}
+          <strong style="color: #555;">Endereço:</strong> ${escola.endereco || escola.endereço || 'Não informado'}
         </p>
         ${escola.data_avaliacao ? `
           <p style="margin: 8px 0; font-size: 13px;">
@@ -1541,25 +1578,28 @@ function plotarEscolasNoMapa(escolas) {
       minWidth: 250
     });
     
-    // Adicionar tooltip (hover)
-    marker.bindTooltip(escola.nome || 'Escola', {
+    // 🔥 ADICIONAR TOOLTIP COM NOME DA ESCOLA
+    marker.bindTooltip(nomeEscola, {
       direction: 'top',
       offset: [0, -5],
-      opacity: 0.9
+      opacity: 0.9,
+      permanent: false  // Só aparece ao passar o mouse
     });
     
     // Eventos para feedback visual
     marker.on('mouseover', function() {
       this.setStyle({
         fillOpacity: 1,
-        weight: 3
+        weight: 3,
+        radius: 12
       });
     });
     
     marker.on('mouseout', function() {
       this.setStyle({
         fillOpacity: 0.8,
-        weight: 2
+        weight: 2,
+        radius: 10
       });
     });
     
@@ -1568,9 +1608,18 @@ function plotarEscolasNoMapa(escolas) {
     
     // Armazenar dados da escola no marcador
     marker.options.escolaData = escola;
+    marker.options.statusOriginal = status;
   });
   
-  console.log(`✅ ${escolas.length} escolas plotadas`);
+  console.log(`✅ ${escolas.length} escolas plotadas com status do Firebase`);
+  
+  // 🔥 DEPURAÇÃO: Mostrar contagem por status
+  const contagemStatus = {};
+  escolas.forEach(e => {
+    const s = (e.clase || e.status || '').toLowerCase().trim();
+    contagemStatus[s] = (contagemStatus[s] || 0) + 1;
+  });
+  console.log('📊 Contagem por status:', contagemStatus);
 }
 
 // ==================== FUNÇÕES DO DASHBOARD ====================
