@@ -8,21 +8,16 @@ let zonasLayer = null;
 
 // Inicializar mapa
 function inicializarMapa() {
-  if (map) {
-    console.log('⚠️ Mapa já inicializado');
+  // 🔒 USAR mapa global já inicializado
+  if (window.map && window.map instanceof L.Map) {
+    map = window.map;
+    console.log('🗺️ Usando mapa global existente');
     return map;
   }
-  
-  console.log('🗺️ Inicializando mapa unificado...');
-  
-  // Coordenadas de Fortaleza
-  const centroFortaleza = [-3.717, -38.543];
-  
-  try {
-    // Criar mapa
-    map = L.map('map').setView(centroFortaleza, 12);
-    window.map = map;
-    
+
+  console.error('❌ Mapa Leaflet global não encontrado. mapa.js deve inicializar primeiro.');
+  return null;
+}
     // Adicionar tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
