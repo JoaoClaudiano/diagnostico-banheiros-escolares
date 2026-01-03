@@ -162,9 +162,6 @@
             <button class="tab-btn" data-tab="arquitetura-tecnica">
                 <i class="fas fa-code"></i> Arquitetura Técnica
             </button>
-            <button class="tab-btn" data-tab="recomendacoes">
-                <i class="fas fa-tools"></i> Recomendações Técnicas
-            </button>
         </div>
 
         <!-- CONTEÚDO DAS ABAS -->
@@ -517,48 +514,50 @@
             <div class="methodology-card">
                 <h3><i class="fas fa-cogs"></i> 1. Fundamentação Normativa do Checklist</h3>
                 
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
-                            <th style="padding: 1rem; text-align: left;">Dimensão Técnica</th>
-                            <th style="padding: 1rem; text-align: left;">Itens Avaliados</th>
-                            <th style="padding: 1rem; text-align: left;">Peso Técnico</th>
-                            <th style="padding: 1rem; text-align: left;">Fundamentação Normativa</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Estrutura Física</strong></td>
-                            <td style="padding: 1rem;">Mofo/umidade, piso quebrado, infiltrações</td>
-                            <td style="padding: 1rem;">3 pontos cada</td>
-                            <td style="padding: 1rem;">ABNT NBR 15575 (Desempenho) + ABNT NBR 5674 (Manutenção)</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Higiene e Limpeza</strong></td>
-                            <td style="padding: 1rem;">Limpeza inadequada, mau cheiro</td>
-                            <td style="padding: 1rem;">2 pontos cada</td>
-                            <td style="padding: 1rem;">RDC ANVISA 216/2004 + Portaria MS 1.914/2014</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Conforto Ambiental</strong></td>
-                            <td style="padding: 1rem;">Iluminação, ventilação</td>
-                            <td style="padding: 1rem;">1 ponto cada</td>
-                            <td style="padding: 1rem;">NBR 15220 (Desempenho Térmico) + NBR 5413 (Iluminação)</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Equipamentos Sanitários</strong></td>
-                            <td style="padding: 1rem;">Vasos, pias, torneiras</td>
-                            <td style="padding: 1rem;">2-3 pontos</td>
-                            <td style="padding: 1rem;">ABNT NBR 5626 (Água) + NBR 8160 (Esgoto)</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 1rem;"><strong>Acessibilidade</strong></td>
-                            <td style="padding: 1rem;">Banheiro acessível</td>
-                            <td style="padding: 1rem;">4 pontos</td>
-                            <td style="padding: 1rem;">NBR 9050 (Acessibilidade) + Lei 13.146/2015</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Dimensão Técnica</th>
+                                <th>Itens Avaliados</th>
+                                <th>Peso Técnico</th>
+                                <th>Fundamentação Normativa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Estrutura Física</strong></td>
+                                <td>Mofo/umidade, piso quebrado, infiltrações</td>
+                                <td>3 pontos cada</td>
+                                <td>ABNT NBR 15575 (Desempenho) + ABNT NBR 5674 (Manutenção)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Higiene e Limpeza</strong></td>
+                                <td>Limpeza inadequada, mau cheiro</td>
+                                <td>2 pontos cada</td>
+                                <td>RDC ANVISA 216/2004 + Portaria MS 1.914/2014</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Conforto Ambiental</strong></td>
+                                <td>Iluminação, ventilação</td>
+                                <td>1 ponto cada</td>
+                                <td>NBR 15220 (Desempenho Térmico) + NBR 5413 (Iluminação)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Equipamentos Sanitários</strong></td>
+                                <td>Vasos, pias, torneiras</td>
+                                <td>2-3 pontos</td>
+                                <td>ABNT NBR 5626 (Água) + NBR 8160 (Esgoto)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Acessibilidade</strong></td>
+                                <td>Banheiro acessível</td>
+                                <td>4 pontos</td>
+                                <td>NBR 9050 (Acessibilidade) + Lei 13.146/2015</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <!-- ACCORDION TÉCNICO EXPANDIDO -->
@@ -587,42 +586,44 @@
                             
                             <h4>Mapeamento Técnico</h4>
                             <p><strong>No sistema, o GS corresponde ao peso (1-4) derivado do status da avaliação:</strong></p>
-                            <table class="tech-table">
-                                <thead>
-                                    <tr>
-                                        <th>Pontuação (IT)</th>
-                                        <th>Status</th>
-                                        <th>GS</th>
-                                        <th>Interpretação</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>0-3 pontos</td>
-                                        <td>Adequada</td>
-                                        <td>1</td>
-                                        <td>Infraestrutura dentro dos padrões</td>
-                                    </tr>
-                                    <tr>
-                                        <td>4-7 pontos</td>
-                                        <td>Alerta</td>
-                                        <td>2</td>
-                                        <td>Problemas leves, monitoramento necessário</td>
-                                    </tr>
-                                    <tr>
-                                        <td>8-11 pontos</td>
-                                        <td>Atenção</td>
-                                        <td>3</td>
-                                        <td>Problemas significativos, risco médio</td>
-                                    </tr>
-                                    <tr>
-                                        <td>12-13 pontos</td>
-                                        <td>Crítica</td>
-                                        <td>4</td>
-                                        <td>Problemas graves, risco imediato</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="table-container">
+                                <table class="tech-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Pontuação (IT)</th>
+                                            <th>Status</th>
+                                            <th>GS</th>
+                                            <th>Interpretação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>0-3 pontos</td>
+                                            <td>Adequada</td>
+                                            <td>1</td>
+                                            <td>Infraestrutura dentro dos padrões</td>
+                                        </tr>
+                                        <tr>
+                                            <td>4-7 pontos</td>
+                                            <td>Alerta</td>
+                                            <td>2</td>
+                                            <td>Problemas leves, monitoramento necessário</td>
+                                        </tr>
+                                        <tr>
+                                            <td>8-11 pontos</td>
+                                            <td>Atenção</td>
+                                            <td>3</td>
+                                            <td>Problemas significativos, risco médio</td>
+                                        </tr>
+                                        <tr>
+                                            <td>12-13 pontos</td>
+                                            <td>Crítica</td>
+                                            <td>4</td>
+                                            <td>Problemas graves, risco imediato</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -652,32 +653,34 @@
                             <h4>Cálculo Detalhado</h4>
                             <p><strong>No sistema, o IT corresponde à soma dos pesos dos problemas identificados no checklist:</strong></p>
                             
-                            <table class="tech-table">
-                                <thead>
-                                    <tr>
-                                        <th>Tipo de Problema</th>
-                                        <th>Peso</th>
-                                        <th>Exemplos</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Problemas Graves</td>
-                                        <td>3 pontos</td>
-                                        <td>Mofo ou umidade excessiva</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Problemas Médios</td>
-                                        <td>2 pontos</td>
-                                        <td>Infiltrações visíveis, piso quebrado, limpeza inadequada, mau cheiro</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Problemas Leves</td>
-                                        <td>1 ponto</td>
-                                        <td>Iluminação insuficiente, ventilação inadequada</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="table-container">
+                                <table class="tech-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo de Problema</th>
+                                            <th>Peso</th>
+                                            <th>Exemplos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Problemas Graves</td>
+                                            <td>3 pontos</td>
+                                            <td>Mofo ou umidade excessiva</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Problemas Médios</td>
+                                            <td>2 pontos</td>
+                                            <td>Infiltrações visíveis, piso quebrado, limpeza inadequada, mau cheiro</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Problemas Leves</td>
+                                            <td>1 ponto</td>
+                                            <td>Iluminação insuficiente, ventilação inadequada</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                             
                             <p><strong>Fórmula:</strong> IT = Σ(peso de cada problema selecionado)</p>
                             <p><strong>Faixa:</strong> 0 a 13 pontos (máximo teórico com todos os problemas)</p>
@@ -718,37 +721,39 @@
                                 • Normaliza para escala 1-4
                             </div>
                             
-                            <table class="tech-table">
-                                <thead>
-                                    <tr>
-                                        <th>Ocorrências</th>
-                                        <th>RT</th>
-                                        <th>Interpretação</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>0 ocorrências anteriores</td>
-                                        <td>1</td>
-                                        <td>Baixa recorrência</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1-2 ocorrências</td>
-                                        <td>2</td>
-                                        <td>Média recorrência</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3-4 ocorrências</td>
-                                        <td>3</td>
-                                        <td>Alta recorrência</td>
-                                    </tr>
-                                    <tr>
-                                        <td>5+ ocorrências</td>
-                                        <td>4</td>
-                                        <td>Muito alta recorrência</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="table-container">
+                                <table class="tech-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Ocorrências</th>
+                                            <th>RT</th>
+                                            <th>Interpretação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>0 ocorrências anteriores</td>
+                                            <td>1</td>
+                                            <td>Baixa recorrência</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1-2 ocorrências</td>
+                                            <td>2</td>
+                                            <td>Média recorrência</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3-4 ocorrências</td>
+                                            <td>3</td>
+                                            <td>Alta recorrência</td>
+                                        </tr>
+                                        <tr>
+                                            <td>5+ ocorrências</td>
+                                            <td>4</td>
+                                            <td>Muito alta recorrência</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -790,42 +795,44 @@
             <div class="methodology-card">
                 <h3><i class="fas fa-sort-amount-down"></i> 2. Sistema de Classificação Detalhado</h3>
                 
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
-                            <th style="padding: 1rem; text-align: left;">Faixa de Pontos</th>
-                            <th style="padding: 1rem; text-align: left;">Classificação</th>
-                            <th style="padding: 1rem; text-align: left;">Significado Técnico</th>
-                            <th style="padding: 1rem; text-align: left;">Implicações para Gestão</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">0-3 pontos</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-ok">Adequada</span></td>
-                            <td style="padding: 1rem;">Condições dentro dos parâmetros normativos</td>
-                            <td style="padding: 1rem;">Manutenção preventiva regular</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">4-6 pontos</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-alert">Alerta</span></td>
-                            <td style="padding: 1rem;">Problemas menores que podem evoluir</td>
-                            <td style="padding: 1rem;">Ações corretivas em 90 dias</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">7-8 pontos</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-atencao">Atenção Elevada</span></td>
-                            <td style="padding: 1rem;">Problemas significativos com risco sanitário</td>
-                            <td style="padding: 1rem;">Intervenção em 30 dias</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 1rem;">≥9 pontos</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-critical">Crítica</span></td>
-                            <td style="padding: 1rem;">Risco imediato à saúde e segurança</td>
-                            <td style="padding: 1rem;">Intervenção imediata (7 dias)</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Faixa de Pontos</th>
+                                <th>Classificação</th>
+                                <th>Significado Técnico</th>
+                                <th>Implicações para Gestão</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0-3 pontos</td>
+                                <td><span class="status-badge status-ok">Adequada</span></td>
+                                <td>Condições dentro dos parâmetros normativos</td>
+                                <td>Manutenção preventiva regular</td>
+                            </tr>
+                            <tr>
+                                <td>4-6 pontos</td>
+                                <td><span class="status-badge status-alert">Alerta</span></td>
+                                <td>Problemas menores que podem evoluir</td>
+                                <td>Ações corretivas em 90 dias</td>
+                            </tr>
+                            <tr>
+                                <td>7-8 pontos</td>
+                                <td><span class="status-badge status-atencao">Atenção Elevada</span></td>
+                                <td>Problemas significativos com risco sanitário</td>
+                                <td>Intervenção em 30 dias</td>
+                            </tr>
+                            <tr>
+                                <td>≥9 pontos</td>
+                                <td><span class="status-badge status-critical">Crítica</span></td>
+                                <td>Risco imediato à saúde e segurança</td>
+                                <td>Intervenção imediata (7 dias)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="methodology-card">
@@ -1056,42 +1063,44 @@
             <div class="methodology-card">
                 <h3><i class="fas fa-chart-pie"></i> 4. Indicadores de Desempenho Institucional</h3>
                 
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
-                            <th style="padding: 1rem; text-align: left;">Indicador</th>
-                            <th style="padding: 1rem; text-align: left;">Fórmula</th>
-                            <th style="padding: 1rem; text-align: left;">Interpretação</th>
-                            <th style="padding: 1rem; text-align: left;">Meta Institucional</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>IPT Médio Municipal</strong></td>
-                            <td style="padding: 1rem;">Σ(IPTᵢ) ÷ N</td>
-                            <td style="padding: 1rem;">"Termômetro" da rede escolar</td>
-                            <td style="padding: 1rem;">&lt; 2.0 (baixa criticidade)</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Densidade Crítica</strong></td>
-                            <td style="padding: 1rem;">Nº críticas ÷ Área</td>
-                            <td style="padding: 1rem;">Intensidade espacial dos problemas</td>
-                            <td style="padding: 1rem;">Redução anual de 10%</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Concentração Relativa Máxima</strong></td>
-                            <td style="padding: 1rem;">Max(CRᵢ)</td>
-                            <td style="padding: 1rem;">Desigualdade territorial</td>
-                            <td style="padding: 1rem;">&lt; 1.5 (redução desigualdade)</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 1rem;"><strong>Cobertura do Sistema</strong></td>
-                            <td style="padding: 1rem;">Escolas avaliadas ÷ Total</td>
-                            <td style="padding: 1rem;">Abragência do monitoramento</td>
-                            <td style="padding: 1rem;">100% (todas escolas)</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Indicador</th>
+                                <th>Fórmula</th>
+                                <th>Interpretação</th>
+                                <th>Meta Institucional</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>IPT Médio Municipal</strong></td>
+                                <td>Σ(IPTᵢ) ÷ N</td>
+                                <td>"Termômetro" da rede escolar</td>
+                                <td>&lt; 2.0 (baixa criticidade)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Densidade Crítica</strong></td>
+                                <td>Nº críticas ÷ Área</td>
+                                <td>Intensidade espacial dos problemas</td>
+                                <td>Redução anual de 10%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Concentração Relativa Máxima</strong></td>
+                                <td>Max(CRᵢ)</td>
+                                <td>Desigualdade territorial</td>
+                                <td>&lt; 1.5 (redução desigualdade)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cobertura do Sistema</strong></td>
+                                <td>Escolas avaliadas ÷ Total</td>
+                                <td>Abragência do monitoramento</td>
+                                <td>100% (todas escolas)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -1229,42 +1238,44 @@
             <div class="methodology-card">
                 <h3><i class="fas fa-user-tie"></i> 1. Perfis de Usuário Institucionais</h3>
                 
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
-                            <th style="padding: 1rem; text-align: left;">Perfil</th>
-                            <th style="padding: 1rem; text-align: left;">Foco Principal</th>
-                            <th style="padding: 1rem; text-align: left;">Indicadores-Chave</th>
-                            <th style="padding: 1rem; text-align: left;">Ações Típicas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Gestor Municipal</strong></td>
-                            <td style="padding: 1rem;">Alocação de recursos</td>
-                            <td style="padding: 1rem;">IPT médio, Zonas Prioritárias</td>
-                            <td style="padding: 1rem;">Planejamento orçamentário, definição de prioridades</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Técnico da Secretaria</strong></td>
-                            <td style="padding: 1rem;">Execução de intervenções</td>
-                            <td style="padding: 1rem;">Ranking IPT, Problemas frequentes</td>
-                            <td style="padding: 1rem;">Elaboração de projetos, acompanhamento de obras</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;"><strong>Diretor Escolar</strong></td>
-                            <td style="padding: 1rem;">Condição da própria escola</td>
-                            <td style="padding: 1rem;">Status, Pontuação específica</td>
-                            <td style="padding: 1rem;">Solicitação de reparos, manutenção preventiva</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 1rem;"><strong>Auditor/Conselheiro</strong></td>
-                            <td style="padding: 1rem;">Transparência e conformidade</td>
-                            <td style="padding: 1rem;">Evolução temporal, Distribuição</td>
-                            <td style="padding: 1rem;">Fiscalização, controle social</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Perfil</th>
+                                <th>Foco Principal</th>
+                                <th>Indicadores-Chave</th>
+                                <th>Ações Típicas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Gestor Municipal</strong></td>
+                                <td>Alocação de recursos</td>
+                                <td>IPT médio, Zonas Prioritárias</td>
+                                <td>Planejamento orçamentário, definição de prioridades</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Técnico da Secretaria</strong></td>
+                                <td>Execução de intervenções</td>
+                                <td>Ranking IPT, Problemas frequentes</td>
+                                <td>Elaboração de projetos, acompanhamento de obras</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Diretor Escolar</strong></td>
+                                <td>Condição da própria escola</td>
+                                <td>Status, Pontuação específica</td>
+                                <td>Solicitação de reparos, manutenção preventiva</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Auditor/Conselheiro</strong></td>
+                                <td>Transparência e conformidade</td>
+                                <td>Evolução temporal, Distribuição</td>
+                                <td>Fiscalização, controle social</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="methodology-card">
@@ -1399,145 +1410,6 @@
                     ├── <span style="color: #569CD6;">estilo.css</span>           <span style="color: #6A9955;"># Estilos principais</span><br>
                     └── <span style="color: #569CD6;">manifest.json</span>        <span style="color: #6A9955;"># Configuração PWA</span><br>
                 </div>
-            </div>
-        </div>
-
-        <!-- ABA 9: RECOMENDAÇÕES TÉCNICAS -->
-        <div id="recomendacoes" class="tab-content">
-            <h2><i class="fas fa-tools"></i> Recomendações Técnicas e Manutenção</h2>
-            
-            <div class="methodology-card">
-                <h3><i class="fas fa-exclamation-triangle"></i> 1. Vulnerabilidades Identificadas</h3>
-                
-                <div class="danger-box">
-                    <strong><i class="fas fa-shield-alt"></i> CRÍTICO: Chaves Firebase Expostas</strong><br>
-                    Todas as chaves API estão hardcoded no código fonte. 
-                    <strong>Recomendação urgente:</strong> Mover para variáveis de ambiente ou configurar restrições por domínio.
-                </div>
-                
-                <div class="warning-box">
-                    <strong><i class="fas fa-database"></i> ALERTA: Performance com Grandes Volumes</strong><br>
-                    Sistema carrega todas avaliações de uma vez. 
-                    <strong>Recomendação:</strong> Implementar paginação ou limites na consulta.
-                </div>
-                
-                <div class="info-box">
-                    <strong><i class="fas fa-images"></i> ATENÇÃO: Tamanho de PDFs com Fotos</strong><br>
-                    Imagens em Base64 podem gerar PDFs muito grandes. 
-                    <strong>Recomendação:</strong> Implementar compressão antes da conversão.
-                </div>
-            </div>
-            
-            <div class="methodology-card">
-                <h3><i class="fas fa-wrench"></i> 2. Melhorias de Performance Recomendadas</h3>
-                
-                <div class="impact-grid">
-                    <div class="impact-card">
-                        <h4><i class="fas fa-compress-arrows-alt"></i> Compressão de Imagens</h4>
-                        <p>Reduzir tamanho das fotos antes do PDF</p>
-                        <p><strong>Tecnologia:</strong> Canvas API + redimensionamento</p>
-                    </div>
-                    
-                    <div class="impact-card">
-                        <h4><i class="fas fa-layer-group"></i> Clusterização no Mapa</h4>
-                        <p>Agrupar marcadores quando zoomed out</p>
-                        <p><strong>Biblioteca:</strong> Leaflet.markercluster</p>
-                    </div>
-                    
-                    <div class="impact-card">
-                        <h4><i class="fas fa-database"></i> Cache Local</h4>
-                        <p>Armazenar dados frequentemente acessados</p>
-                        <p><strong>Tecnologia:</strong> IndexedDB para dados estruturados</p>
-                    </div>
-                    
-                    <div class="impact-card">
-                        <h4><i class="fas fa-sync-alt"></i> Lazy Loading</h4>
-                        <p>Carregar dados sob demanda</p>
-                        <p><strong>Aplicação:</strong> Mapas e listas grandes</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="methodology-card">
-                <h3><i class="fas fa-shield-alt"></i> 3. Segurança - Plano de Ação</h3>
-                
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
-                            <th style="padding: 1rem; text-align: left;">Item</th>
-                            <th style="padding: 1rem; text-align: left;">Prioridade</th>
-                            <th style="padding: 1rem; text-align: left;">Ação Recomendada</th>
-                            <th style="padding: 1rem; text-align: left;">Prazo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">Chaves Firebase expostas</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-critical">CRÍTICA</span></td>
-                            <td style="padding: 1rem;">Restringir por domínio no Console Firebase</td>
-                            <td style="padding: 1rem;">Imediato</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">Regras de segurança Firestore</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-atencao">ALTA</span></td>
-                            <td style="padding: 1rem;">Implementar regras de leitura/escrita</td>
-                            <td style="padding: 1rem;">7 dias</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">Autenticação básica</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-alert">MÉDIA</span></td>
-                            <td style="padding: 1rem;">Login por usuário/senha ou Google Auth</td>
-                            <td style="padding: 1rem;">30 dias</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 1rem;">HTTPS obrigatório</td>
-                            <td style="padding: 1rem;"><span class="status-badge status-ok">OK</span></td>
-                            <td style="padding: 1rem;">Já implementado via Firebase Hosting</td>
-                            <td style="padding: 1rem;">Concluído</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="methodology-card">
-                <h3><i class="fas fa-calendar-alt"></i> 4. Cronograma de Manutenção Técnica</h3>
-                
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white;">
-                            <th style="padding: 1rem; text-align: left;">Atividade</th>
-                            <th style="padding: 1rem; text-align: left;">Frequência</th>
-                            <th style="padding: 1rem; text-align: left;">Responsável</th>
-                            <th style="padding: 1rem; text-align: left;">Tempo Estimado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">Backup do Firestore</td>
-                            <td style="padding: 1rem;">Mensal</td>
-                            <td style="padding: 1rem;">Administrador</td>
-                            <td style="padding: 1rem;">30 minutos</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">Limpeza de dados pendentes</td>
-                            <td style="padding: 1rem;">Semanal</td>
-                            <td style="padding: 1rem;">Sistema automático</td>
-                            <td style="padding: 1rem;">Automático</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 1rem;">Atualização de escolas</td>
-                            <td style="padding: 1rem;">Trimestral</td>
-                            <td style="padding: 1rem;">Técnico municipal</td>
-                            <td style="padding: 1rem;">2 horas</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 1rem;">Revisão de segurança</td>
-                            <td style="padding: 1rem;">Semestral</td>
-                            <td style="padding: 1rem;">Equipe técnica</td>
-                            <td style="padding: 1rem;">4 horas</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
