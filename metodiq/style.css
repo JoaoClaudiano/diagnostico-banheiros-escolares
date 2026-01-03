@@ -21,7 +21,6 @@
     box-sizing: border-box;
 }
 
-
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
@@ -130,7 +129,6 @@ header h1 {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     position: relative;
 }
-
 
 header .subtitle {
     font-size: 1.2rem;
@@ -1047,7 +1045,6 @@ body.dark-theme .flow-step::after {
 }
 
 /* FOOTER */
-/* Substitua o footer atual por: */
 footer {
     text-align: center;
     padding: 2.5rem;
@@ -1081,7 +1078,6 @@ footer {
     transform: translateY(-2px);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-
 
 /* UTILITÁRIOS */
 .info-box {
@@ -1246,7 +1242,69 @@ body.dark-theme ::-webkit-scrollbar-track {
     background: linear-gradient(135deg, var(--primary-dark) 0%, #102a7a 100%);
 }
 
-/* RESPONSIVIDADE */
+/* ============================================ */
+/* RESPONSIVIDADE PARA TABELAS - CORREÇÕES ADICIONADAS */
+/* ============================================ */
+
+/* Container para tabelas com scroll horizontal */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+body.dark-theme .table-container {
+    border-color: #4a5568;
+}
+
+/* Tabelas responsivas */
+table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+}
+
+/* Melhorar scroll horizontal em tabelas */
+.table-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+body.dark-theme .table-container::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Para tabelas técnicas (dentro dos tech-cards) */
+.tech-table {
+    width: 100%;
+    min-width: 500px;
+}
+
+/* Classes utilitárias para responsividade */
+.mobile-only {
+    display: none;
+}
+
+/* ============================================ */
+/* RESPONSIVIDADE PARA SMARTPHONES (MOBILE-FIRST) */
+/* ============================================ */
+
 @media (max-width: 1200px) {
     .sidebar-tools {
         width: 250px;
@@ -1284,6 +1342,72 @@ body.dark-theme ::-webkit-scrollbar-track {
 }
 
 @media (max-width: 768px) {
+    /* AJUSTES PARA TABELAS EM TELAS PEQUENAS */
+    .table-container {
+        margin: 1rem 0;
+    }
+    
+    /* Reduzir padding das células */
+    table th,
+    table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Reduzir tamanho de fontes em cabeçalhos */
+    table th {
+        font-size: 0.85rem;
+    }
+    
+    /* Ajustar cards com tabelas */
+    .methodology-card,
+    .tech-card {
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    /* Ajustar accordions */
+    .tech-accordion-header {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .tech-accordion-content {
+        padding: 1rem;
+    }
+    
+    /* Ajustar tabelas técnicas */
+    .tech-table {
+        min-width: 450px;
+    }
+    
+    .tech-table th,
+    .tech-table td {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Ajustar grids */
+    .impact-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .flow-step {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Classes utilitárias */
+    .desktop-only {
+        display: none;
+    }
+    
+    .mobile-only {
+        display: block;
+    }
+    
+    /* Outros ajustes existentes */
     header h1 {
         font-size: 1.8rem;
     }
@@ -1303,14 +1427,6 @@ body.dark-theme ::-webkit-scrollbar-track {
     }
     
     .tab-content {
-        padding: 1.5rem;
-    }
-    
-    .methodology-card {
-        padding: 1.5rem;
-    }
-    
-    .tech-card {
         padding: 1.5rem;
     }
 }
@@ -1340,12 +1456,30 @@ body.dark-theme ::-webkit-scrollbar-track {
     }
 }
 
-/* ============================================ */
-/* RESPONSIVIDADE PARA SMARTPHONES (MOBILE-FIRST) */
-/* ============================================ */
-
 /* Smartphones grandes (acima de 480px) */
 @media (max-width: 480px) {
+    /* AJUSTES MAIS EXTREMOS PARA TELAS MUITO PEQUENAS */
+    table th,
+    table td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    table th {
+        font-size: 0.75rem;
+    }
+    
+    /* Esconder colunas menos importantes se necessário */
+    .hide-on-mobile {
+        display: none;
+    }
+    
+    /* Ajustar equações */
+    .equacao {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+    
     /* HEADER COMPACTO */
     .header-container {
         padding: 0 10px;
@@ -1415,8 +1549,7 @@ body.dark-theme ::-webkit-scrollbar-track {
         padding: 1rem;
     }
     
-    /* TABELAS COM SCROLL HORIZONTAL */
-    /* CORREÇÃO COMPLETA PARA TABELAS NO MOBILE */
+    /* TABELAS COM SCROLL HORIZONTAL - CORREÇÃO COMPLETA */
     .tech-table-wrapper {
         position: relative;
         overflow: hidden;
@@ -1707,7 +1840,7 @@ body.dark-theme ::-webkit-scrollbar-track {
     }
 }
 
-/* MELHORIAS DE TOCHE PARA SMARTPHONES */
+/* MELHORIAS DE TOQUE PARA SMARTPHONES */
 @media (hover: none) and (pointer: coarse) {
     /* AUMENTAR ÁREA DE TOQUE PARA BOTÕES */
     .header-btn,
@@ -1737,7 +1870,7 @@ body.dark-theme ::-webkit-scrollbar-track {
     
     /* AUMENTAR TAMANHO DE INPUTS */
     #searchInput {
-        font-size: 16px; /* Evita zoom automático no iOS */
+        font-size: 16px;
         padding: 12px 15px;
     }
 }
@@ -1818,4 +1951,3 @@ body.dark-theme ::-webkit-scrollbar-track {
         padding-top: max(1.5rem, env(safe-area-inset-top));
     }
 }
-
