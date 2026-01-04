@@ -1807,6 +1807,191 @@ body.dark-theme ::-webkit-scrollbar-track {
     }
 }
 
+/* ============================================ */
+/* CORREÇÃO PARA TABELAS EM TELAS PEQUENAS */
+/* ============================================ */
+
+/* Garantir que tabelas fiquem responsivas em cards */
+.card-table-container {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    margin: 1rem 0;
+    background: white;
+}
+
+body.dark-theme .card-table-container {
+    background: #2d3748;
+}
+
+/* Aplicar a todas as tabelas dentro de cards e tab-content */
+.tab-content table,
+.tech-card table,
+.methodology-card table,
+.impact-card table,
+.flow-step table {
+    width: 100%;
+    min-width: 600px; /* Largura mínima para manter a legibilidade */
+    border-collapse: collapse;
+    margin: 0;
+}
+
+/* Estilização para tabelas em containers responsivos */
+.tab-content table th,
+.tech-card table th,
+.methodology-card table th {
+    white-space: nowrap;
+    min-width: 120px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+}
+
+.tab-content table td,
+.tech-card table td,
+.methodology-card table td {
+    padding: 0.8rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+body.dark-theme .tab-content table td,
+body.dark-theme .tech-card table td,
+body.dark-theme .methodology-card table td {
+    border-bottom: 1px solid #4a5568;
+}
+
+/* Ajuste específico para telas muito pequenas */
+@media (max-width: 768px) {
+    /* Reduzir padding das células */
+    .tab-content table th,
+    .tech-card table th,
+    .methodology-card table th,
+    .tab-content table td,
+    .tech-card table td,
+    .methodology-card table td {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Reduzir ainda mais para smartphones */
+    @media (max-width: 480px) {
+        .tab-content table th,
+        .tech-card table th,
+        .methodology-card table th,
+        .tab-content table td,
+        .tech-card table td,
+        .methodology-card table td {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .tab-content table,
+        .tech-card table,
+        .methodology-card table {
+            min-width: 500px; /* Reduzir largura mínima para telas muito pequenas */
+        }
+        
+        /* Indicador visual de que a tabela é rolável */
+        .card-table-container {
+            position: relative;
+        }
+        
+        .card-table-container::after {
+            content: '↔';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: 2;
+        }
+    }
+}
+
+/* Ajuste para tabelas específicas em tech-accordion */
+.tech-accordion-content .tech-table {
+    min-width: 100%;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .tech-accordion-content .tech-table {
+        min-width: 500px;
+    }
+}
+
+/* Garantir que os cards não quebrem com tabelas grandes */
+.tab-content,
+.tech-card,
+.methodology-card,
+.impact-card,
+.flow-step {
+    overflow: hidden;
+}
+
+/* Melhorar a visualização em orientação paisagem mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .card-table-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+}
+
+/* Ajustes específicos para a tabela de Técnico */
+.tech-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid var(--border);
+}
+
+body.dark-theme .tech-table-wrapper {
+    background: #2d3748;
+    border-color: #4a5568;
+}
+
+.tech-table-wrapper table {
+    min-width: 700px;
+    margin: 0;
+}
+
+/* Garantir que o conteúdo ao redor das tabelas também se ajuste */
+.tech-card > *:not(.card-table-container):not(table) {
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
+/* Ajuste para fórmulas e equações em telas pequenas */
+@media (max-width: 480px) {
+    .formula-destaque,
+    .equacao {
+        overflow-x: auto;
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .formula-destaque h3,
+    .equacao {
+        white-space: nowrap;
+        min-width: 300px;
+    }
+}
+
 /* AJUSTES FINAIS PARA DISPOSITIVOS COM NOTCH/DYNAMIC ISLAND */
 @media (max-width: 480px) {
     .container {
