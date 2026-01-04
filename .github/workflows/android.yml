@@ -1,10 +1,39 @@
-name: Teste Workflow
+name: Build Android App (CheckInfra)
 
 on:
   workflow_dispatch:
 
 jobs:
-  teste:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "OK"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Initialize Android Project
+        run: |
+          bubblewrap init \
+            --manifest=https://joaoclaudiano.github.io/checkinfra/manifest.json \
+            --directory=android \
+            --skipPwaValidation
+
+      - name: Build Android App Bundle
+        run: |
+          cd android
+          ./gradlew bundleRelease
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkinfra-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
