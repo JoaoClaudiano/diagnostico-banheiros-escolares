@@ -280,5 +280,15 @@ checkBairros.addEventListener("change", function() {
 </script>
 
 <script src="./mapabairros.js"></script>
+
+<!-- ===== SERVICE WORKER ===== -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js")
+    .then(() => console.log("Service Worker registrado"))
+    .catch(err => console.error("Erro no Service Worker", err));
+}
+</script>
+  
 </body>
 </html>
