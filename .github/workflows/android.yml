@@ -1,35 +1,10 @@
-name: Build Android App (TWA)
+name: Teste Android Workflow
 
 on:
 workflow_dispatch:
 
 jobs:
-build:
+teste:
 runs-on: ubuntu-latest
-
 steps:
-- name: Checkout do repositório
-uses: actions/checkout@v4
-
-- name: Setup Node.js
-uses: actions/setup-node@v4
-with:
-node-version: 18
-
-- name: Instalar Bubblewrap
-run: npm install -g @bubblewrap/cli
-
-- name: Inicializar projeto TWA
-run: |
-bubblewrap init --manifest https://github.com/JoaoClaudiano/checkinfra/manifest.json --skip-prompt
-
-- name: Build Android App Bundle
-run: |
-cd android
-bubblewrap build
-
-- name: Upload do AAB
-uses: actions/upload-artifact@v4
-with:
-name: checkinfra-android-aab
-path: android/app-release.aab
+- run: echo "Workflow OK"
