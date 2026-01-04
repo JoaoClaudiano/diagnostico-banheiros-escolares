@@ -13,13 +13,13 @@ const CACHE_NAME = `checkinfra-${BUILD_VERSION}`;
    ARQUIVOS ESSENCIAIS
 ========================================= */
 const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./avaliacao.html",
-  "./analise-espacial.html",
-  "./manifest.json",
-  "./mapa/escolas.js"
-   "./painel/index.html"
+  "/",
+  "/index.html",
+  "/avaliacao.html",
+  "/analise-espacial.html",
+  "/manifest.json",
+  "/mapa/escolas.js",
+   "/painel/index.html"
 ];
 
 /* =========================================
