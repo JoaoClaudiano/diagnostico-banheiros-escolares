@@ -21,11 +21,14 @@ jobs:
         run: npm install -g @bubblewrap/cli
 
       - name: Initialize Android Project
-        run: |
-          yes | bubblewrap init \
-            --manifest=https://joaoclaudiano.github.io/checkinfra/manifest.json \
-            --directory=android \
-            --skipPwaValidation
+  env:
+    JAVA_HOME: ${{ env.JAVA_HOME }}
+  run: |
+    bubblewrap init \
+      --manifest=https://joaoclaudiano.github.io/checkinfra/manifest.json \
+      --directory=android \
+      --skipPwaValidation \
+      --skipJdkDownload
 
       - name: Build Android App Bundle
         run: |
