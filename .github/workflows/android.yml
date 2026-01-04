@@ -22,7 +22,7 @@ jobs:
 
       - name: Initialize Android Project
         run: |
-          bubblewrap init \
+          yes | bubblewrap init \
             --manifest=https://joaoclaudiano.github.io/checkinfra/manifest.json \
             --directory=android \
             --skipPwaValidation
