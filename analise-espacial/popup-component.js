@@ -1,4 +1,4 @@
-// popup-counter-optimized-tetris-fixed.js
+// popup-counter-tetris-fixed-final.js
 (function() {
     'use strict';
     
@@ -41,7 +41,6 @@
             
             const data = await response.json();
             
-            // CounterAPI retorna {success: true, value: X} ou {count: X}
             let count = 0;
             
             if (data && typeof data.count === 'number') {
@@ -75,10 +74,8 @@
                 throw new Error(`HTTP ${response.status}`);
             }
             
-            // Pequeno delay para a API atualizar
             await new Promise(resolve => setTimeout(resolve, 300));
             
-            // Busca o novo valor
             const updated = await getCounterValue();
             console.log('Novo valor após incremento:', updated);
             
@@ -109,23 +106,20 @@
         return newCount;
     }
     
-    // ==================== TETRIS INTELIGENTE E CORRETO ====================
+    // ==================== TETRIS COM ESCALA DINÂMICA ====================
     class MiniTetris {
         constructor(canvas) {
             this.canvas = canvas;
             this.ctx = canvas.getContext('2d');
             
-            // Tamanho fixo para manter compatibilidade
-            const isMobile = window.innerWidth < 480;
-            this.gridSize = isMobile ? 14 : 16;
-            this.cols = 10;
-            this.rows = 14;
+            // DIMENSÕES FIXAS PARA O JOGO (lógica)
+            this.logicalCols = 10;  // Menos colunas para caber melhor
+            this.logicalRows = 14;  // Menos linhas também
             
-            // Ajusta canvas
-            this.canvas.width = this.cols * this.gridSize;
-            this.canvas.height = this.rows * this.gridSize;
+            // Grid lógico (não visual)
+            this.gridSize = 1; // Apenas para cálculos lógicos
             
-            // Tetrominós clássicos
+            // Tetrominós
             this.shapes = [
                 [[1,1,1,1]], // I
                 [[1,1],[1,1]], // O
@@ -155,15 +149,42 @@
             this.dropInterval = 600;
             
             this.reset();
+            this.setupCanvas();
             this.start();
+        }
+        
+        setupCanvas() {
+            // Obtém o tamanho do container
+            const container = this.canvas.parentElement;
+            if (!container) return;
+            
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            
+            // Calcula o tamanho máximo que podemos usar
+            // Queremos manter proporção do jogo (10x14)
+            const widthRatio = containerWidth / this.logicalCols;
+            const heightRatio = containerHeight / this.logicalRows;
+            
+            // Usa o menor ratio para garantir que caiba
+            const scale = Math.min(widthRatio, heightRatio) * 0.9; // 90% para ter margem
+            
+            // Define tamanho do canvas
+            this.canvas.width = this.logicalCols * scale;
+            this.canvas.height = this.logicalRows * scale;
+            
+            // Tamanho visual de cada célula
+            this.cellSize = scale;
+            
+            console.log(`Canvas: ${this.canvas.width}x${this.canvas.height}, Célula: ${this.cellSize}px`);
         }
         
         reset() {
             // Inicializa o tabuleiro vazio
             this.board = [];
-            for (let row = 0; row < this.rows; row++) {
+            for (let row = 0; row < this.logicalRows; row++) {
                 this.board[row] = [];
-                for (let col = 0; col < this.cols; col++) {
+                for (let col = 0; col < this.logicalCols; col++) {
                     this.board[row][col] = 0;
                 }
             }
@@ -171,7 +192,7 @@
             this.score = 0;
             this.gameOver = false;
             
-            // Gera a primeira peça
+            // Gera as peças
             this.currentPiece = this.createRandomPiece();
             this.nextPiece = this.createRandomPiece();
         }
@@ -182,7 +203,7 @@
                 shape: this.shapes[shapeIndex],
                 color: this.colors[shapeIndex],
                 row: 0,
-                col: Math.floor(this.cols / 2) - Math.floor(this.shapes[shapeIndex][0].length / 2)
+                col: Math.floor(this.logicalCols / 2) - Math.floor(this.shapes[shapeIndex][0].length / 2)
             };
         }
         
@@ -194,11 +215,11 @@
                         const newCol = col + c;
                         
                         // Verifica limites
-                        if (newCol < 0 || newCol >= this.cols || newRow >= this.rows) {
+                        if (newCol < 0 || newCol >= this.logicalCols || newRow >= this.logicalRows) {
                             return false;
                         }
                         
-                        // Verifica se já tem peça no tabuleiro
+                        // Verifica colisão com peças existentes
                         if (newRow >= 0 && this.board[newRow][newCol]) {
                             return false;
                         }
@@ -215,7 +236,7 @@
                         const row = this.currentPiece.row + r;
                         const col = this.currentPiece.col + c;
                         
-                        if (row >= 0) { // Só adiciona se estiver dentro do tabuleiro
+                        if (row >= 0) {
                             this.board[row][col] = this.currentPiece.color;
                         }
                     }
@@ -226,11 +247,10 @@
         clearLines() {
             let linesCleared = 0;
             
-            for (let row = this.rows - 1; row >= 0; row--) {
+            for (let row = this.logicalRows - 1; row >= 0; row--) {
                 let isLineComplete = true;
                 
-                // Verifica se a linha está completa
-                for (let col = 0; col < this.cols; col++) {
+                for (let col = 0; col < this.logicalCols; col++) {
                     if (!this.board[row][col]) {
                         isLineComplete = false;
                         break;
@@ -240,129 +260,16 @@
                 if (isLineComplete) {
                     // Remove a linha
                     this.board.splice(row, 1);
-                    // Adiciona uma nova linha no topo
-                    this.board.unshift(new Array(this.cols).fill(0));
+                    // Adiciona nova linha vazia no topo
+                    this.board.unshift(new Array(this.logicalCols).fill(0));
                     linesCleared++;
-                    
-                    // Move a linha atual para baixo novamente para verificar
-                    row++;
+                    row++; // Reavalia a mesma posição
                 }
             }
             
             if (linesCleared > 0) {
                 this.score += linesCleared * 100;
-                this.createLineClearEffect(linesCleared);
             }
-        }
-        
-        createLineClearEffect(lines) {
-            // Efeito visual simples
-            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'];
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    const container = this.canvas.parentElement;
-                    if (!container) return;
-                    
-                    const particle = document.createElement('div');
-                    particle.style.position = 'absolute';
-                    particle.style.width = '4px';
-                    particle.style.height = '4px';
-                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    particle.style.borderRadius = '50%';
-                    particle.style.left = `${Math.random() * 80 + 10}%`;
-                    particle.style.top = `${Math.random() * 80 + 10}%`;
-                    particle.style.pointerEvents = 'none';
-                    particle.style.zIndex = '10';
-                    container.appendChild(particle);
-                    
-                    setTimeout(() => particle.remove(), 500);
-                }, i * 100);
-            }
-        }
-        
-        findBestPosition() {
-            if (!this.currentPiece) return;
-            
-            let bestScore = -Infinity;
-            let bestRotation = 0;
-            let bestCol = this.currentPiece.col;
-            
-            // Testa todas as rotações possíveis
-            for (let rotation = 0; rotation < 4; rotation++) {
-                let testPiece = {
-                    ...this.currentPiece,
-                    shape: this.rotatePiece(this.currentPiece.shape, rotation)
-                };
-                
-                // Testa todas as colunas possíveis
-                for (let col = 0; col <= this.cols - testPiece.shape[0].length; col++) {
-                    // Encontra a linha mais baixa onde a peça pode ser colocada
-                    let row = 0;
-                    while (this.isValidMove(testPiece, row + 1, col)) {
-                        row++;
-                    }
-                    
-                    // Calcula pontuação
-                    let score = 0;
-                    
-                    // Pontua por altura (quanto mais baixo, melhor)
-                    score += row * 2;
-                    
-                    // Pontua por proximidade de outras peças
-                    for (let r = 0; r < testPiece.shape.length; r++) {
-                        for (let c = 0; c < testPiece.shape[r].length; c++) {
-                            if (testPiece.shape[r][c]) {
-                                const boardRow = row + r;
-                                const boardCol = col + c;
-                                
-                                // Bônus por encostar em peças existentes
-                                if (boardRow < this.rows - 1 && this.board[boardRow + 1][boardCol]) {
-                                    score += 3;
-                                }
-                                
-                                // Penalidade por criar buracos
-                                if (boardRow > 0 && !this.board[boardRow - 1][boardCol]) {
-                                    score -= 1;
-                                }
-                            }
-                        }
-                    }
-                    
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestRotation = rotation;
-                        bestCol = col;
-                    }
-                }
-            }
-            
-            // Aplica a melhor rotação
-            for (let i = 0; i < bestRotation; i++) {
-                this.currentPiece.shape = this.rotatePiece(this.currentPiece.shape);
-            }
-            
-            // Move para a melhor coluna
-            if (this.isValidMove(this.currentPiece, this.currentPiece.row, bestCol)) {
-                this.currentPiece.col = bestCol;
-            }
-        }
-        
-        rotatePiece(shape, rotations = 1) {
-            let rotated = shape;
-            for (let i = 0; i < rotations; i++) {
-                const N = rotated.length;
-                const M = rotated[0].length;
-                const newShape = [];
-                
-                for (let r = 0; r < M; r++) {
-                    newShape[r] = [];
-                    for (let c = 0; c < N; c++) {
-                        newShape[r][c] = rotated[N - 1 - c][r];
-                    }
-                }
-                rotated = newShape;
-            }
-            return rotated;
         }
         
         update() {
@@ -376,7 +283,7 @@
                 if (this.isValidMove(this.currentPiece, this.currentPiece.row + 1, this.currentPiece.col)) {
                     this.currentPiece.row++;
                 } else {
-                    // Fixa a peça no tabuleiro
+                    // Fixa a peça
                     this.mergePiece();
                     this.clearLines();
                     
@@ -384,104 +291,139 @@
                     this.currentPiece = this.nextPiece;
                     this.nextPiece = this.createRandomPiece();
                     
-                    // Encontra a melhor posição para a nova peça
-                    this.findBestPosition();
-                    
                     // Verifica game over
                     if (!this.isValidMove(this.currentPiece, this.currentPiece.row, this.currentPiece.col)) {
                         this.gameOver = true;
-                        setTimeout(() => this.reset(), 2000);
+                        setTimeout(() => {
+                            this.reset();
+                            this.draw();
+                        }, 2000);
                     }
                 }
                 
-                // Movimentos laterais aleatórios (25% de chance)
-                if (Math.random() < 0.25) {
+                // Movimentos aleatórios (IA simples)
+                if (Math.random() < 0.3) {
                     const direction = Math.random() < 0.5 ? -1 : 1;
                     if (this.isValidMove(this.currentPiece, this.currentPiece.row, this.currentPiece.col + direction)) {
                         this.currentPiece.col += direction;
                     }
                 }
                 
-                // Rotações aleatórias (20% de chance)
+                // Rotações aleatórias
                 if (Math.random() < 0.2) {
-                    const rotated = this.rotatePiece(this.currentPiece.shape);
-                    if (this.isValidMove({...this.currentPiece, shape: rotated}, this.currentPiece.row, this.currentPiece.col)) {
-                        this.currentPiece.shape = rotated;
-                    }
+                    this.rotateCurrentPiece();
                 }
                 
                 this.draw();
             }
         }
         
+        rotateCurrentPiece() {
+            const rotated = this.rotateMatrix(this.currentPiece.shape);
+            if (this.isValidMove({...this.currentPiece, shape: rotated}, this.currentPiece.row, this.currentPiece.col)) {
+                this.currentPiece.shape = rotated;
+            }
+        }
+        
+        rotateMatrix(matrix) {
+            const N = matrix.length;
+            const M = matrix[0].length;
+            const rotated = [];
+            
+            for (let r = 0; r < M; r++) {
+                rotated[r] = [];
+                for (let c = 0; c < N; c++) {
+                    rotated[r][c] = matrix[N - 1 - c][r];
+                }
+            }
+            return rotated;
+        }
+        
         draw() {
             // Limpa o canvas
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             
-            // Desenha o tabuleiro
-            for (let row = 0; row < this.rows; row++) {
-                for (let col = 0; col < this.cols; col++) {
+            // Fundo escuro
+            this.ctx.fillStyle = '#000';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            // Desenha as peças fixadas (FUNDO - AGORA VISÍVEL!)
+            for (let row = 0; row < this.logicalRows; row++) {
+                for (let col = 0; col < this.logicalCols; col++) {
                     if (this.board[row][col]) {
-                        this.ctx.fillStyle = this.board[row][col];
-                        this.ctx.fillRect(
-                            col * this.gridSize,
-                            row * this.gridSize,
-                            this.gridSize - 1,
-                            this.gridSize - 1
-                        );
-                        
-                        // Efeito de brilho
-                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                        this.ctx.fillRect(
-                            col * this.gridSize,
-                            row * this.gridSize,
-                            this.gridSize - 1,
-                            2
-                        );
+                        this.drawCell(col, row, this.board[row][col], false);
                     }
                 }
             }
             
             // Desenha a peça atual
             if (this.currentPiece) {
-                this.ctx.fillStyle = this.currentPiece.color;
                 for (let r = 0; r < this.currentPiece.shape.length; r++) {
                     for (let c = 0; c < this.currentPiece.shape[r].length; c++) {
                         if (this.currentPiece.shape[r][c]) {
-                            this.ctx.fillRect(
-                                (this.currentPiece.col + c) * this.gridSize,
-                                (this.currentPiece.row + r) * this.gridSize,
-                                this.gridSize - 1,
-                                this.gridSize - 1
-                            );
+                            const col = this.currentPiece.col + c;
+                            const row = this.currentPiece.row + r;
                             
-                            // Contorno
-                            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-                            this.ctx.lineWidth = 1;
-                            this.ctx.strokeRect(
-                                (this.currentPiece.col + c) * this.gridSize,
-                                (this.currentPiece.row + r) * this.gridSize,
-                                this.gridSize - 1,
-                                this.gridSize - 1
-                            );
+                            // Só desenha se estiver visível
+                            if (row >= 0) {
+                                this.drawCell(col, row, this.currentPiece.color, true);
+                            }
                         }
                     }
                 }
             }
             
-            // Grade
+            // Grade sutil
+            this.drawGrid();
+        }
+        
+        drawCell(col, row, color, isCurrent = false) {
+            const x = col * this.cellSize;
+            const y = row * this.cellSize;
+            const size = this.cellSize;
+            
+            // Cor principal
+            this.ctx.fillStyle = color;
+            this.ctx.fillRect(x, y, size - 1, size - 1);
+            
+            // Efeito 3D para peças fixas
+            if (!isCurrent) {
+                // Sombra interna
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.fillRect(x, y, size - 1, 2);
+                this.ctx.fillRect(x, y, 2, size - 1);
+                
+                // Realce
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                this.ctx.fillRect(x + size - 3, y, 2, size - 1);
+                this.ctx.fillRect(x, y + size - 3, size - 1, 2);
+            } else {
+                // Contorno para peça atual
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(x, y, size - 1, size - 1);
+            }
+        }
+        
+        drawGrid() {
             this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             this.ctx.lineWidth = 0.5;
-            for (let col = 0; col <= this.cols; col++) {
+            
+            // Linhas verticais
+            for (let col = 0; col <= this.logicalCols; col++) {
+                const x = col * this.cellSize;
                 this.ctx.beginPath();
-                this.ctx.moveTo(col * this.gridSize, 0);
-                this.ctx.lineTo(col * this.gridSize, this.rows * this.gridSize);
+                this.ctx.moveTo(x, 0);
+                this.ctx.lineTo(x, this.canvas.height);
                 this.ctx.stroke();
             }
-            for (let row = 0; row <= this.rows; row++) {
+            
+            // Linhas horizontais
+            for (let row = 0; row <= this.logicalRows; row++) {
+                const y = row * this.cellSize;
                 this.ctx.beginPath();
-                this.ctx.moveTo(0, row * this.gridSize);
-                this.ctx.lineTo(this.cols * this.gridSize, row * this.gridSize);
+                this.ctx.moveTo(0, y);
+                this.ctx.lineTo(this.canvas.width, y);
                 this.ctx.stroke();
             }
         }
@@ -537,7 +479,7 @@
                 background: white;
                 border-radius: 16px;
                 width: 90%;
-                max-width: 400px;
+                max-width: 380px; /* Mais compacto */
                 overflow: hidden;
                 transform: translateY(20px) scale(0.95);
                 opacity: 0;
@@ -555,7 +497,7 @@
             .popup-header {
                 background: linear-gradient(135deg, ${CONFIG.colors.primary}, ${CONFIG.colors.primaryDark});
                 color: white;
-                padding: 15px 20px;
+                padding: 12px 16px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -563,7 +505,7 @@
             
             .popup-header h3 {
                 margin: 0;
-                font-size: 16px;
+                font-size: 15px;
                 font-weight: 600;
             }
             
@@ -571,11 +513,11 @@
                 background: rgba(255, 255, 255, 0.2);
                 border: none;
                 color: white;
-                width: 28px;
-                height: 28px;
+                width: 26px;
+                height: 26px;
                 border-radius: 50%;
                 cursor: pointer;
-                font-size: 18px;
+                font-size: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -588,13 +530,13 @@
             
             /* CONTEÚDO COMPACTO */
             .popup-content {
-                padding: 20px;
+                padding: 16px;
             }
             
             .popup-message {
                 text-align: center;
-                margin: 0 0 15px 0;
-                font-size: 14px;
+                margin: 0 0 12px 0;
+                font-size: 13px;
                 color: #333;
                 line-height: 1.4;
             }
@@ -602,25 +544,25 @@
             .popup-message strong {
                 display: block;
                 color: ${CONFIG.colors.primary};
-                font-size: 15px;
-                margin-bottom: 5px;
+                font-size: 14px;
+                margin-bottom: 4px;
             }
             
-            /* TETRIS COMPACTO - CORRIGIDO */
+            /* TETRIS COMPACTO COM ESCALA */
             .tetris-section {
                 background: #000;
-                border-radius: 8px;
+                border-radius: 6px;
                 overflow: hidden;
-                margin: 15px 0;
+                margin: 12px 0;
                 border: 2px solid #1a1a2e;
-                height: 200px;
+                height: 160px; /* Altura reduzida */
                 display: flex;
                 flex-direction: column;
                 position: relative;
             }
             
             .tetris-header {
-                padding: 8px;
+                padding: 6px;
                 text-align: center;
                 background: rgba(0, 0, 0, 0.9);
                 border-bottom: 1px solid #333;
@@ -628,7 +570,7 @@
             
             .tetris-header h4 {
                 margin: 0;
-                font-size: 12px;
+                font-size: 11px;
                 color: #4FC3F7;
                 font-family: 'Courier New', monospace;
                 letter-spacing: 1px;
@@ -639,32 +581,30 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 10px;
-                background: linear-gradient(180deg, #0a0a1a 0%, #000 100%);
+                padding: 8px;
+                background: #000;
             }
             
             #tetrisCanvas {
-                background: #000;
                 display: block;
                 max-width: 100%;
                 max-height: 100%;
-                image-rendering: pixelated;
-                image-rendering: crisp-edges;
+                background: #000 !important;
             }
             
             /* BOTÕES COMPACTOS */
             .buttons-row {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                margin: 15px 0;
+                gap: 8px;
+                margin: 12px 0;
             }
             
             .btn {
-                padding: 12px 15px;
+                padding: 10px 12px;
                 border: none;
-                border-radius: 10px;
-                font-size: 14px;
+                border-radius: 8px;
+                font-size: 13px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s;
@@ -687,7 +627,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
+                gap: 5px;
             }
             
             .btn-secondary:hover:not(:disabled) {
@@ -704,25 +644,25 @@
             /* CONTADOR PEQUENO */
             .counter-display {
                 text-align: center;
-                margin: 15px 0;
+                margin: 12px 0;
             }
             
             .counter-number {
                 display: inline-block;
-                width: 50px;
-                height: 50px;
+                width: 45px;
+                height: 45px;
                 border-radius: 50%;
                 background: linear-gradient(135deg, ${CONFIG.colors.secondaryLight}, ${CONFIG.colors.secondary});
                 color: white;
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 800;
-                line-height: 50px;
-                margin-bottom: 5px;
+                line-height: 45px;
+                margin-bottom: 4px;
                 transition: transform 0.3s;
             }
             
             .counter-label {
-                font-size: 11px;
+                font-size: 10px;
                 color: #666;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
@@ -731,17 +671,17 @@
             /* STATUS */
             .status-display {
                 text-align: center;
-                margin: 10px 0;
-                font-size: 12px;
+                margin: 8px 0;
+                font-size: 11px;
                 color: #666;
             }
             
             .status-indicator {
                 display: inline-block;
-                width: 6px;
-                height: 6px;
+                width: 5px;
+                height: 5px;
                 border-radius: 50%;
-                margin-right: 6px;
+                margin-right: 5px;
             }
             
             .status-online {
@@ -760,8 +700,8 @@
             
             /* CHECKBOX */
             .option-row {
-                margin-top: 15px;
-                padding-top: 15px;
+                margin-top: 12px;
+                padding-top: 12px;
                 border-top: 1px solid #eee;
                 text-align: center;
             }
@@ -769,26 +709,26 @@
             .checkbox-label {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: 5px;
                 cursor: pointer;
-                font-size: 12px;
+                font-size: 11px;
                 color: #666;
             }
             
             /* NOTIFICAÇÃO */
             .coffee-notification {
                 position: fixed;
-                top: 20px;
-                right: 20px;
+                top: 15px;
+                right: 15px;
                 background: ${CONFIG.colors.success};
                 color: white;
-                padding: 10px 15px;
-                border-radius: 8px;
+                padding: 8px 12px;
+                border-radius: 6px;
                 z-index: 10000;
                 animation: slideIn 0.3s ease-out;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                font-size: 13px;
-                max-width: 250px;
+                font-size: 12px;
+                max-width: 200px;
             }
             
             @keyframes slideIn {
@@ -799,73 +739,73 @@
             /* ANIMAÇÃO CAFÉ */
             .coffee-particle {
                 position: fixed;
-                font-size: 16px;
+                font-size: 14px;
                 z-index: 10001;
                 pointer-events: none;
                 animation: floatUp 1s ease-out forwards;
             }
             
             @keyframes floatUp {
-                to { transform: translateY(-60px) rotate(15deg); opacity: 0; }
+                to { transform: translateY(-50px) rotate(15deg); opacity: 0; }
             }
             
             /* RESPONSIVIDADE MELHORADA */
             @media (max-width: 480px) {
                 .popup-card {
                     width: 95%;
-                    max-width: 320px;
-                    border-radius: 14px;
+                    max-width: 300px;
+                    border-radius: 12px;
                 }
                 
                 .popup-header {
-                    padding: 12px 16px;
+                    padding: 10px 14px;
                 }
                 
                 .popup-header h3 {
-                    font-size: 15px;
+                    font-size: 14px;
                 }
                 
                 .popup-content {
-                    padding: 16px;
+                    padding: 14px;
                 }
                 
                 .tetris-section {
-                    height: 180px;
+                    height: 140px;
                 }
                 
                 .tetris-header h4 {
-                    font-size: 11px;
+                    font-size: 10px;
                 }
                 
                 .buttons-row {
                     grid-template-columns: 1fr;
-                    gap: 8px;
+                    gap: 6px;
                 }
                 
                 .btn {
-                    padding: 10px 12px;
-                    font-size: 13px;
+                    padding: 8px 10px;
+                    font-size: 12px;
                 }
                 
                 .counter-number {
-                    width: 45px;
-                    height: 45px;
-                    font-size: 16px;
-                    line-height: 45px;
+                    width: 40px;
+                    height: 40px;
+                    font-size: 14px;
+                    line-height: 40px;
                 }
                 
                 .counter-label {
-                    font-size: 10px;
+                    font-size: 9px;
                 }
             }
             
             @media (max-width: 360px) {
                 .tetris-section {
-                    height: 160px;
+                    height: 130px;
                 }
                 
                 .popup-card {
-                    max-width: 300px;
+                    max-width: 280px;
                 }
             }
             
