@@ -1,4 +1,4 @@
-// popup-counter-tetris-fixed-final.js
+// popup-counter-tetris-final-fixed.js
 (function() {
     'use strict';
     
@@ -106,20 +106,16 @@
         return newCount;
     }
     
-    // ==================== TETRIS COM ESCALA DINÂMICA ====================
+    // ==================== TETRIS CORRIGIDO ====================
     class MiniTetris {
         constructor(canvas) {
             this.canvas = canvas;
             this.ctx = canvas.getContext('2d');
             
-            // DIMENSÕES FIXAS PARA O JOGO (lógica)
-            this.logicalCols = 10;  // Menos colunas para caber melhor
-            this.logicalRows = 14;  // Menos linhas também
+            // Dimensões do jogo
+            this.cols = 10;  // Menos colunas para caber melhor
+            this.rows = 14;  // Menos linhas também
             
-            // Grid lógico (não visual)
-            this.gridSize = 1; // Apenas para cálculos lógicos
-            
-            // Tetrominós
             this.shapes = [
                 [[1,1,1,1]], // I
                 [[1,1],[1,1]], // O
@@ -147,6 +143,7 @@
             this.score = 0;
             this.lastDropTime = 0;
             this.dropInterval = 600;
+            this.cellSize = 0;
             
             this.reset();
             this.setupCanvas();
@@ -154,56 +151,44 @@
         }
         
         setupCanvas() {
-            // Obtém o tamanho do container
             const container = this.canvas.parentElement;
             if (!container) return;
             
-            const containerWidth = container.clientWidth;
-            const containerHeight = container.clientHeight;
+            const containerWidth = container.clientWidth - 16; // - padding
+            const containerHeight = container.clientHeight - 16;
             
-            // Calcula o tamanho máximo que podemos usar
-            // Queremos manter proporção do jogo (10x14)
-            const widthRatio = containerWidth / this.logicalCols;
-            const heightRatio = containerHeight / this.logicalRows;
+            // Calcula tamanho baseado no container
+            const widthBasedCell = Math.floor(containerWidth / this.cols);
+            const heightBasedCell = Math.floor(containerHeight / this.rows);
             
-            // Usa o menor ratio para garantir que caiba
-            const scale = Math.min(widthRatio, heightRatio) * 0.9; // 90% para ter margem
+            this.cellSize = Math.min(widthBasedCell, heightBasedCell) - 1;
             
-            // Define tamanho do canvas
-            this.canvas.width = this.logicalCols * scale;
-            this.canvas.height = this.logicalRows * scale;
+            this.canvas.width = this.cols * this.cellSize;
+            this.canvas.height = this.rows * this.cellSize;
             
-            // Tamanho visual de cada célula
-            this.cellSize = scale;
-            
-            console.log(`Canvas: ${this.canvas.width}x${this.canvas.height}, Célula: ${this.cellSize}px`);
+            console.log(`Tetris: ${this.canvas.width}x${this.canvas.height}, Célula: ${this.cellSize}px`);
         }
         
         reset() {
-            // Inicializa o tabuleiro vazio
-            this.board = [];
-            for (let row = 0; row < this.logicalRows; row++) {
-                this.board[row] = [];
-                for (let col = 0; col < this.logicalCols; col++) {
-                    this.board[row][col] = 0;
-                }
-            }
-            
+            // Inicializa tabuleiro vazio
+            this.board = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
             this.score = 0;
             this.gameOver = false;
             
-            // Gera as peças
+            // Gera peças iniciais
             this.currentPiece = this.createRandomPiece();
             this.nextPiece = this.createRandomPiece();
         }
         
         createRandomPiece() {
             const shapeIndex = Math.floor(Math.random() * this.shapes.length);
+            const shape = this.shapes[shapeIndex];
+            
             return {
-                shape: this.shapes[shapeIndex],
+                shape: shape,
                 color: this.colors[shapeIndex],
                 row: 0,
-                col: Math.floor(this.logicalCols / 2) - Math.floor(this.shapes[shapeIndex][0].length / 2)
+                col: Math.floor(this.cols / 2) - Math.floor(shape[0].length / 2)
             };
         }
         
@@ -215,12 +200,12 @@
                         const newCol = col + c;
                         
                         // Verifica limites
-                        if (newCol < 0 || newCol >= this.logicalCols || newRow >= this.logicalRows) {
+                        if (newCol < 0 || newCol >= this.cols || newRow >= this.rows) {
                             return false;
                         }
                         
-                        // Verifica colisão com peças existentes
-                        if (newRow >= 0 && this.board[newRow][newCol]) {
+                        // Verifica colisão com peças existentes (CORRIGIDO: board[newRow][newCol] deve existir)
+                        if (newRow >= 0 && this.board[newRow] && this.board[newRow][newCol]) {
                             return false;
                         }
                     }
@@ -230,14 +215,17 @@
         }
         
         mergePiece() {
+            // CORREÇÃO: Agora realmente fixa a peça no tabuleiro
             for (let r = 0; r < this.currentPiece.shape.length; r++) {
                 for (let c = 0; c < this.currentPiece.shape[r].length; c++) {
                     if (this.currentPiece.shape[r][c]) {
                         const row = this.currentPiece.row + r;
                         const col = this.currentPiece.col + c;
                         
-                        if (row >= 0) {
+                        // Só adiciona se estiver dentro do tabuleiro
+                        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
                             this.board[row][col] = this.currentPiece.color;
+                            console.log(`Peça fixada em [${row}][${col}] = ${this.currentPiece.color}`);
                         }
                     }
                 }
@@ -247,10 +235,11 @@
         clearLines() {
             let linesCleared = 0;
             
-            for (let row = this.logicalRows - 1; row >= 0; row--) {
+            for (let row = this.rows - 1; row >= 0; row--) {
                 let isLineComplete = true;
                 
-                for (let col = 0; col < this.logicalCols; col++) {
+                // Verifica se a linha está completa
+                for (let col = 0; col < this.cols; col++) {
                     if (!this.board[row][col]) {
                         isLineComplete = false;
                         break;
@@ -261,7 +250,7 @@
                     // Remove a linha
                     this.board.splice(row, 1);
                     // Adiciona nova linha vazia no topo
-                    this.board.unshift(new Array(this.logicalCols).fill(0));
+                    this.board.unshift(Array(this.cols).fill(0));
                     linesCleared++;
                     row++; // Reavalia a mesma posição
                 }
@@ -269,6 +258,7 @@
             
             if (linesCleared > 0) {
                 this.score += linesCleared * 100;
+                console.log(`Linhas removidas: ${linesCleared}, Pontuação: ${this.score}`);
             }
         }
         
@@ -279,21 +269,23 @@
             if (currentTime - this.lastDropTime > this.dropInterval) {
                 this.lastDropTime = currentTime;
                 
-                // Move a peça para baixo
+                // Tenta mover para baixo
                 if (this.isValidMove(this.currentPiece, this.currentPiece.row + 1, this.currentPiece.col)) {
                     this.currentPiece.row++;
                 } else {
-                    // Fixa a peça
+                    // Não pode mover mais, fixa a peça
+                    console.log('Fixando peça no tabuleiro...');
                     this.mergePiece();
                     this.clearLines();
                     
-                    // Nova peça
+                    // Pega a próxima peça
                     this.currentPiece = this.nextPiece;
                     this.nextPiece = this.createRandomPiece();
                     
-                    // Verifica game over
+                    // Verifica se a nova peça já colide (game over)
                     if (!this.isValidMove(this.currentPiece, this.currentPiece.row, this.currentPiece.col)) {
                         this.gameOver = true;
+                        console.log('GAME OVER!');
                         setTimeout(() => {
                             this.reset();
                             this.draw();
@@ -301,7 +293,7 @@
                     }
                 }
                 
-                // Movimentos aleatórios (IA simples)
+                // Movimento lateral aleatório (IA)
                 if (Math.random() < 0.3) {
                     const direction = Math.random() < 0.5 ? -1 : 1;
                     if (this.isValidMove(this.currentPiece, this.currentPiece.row, this.currentPiece.col + direction)) {
@@ -309,7 +301,7 @@
                     }
                 }
                 
-                // Rotações aleatórias
+                // Rotação aleatória
                 if (Math.random() < 0.2) {
                     this.rotateCurrentPiece();
                 }
@@ -326,14 +318,13 @@
         }
         
         rotateMatrix(matrix) {
-            const N = matrix.length;
-            const M = matrix[0].length;
-            const rotated = [];
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            const rotated = Array(cols).fill().map(() => Array(rows).fill(0));
             
-            for (let r = 0; r < M; r++) {
-                rotated[r] = [];
-                for (let c = 0; c < N; c++) {
-                    rotated[r][c] = matrix[N - 1 - c][r];
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    rotated[c][rows - 1 - r] = matrix[r][c];
                 }
             }
             return rotated;
@@ -343,29 +334,29 @@
             // Limpa o canvas
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             
-            // Fundo escuro
+            // Fundo preto
             this.ctx.fillStyle = '#000';
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             
-            // Desenha as peças fixadas (FUNDO - AGORA VISÍVEL!)
-            for (let row = 0; row < this.logicalRows; row++) {
-                for (let col = 0; col < this.logicalCols; col++) {
+            // Desenha peças fixas no tabuleiro (FUNDO)
+            for (let row = 0; row < this.rows; row++) {
+                for (let col = 0; col < this.cols; col++) {
                     if (this.board[row][col]) {
                         this.drawCell(col, row, this.board[row][col], false);
                     }
                 }
             }
             
-            // Desenha a peça atual
-            if (this.currentPiece) {
+            // Desenha a peça atual (se existir)
+            if (this.currentPiece && !this.gameOver) {
                 for (let r = 0; r < this.currentPiece.shape.length; r++) {
                     for (let c = 0; c < this.currentPiece.shape[r].length; c++) {
                         if (this.currentPiece.shape[r][c]) {
                             const col = this.currentPiece.col + c;
                             const row = this.currentPiece.row + r;
                             
-                            // Só desenha se estiver visível
-                            if (row >= 0) {
+                            // Só desenha se estiver dentro do canvas
+                            if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
                                 this.drawCell(col, row, this.currentPiece.color, true);
                             }
                         }
@@ -373,44 +364,42 @@
                 }
             }
             
-            // Grade sutil
+            // Grade
             this.drawGrid();
         }
         
-        drawCell(col, row, color, isCurrent = false) {
+        drawCell(col, row, color, isCurrent) {
             const x = col * this.cellSize;
             const y = row * this.cellSize;
             const size = this.cellSize;
             
             // Cor principal
             this.ctx.fillStyle = color;
-            this.ctx.fillRect(x, y, size - 1, size - 1);
+            this.ctx.fillRect(x + 1, y + 1, size - 2, size - 2);
             
-            // Efeito 3D para peças fixas
             if (!isCurrent) {
-                // Sombra interna
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                this.ctx.fillRect(x, y, size - 1, 2);
-                this.ctx.fillRect(x, y, 2, size - 1);
+                // Efeito 3D para peças fixas
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.fillRect(x + 1, y + 1, size - 2, 2); // Topo
+                this.ctx.fillRect(x + 1, y + 1, 2, size - 2); // Esquerda
                 
-                // Realce
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                this.ctx.fillRect(x + size - 3, y, 2, size - 1);
-                this.ctx.fillRect(x, y + size - 3, size - 1, 2);
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.fillRect(x + size - 3, y + 1, 2, size - 2); // Direita
+                this.ctx.fillRect(x + 1, y + size - 3, size - 2, 2); // Baixo
             } else {
                 // Contorno para peça atual
                 this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
                 this.ctx.lineWidth = 1;
-                this.ctx.strokeRect(x, y, size - 1, size - 1);
+                this.ctx.strokeRect(x + 1, y + 1, size - 2, size - 2);
             }
         }
         
         drawGrid() {
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
             this.ctx.lineWidth = 0.5;
             
             // Linhas verticais
-            for (let col = 0; col <= this.logicalCols; col++) {
+            for (let col = 0; col <= this.cols; col++) {
                 const x = col * this.cellSize;
                 this.ctx.beginPath();
                 this.ctx.moveTo(x, 0);
@@ -419,7 +408,7 @@
             }
             
             // Linhas horizontais
-            for (let row = 0; row <= this.logicalRows; row++) {
+            for (let row = 0; row <= this.rows; row++) {
                 const y = row * this.cellSize;
                 this.ctx.beginPath();
                 this.ctx.moveTo(0, y);
@@ -479,7 +468,7 @@
                 background: white;
                 border-radius: 16px;
                 width: 90%;
-                max-width: 380px; /* Mais compacto */
+                max-width: 380px;
                 overflow: hidden;
                 transform: translateY(20px) scale(0.95);
                 opacity: 0;
@@ -535,7 +524,7 @@
             
             .popup-message {
                 text-align: center;
-                margin: 0 0 12px 0;
+                margin: 0 0 10px 0;
                 font-size: 13px;
                 color: #333;
                 line-height: 1.4;
@@ -548,14 +537,27 @@
                 margin-bottom: 4px;
             }
             
-            /* TETRIS COMPACTO COM ESCALA */
+            /* AVISO DE CONSTRUÇÃO */
+            .warning-message {
+                background: rgba(255, 107, 107, 0.1);
+                border-left: 3px solid ${CONFIG.colors.primary};
+                padding: 8px 10px;
+                margin: 0 0 12px 0;
+                border-radius: 4px;
+                font-size: 11px;
+                color: #666;
+                line-height: 1.3;
+                text-align: left;
+            }
+            
+            /* TETRIS COMPACTO */
             .tetris-section {
                 background: #000;
                 border-radius: 6px;
                 overflow: hidden;
                 margin: 12px 0;
                 border: 2px solid #1a1a2e;
-                height: 160px; /* Altura reduzida */
+                height: 160px;
                 display: flex;
                 flex-direction: column;
                 position: relative;
@@ -777,6 +779,11 @@
                     font-size: 10px;
                 }
                 
+                .warning-message {
+                    font-size: 10px;
+                    padding: 6px 8px;
+                }
+                
                 .buttons-row {
                     grid-template-columns: 1fr;
                     gap: 6px;
@@ -823,6 +830,12 @@
                     color: #e0e0e0;
                 }
                 
+                .warning-message {
+                    background: rgba(255, 107, 107, 0.15);
+                    color: #aaa;
+                    border-left-color: ${CONFIG.colors.primary};
+                }
+                
                 .counter-label {
                     color: #aaa;
                 }
@@ -852,8 +865,12 @@
                     <div class="popup-content">
                         <p class="popup-message">
                             <strong>Ajude-nos com um cafezinho! ☕</strong>
-                            Estamos melhorando esta página.
+                            Estamos trabalhando para melhorar esta página.
                         </p>
+                        
+                        <div class="warning-message">
+                            ⚠️ <strong>Atenção:</strong> Esta funcionalidade ainda está sendo construída e testada e pode apresentar bugs, erros ou instabilidades de funcionamento.
+                        </div>
                         
                         <div class="tetris-section">
                             <div class="tetris-header">
@@ -1105,7 +1122,10 @@
         
         // Inicia Tetris
         if (elements.canvas) {
-            state.tetris = new MiniTetris(elements.canvas);
+            // Pequeno delay para garantir que o container está renderizado
+            setTimeout(() => {
+                state.tetris = new MiniTetris(elements.canvas);
+            }, 100);
         }
         
         // Atualiza contador da API
