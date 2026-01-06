@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa Sanitário – CheckInfra</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+body{margin:0;font-family:Arial,sans-serif;}
+header{background:#1f4fd8;color:#fff;padding:14px;text-align:center;font-weight:bold;position:sticky;top:0;z-index:1000;}
+footer{background:#f4f6f8;padding:8px;text-align:center;font-size:12px;border-top:1px solid #ddd;}
+
+.painel{
+  padding:6px;
+  background:#f4f6f8;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  position:sticky;
+  top:52px;
+  z-index:999;
+  border-bottom:1px solid #ddd;
+}
+
+label{font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px;}
+
+.bola{width:12px;height:12px;border-radius:50%;}
+.verde{background:#4CAF50;}
+.amarela{background:#FFD700;}
+.laranja{background:#FF9800;}
+.vermelho{background:#F44336;}
+
+#map{height:calc(100vh - 160px);}
+
+.pulse{animation:pulse 2.2s infinite;}
+@keyframes pulse{
+  0%{r:8;opacity:.9}
+  70%{r:18;opacity:0}
+  100%{opacity:0}
+}
+</style>
+</head>
+
+<body>
+
+<header>Mapa Sanitário das Escolas — CheckInfra</header>
+
+<div class="painel">
+  <label><input type="checkbox" id="fAdequado" checked><span class="bola verde"></span>Adequado</label>
+  <label><input type="checkbox" id="fAlerta" checked><span class="bola amarela"></span>Alerta</label>
+  <label><input type="checkbox" id="fAtencao" checked><span class="bola laranja"></span>Atenção</label>
+  <label><input type="checkbox" id="fCritico" checked><span class="bola vermelho"></span>Crítico</label>
+  <label><input type="checkbox" id="togglePulso" checked>Mapa vivo</label>
+  <label><input type="checkbox" id="toggleBairros" checked>Polígonos</label>
+  <label><input type="checkbox" id="toggleIA">Leitura IA</label>
+</div>
+
+<div id="map"></div>
+
+<footer>
+  Leitura territorial indicativa. Não substitui inspeção técnica presencial.
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔥 Firebase */
+const app = initializeApp({
+  apiKey: "AIzaSyBvFUBXJwumctgf2DNH9ajSIk5-uydiZa0",
+  authDomain: "checkinfra-adf3c.firebaseapp.com",
+  projectId: "checkinfra-adf3c"
+});
+const db = getFirestore(app);
+
+/* 🗺️ Mapa */
+const map = L.map("map").setView([-3.7319,-38.5267],12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+/* 🔹 Estado */
+let avaliacoes = [];
+let camadaPontos = L.layerGroup().addTo(map);
+let camadaBairros = L.geoJSON(null).addTo(map);
+
+/* 🎯 Utilidades */
+function corStatus(s){
+  s=s.toLowerCase();
+  if(s.includes("crít"))return"#F44336";
+  if(s.includes("aten"))return"#FF9800";
+  if(s.includes("alert"))return"#FFD700";
+  return"#4CAF50";
+}
+
+/* 📍 Pontos */
+function desenharPontos(){
+  camadaPontos.clearLayers();
+  avaliacoes.forEach(d=>{
+    if(
+      (d.status.includes("Adequado") && !fAdequado.checked)||
+      (d.status.includes("Alerta") && !fAlerta.checked)||
+      (d.status.includes("Atenção") && !fAtencao.checked)||
+      (d.status.includes("Crítico") && !fCritico.checked)
+    ) return;
+
+    L.circleMarker([d.lat,d.lng],{
+      radius:8,
+      color:corStatus(d.status),
+      fillOpacity:.8,
+      className:togglePulso.checked?"pulse":""
+    }).bindPopup(`
+      <strong>${d.escola}</strong><br>
+      Status: ${d.status}<br>
+      Pontuação: ${d.pontuacao}
+    `).addTo(camadaPontos);
+  });
+}
+
+/* 🟨 Polígonos */
+async function desenharBairros(){
+  camadaBairros.clearLayers();
+  if(!toggleBairros.checked) return;
+
+  const geo = await fetch("POLIGONAIS.geojson").then(r=>r.json());
+
+  camadaBairros = L.geoJSON(geo,{
+    style:f=>{
+      const dentro = avaliacoes.filter(p=>L.polygon(f.geometry.coordinates[0].map(c=>[c[1],c[0]])).contains([p.lat,p.lng]));
+      if(dentro.length===0) return{fillOpacity:0,weight:1,color:"#999"};
+
+      const total=dentro.length;
+      const c={
+        crit: dentro.filter(d=>d.status.includes("Crítico")).length,
+        aten: dentro.filter(d=>d.status.includes("Atenção")).length,
+        alerta: dentro.filter(d=>d.status.includes("Alerta")).length,
+        adeq: dentro.filter(d=>d.status.includes("Adequado")).length
+      };
+
+      let cor="#4CAF50";
+      if(c.crit/total>=.5) cor="#F44336";
+      else if(c.aten/total>=.5) cor="#FF9800";
+      else if(c.alerta/total>=.5) cor="#FFD700";
+
+      return{fillColor:cor,fillOpacity:.45,color:"#555",weight:1};
+    },
+    onEachFeature:(f,l)=>{
+      l.on("click",()=>{
+        const dentro = avaliacoes.filter(p=>l.getBounds().contains([p.lat,p.lng]));
+        if(dentro.length===0){
+          l.bindPopup("Sem avaliações").openPopup();return;
+        }
+        const t=dentro.length;
+        const c={
+          crit: dentro.filter(d=>d.status.includes("Crítico")).length,
+          aten: dentro.filter(d=>d.status.includes("Atenção")).length,
+          alerta: dentro.filter(d=>d.status.includes("Alerta")).length,
+          adeq: dentro.filter(d=>d.status.includes("Adequado")).length
+        };
+
+        l.bindPopup(`
+        <strong>Leitura territorial</strong><hr>
+        Crítico: ${(c.crit/t*100).toFixed(0)}% (${c.crit})<br>
+        Atenção: ${(c.aten/t*100).toFixed(0)}% (${c.aten})<br>
+        Alerta: ${(c.alerta/t*100).toFixed(0)}% (${c.alerta})<br>
+        Adequado: ${(c.adeq/t*100).toFixed(0)}% (${c.adeq})<br>
+        <hr>
+        ${c.crit/t>=.5?"≥50% crítico — situação predominante":""}
+        `).openPopup();
+      });
+    }
+  }).addTo(map);
+}
+
+/* 🔄 Firebase */
+async function carregar(){
+  const snap = await getDocs(collection(db,"avaliacoes"));
+  avaliacoes=[];
+  snap.forEach(d=>avaliacoes.push(d.data()));
+  desenharPontos();
+  desenharBairros();
+}
+carregar();
+
+/* 🔁 Eventos */
+[fAdequado,fAlerta,fAtencao,fCritico,togglePulso,toggleBairros]
+.forEach(e=>e.onchange=()=>{desenharPontos();desenharBairros();});
+</script>
+
+</body>
+</html>
