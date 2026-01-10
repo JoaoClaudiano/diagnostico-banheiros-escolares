@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>CheckInfra — Teste de Índices Espaciais</title>
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet Heat -->
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .painel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.15);
+      z-index: 1000;
+      width: 260px;
+    }
+    .painel h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+    .painel label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .indicadores {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    .indicadores div {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="painel">
+  <h3>Índices Espaciais</h3>
+
+  <label><input type="checkbox" id="toggle-densidade"> 🔴 Densidade Crítica</label>
+  <label><input type="checkbox" id="toggle-voronoi"> 🔺 Voronoi Crítico</label>
+
+  <div class="indicadores">
+    <strong>Indicadores</strong>
+    <div>Densidade crítica: <span id="ind-densidade">–</span></div>
+    <div>Hotspots: <span id="ind-hotspots">–</span></div>
+    <div>Gini sanitário: <span id="ind-gini">–</span></div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<!-- =========================
+     FIREBASE
+========================= -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔧 AJUSTE SEU CONFIG */
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_DOMINIO.firebaseapp.com",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* =========================
+   MAPA
+========================= */
+const map = L.map("map").setView([-3.77, -38.56], 12);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+/* =========================
+   DADOS (MANAGER)
+========================= */
+window.dadosManager = {
+  escolas: [],
+
+  async carregar() {
+    const snap = await getDocs(collection(db, "avaliacoes"));
+    this.escolas = [];
+
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (!d.lat || !d.lng) return;
+
+      this.escolas.push({
+        id: d.id || doc.id,
+        escola: d.escola,
+        classe: (d.classe || d.status || "").toLowerCase(),
+        status: d.status,
+        pontuacao: d.pontuacao ?? 0,
+        rt: d.rt ?? 0,
+        lat: d.lat,
+        lng: d.lng
+      });
+    });
+
+    console.log("📊 Escolas carregadas:", this.escolas.length);
+  },
+
+  getEscolas() {
+    return this.escolas;
+  }
+};
+
+/* =========================
+   ÍNDICE — DENSIDADE CRÍTICA
+========================= */
+window.DensidadeCritica = {
+  layer: null,
+
+  ativar(escolas) {
+    const pontos = escolas
+      .filter(e => e.classe === "critico")
+      .map(e => [e.lat, e.lng, 1]);
+
+    if (!pontos.length) return;
+
+    this.layer = L.heatLayer(pontos, {
+      radius: 28,
+      blur: 18
+    }).addTo(map);
+  },
+
+  desativar() {
+    if (this.layer) {
+      map.removeLayer(this.layer);
+      this.layer = null;
+    }
+  }
+};
+
+/* =========================
+   ÍNDICE — VORONOI SIMPLIFICADO
+========================= */
+window.VoronoiCritico = {
+  layer: null,
+
+  ativar(escolas) {
+    this.layer = L.layerGroup();
+
+    escolas
+      .filter(e => e.classe === "critico")
+      .forEach(e => {
+        L.circle([e.lat, e.lng], {
+          radius: 600,
+          color: "red",
+          fillOpacity: 0.08
+        }).addTo(this.layer);
+      });
+
+    this.layer.addTo(map);
+  },
+
+  desativar() {
+    if (this.layer) {
+      map.removeLayer(this.layer);
+      this.layer = null;
+    }
+  }
+};
+
+/* =========================
+   GINI SANITÁRIO
+========================= */
+function calcularGini(valores) {
+  const arr = valores.slice().sort((a, b) => a - b);
+  const n = arr.length;
+  const soma = arr.reduce((a, b) => a + b, 0);
+  if (soma === 0) return 0;
+
+  let acc = 0;
+  for (let i = 0; i < n; i++) acc += (i + 1) * arr[i];
+  return (2 * acc) / (n * soma) - (n + 1) / n;
+}
+
+/* =========================
+   ORQUESTRAÇÃO
+========================= */
+function atualizarIndicadores(escolas) {
+  const criticas = escolas.filter(e => e.classe === "critico");
+
+  document.getElementById("ind-densidade").textContent =
+    escolas.length
+      ? Math.round((criticas.length / escolas.length) * 100) + "%"
+      : "0%";
+
+  document.getElementById("ind-hotspots").textContent =
+    Math.floor(criticas.length / 3);
+
+  document.getElementById("ind-gini").textContent =
+    calcularGini(escolas.map(e => e.pontuacao)).toFixed(2);
+}
+
+function aplicarAnalise() {
+  const escolas = window.dadosManager.getEscolas();
+
+  DensidadeCritica.desativar();
+  VoronoiCritico.desativar();
+
+  if (document.getElementById("toggle-densidade").checked) {
+    DensidadeCritica.ativar(escolas);
+  }
+
+  if (document.getElementById("toggle-voronoi").checked) {
+    VoronoiCritico.ativar(escolas);
+  }
+
+  atualizarIndicadores(escolas);
+}
+
+/* =========================
+   EVENTOS
+========================= */
+document.getElementById("toggle-densidade").onchange = aplicarAnalise;
+document.getElementById("toggle-voronoi").onchange = aplicarAnalise;
+
+/* =========================
+   INIT
+========================= */
+await window.dadosManager.carregar();
+aplicarAnalise();
+
+</script>
+</body>
+</html>
