@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====================
     // INICIALIZAR MENUS E FERRAMENTAS
     // ====================
-    initMenus();
     
     // ====================
     // INICIALIZAR ACCORDIONS
@@ -136,10 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 1000);
 
-    // ============================================
 // ENVOLVER TABELAS EM CONTAINERS RESPONSIVOS
-// ============================================
-
 // Função para envolver tabelas em containers responsivos
 function wrapResponsiveTables() {
     const tables = document.querySelectorAll('.tab-content table, .tech-card table, .methodology-card table, .impact-card table, .flow-step table, .tech-table');
@@ -514,6 +510,9 @@ function initMenus() {
         }
     });
 }
+
+    initMenus();
+
 
 // ====================
 // FUNÇÃO DE EXPORTAÇÃO PARA PDF
