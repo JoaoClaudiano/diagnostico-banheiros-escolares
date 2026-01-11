@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    
     // Verifica se há uma aba salva no localStorage
     const savedTab = localStorage.getItem('activeTab') || 'apresentacao';
     activateTab(savedTab);
