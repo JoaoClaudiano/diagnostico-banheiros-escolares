@@ -464,27 +464,18 @@
 
 <div id="feedback-container"></div>
 
+<script src="./feedback/feedback.js" defer></script>
+
 <script>
+  // Carregar apenas o HTML
   fetch("./feedback/feedback.html")
     .then(res => res.text())
     .then(html => {
       document.getElementById("feedback-container").innerHTML = html;
-
-      const script = document.createElement("script");
-      script.src = "./feedback/feedback.js";
-      document.body.appendChild(script);
-    });
-    
+    })
+    .catch(console.error);
 </script>
 
-<div id="pwa-container"></div>
-<script>
-fetch('banner.html')
-  .then(resp => resp.text())
-  .then(html => {
-    document.getElementById('pwa-container').innerHTML = html;
-  });
-</script>
 
 <!-- ===== SERVICE WORKER ===== -->
 <script>
