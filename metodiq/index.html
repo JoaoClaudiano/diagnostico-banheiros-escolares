@@ -27,8 +27,8 @@
     <meta name="twitter:description" content="Sistema Integrado de Diagnóstico da Infraesrutura Sanitária Escolar">
 
     <!-- Preload para performance -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
 
     <!-- Estilos -->
     <link rel="stylesheet" href="style.css">
@@ -1579,7 +1579,7 @@
 <!-- ===== SERVICE WORKER ===== -->
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js")
+  navigator.serviceWorker.register("../service-worker.js")
     .then(() => console.log("Service Worker registrado"))
     .catch(err => console.error("Erro no Service Worker", err));
 }
