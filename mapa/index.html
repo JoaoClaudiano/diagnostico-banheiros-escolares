@@ -307,11 +307,14 @@ checkBairros.addEventListener("change", function() {
 <!-- ===== SERVICE WORKER ===== -->
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("../service-worker.js")
-    .then(() => console.log("Service Worker registrado"))
-    .catch(err => console.error("Erro no Service Worker", err));
+  navigator.serviceWorker.register("/checkinfra/service-worker.js", {
+    scope: "/checkinfra/"
+  })
+  .then(() => console.log("✅ Service Worker registrado com sucesso"))
+  .catch(err => console.error("❌ Erro no Service Worker", err));
 }
 </script>
+
   
 </body>
 </html>
