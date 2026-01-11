@@ -1,5 +1,7 @@
 // Sistema principal do manual CheckInfra
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Script carregado! Iniciando sistema...');
+    
     // ====================
     // SISTEMA DE ABAS
     // ====================
@@ -29,12 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Salva a aba ativa no localStorage
         localStorage.setItem('activeTab', tabId);
         
-        // Rolagem suave para o topo do conteúdo
-        if (activeContent) {
-            setTimeout(() => {
-                activeContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
+        // Envolver tabelas da aba ativa
+        setTimeout(wrapResponsiveTables, 300);
     }
     
     // Adiciona eventos aos botões
@@ -69,6 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!isOpen) {
                 header.classList.add('active');
                 content.style.maxHeight = content.scrollHeight + 'px';
+                // Envolver tabelas dentro do accordion
+                setTimeout(() => wrapTablesInContainer(content), 100);
             }
         });
     });
@@ -92,6 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!isOpen) {
                 header.classList.add('active');
                 content.style.maxHeight = content.scrollHeight + 'px';
+                // Envolver tabelas dentro do accordion técnico
+                setTimeout(() => wrapTablesInContainer(content), 100);
             }
         });
     });
@@ -115,208 +117,147 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // ====================
-    // INICIALIZAR MENUS E FERRAMENTAS
+    // FUNÇÕES PARA TABELAS RESPONSIVAS
     // ====================
     
-    // ====================
-    // INICIALIZAR ACCORDIONS
-    // ====================
-    setTimeout(() => {
-        // Abrir primeiro accordion
-        const firstAccordion = document.querySelector('.accordion-header');
-        if (firstAccordion) {
-            firstAccordion.click();
-        }
+    // Função para envolver tabelas em containers responsivos
+    function wrapTablesInContainer(element) {
+        if (!element) return;
         
-        // Abrir primeiro accordion técnico
-        const firstTechAccordion = document.querySelector('.tech-accordion-header');
-        if (firstTechAccordion) {
-            firstTechAccordion.click();
-        }
-    }, 1000);
-
-// ENVOLVER TABELAS EM CONTAINERS RESPONSIVOS
-// Função para envolver tabelas em containers responsivos
-function wrapResponsiveTables() {
-    const tables = document.querySelectorAll('.tab-content table, .tech-card table, .methodology-card table, .impact-card table, .flow-step table, .tech-table');
-    
-    tables.forEach(table => {
-        // Verificar se a tabela já está dentro de um container
-        if (!table.parentElement.classList.contains('card-table-container') && 
-            !table.parentElement.classList.contains('tech-table-wrapper')) {
-            
-            // Criar wrapper
-            const wrapper = document.createElement('div');
-            wrapper.className = 'card-table-container';
-            
-            // Inserir wrapper antes da tabela e mover tabela para dentro
-            table.parentNode.insertBefore(wrapper, table);
-            wrapper.appendChild(table);
-            
-            console.log('Tabela envolta em container responsivo:', table);
-        }
-    });
-}
-
-// Executar quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', function() {
-    // Envolver tabelas existentes
-    wrapResponsiveTables();
-    
-    // Observar mudanças no DOM (útil se conteúdo for carregado dinamicamente)
-    const observer = new MutationObserver(function(mutations) {
-        let shouldWrap = false;
-        mutations.forEach(function(mutation) {
-            if (mutation.addedNodes.length) {
-                shouldWrap = true;
+        const tables = element.querySelectorAll('table');
+        tables.forEach(table => {
+            // Verificar se a tabela já está dentro de um container
+            if (!table.closest('.table-responsive') && !table.closest('.card-table-container')) {
+                // Criar wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive card-table-container';
+                wrapper.style.cssText = `
+                    width: 100%;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                    margin: 1rem 0;
+                    border-radius: 8px;
+                    border: 1px solid var(--border);
+                    background: white;
+                `;
+                
+                if (document.body.classList.contains('dark-theme')) {
+                    wrapper.style.background = '#2d3748';
+                    wrapper.style.borderColor = '#4a5568';
+                }
+                
+                // Inserir wrapper antes da tabela e mover tabela para dentro
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+                
+                // Aplicar estilo mínimo para tabela
+                table.style.minWidth = '600px';
+                table.style.width = '100%';
             }
         });
-        if (shouldWrap) {
-            wrapResponsiveTables();
+    }
+    
+    // Função principal para envolver todas as tabelas
+    function wrapResponsiveTables() {
+        console.log('Envolvendo tabelas em containers responsivos...');
+        
+        // Selecionar todas as tabelas
+        const tables = document.querySelectorAll('table');
+        
+        tables.forEach(table => {
+            wrapTablesInContainer(table.parentElement);
+        });
+        
+        // Adicionar indicadores de scroll em mobile
+        addTableScrollIndicators();
+    }
+    
+    // Adicionar indicadores de scroll para tabelas em mobile
+    function addTableScrollIndicators() {
+        if (window.innerWidth > 768) return;
+        
+        const containers = document.querySelectorAll('.table-responsive');
+        containers.forEach(container => {
+            // Verificar se a tabela tem scroll horizontal
+            const table = container.querySelector('table');
+            if (table && table.scrollWidth > container.offsetWidth) {
+                // Adicionar indicador se não existir
+                if (!container.querySelector('.scroll-indicator')) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'scroll-indicator';
+                    indicator.innerHTML = '<i class="fas fa-arrows-left-right"></i> Arraste para os lados';
+                    indicator.style.cssText = `
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background: var(--primary);
+                        color: white;
+                        padding: 4px 8px;
+                        border-radius: 12px;
+                        font-size: 0.7rem;
+                        z-index: 10;
+                        opacity: 0.8;
+                        pointer-events: none;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    `;
+                    container.style.position = 'relative';
+                    container.appendChild(indicator);
+                    
+                    // Remover indicador após alguns segundos
+                    setTimeout(() => {
+                        indicator.style.opacity = '0';
+                        setTimeout(() => indicator.remove(), 500);
+                    }, 3000);
+                }
+            }
+        });
+    }
+    
+    // Detectar mobile e adicionar classe
+    function detectMobile() {
+        if (window.innerWidth <= 768) {
+            document.body.classList.add('is-mobile');
+        } else {
+            document.body.classList.remove('is-mobile');
         }
+        addTableScrollIndicators();
+    }
+    
+    // Executar funções de tabela
+    setTimeout(() => {
+        wrapResponsiveTables();
+        detectMobile();
+    }, 500);
+    
+    // Executar ao redimensionar
+    window.addEventListener('resize', detectMobile);
+    
+    // Observar mudanças no DOM para novas tabelas
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.tagName === 'TABLE') {
+                            wrapTablesInContainer(node.parentElement);
+                        } else if (node.querySelectorAll) {
+                            const tables = node.querySelectorAll('table');
+                            tables.forEach(table => {
+                                wrapTablesInContainer(table.parentElement);
+                            });
+                        }
+                    }
+                });
+            }
+        });
     });
     
-    // Começar a observar o body por mudanças
     observer.observe(document.body, {
         childList: true,
         subtree: true
     });
-    
-    // Também envolver tabelas após um pequeno delay para garantir
-    setTimeout(wrapResponsiveTables, 500);
-});
-
-// ============================================
-// MELHORIAS PARA TABELAS EM MOBILE
-// ============================================
-
-// Adicionar classe mobile para ajustes específicos
-function detectMobile() {
-    const isMobile = window.innerWidth <= 768;
-    if (isMobile) {
-        document.body.classList.add('is-mobile');
-    } else {
-        document.body.classList.remove('is-mobile');
-    }
-}
-
-// Executar na carga e no redimensionamento
-window.addEventListener('load', detectMobile);
-window.addEventListener('resize', detectMobile);
-
-// Adicionar indicador de scroll para tabelas em mobile
-function addTableScrollIndicators() {
-    if (window.innerWidth > 768) return;
-    
-    const containers = document.querySelectorAll('.card-table-container');
-    containers.forEach(container => {
-        // Remover indicadores existentes
-        const existingIndicator = container.querySelector('.scroll-indicator');
-        if (existingIndicator) {
-            existingIndicator.remove();
-        }
-        
-        // Verificar se a tabela tem scroll horizontal
-        const table = container.querySelector('table');
-        if (table && table.scrollWidth > container.offsetWidth) {
-            const indicator = document.createElement('div');
-            indicator.className = 'scroll-indicator';
-            indicator.innerHTML = '<span>↔ Arraste para o lado</span>';
-            indicator.style.cssText = `
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: var(--primary);
-                color: white;
-                padding: 4px 8px;
-                border-radius: 12px;
-                font-size: 0.7rem;
-                z-index: 10;
-                opacity: 0.8;
-                pointer-events: none;
-            `;
-            container.style.position = 'relative';
-            container.appendChild(indicator);
-            
-            // Remover indicador após alguns segundos
-            setTimeout(() => {
-                indicator.style.opacity = '0';
-                setTimeout(() => indicator.remove(), 500);
-            }, 3000);
-        }
-    });
-}
-
-// Executar após envolver tabelas
-setTimeout(addTableScrollIndicators, 600);
-
-// ============================================
-// AJUSTES PARA TELAS PEQUENAS - COMPLEMENTAR CSS
-// ============================================
-
-// Adicionar estilos dinâmicos para melhor experiência
-function addDynamicStyles() {
-    // Verificar se já existe o estilo
-    if (document.getElementById('mobile-table-styles')) return;
-    
-    const style = document.createElement('style');
-    style.id = 'mobile-table-styles';
-    style.textContent = `
-        /* Ajustes para mobile via JavaScript */
-        @media (max-width: 768px) {
-            .is-mobile .card-table-container {
-                border-radius: 6px;
-                box-shadow: inset 0 0 0 1px rgba(31, 79, 216, 0.1);
-            }
-            
-            .is-mobile .card-table-container::-webkit-scrollbar {
-                height: 6px;
-            }
-            
-            .is-mobile .card-table-container::-webkit-scrollbar-thumb {
-                background: var(--primary);
-                border-radius: 3px;
-            }
-            
-            .is-mobile table {
-                font-size: 0.85rem;
-            }
-            
-            .is-mobile table th {
-                position: sticky;
-                left: 0;
-                z-index: 1;
-            }
-            
-            /* Garantir que células importantes sejam visíveis */
-            .is-mobile table td:first-child,
-            .is-mobile table th:first-child {
-                position: sticky;
-                left: 0;
-                background: inherit;
-                z-index: 1;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .is-mobile table {
-                font-size: 0.8rem;
-            }
-            
-            .is-mobile table th,
-            .is-mobile table td {
-                padding: 0.5rem 0.6rem !important;
-            }
-        }
-    `;
-    
-    document.head.appendChild(style);
-}
-
-// Adicionar estilos dinâmicos
-document.addEventListener('DOMContentLoaded', addDynamicStyles);
-
-    
     
     // ====================
     // SISTEMA DE IMPRESSÃO/EXPORTAÇÃO
@@ -399,6 +340,9 @@ document.addEventListener('DOMContentLoaded', addDynamicStyles);
             }, 500);
         }
     });
+    
+    // Inicializar menus
+    initMenus();
 });
 
 // ====================
@@ -409,6 +353,11 @@ function initMenus() {
     const menuOverlay = document.getElementById('menuOverlay');
     const sidebarTools = document.getElementById('sidebarTools');
     const closeMenu = document.getElementById('closeMenu');
+    
+    if (!menuToggle || !menuOverlay || !sidebarTools || !closeMenu) {
+        console.error('Elementos do menu não encontrados');
+        return;
+    }
     
     // Menu sanduíche de ferramentas
     menuToggle.addEventListener('click', () => {
@@ -431,29 +380,32 @@ function initMenus() {
     });
     
     // Botões das ferramentas
-    document.getElementById('exportPdfBtn').addEventListener('click', () => {
-        exportToPDF();
-    });
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    const exportPrintBtn = document.getElementById('exportPrintBtn');
+    const jumpToTopBtn = document.getElementById('jumpToTopBtn');
+    const jumpToBottomBtn = document.getElementById('jumpToBottomBtn');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const helpBtn = document.getElementById('helpBtn');
+    const versionInfoBtn = document.getElementById('versionInfoBtn');
     
-    document.getElementById('exportPrintBtn').addEventListener('click', () => {
-        window.print();
-    });
+    if (exportPdfBtn) exportPdfBtn.addEventListener('click', exportToPDF);
+    if (exportPrintBtn) exportPrintBtn.addEventListener('click', () => window.print());
     
-    document.getElementById('jumpToTopBtn').addEventListener('click', () => {
+    if (jumpToTopBtn) jumpToTopBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         sidebarTools.classList.remove('active');
         menuOverlay.classList.remove('active');
         document.body.style.overflow = '';
     });
     
-    document.getElementById('jumpToBottomBtn').addEventListener('click', () => {
+    if (jumpToBottomBtn) jumpToBottomBtn.addEventListener('click', () => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         sidebarTools.classList.remove('active');
         menuOverlay.classList.remove('active');
         document.body.style.overflow = '';
     });
     
-    document.getElementById('toggleSidebarBtn').addEventListener('click', () => {
+    if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', () => {
         sidebarTools.classList.toggle('active');
         if (sidebarTools.classList.contains('active')) {
             menuOverlay.classList.add('active');
@@ -464,42 +416,39 @@ function initMenus() {
         }
     });
     
-    document.getElementById('helpBtn').addEventListener('click', () => {
-        showHelp();
-    });
-    
-    document.getElementById('versionInfoBtn').addEventListener('click', () => {
-        showVersionInfo();
-    });
+    if (helpBtn) helpBtn.addEventListener('click', showHelp);
+    if (versionInfoBtn) versionInfoBtn.addEventListener('click', showVersionInfo);
     
     // Sistema de tema
     const themeLight = document.getElementById('themeLight');
     const themeDark = document.getElementById('themeDark');
     
-    // Verificar tema salvo
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme');
-        themeDark.classList.add('active');
-        themeLight.classList.remove('active');
-    } else {
-        themeLight.classList.add('active');
-        themeDark.classList.remove('active');
+    if (themeLight && themeDark) {
+        // Verificar tema salvo
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeDark.classList.add('active');
+            themeLight.classList.remove('active');
+        } else {
+            themeLight.classList.add('active');
+            themeDark.classList.remove('active');
+        }
+        
+        themeLight.addEventListener('click', () => {
+            themeLight.classList.add('active');
+            themeDark.classList.remove('active');
+            document.body.classList.remove('dark-theme');
+            localStorage.setItem('theme', 'light');
+        });
+        
+        themeDark.addEventListener('click', () => {
+            themeDark.classList.add('active');
+            themeLight.classList.remove('active');
+            document.body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        });
     }
-    
-    themeLight.addEventListener('click', () => {
-        themeLight.classList.add('active');
-        themeDark.classList.remove('active');
-        document.body.classList.remove('dark-theme');
-        localStorage.setItem('theme', 'light');
-    });
-    
-    themeDark.addEventListener('click', () => {
-        themeDark.classList.add('active');
-        themeLight.classList.remove('active');
-        document.body.classList.add('dark-theme');
-        localStorage.setItem('theme', 'dark');
-    });
     
     // Fechar menu ao pressionar ESC
     document.addEventListener('keydown', (e) => {
@@ -510,9 +459,6 @@ function initMenus() {
         }
     });
 }
-
-    initMenus();
-
 
 // ====================
 // FUNÇÃO DE EXPORTAÇÃO PARA PDF
@@ -853,16 +799,17 @@ window.activateTab = function(tabId) {
         menuOverlay.classList.remove('active');
         document.body.style.overflow = '';
     }
+    
+    // Envolver tabelas da nova aba
+    setTimeout(() => {
+        const tables = activeContent.querySelectorAll('table');
+        tables.forEach(table => {
+            if (!table.closest('.table-responsive')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive card-table-container';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            }
+        });
+    }, 300);
 };
-
-// Adicione no final do script.js
-console.log('Script carregado! Verificando elementos:');
-console.log('Aba ativa:', document.querySelector('.tab-btn.active')?.dataset.tab);
-console.log('Elementos de busca:', {
-    searchInput: document.getElementById('searchInput'),
-    searchBtn: document.getElementById('searchBtn'),
-    searchResults: document.getElementById('searchResults')
-});
-console.log('Service Worker:', navigator.serviceWorker ? 'Disponível' : 'Não disponível');
-
-
