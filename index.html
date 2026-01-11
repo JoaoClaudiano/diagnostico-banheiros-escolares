@@ -468,16 +468,24 @@
 
 <div id="feedback-container"></div>
 
-<script src="./feedback/feedback.js" defer></script>
-
 <script>
-  // Carregar apenas o HTML
+// Carregar feedback de forma assíncrona
+setTimeout(() => {
   fetch("./feedback/feedback.html")
     .then(res => res.text())
     .then(html => {
       document.getElementById("feedback-container").innerHTML = html;
+      
+      // Carregar o JS apenas UMA VEZ, com um pequeno delay
+      setTimeout(() => {
+        const script = document.createElement('script');
+        script.src = "./feedback/feedback.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }, 500);
     })
-    .catch(console.error);
+    .catch(err => console.error("Erro ao carregar feedback:", err));
+}, 1500); // Delay maior para garantir que outros modais já foram carregados
 </script>
 
 
