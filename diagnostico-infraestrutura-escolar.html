@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagnóstico da Infraestrutura Sanitária Escolar – CheckInfra</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Entenda o que é o diagnóstico da infraestrutura sanitária escolar e como o CheckInfra apoia gestores públicos na leitura técnica, priorização e planejamento de melhorias em escolas.">
+  <meta name="robots" content="index, follow">
+
+  <link rel="canonical" href="https://joaoclaudiano.github.io/checkinfra/diagnostico-infraestrutura-escolar.html">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DD4SQ88NVT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DD4SQ88NVT');
+  </script>
+
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; color:#333; }
+    .header { background:#1f4fd8; color:#fff; padding:20px; display:flex; align-items:center; gap:15px; }
+    .header a { color:#fff; text-decoration:none; font-size:18px; }
+    .header-title { font-size:22px; font-weight:bold; flex:1; text-align:center; }
+
+    .container { max-width:960px; margin:40px auto; padding:0 20px; line-height:1.7; }
+    h1,h2,h3 { color:#1f4fd8; }
+    h2 { margin-top:40px; }
+    p { margin-bottom:16px; text-align:justify; }
+
+    .box {
+      background:#fff;
+      border-radius:10px;
+      padding:22px;
+      box-shadow:0 4px 12px rgba(0,0,0,.08);
+      margin:30px 0;
+    }
+
+    ul { margin-left:20px; }
+    li { margin-bottom:10px; }
+    ul li::before { content:"•"; color:#1f4fd8; font-weight:bold; margin-right:6px; }
+
+    .links a {
+      display:inline-block;
+      margin:10px 15px 0 0;
+      padding:10px 16px;
+      background:#1f4fd8;
+      color:#fff;
+      border-radius:6px;
+      text-decoration:none;
+      font-size:15px;
+    }
+    .links a:hover { opacity:.9; }
+
+    footer {
+      background:#1f4fd8;
+      color:#fff;
+      text-align:center;
+      padding:20px;
+      line-height:1.6;
+    }
+    footer a { color:#fff; text-decoration:underline; margin:0 8px; }
+  </style>
+</head>
+
+<body>
+
+<header class="header">
+  <a href="./index.html">← Início</a>
+  <div class="header-title">Diagnóstico da Infraestrutura Escolar</div>
+</header>
+
+<main class="container">
+
+  <h1>Diagnóstico da Infraestrutura Sanitária Escolar</h1>
+
+  <p>
+    A infraestrutura sanitária das escolas exerce papel central na saúde,
+    dignidade e permanência dos estudantes. Banheiros inadequados impactam
+    diretamente o bem-estar, a aprendizagem e a gestão educacional.
+  </p>
+
+  <div class="box">
+    <h2>O que é diagnóstico de infraestrutura</h2>
+    <p>
+      O diagnóstico da infraestrutura escolar é um processo de
+      <strong>leitura sistemática das condições físicas</strong> dos ambientes,
+      com o objetivo de apoiar decisões de gestão, planejamento e priorização
+      de intervenções.
+    </p>
+    <p>
+      Diferentemente de uma vistoria ou laudo técnico, o diagnóstico possui
+      caráter <strong>analítico, comparativo e orientador</strong>, permitindo
+      identificar padrões, riscos e níveis de urgência.
+    </p>
+  </div>
+
+  <div class="box">
+    <h2>Como o CheckInfra atua</h2>
+    <p>
+      O <strong>CheckInfra</strong> é uma plataforma digital desenvolvida para
+      apoiar gestores públicos e equipes técnicas na avaliação da infraestrutura
+      sanitária escolar.
+    </p>
+    <ul>
+      <li>Checklists técnicos estruturados;</li>
+      <li>Registros fotográficos orientados;</li>
+      <li>Pontuação e índices comparativos;</li>
+      <li>Leitura territorial e visualização espacial;</li>
+      <li>Apoio à priorização de intervenções.</li>
+    </ul>
+
+    <div class="links">
+      <a href="./mapa/">Mapa</a>
+      <a href="./painel/">Painel</a>
+      <a href="./metodiq/">Metodologia</a>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>Público-alvo</h2>
+    <p>O CheckInfra é voltado principalmente para:</p>
+    <ul>
+      <li>Secretarias municipais e estaduais de educação;</li>
+      <li>Gestores escolares;</li>
+      <li>Equipes técnicas e administrativas;</li>
+      <li>Instituições públicas e privadas licenciadas.</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <h2>Limitações e responsabilidade</h2>
+    <p>
+      O CheckInfra é uma ferramenta de <strong>apoio à decisão</strong>.
+      Os diagnósticos gerados não substituem inspeções técnicas presenciais,
+      laudos de engenharia ou pareceres profissionais exigidos por normas legais.
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  © 2026 CheckInfra — Diagnóstico sanitário escolar<br>
+  <a href="./index.html">Início</a> |
+  <a href="./pages/sobre.html">Sobre</a> |
+  <a href="./pages/politica-privacidade.html">Privacidade</a> |
+  <a href="./pages/termos-de-uso.html">Termos</a> |
+  <a href="./pages/contato.html">Contato</a>
+</footer>
+
+<!-- Service Worker -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js");
+}
+</script>
+
+</body>
+</html>
